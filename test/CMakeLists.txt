@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(test
-	0.main.cpp
+	main.cpp
 	test.cpp)
 
 find_package(Catch2 REQUIRED)
