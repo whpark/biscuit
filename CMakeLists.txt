@@ -10,8 +10,9 @@ if (POLICY CMP0141)
 endif()
 
 # Specify the packages you want to use from vcpkg
-project ("biscuit")
+
+include_directories(${CMAKE_SOURCE_DIR})
 
 # Include sub-projects.
-add_subdirectory("biscuit")
-add_subdirectory("test")
+add_subdirectory(biscuit)
+add_subdirectory(test)

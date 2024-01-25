@@ -3,8 +3,10 @@
 # project specific logic here.
 #
 
+project(biscuit)
+
 # Add source to this project's library.
-add_library (biscuit STATIC "biscuit.ixx" "biscuit.h")
+add_library (biscuit STATIC "biscuit.ixx" "biscuit.h" "concepts.ixx")
 
 set_property(TARGET biscuit PROPERTY CXX_STANDARD 23)
 
@@ -22,8 +24,13 @@ check_cxx_compiler_flag("-fmodules" MODULES_TS)
 #	message(FATAL_ERROR "C++20 Modules required!")
 #endif()
 
+if (MSVC)
+	target_compile_options(${PROJECT_NAME} PUBLIC "/Zc:preprocessor")
+endif()
+
 target_sources(biscuit PUBLIC FILE_SET biscuit_modules TYPE CXX_MODULES FILES
                ${CMAKE_CURRENT_SOURCE_DIR}/biscuit.ixx
+			   ${CMAKE_CURRENT_SOURCE_DIR}/concepts.ixx
 )
 
 find_package(Catch2 REQUIRED)
@@ -34,3 +41,8 @@ target_link_libraries(biscuit
 	PRIVATE
 		fmt::fmt
 )
+
+#add_custom_command(TARGET biscuit POST_BUILD
+##    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:biscuit> "/biscuit"
+#    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_SOURCE_DIR}/include/biscuit/"
+#)
