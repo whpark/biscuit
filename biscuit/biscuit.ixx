@@ -34,7 +34,7 @@ namespace std {
 #endif
 
 
-// std::vies::enumerate
+// std::views::enumerate
 #ifdef __cpp_lib_ranges_enumerate
 #else
 // https://www.reedbeta.com/blog/python-like-enumerate-in-cpp17/

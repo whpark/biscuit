@@ -33,6 +33,8 @@ target_sources(biscuit PUBLIC FILE_SET biscuit_modules TYPE CXX_MODULES FILES
 			   ${CMAKE_CURRENT_SOURCE_DIR}/concepts.ixx
 )
 
+target_include_directories(biscuit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 find_package(Catch2 REQUIRED)
 find_package(fmt REQUIRED)
 find_package(glaze REQUIRED)

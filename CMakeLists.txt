@@ -11,8 +11,6 @@ endif()
 
 # Specify the packages you want to use from vcpkg
 
-include_directories(${CMAKE_SOURCE_DIR})
-
 # Include sub-projects.
 add_subdirectory(biscuit)
 add_subdirectory(test)

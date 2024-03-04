@@ -1,5 +1,5 @@
 #include <catch.hpp>
-#include "biscuit/biscuit.h"
+#include "biscuit.h"
 
 import biscuit;
 
