@@ -12,5 +12,5 @@ endif()
 # Specify the packages you want to use from vcpkg
 
 # Include sub-projects.
-add_subdirectory(biscuit)
+add_subdirectory(src)
 add_subdirectory(test)

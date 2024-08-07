@@ -1,2 +1,2 @@
 ﻿# Include sub-projects.
-add_subdirectory(test)
+add_subdirectory(biscuit)
