@@ -8,9 +8,13 @@ project(biscuit)
 # Add source to this project's library.
 add_library (biscuit STATIC "biscuit.ixx" "biscuit.h" "concepts.ixx")
 
-set_property(TARGET biscuit PROPERTY CXX_STANDARD 23)
+#Set different output names based on the build type
+set_target_properties(biscuit PROPERTIES
+    DEBUG_POSTFIX ".D"
+    #RELEASE_POSTFIX ".x64R"
+)
 
-find_package(fmt REQUIRED)
+set_property(TARGET biscuit PROPERTY CXX_STANDARD 23)
 
 # TODO: Add tests and install targets if needed.
 
