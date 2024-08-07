@@ -11,6 +11,8 @@ endif()
 
 # Specify the packages you want to use from vcpkg
 
-# Include sub-projects.
+# Include 3rd-party projects.
+add_subdirectory(3rd)
+
+#Include Main Project
 add_subdirectory(src)
-add_subdirectory(test)
