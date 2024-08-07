@@ -3,7 +3,7 @@
 
 import biscuit;
 
-#pragma comment(lib, "biscuit.x64D.lib")
+#pragma comment(lib, "biscuit.lib")
 
 TEST_CASE("test", "[test]") {
 

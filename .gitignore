@@ -1,6 +1,7 @@
 .vs/
 /bin/
 /lib/
+/ifc/
 /build/
 /out/
 *.pdb
