@@ -6,7 +6,6 @@ import biscuit;
 #pragma comment(lib, "biscuit.lib")
 
 TEST_CASE("test", "[test]") {
-
 	REQUIRE(biscuit::Print());
-
+	REQUIRE(biscuit::Print2());
 }

@@ -72,4 +72,10 @@ export namespace biscuit {
 		fmt::print("hello, biscuit!\n");
 		return true;
 	}
+
+	EXPORT_DLL bool Print2() {
+		fmt::print("hello, biscuit2!\n");
+		return true;
+	}
+
 }
