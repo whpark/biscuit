@@ -67,9 +67,9 @@ namespace biscuit::views {
 	}
 }
 
-//export namespace biscuit {
-//	EXPORT_DLL bool Print() {
-//		fmt::print("hello, biscuit!\n");
-//		return true;
-//	}
-//}
+export namespace biscuit {
+	EXPORT_DLL bool Print() {
+		fmt::print("hello, biscuit!\n");
+		return true;
+	}
+}

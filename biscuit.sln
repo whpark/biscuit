@@ -6,28 +6,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{933DE55C-D91
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit", "src\biscuit\biscuit.vcxproj", "{4FC2059E-06A9-4B82-861D-ED3CB583303F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "src\test\test.vcxproj", "{BAEB51D6-595E-4B31-8132-58BE4A67718F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4FC2059E-06A9-4B82-861D-ED3CB583303F} = {4FC2059E-06A9-4B82-861D-ED3CB583303F}
+	EndProjectSection
+EndProject
 Global
-	GlobalSection(NestedProjects) = preSolution
-		{4FC2059E-06A9-4B82-861D-ED3CB583303F} = {933DE55C-D916-47E5-8E49-F133CF2F2BD3}
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{4FC2059E-06A9-4B82-861D-ED3CB583303F}.Debug|x64.ActiveCfg = Debug|x64
 		{4FC2059E-06A9-4B82-861D-ED3CB583303F}.Debug|x64.Build.0 = Debug|x64
 		{4FC2059E-06A9-4B82-861D-ED3CB583303F}.Release|x64.ActiveCfg = Release|x64
-		{4FC2059E-06A9-4B82-861D-ED3CB583303F}.Release|x64.Build.0 = Release|x64
-	EndGlobalSection
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Release|x64 = Release|x64
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {5807FAB1-E483-4E4C-82EE-CE7C0B12AF8C}
-	EndGlobalSection
-EndGlobal
-ase|x64.ActiveCfg = Release|x64
 		{4FC2059E-06A9-4B82-861D-ED3CB583303F}.Release|x64.Build.0 = Release|x64
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F}.Debug|x64.ActiveCfg = Debug|x64
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F}.Debug|x64.Build.0 = Debug|x64
@@ -42,6 +30,17 @@ ase|x64.ActiveCfg = Release|x64
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5807FAB1-E483-4E4C-82EE-CE7C0B12AF8C}
+	EndGlobalSection
+EndGlobal
+lSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5807FAB1-E483-4E4C-82EE-CE7C0B12AF8C}
+	EndGlobalSection
+EndGlobal
+tensibilityGlobals) = postSolution
 		SolutionGuid = {5807FAB1-E483-4E4C-82EE-CE7C0B12AF8C}
 	EndGlobalSection
 EndGlobal
