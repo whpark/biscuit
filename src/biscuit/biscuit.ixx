@@ -5,6 +5,8 @@
 #include <ranges>
 #include <fmt/core.h>
 
+#define EXPORT_DLL __declspec(dllexport)
+
 export module biscuit;
 
 // ssize_t
@@ -21,24 +23,9 @@ namespace std::inline literals {
 }
 #endif
 
-// to_underlying
-#ifdef __cpp_lib_to_underlying
-#else
-namespace std {
-	export
-	template <typename T>
-	constexpr underlying_type_t<T> to_underlying(T value) noexcept {
-		return static_cast<underlying_type_t<T>>(value);
-	}
-}
-#endif
-
-
 // std::views::enumerate
-#ifdef __cpp_lib_ranges_enumerate
-#else
 // https://www.reedbeta.com/blog/python-like-enumerate-in-cpp17/
-namespace std::ranges::views {
+namespace biscuit::views {
 	export
 	template <typename T,
 		typename TIter = decltype(std::begin(std::declval<T>())),
@@ -59,8 +46,9 @@ namespace std::ranges::views {
 		return iterable_wrapper{ std::forward<T>(iterable) };
 	}
 }
-#endif
-export namespace biscuit {
+
+namespace biscuit::views {
+	export
 	template < std::integral size_type, typename T, typename TIter = decltype(std::begin(std::declval<T>())), typename = decltype(std::end(std::declval<T>())) >
 	constexpr auto enumerate_as(T&& iterable) {
 		struct iterator {
@@ -79,10 +67,9 @@ export namespace biscuit {
 	}
 }
 
-
-export namespace biscuit {
-	bool Print() {
-		fmt::print("hello, biscuit!\n");
-		return true;
-	}
-}
+//export namespace biscuit {
+//	EXPORT_DLL bool Print() {
+//		fmt::print("hello, biscuit!\n");
+//		return true;
+//	}
+//}

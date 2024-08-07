@@ -1,4 +1,6 @@
 .vs/
+/bin/
+/lib/
 /build/
 /out/
 *.pdb
