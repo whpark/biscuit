@@ -2,14 +2,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{933DE55C-D916-47E5-8E49-F133CF2F2BD3}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit", "src\biscuit\biscuit.vcxproj", "{4FC2059E-06A9-4B82-861D-ED3CB583303F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "src\test\test.vcxproj", "{BAEB51D6-595E-4B31-8132-58BE4A67718F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4FC2059E-06A9-4B82-861D-ED3CB583303F} = {4FC2059E-06A9-4B82-861D-ED3CB583303F}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,24 +34,11 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{BAEB51D6-595E-4B31-8132-58BE4A67718F} = {933DE55C-D916-47E5-8E49-F133CF2F2BD3}
-	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5807FAB1-E483-4E4C-82EE-CE7C0B12AF8C}
 	EndGlobalSection
 EndGlobal
-veCfg = Debug|Win32
-		{2BBABB13-78E2-4EAD-9079-7A394C075FE3}.Debug|x86.Build.0 = Debug|Win32
-		{2BBABB13-78E2-4EAD-9079-7A394C075FE3}.Release|x64.ActiveCfg = Release|x64
-		{2BBABB13-78E2-4EAD-9079-7A394C075FE3}.Release|x64.Build.0 = Release|x64
-		{2BBABB13-78E2-4EAD-9079-7A394C075FE3}.Release|x86.ActiveCfg = Release|Win32
-		{2BBABB13-78E2-4EAD-9079-7A394C075FE3}.Release|x86.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
+tedProjects) = preSolution
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F} = {933DE55C-D916-47E5-8E49-F133CF2F2BD3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

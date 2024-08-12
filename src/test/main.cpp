@@ -1,8 +1,8 @@
-#include <filesystem>
-
 #include <fmt/core.h>
 #include <fmt/std.h>
 #include <catch.hpp>
+
+import std;
 
 int main(int argc, char* argv[]) {
 	auto path = std::filesystem::current_path();

@@ -21,7 +21,16 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="biscuit.h">
+    <ClInclude Include="..\..\include\biscuit\recursive_macro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\biscuit\biscuit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\biscuit\macro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\biscuit\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -36,6 +45,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="concepts.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="aliases.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="views.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dll.h">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

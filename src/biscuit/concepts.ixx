@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// concepts.h:
+// concepts.ixx:
 //
 // PWH
 //    2020.11.12
@@ -10,11 +10,8 @@
 
 module;
 
-#include <version>
-#include <concepts>
-#include <string>
-
-export module biscuit.concepts;
+export module biscuit:concepts;
+import std.compat;
 
 export namespace biscuit {
 	using charKSSM_t = uint16_t;
