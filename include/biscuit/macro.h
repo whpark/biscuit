@@ -1,5 +1,7 @@
 #pragma once
 
+import <version>;
+
 #ifdef __cpp_lib_source_location
 #	include <source_location>
 #	define BSC__FUNCSIG std::string(std::source_location::current().function_name()) + " : "

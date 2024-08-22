@@ -1,8 +1,14 @@
 {
-    "dependencies":
-    [
-        "catch2",
-        "fmt",
-        "glaze"
-    ]
+  "dependencies": [
+    "boost-pfr",
+    "catch2",
+    "cereal",
+    "fmt",
+    "glaze",
+    "glm",
+    "libiconv",
+    "simdutf",
+    "spdlog",
+    "units"
+  ]
 }

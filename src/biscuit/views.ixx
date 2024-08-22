@@ -3,12 +3,12 @@ module;
 export module biscuit:views;
 import std.compat;
 
-#ifndef __cpp_lib_ranges_enumerate
+export namespace bisucit::views {
+
+//#ifndef __cpp_lib_ranges_enumerate
 // std::views::enumerate
 // https://www.reedbeta.com/blog/python-like-enumerate-in-cpp17/
-namespace bisucit::views {
-	export
-		template <typename T,
+	template <typename T,
 		typename TIter = decltype(std::begin(std::declval<T>())),
 		typename = decltype(std::end(std::declval<T>()))>
 	constexpr auto enumerate(T && iterable) {
@@ -26,12 +26,9 @@ namespace bisucit::views {
 		};
 		return iterable_wrapper{ std::forward<T>(iterable) };
 	}
-}
-#endif
+//#endif
 
-namespace biscuit::views {
-	export
-		template < std::integral size_type, typename T, typename TIter = decltype(std::begin(std::declval<T>())), typename = decltype(std::end(std::declval<T>())) >
+	template < std::integral size_type, typename T, typename TIter = decltype(std::begin(std::declval<T>())), typename = decltype(std::end(std::declval<T>())) >
 	constexpr auto enumerate_as(T&& iterable) {
 		struct iterator {
 			size_type i;
@@ -47,4 +44,5 @@ namespace biscuit::views {
 		};
 		return iterable_wrapper{ std::forward<T>(iterable) };
 	}
-}
+
+}	// namespace biscuit::views

@@ -4,6 +4,7 @@
 /ifc/
 /build/
 /out/
+/pending/
 *.pdb
 *.idb
 [dD]ebug/

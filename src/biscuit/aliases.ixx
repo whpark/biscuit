@@ -6,7 +6,6 @@ module;
 export module biscuit:aliases;
 import std.compat;
 
-
 // export aliases;
 export namespace biscuit::inline literals { };
 
@@ -23,9 +22,7 @@ export namespace biscuit::inline aliases {
 
 	using uchar = unsigned char;
 	using uint = uint32_t;	// conflicts with cv::
-#ifdef BSC__STRING_SUPPORT_CODEPAGE_KSSM
 	using charKSSM_t = uint16_t;
-#endif
 }
 
 
@@ -40,4 +37,3 @@ namespace biscuit::inline literals {
 	export constexpr std::size_t operator "" uz ( unsigned long long n ) { return n; }
 }
 #endif
-//>>
