@@ -65,6 +65,9 @@
     <ClCompile Include="string.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="kssm.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\vcpkg.json" />

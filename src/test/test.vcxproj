@@ -101,6 +101,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="test.cpp" />
+    <ClCompile Include="string_convert_codepage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\biscuit\biscuit.vcxproj">

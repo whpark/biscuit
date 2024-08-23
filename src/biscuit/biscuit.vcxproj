@@ -134,6 +134,7 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
     <ClCompile Include="dll.h" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="iconv_wrapper.ixx" />
+    <ClCompile Include="kssm.ixx" />
     <ClCompile Include="misc.ixx" />
     <ClCompile Include="string.ixx" />
     <ClCompile Include="views.ixx" />

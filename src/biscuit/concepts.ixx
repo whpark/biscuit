@@ -72,9 +72,8 @@ export namespace biscuit::concepts {
 	};
 
 
-	/// @brief type for string (charKSSM_t for KSSM (Korean Johab)
 	template < typename tchar >
-	concept string_elem = is_one_of<std::remove_cvref_t<tchar>, char, char8_t, char16_t, char32_t, wchar_t, charKSSM_t>;	// charKSSM_t for KSSM (Johab)
+	concept string_elem = is_one_of<std::remove_cvref_t<tchar>, char, char8_t, char16_t, char32_t, wchar_t, charKSSM_t >;
 	
 	/// @brief type for utf (unicode transformation format) string.
 	template < typename tchar >

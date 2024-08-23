@@ -12,6 +12,8 @@ export import :arithmetic;
 export import :color;
 export import :views;
 export import :misc;
+export import :string;
+export import :kssm;
 //export import :coord;
 
 export namespace biscuit {
