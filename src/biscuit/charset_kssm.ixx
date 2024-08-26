@@ -4,6 +4,31 @@ export module biscuit:kssm;
 import std.compat;
 import :aliases;
 
+namespace biscuit::charset {
+	/// @brief KSSM is always in Big Endian. if you want it to be little-endian, use this function
+	/// @param v KSSM value
+	/// @return little-endian KSSM Value (MSB : 1)
+	export constexpr charKSSM_t SwapKSSMByteOrder(charKSSM_t v) {
+		// KSSM is always Big Endian
+		if constexpr (std::endian::native == std::endian::big) {
+			return v;
+		} else {
+			return std::byteswap(v);
+		}
+	}
+
+	namespace detail {
+		constexpr charKSSM_t SwapOrNot(charKSSM_t c) {
+			if constexpr (false) {
+				return SwapKSSMByteOrder(c);
+			}
+			else {
+				return c;
+			}
+		}
+	}
+}
+
 export namespace biscuit::charset {
 
 	//=========================================================================
@@ -64,100 +89,87 @@ export namespace biscuit::charset {
 	//	종성 	- 	F 	ㄱ 	ㄲ 	ㄳ 	ㄴ 	ㄵ 	ㄶ 	ㄷ 	ㄹ 	ㄺ 	ㄻ 	ㄼ 	ㄽ 	ㄾ 	ㄿ 	ㅀ 	ㅁ 	- 	ㅂ 	ㅄ 	ㅅ 	ㅆ 	ㅇ 	ㅈ 	ㅊ 	ㅋ 	ㅌ 	ㅍ 	ㅎ 	- 	- 
 	//=============================================================================================================================================
 
-	/// @brief KSSM is always in Big Endian. if you want it to be little-endian, use this function
-	/// @param v KSSM value
-	/// @return little-endian KSSM Value (MSB : 1)
-	constexpr charKSSM_t SwapKSSMByteOrder(charKSSM_t v) {
-		// KSSM is always Big Endian
-		if constexpr (std::endian::native == std::endian::big) {
-			return v;
-		} else {
-			return std::byteswap(v);
-		}
-	}
-
-
 	enum class eKSSM : charKSSM_t {
-		maskChar = SwapKSSMByteOrder(0b1'00000'00000'00000),	// MSB : 1 (Big Endian)
-		maskIni  = SwapKSSMByteOrder(0b0'11111'00000'00000),	// 초성
-		maskMid  = SwapKSSMByteOrder(0b0'00000'11111'00000),	// 중성
-		maskFin  = SwapKSSMByteOrder(0b0'00000'00000'11111),	// 종성
+		maskChar	= detail::SwapOrNot(0b1'00000'00000'00000),	// MSB : 1 (Big Endian)
+		maskIni		= detail::SwapOrNot(0b0'11111'00000'00000),	// 초성
+		maskMid		= detail::SwapOrNot(0b0'00000'11111'00000),	// 중성
+		maskFin		= detail::SwapOrNot(0b0'00000'00000'11111),	// 종성
 
 		// 초성 (19+1)
-		Ini_Fill	= SwapKSSMByteOrder( 1 << 10),	// 채움
-		Ini_G		= SwapKSSMByteOrder( 2 << 10),	// ㄱ
-		Ini_GG		= SwapKSSMByteOrder( 3 << 10),	// ㄲ
-		Ini_N		= SwapKSSMByteOrder( 4 << 10),	// ㄴ
-		Ini_D		= SwapKSSMByteOrder( 5 << 10),	// ㄷ
-		Ini_DD		= SwapKSSMByteOrder( 6 << 10),	// ㄸ
-		Ini_L		= SwapKSSMByteOrder( 7 << 10),	// ㄹ
-		Ini_M		= SwapKSSMByteOrder( 8 << 10),	// ㅁ
-		Ini_B		= SwapKSSMByteOrder( 9 << 10),	// ㅂ
-		Ini_BB		= SwapKSSMByteOrder(10 << 10),	// ㅃ
-		Ini_S		= SwapKSSMByteOrder(11 << 10),	// ㅅ
-		Ini_SS		= SwapKSSMByteOrder(12 << 10),	// ㅆ
-		Ini_O		= SwapKSSMByteOrder(13 << 10),	// ㅇ
-		Ini_J		= SwapKSSMByteOrder(14 << 10),	// ㅈ
-		Ini_JJ		= SwapKSSMByteOrder(15 << 10),	// ㅉ
-		Ini_CH		= SwapKSSMByteOrder(16 << 10),	// ㅊ
-		Ini_K		= SwapKSSMByteOrder(17 << 10),	// ㅋ
-		Ini_T		= SwapKSSMByteOrder(18 << 10),	// ㅌ
-		Ini_P		= SwapKSSMByteOrder(19 << 10),	// ㅍ
-		Ini_H		= SwapKSSMByteOrder(20 << 10),	// ㅎ
+		Ini_Fill	= detail::SwapOrNot( 1 << 10),	// 채움
+		Ini_G		= detail::SwapOrNot( 2 << 10),	// ㄱ
+		Ini_GG		= detail::SwapOrNot( 3 << 10),	// ㄲ
+		Ini_N		= detail::SwapOrNot( 4 << 10),	// ㄴ
+		Ini_D		= detail::SwapOrNot( 5 << 10),	// ㄷ
+		Ini_DD		= detail::SwapOrNot( 6 << 10),	// ㄸ
+		Ini_L		= detail::SwapOrNot( 7 << 10),	// ㄹ
+		Ini_M		= detail::SwapOrNot( 8 << 10),	// ㅁ
+		Ini_B		= detail::SwapOrNot( 9 << 10),	// ㅂ
+		Ini_BB		= detail::SwapOrNot(10 << 10),	// ㅃ
+		Ini_S		= detail::SwapOrNot(11 << 10),	// ㅅ
+		Ini_SS		= detail::SwapOrNot(12 << 10),	// ㅆ
+		Ini_O		= detail::SwapOrNot(13 << 10),	// ㅇ
+		Ini_J		= detail::SwapOrNot(14 << 10),	// ㅈ
+		Ini_JJ		= detail::SwapOrNot(15 << 10),	// ㅉ
+		Ini_CH		= detail::SwapOrNot(16 << 10),	// ㅊ
+		Ini_K		= detail::SwapOrNot(17 << 10),	// ㅋ
+		Ini_T		= detail::SwapOrNot(18 << 10),	// ㅌ
+		Ini_P		= detail::SwapOrNot(19 << 10),	// ㅍ
+		Ini_H		= detail::SwapOrNot(20 << 10),	// ㅎ
 
 		// 중성. (21+1) U : Up, D : Down, R : Right, L : Left, H : Horizontal bar, V : Vertical bar
-		Mid_Fill	= SwapKSSMByteOrder( 2 <<  5),	// 채움		00010
-		Mid_R		= SwapKSSMByteOrder( 3 <<  5),	// ㅏ		00011
-		Mid_RV		= SwapKSSMByteOrder( 4 <<  5),	// ㅐ		00100
-		Mid_RR		= SwapKSSMByteOrder( 5 <<  5),	// ㅑ		00101
-		Mid_RRV		= SwapKSSMByteOrder( 6 <<  5),	// ㅒ		00110
-		Mid_L		= SwapKSSMByteOrder( 7 <<  5),	// ㅓ		00111
-		Mid_LV		= SwapKSSMByteOrder(10 <<  5),	// ㅔ		01010
-		Mid_LL		= SwapKSSMByteOrder(11 <<  5),	// ㅕ		01011
-		Mid_LLV		= SwapKSSMByteOrder(12 <<  5),	// ㅖ		01100
-		Mid_U		= SwapKSSMByteOrder(13 <<  5),	// ㅗ		01101
-		Mid_UR		= SwapKSSMByteOrder(14 <<  5),	// ㅘ		01110
-		Mid_URV		= SwapKSSMByteOrder(15 <<  5),	// ㅙ		01111
-		Mid_UV		= SwapKSSMByteOrder(18 <<  5),	// ㅚ		10010
-		Mid_UU		= SwapKSSMByteOrder(19 <<  5),	// ㅛ		10011
-		Mid_D		= SwapKSSMByteOrder(20 <<  5),	// ㅜ		10100
-		Mid_DL		= SwapKSSMByteOrder(21 <<  5),	// ㅝ		10101
-		Mid_DLV		= SwapKSSMByteOrder(22 <<  5),	// ㅞ		10110
-		Mid_DV		= SwapKSSMByteOrder(23 <<  5),	// ㅟ		10111
-		Mid_DD		= SwapKSSMByteOrder(26 <<  5),	// ㅠ		11010
-		Mid_H		= SwapKSSMByteOrder(27 <<  5),	// ㅡ		11011
-		Mid_HV		= SwapKSSMByteOrder(28 <<  5),	// ㅢ		11100
-		Mid_V		= SwapKSSMByteOrder(29 <<  5),	// ㅣ		11101
+		Mid_Fill	= detail::SwapOrNot( 2 <<  5),	// 채움		00010
+		Mid_R		= detail::SwapOrNot( 3 <<  5),	// ㅏ		00011
+		Mid_RV		= detail::SwapOrNot( 4 <<  5),	// ㅐ		00100
+		Mid_RR		= detail::SwapOrNot( 5 <<  5),	// ㅑ		00101
+		Mid_RRV		= detail::SwapOrNot( 6 <<  5),	// ㅒ		00110
+		Mid_L		= detail::SwapOrNot( 7 <<  5),	// ㅓ		00111
+		Mid_LV		= detail::SwapOrNot(10 <<  5),	// ㅔ		01010
+		Mid_LL		= detail::SwapOrNot(11 <<  5),	// ㅕ		01011
+		Mid_LLV		= detail::SwapOrNot(12 <<  5),	// ㅖ		01100
+		Mid_U		= detail::SwapOrNot(13 <<  5),	// ㅗ		01101
+		Mid_UR		= detail::SwapOrNot(14 <<  5),	// ㅘ		01110
+		Mid_URV		= detail::SwapOrNot(15 <<  5),	// ㅙ		01111
+		Mid_UV		= detail::SwapOrNot(18 <<  5),	// ㅚ		10010
+		Mid_UU		= detail::SwapOrNot(19 <<  5),	// ㅛ		10011
+		Mid_D		= detail::SwapOrNot(20 <<  5),	// ㅜ		10100
+		Mid_DL		= detail::SwapOrNot(21 <<  5),	// ㅝ		10101
+		Mid_DLV		= detail::SwapOrNot(22 <<  5),	// ㅞ		10110
+		Mid_DV		= detail::SwapOrNot(23 <<  5),	// ㅟ		10111
+		Mid_DD		= detail::SwapOrNot(26 <<  5),	// ㅠ		11010
+		Mid_H		= detail::SwapOrNot(27 <<  5),	// ㅡ		11011
+		Mid_HV		= detail::SwapOrNot(28 <<  5),	// ㅢ		11100
+		Mid_V		= detail::SwapOrNot(29 <<  5),	// ㅣ		11101
 
 		// 종성 (27+1)
-		Fin_Fill	= SwapKSSMByteOrder( 1),		// 채움
-		Fin_G		= SwapKSSMByteOrder( 2),		// ㄱ
-		Fin_GG		= SwapKSSMByteOrder( 3),		// ㄲ
-		Fin_GS		= SwapKSSMByteOrder( 4),		// ㄳ
-		Fin_N		= SwapKSSMByteOrder( 5),		// ㄴ
-		Fin_NJ		= SwapKSSMByteOrder( 6),		// ㄵ
-		Fin_NH		= SwapKSSMByteOrder( 7),		// ㄶ
-		Fin_D		= SwapKSSMByteOrder( 8),		// ㄷ
-		Fin_L		= SwapKSSMByteOrder( 9),		// ㄹ
-		Fin_LG		= SwapKSSMByteOrder(10),		// ㄺ
-		Fin_LM		= SwapKSSMByteOrder(11),		// ㄻ
-		Fin_LB		= SwapKSSMByteOrder(12),		// ㄼ
-		Fin_LS		= SwapKSSMByteOrder(13),		// ㄽ
-		Fin_LT		= SwapKSSMByteOrder(14),		// ㄾ
-		Fin_LP		= SwapKSSMByteOrder(15),		// ㄿ
-		Fin_LH		= SwapKSSMByteOrder(16),		// ㅀ
-		Fin_M		= SwapKSSMByteOrder(17),		// ㅁ
-		Fin_B		= SwapKSSMByteOrder(19),		// ㅂ
-		Fin_BS		= SwapKSSMByteOrder(20),		// ㅄ
-		Fin_S		= SwapKSSMByteOrder(21),		// ㅅ
-		Fin_SS		= SwapKSSMByteOrder(22),		// ㅆ
-		Fin_O		= SwapKSSMByteOrder(23),		// ㅇ
-		Fin_J		= SwapKSSMByteOrder(24),		// ㅈ
-		Fin_CH		= SwapKSSMByteOrder(25),		// ㅊ
-		Fin_K		= SwapKSSMByteOrder(26),		// ㅋ
-		Fin_T		= SwapKSSMByteOrder(27),		// ㅌ
-		Fin_P		= SwapKSSMByteOrder(28),		// ㅍ
-		Fin_H		= SwapKSSMByteOrder(29),		// ㅎ
+		Fin_Fill	= detail::SwapOrNot( 1),		// 채움
+		Fin_G		= detail::SwapOrNot( 2),		// ㄱ
+		Fin_GG		= detail::SwapOrNot( 3),		// ㄲ
+		Fin_GS		= detail::SwapOrNot( 4),		// ㄳ
+		Fin_N		= detail::SwapOrNot( 5),		// ㄴ
+		Fin_NJ		= detail::SwapOrNot( 6),		// ㄵ
+		Fin_NH		= detail::SwapOrNot( 7),		// ㄶ
+		Fin_D		= detail::SwapOrNot( 8),		// ㄷ
+		Fin_L		= detail::SwapOrNot( 9),		// ㄹ
+		Fin_LG		= detail::SwapOrNot(10),		// ㄺ
+		Fin_LM		= detail::SwapOrNot(11),		// ㄻ
+		Fin_LB		= detail::SwapOrNot(12),		// ㄼ
+		Fin_LS		= detail::SwapOrNot(13),		// ㄽ
+		Fin_LT		= detail::SwapOrNot(14),		// ㄾ
+		Fin_LP		= detail::SwapOrNot(15),		// ㄿ
+		Fin_LH		= detail::SwapOrNot(16),		// ㅀ
+		Fin_M		= detail::SwapOrNot(17),		// ㅁ
+		Fin_B		= detail::SwapOrNot(19),		// ㅂ
+		Fin_BS		= detail::SwapOrNot(20),		// ㅄ
+		Fin_S		= detail::SwapOrNot(21),		// ㅅ
+		Fin_SS		= detail::SwapOrNot(22),		// ㅆ
+		Fin_O		= detail::SwapOrNot(23),		// ㅇ
+		Fin_J		= detail::SwapOrNot(24),		// ㅈ
+		Fin_CH		= detail::SwapOrNot(25),		// ㅊ
+		Fin_K		= detail::SwapOrNot(26),		// ㅋ
+		Fin_T		= detail::SwapOrNot(27),		// ㅌ
+		Fin_P		= detail::SwapOrNot(28),		// ㅍ
+		Fin_H		= detail::SwapOrNot(29),		// ㅎ
 
 	};
 	std::map<wchar_t, eKSSM> const s_mapW2KSSM_Ini {

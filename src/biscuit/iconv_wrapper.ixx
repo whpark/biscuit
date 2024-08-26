@@ -20,9 +20,12 @@
 #pragma warning(pop)
 
 export module biscuit:iconv_wrapper;
+import :aliases;
 import :concepts;
 import :misc;
 import std.compat;
+
+using namespace std::literals;
 
 /*******************************************
 
@@ -60,7 +63,7 @@ import std.compat;
 			UTF-16, UTF-16BE, UTF-16LE
 			UTF-32, UTF-32BE, UTF-32LE
 			UTF-7
-			C99, JAVA 
+			C99, JAVA
 		Full Unicode, in terms of uint16_t or uint32_t (with machine dependent endianness and alignment)
 			UCS-2-INTERNAL, UCS-4-INTERNAL
 		Locale dependent, in terms of `char' or `wchar_t' (with machine dependent endianness and alignment, and with OS and locale dependent semantics)
@@ -80,7 +83,7 @@ import std.compat;
 		Turkmen
 			TDS565
 		Platform specifics
-			ATARIST, RISCOS-LATIN1 
+			ATARIST, RISCOS-LATIN1
 
 
 *******************************************/
@@ -92,7 +95,7 @@ export namespace biscuit {
 
 	template < concepts::string_elem tchar_to, concepts::string_elem tchar_from, size_t initial_dst_buf_size = 1024 >
 	class Ticonv {
-		libiconv_t m_cd {(iconv_t)-1};
+		libiconv_t m_cd{ (iconv_t)-1 };
 
 	public:
 		Ticonv(char const* to = nullptr, char const* from = nullptr) {
@@ -131,11 +134,45 @@ export namespace biscuit {
 			SetFlag(ICONV_SET_DISCARD_ILSEQ, bOn);
 		}
 
-	public:
-		std::optional<std::basic_string<tchar_to>> Convert(std::basic_string<tchar_from> const& strFrom) {
-			return Convert(std::basic_string_view<tchar_from>{strFrom});
+	protected:
+		template < typename tchar >
+		bool ContinueConvert(std::basic_string<tchar>& strTo, char** psrc, size_t& remnant) const {
+			while (remnant) {
+				auto size_out = strTo.size();
+				strTo.resize(strTo.size() + std::max(4uz, remnant)*sizeof(tchar), 0);
+				size_t outbytesleft = (strTo.size() - size_out)*sizeof(tchar);
+				char* out = reinterpret_cast<char*>(strTo.data() + size_out);
+				size_t converted = iconv(m_cd, psrc, &remnant, &out, &outbytesleft);
+				if constexpr (sizeof(tchar) >= 2) {
+					if (outbytesleft % sizeof(tchar) != 0) {
+						throw std::runtime_error("invalid multibyte sequence");
+					}
+				}
+				if (converted == (size_t)-1) {
+					if (auto e = errno; e == E2BIG) {
+						strTo.resize(strTo.size() - outbytesleft/sizeof(tchar));
+						continue;
+					}
+					return false;
+				}
+				else {
+					strTo.resize(strTo.size() - outbytesleft/sizeof(tchar));
+					return true;
+				}
+			}
+			return true;
 		}
-		std::optional<std::basic_string<tchar_to>> Convert(std::basic_string_view<tchar_from> svFrom) {
+
+	public:
+		//std::optional<std::basic_string<tchar_to>> Convert(std::basic_string<tchar_from> const& strFrom) {
+		//	return Convert(std::basic_string_view<tchar_from>{strFrom});
+		//}
+		template < concepts::tchar_string_like tstring >
+		std::optional<std::basic_string<tchar_to>> Convert(tstring const& svFrom) {
+			std::basic_string<tchar_to> strTo;
+
+			using tchar_from2 = std::ranges::range_value_t<tstring>;
+			static_assert(std::is_same_v<tchar_from, tchar_from2>);
 			if (!IsOpen())
 				return {};
 
@@ -145,53 +182,67 @@ export namespace biscuit {
 			char_source_buf_t* src = (char_source_buf_t*)(svFrom.data());
 			size_t remnant_src = svFrom.size()*sizeof(tchar_from);
 
-			auto Conv = [](iconv_t cd, std::basic_string<tchar_to>& strTo, char_source_buf_t** psrc, auto& remnant_src, auto& remnant_dst) -> std::optional<std::basic_string<tchar_to>> {
-				while (remnant_src) {
-					char* out = std::bit_cast<char*>(strTo.data() + strTo.size() - remnant_dst/sizeof(tchar_to));
-					if (iconv(cd, psrc, &remnant_src, &out, &remnant_dst) == (size_t)-1) {
-						if (errno == E2BIG) {
-							//size_t const old_size = strTo.size() * sizeof(tchar_to);
-							//size_t const new_size = strTo.size() * sizeof(tchar_to) * 2;
-							remnant_dst += strTo.size() * sizeof(tchar_to);
-							strTo.resize(strTo.size()*2);
-							continue;
-						}
-						return {};
+			bool bResult = false;
+			if constexpr (std::is_same_v<tchar_from, charKSSM_t>) {
+				std::string strMBCS;
+				strMBCS.reserve(svFrom.size() * sizeof(tchar_from));
+				for (auto c : svFrom) {
+					if (c & 0xff00)
+						strMBCS.push_back(c >> 8);
+					strMBCS.push_back(c & 0xff);
+				}
+				src = strMBCS.data();
+				remnant_src = strMBCS.size();
+				bResult = ContinueConvert(strTo, &src, remnant_src);
+			}
+			else if constexpr (std::is_same_v<tchar_to, charKSSM_t>) {
+				std::string strMBCS;
+				if (!ContinueConvert(strMBCS, &src, remnant_src))
+					return {};
+				size_t len_kssm{};
+				for (auto p = strMBCS.begin(), e = strMBCS.end(); p < e; p++) {
+					if (*p & 0x80) {
+						len_kssm++;
+						p++;
 					}
 				}
-
-				strTo.resize(strTo.size() - remnant_dst/sizeof(tchar_to));
-				return std::move(strTo);
-			};
-
-
-			if constexpr (initial_dst_buf_size != 0) {
-				tchar_to initial_dst_buf[initial_dst_buf_size]{};
+				strTo.assign(strMBCS.size() - len_kssm, 0);
+				auto q = strTo.begin();
+				for (auto p = strMBCS.begin(), e = strMBCS.end(); p < e; p++, q++) {
+					*q = (*p & 0xff);
+					if (*p & 0x80) {
+						p++;
+						*q = ((*q << 8) | (*p & 0xff));
+					}
+				}
+				bResult = true;
+			}
+			else if constexpr (initial_dst_buf_size != 0) {
+				std::array<tchar_to, initial_dst_buf_size> initial_dst_buf{};
 				size_t remnant_dst = sizeof(initial_dst_buf);
-				char* out = (char*)initial_dst_buf;
-				if (iconv(m_cd, &src, &remnant_src, &out, &remnant_dst) == (size_t)-1) {
+				char* out = (char*)initial_dst_buf.data();
+				if (auto converted = iconv(m_cd, &src, &remnant_src, &out, &remnant_dst); converted == (size_t)-1) {
 					auto e = errno;
 					if (e == E2BIG) {
-						std::basic_string<tchar_to> strTo;
-						size_t const old_size = sizeof(initial_dst_buf);
-						size_t const new_size = std::max(old_size*2, svFrom.size());
-						strTo.resize(new_size/sizeof(tchar_to));
-						std::memmove(strTo.data(), initial_dst_buf, old_size - remnant_dst);
-						remnant_dst += (new_size - old_size);
-
-						return Conv(m_cd, strTo, &src, remnant_src, remnant_dst);
+						strTo.assign(initial_dst_buf.data(), initial_dst_buf.size()-remnant_dst/sizeof(tchar_to));
+						bResult = ContinueConvert(strTo, &src, remnant_src);
 					}
-					return {};
 				}
-				return std::move(std::basic_string<tchar_to>(initial_dst_buf, std::size(initial_dst_buf)-remnant_dst/sizeof(tchar_to)));
-
+				else {
+					bResult = true;
+					strTo.assign(initial_dst_buf.data(), initial_dst_buf.size()-remnant_dst/sizeof(tchar_to));
+				}
 			} else {
-				std::basic_string<tchar_to> strTo;
-				strTo.resize(svFrom.size());
-				size_t remnant_dst = strTo.size()*sizeof(tchar_to);
+				//strTo.resize(svFrom.size());
+				//size_t remnant_dst = strTo.size()*sizeof(tchar_to);
 
-				return Conv(m_cd, strTo, &src, remnant_src, remnant_dst);
+				//bResult = Conv(strTo, &src, remnant_src, remnant_dst);
+				bResult = ContinueConvert(strTo, &src, remnant_src);
 			}
+
+			if (bResult)
+				return std::move(strTo);
+			return {};
 		}
 
 	public:
@@ -241,15 +292,10 @@ export namespace biscuit {
 	};
 
 	// helper
-	template < concepts::string_elem tchar_to, concepts::string_elem tchar_from,
+	template < concepts::string_elem tchar_to, concepts::tchar_string_like tstring,
 		xStringLiteral szCodeTo = "", xStringLiteral szCodeFrom = "", size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<tchar_to>> ConvertString(std::basic_string_view<tchar_from> strFrom) {
-		thread_local static Ticonv<tchar_to, tchar_from, initial_dst_buf_size> iconv{szCodeTo.str, szCodeFrom.str};
-		return iconv.Convert(strFrom);
-	}
-	template < concepts::string_elem tchar_to, concepts::string_elem tchar_from,
-		xStringLiteral szCodeTo = "", xStringLiteral szCodeFrom = "", size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<tchar_to>> ConvertString(std::basic_string<tchar_from> const& strFrom) {
+	std::optional<std::basic_string<tchar_to>> ConvertString_iconv(tstring const& strFrom) {
+		using tchar_from = std::remove_cvref_t<tstring>::value_type;
 		thread_local static Ticonv<tchar_to, tchar_from, initial_dst_buf_size> iconv{szCodeTo.str, szCodeFrom.str};
 		return iconv.Convert(strFrom);
 	}
@@ -257,23 +303,34 @@ export namespace biscuit {
 	// codepage 949
 	template < concepts::string_elem tchar_to, size_t initial_dst_buf_size = 1024 >
 	std::optional<std::basic_string<tchar_to>> ConvertStringFromCP949(std::string_view strFrom) {
-		return ConvertString<tchar_to, char, "", "CP949", initial_dst_buf_size>(strFrom);
+		return ConvertString_iconv<tchar_to, std::string_view, "", "CP949", initial_dst_buf_size>(strFrom);
 	}
 
-	template < concepts::string_elem tchar_from, size_t initial_dst_buf_size = 1024 >
-	std::string ConvertStringToCP949(std::basic_string_view<tchar_from> strFrom) {
-		return ConvertString<char, tchar_from, "CP949", "", initial_dst_buf_size>(strFrom);
+	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
+	std::string ConvertStringToCP949(tstring const& strFrom) {
+		using tchar_from = std::remove_cvref_t<tstring>::value_type;
+		return ConvertString_iconv<char, tstring, "CP949", "", initial_dst_buf_size>(strFrom);
 	}
 
 	// KSSM (JOHAB)
 	template < concepts::string_elem tchar_to, size_t initial_dst_buf_size = 1024 >
 	std::optional<std::basic_string<tchar_to>> ConvertStringFromKSSM(std::basic_string_view<charKSSM_t> strFrom) {
-		return ConvertString<tchar_to, charKSSM_t, "", "JOHAB", initial_dst_buf_size>(strFrom);
+		return ConvertString_iconv<tchar_to, std::basic_string_view<charKSSM_t>, "", "JOHAB", initial_dst_buf_size>(strFrom);
 	}
 
-	template < concepts::string_elem tchar_from, size_t initial_dst_buf_size = 1024 >
-	std::basic_string_view<charKSSM_t> ConvertStringToKSSM(std::basic_string_view<tchar_from> strFrom) {
-		return ConvertString<charKSSM_t, tchar_from, "JOHAB", "", initial_dst_buf_size>(strFrom);
+	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
+	std::optional<std::basic_string<charKSSM_t>> ConvertStringToKSSM(tstring const& strFrom) {
+		return ConvertString_iconv<char, tstring, "JOHAB", "", initial_dst_buf_size>(strFrom);
+	}
+
+	template < concepts::string_elem tchar_to, size_t initial_dst_buf_size = 1024 >
+	std::optional<std::basic_string<tchar_to>> ConvertStringFromKSSM_MBCS(std::string_view strFrom) {
+		return ConvertString_iconv<tchar_to, std::string_view, "", "JOHAB", initial_dst_buf_size>(strFrom);
+	}
+
+	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
+	std::optional<std::string> ConvertStringToKSSM_MBCS(tstring const& strFrom) {
+		return ConvertString_iconv<char, tstring, "JOHAB", "", initial_dst_buf_size>(strFrom);
 	}
 
 #pragma pack(pop)

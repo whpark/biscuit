@@ -65,7 +65,7 @@
     <ClCompile Include="string.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="kssm.ixx">
+    <ClCompile Include="charset_kssm.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

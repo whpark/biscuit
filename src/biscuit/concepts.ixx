@@ -42,26 +42,6 @@ export namespace biscuit::concepts {
 
 
 	/// @brief type for string buffer. ex) char buf[12]; std::array<char, 12> buf; std::vector<char> buf;...
-	template < typename tcontainer >
-	concept contiguous_container =
-		requires (tcontainer v) {
-		v[0];
-		std::data(v);
-		std::size(v);
-	};
-
-
-	/// @brief type for string buffer. ex) char buf[12]; std::array<char, 12> buf; std::vector<char> buf;...
-	template < typename tcontainer, typename type >
-	concept contiguous_type_container =
-		requires (tcontainer v) {
-			{ v[0] }			-> std::convertible_to<type>;
-			{ std::data(v) }	-> std::convertible_to<std::remove_cvref_t<type> const *>;
-			{ std::size(v) }	-> std::convertible_to<size_t>;
-	};
-
-
-	/// @brief type for string buffer. ex) char buf[12]; std::array<char, 12> buf; std::vector<char> buf;...
 	template < typename tcontainer, typename type >
 	concept container =
 		requires (tcontainer v) {
@@ -117,35 +97,11 @@ export namespace biscuit::concepts {
 		or (std::is_same_v<as_utf_t<tchar1>, as_utf_t<tchar2>>)
 		);
 
-	///// @brief type for string buffer. ex) char buf[12]; std::array<char, 12> buf; std::vector<char> buf;...
-	//template < typename tcontainer >
-	//concept contiguous_string_container = 
-	//	string_elem<std::remove_cvref_t<decltype(tcontainer{}[0])>>
-	//	and
-	//	contiguous_container<tcontainer>;
-	template < typename tcontainer >
-	concept contiguous_string_container = 
-		string_elem<std::remove_cvref_t<decltype(tcontainer{}[0])>>
-		and
-		(
-			requires (tcontainer v) {
-		v[0];
-		{ v.data() } -> std::convertible_to<std::remove_cvref_t<decltype(v[0])> const*>;
-		{ v.size() } -> std::convertible_to<size_t>;
-	}
-	or
-		std::is_array_v<tcontainer>
+	template < template < typename tchar > typename tstring_or_view, typename tchar >
+	concept string_like = std::ranges::contiguous_range<tstring_or_view<tchar>> && string_elem<tchar>;
 
-		);
-
-
-	/// @brief type for string buffer with type constraints
-	template < typename tcontainer, typename tchar >
-	concept contiguous_type_string_container = 
-		(std::is_same_v<std::remove_cvref_t<typename tcontainer::value_type>, tchar> or std::is_same_v<std::remove_cvref_t<decltype(tcontainer{}[0])>, tchar>)
-		and
-		contiguous_string_container<tcontainer>;
-
+	template < typename tstring_or_view >
+	concept tchar_string_like = std::ranges::contiguous_range<tstring_or_view> && string_elem<std::ranges::range_value_t<tstring_or_view>>;
 
 	/// @brief json container. not completed.
 	template < typename tjson >
