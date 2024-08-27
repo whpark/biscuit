@@ -13,23 +13,32 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#include "biscuit/macro.h"
+
 export module biscuit.misc;
 import biscuit.concepts;
 import std;
 
 namespace concepts = biscuit::concepts;
 
+namespace biscuit {
+	namespace detail {
+		template < typename T = std::uint32_t >		constexpr T bit_single(int b)					{ return ((T)1 << b); }
+		template < typename T, typename ... Bits >	constexpr T bit_multi(Bits ... bits)			{ return (bit_single<T>(bits) | ...); }
+	}
+}
+
 export namespace biscuit {
 #pragma pack(push, 8)
 
 	template < typename tTargetDuration = std::chrono::seconds, typename tSourceClock = std::chrono::system_clock, typename tSourceDuration = typename tSourceClock::duration >
-	[[nodiscard]] constexpr std::chrono::time_point<tSourceClock, tTargetDuration> ToLocalTime(std::chrono::time_point<tSourceClock, tSourceDuration> const& t) {
+	BSC__NODISCARD constexpr std::chrono::time_point<tSourceClock, tTargetDuration> ToLocalTime(std::chrono::time_point<tSourceClock, tSourceDuration> const& t) {
 		auto lt = std::chrono::current_zone()->to_local(t);
 		return std::chrono::time_point_cast<tTargetDuration, tSourceClock, tSourceDuration>(lt);
 	}
-	[[nodiscard]] constexpr auto ToLocalTime_sec(auto t) { return ToLocalTime<std::chrono::seconds>(t); }
-	[[nodiscard]] constexpr auto ToLocalTime_ms(auto t) { return ToLocalTime<std::chrono::milliseconds>(t); }
-	[[nodiscard]] constexpr auto ToLocalTime_us(auto t) { return ToLocalTime<std::chrono::microseconds>(t); }
+	BSC__NODISCARD constexpr auto ToLocalTime_sec(auto t) { return ToLocalTime<std::chrono::seconds>(t); }
+	BSC__NODISCARD constexpr auto ToLocalTime_ms(auto t) { return ToLocalTime<std::chrono::milliseconds>(t); }
+	BSC__NODISCARD constexpr auto ToLocalTime_us(auto t) { return ToLocalTime<std::chrono::microseconds>(t); }
 
 	template < concepts::string_elem tchar, size_t N >
 	struct xStringLiteral {
@@ -91,7 +100,7 @@ export namespace biscuit {
 	// xTrigger -> xFinalAction (naming from gsl::final_action)
 	struct xFinalAction {
 		std::function<void()> m_action;
-		[[nodiscard]] xFinalAction(std::function<void()> action) noexcept : m_action(action) {}
+		BSC__NODISCARD xFinalAction(std::function<void()> action) noexcept : m_action(action) {}
 
 		~xFinalAction() {
 			DoAction();
@@ -107,68 +116,39 @@ export namespace biscuit {
 	};
 
 	// Boolean
-	template < typename ... Args > [[nodiscard]] constexpr bool IsAllTrue(Args&& ... args)						{ return (args && ...); }
-	template < typename ... Args > [[nodiscard]] constexpr bool IsNoneTrue(Args&& ... args)						{ return (!args && ...); }
-	template < typename ... Args > [[nodiscard]] constexpr bool IsAllFalse(Args&& ... args)						{ return ((false == args) && ...); }
-	template < typename ... Args > [[nodiscard]] constexpr bool IsAnyTrue(Args&& ... args)						{ return (args ||...); }
-	template < typename ... Args > [[nodiscard]] constexpr bool IsAllSame(Args&& ... args)						{ return IsAllTrue(args...) || IsNoneTrue(args...); }
+	template < typename ... Args >	BSC__NODISCARD constexpr bool IsAllTrue(Args&& ... args)			{ return (args && ...); }
+	template < typename ... Args >	BSC__NODISCARD constexpr bool IsNoneTrue(Args&& ... args)			{ return (!args && ...); }
+	template < typename ... Args >	BSC__NODISCARD constexpr bool IsAllFalse(Args&& ... args)			{ return ((false == args) && ...); }
+	template < typename ... Args >	BSC__NODISCARD constexpr bool IsAnyOneTrue(Args&& ... args)			{ return (args ||...); }
+	template < typename ... Args >	BSC__NODISCARD constexpr bool IsAllSame(Args&& ... args)			{ return IsAllTrue(args...) || IsNoneTrue(args...); }
 
-	template < typename T, typename ... Args > [[nodiscard]] constexpr bool IsValueOneOf(T v, Args&& ... args)	{ return ((v == args) || ...); }
-	template < typename T, typename ... Args > [[nodiscard]] constexpr bool IsValueNoneOf(T v, Args&& ... args)	{ return ((v != args) && ...); }
+	template < typename T, typename ... Args >	BSC__NODISCARD constexpr bool IsOneOf(T v, Args&& ... args)	{ return ((v == args) || ...); }
+	template < typename T, typename ... Args >	BSC__NODISCARD constexpr bool IsNoneOf(T v, Args&& ... args)	{ return ((v != args) && ...); }
 
-	template < typename T > [[nodiscard]] constexpr bool IsInside(T const& v, T const& left, T const& right)	{ return (left <= v) && (v < right); }
+	template < typename T >			BSC__NODISCARD constexpr bool IsBetween(T const& v, T const& left, T const& right)	{ return (left <= v) && (v < right); }
 
 	// Bit Set
-	namespace detail {
-		template < typename T = std::uint32_t >		constexpr T bit_single(int b)					{ return ((T)1 << b); }
-		template < typename T, typename ... Bits >	constexpr T bit_multi(Bits ... bits)			{ return (bit_single<T>(bits) | ...); }
-	}
-	template < typename ... Bits >				[[nodiscard]] constexpr std::uint32_t Bit32(Bits ... bits)		{ return detail::bit_multi<std::uint32_t>(bits...); }
-	template < typename ... Bits >				[[nodiscard]] constexpr std::uint64_t Bit64(Bits ... bits)		{ return detail::bit_multi<std::uint64_t>(bits...); }
+	template < typename ... Bits >	BSC__NODISCARD constexpr std::uint32_t Bit32(Bits ... bits)			{ return detail::bit_multi<std::uint32_t>(bits...); }
+	template < typename ... Bits >	BSC__NODISCARD constexpr std::uint64_t Bit64(Bits ... bits)			{ return detail::bit_multi<std::uint64_t>(bits...); }
 
-	template < typename ... Bits >				[[nodiscard]] constexpr std::bitset<32> BitSet32(Bits ... bits)	{ return std::bitset<32>(bit32(bits...)); }
-	template < typename ... Bits >				[[nodiscard]] constexpr std::bitset<64> BitSet64(Bits ... bits)	{ return std::bitset<64>(bit64(bits...)); }
+	template < typename ... Bits >	BSC__NODISCARD constexpr std::bitset<32> BitSet32(Bits ... bits)	{ return std::bitset<32>(bit32(bits...)); }
+	template < typename ... Bits >	BSC__NODISCARD constexpr std::bitset<64> BitSet64(Bits ... bits)	{ return std::bitset<64>(bit64(bits...)); }
 
 
 	// Word Align Position
-	template < std::integral T > [[nodiscard]] constexpr inline T AdjustAlign128(T w) { return ((w+15)/16*16); }	//	((w+15)>>4)<<4
-	template < std::integral T > [[nodiscard]] constexpr inline T AdjustAlign64(T w) { return ((w+7)/8*8); }		//	((w+ 7)>>3)<<3
-	template < std::integral T > [[nodiscard]] constexpr inline T AdjustAlign32(T w) { return ((w+3)/4*4); }		//	((w+ 3)>>2)<<2
-	template < std::integral T > [[nodiscard]] constexpr inline T AdjustAlign16(T w) { return ((w+1)/2*2); }		//	((w+ 1)>>1)<<1
-
-
-	// byte swap
-	template < std::integral type >
-	[[nodiscard]] constexpr inline type GetByteSwap(type const v) {
-		if constexpr (sizeof(v) == 1) {
-			return v;
-		}
-		else {
-			type r{};
-			std::reverse_copy((uint8_t const*)&v, (uint8_t const*)&v+sizeof(v), (uint8_t*)&r);
-			return r;
-		}
-	}
-	template < std::integral type >
-	constexpr inline void ByteSwap(type& v) {
-		if constexpr (sizeof(v) == 1) {
-			return ;
-		}
-		else {
-			std::reverse((uint8_t*)&v, (uint8_t*)&v+sizeof(v));
-		}
-	}
+	template < std::integral T >	BSC__NODISCARD constexpr inline T AdjustAlign128(T w)				{ return ((w+15)/16*16); }	//	((w+15)>>4)<<4
+	template < std::integral T >	BSC__NODISCARD constexpr inline T AdjustAlign64(T w)				{ return ((w+7)/8*8); }		//	((w+ 7)>>3)<<3
+	template < std::integral T >	BSC__NODISCARD constexpr inline T AdjustAlign32(T w)				{ return ((w+3)/4*4); }		//	((w+ 3)>>2)<<2
+	template < std::integral T >	BSC__NODISCARD constexpr inline T AdjustAlign16(T w)				{ return ((w+1)/2*2); }		//	((w+ 1)>>1)<<1
 
 	template < std::integral type >
-	inline type GetNetworkByteOrder(type const v) {
+	BSC__NODISCARD inline type GetNetworkByteOrder(type const v) {
 		if constexpr (std::endian::native == std::endian::little) {
-			return GetByteSwap(v);
+			return std::byteswap(v);
 		}
 		else
 			return v;
 	}
-
-
 
 	namespace detail {
 
@@ -178,26 +158,13 @@ export namespace biscuit {
 		public:
 			using base_t = std::pair<T1,T2>;
 			using base_t::base_t;
-
 		};
-
 
 		//// non-const function call in const function. -----> std::remove_cvref_t
 		//template < typename T >
 		//using remove_ref_const_t = std::remove_const_t<std::remove_reference_t<T>>;
 
-
 	}
-
-	/// color
-
-
-	//-----------------------------------------------------------------------------
-	// enum helper
-	template < typename eT, typename T = std::underlying_type<eT> >	[[nodiscard]] constexpr T& enum_as(eT& e)		{ static_assert(sizeof(eT) == sizeof(T)); return (T&)e; }
-	//template < typename eT, typename T = std::underlying_type<eT> >	constexpr eT enum_inc(eT& e)	{ static_assert(sizeof(eT) == sizeof(T)); return (eT)++((T&)e); }
-	//template < typename eT, typename T = std::underlying_type<eT> >	constexpr eT enum_dec(eT& e)	{ static_assert(sizeof(eT) == sizeof(T)); return (eT)--((T&)e); }
-
 
 	//-----------------------------------------------------------------------------
 	// axis
@@ -216,11 +183,11 @@ export namespace biscuit {
 		PW = W,
 	};
 
-	[[nodiscard]] inline bool IsValidCoordSystem(eAXIS eDX, eAXIS eDY) {
+	BSC__NODISCARD inline bool IsValidCoordSystem(eAXIS eDX, eAXIS eDY) {
 		int iDX = std::abs(static_cast<int>(eDX)), iDY = std::abs(static_cast<int>(eDY));
 		return static_cast<int>(eDX) && static_cast<int>(eDY) && (static_cast<int>(iDX) != static_cast<int>(iDY));
 	}
-	[[nodiscard]] inline bool IsValidCoordSystem(eAXIS eDX, eAXIS eDY, eAXIS eDZ) {
+	BSC__NODISCARD inline bool IsValidCoordSystem(eAXIS eDX, eAXIS eDY, eAXIS eDZ) {
 		int iDX = std::abs(static_cast<int>(eDX)), iDY = std::abs(static_cast<int>(eDY)), iDZ = std::abs(static_cast<int>(eDZ));
 		return static_cast<int>(eDX) && static_cast<int>(eDY) && static_cast<int>(eDZ)
 			&& (static_cast<int>(iDX) != static_cast<int>(iDY))
@@ -228,17 +195,17 @@ export namespace biscuit {
 			&& (static_cast<int>(iDZ) != static_cast<int>(iDX));
 	}
 
-	[[nodiscard]] inline eAXIS GetOppositeDirection(eAXIS eDirection) { return (eAXIS)(-static_cast<int>(eDirection)); }
+	BSC__NODISCARD inline eAXIS GetOppositeDirection(eAXIS eDirection) { return (eAXIS)(-static_cast<int>(eDirection)); }
 
 	template < concepts::string_elem tchar >
-	[[nodiscard]] constexpr inline eAXIS GetDirection(std::basic_string_view<tchar> svName) {
+	BSC__NODISCARD constexpr inline eAXIS GetDirection(std::basic_string_view<tchar> svName) {
 		signed char eNegative = tszsearch(svName, '-') ? -1 : 1;
 		if (svName.find('x') != svName.npos or svName.find('X') != svName.npos) return (eAXIS)(static_cast<int>(eAXIS::X)*eNegative);
 		if (svName.find('y') != svName.npos or svName.find('Y') != svName.npos) return (eAXIS)(static_cast<int>(eAXIS::Y)*eNegative);
 		if (svName.find('z') != svName.npos or svName.find('Z') != svName.npos) return (eAXIS)(static_cast<int>(eAXIS::Z)*eNegative);
 		return eAXIS::NONE;
 	}
-	[[nodiscard]] constexpr inline std::basic_string_view<char> GetDirectionName(eAXIS eDirection) {
+	BSC__NODISCARD constexpr inline std::basic_string_view<char> GetDirectionName(eAXIS eDirection) {
 		using namespace std::literals;
 		switch (eDirection) {
 		case eAXIS::NONE : return ""sv;
@@ -250,19 +217,19 @@ export namespace biscuit {
 
 	//-----------------------------------------------------------------------------
 
-	[[nodiscard]] inline bool IsChildPath(std::filesystem::path const& a, std::filesystem::path const& base) {
+	BSC__NODISCARD inline bool IsChildPath(std::filesystem::path const& a, std::filesystem::path const& base) {
 		auto rel = std::filesystem::relative(a, base);
 		return !rel.empty() && rel.is_relative() and !rel.string().starts_with("..");
 	};
 
-	[[nodiscard]] inline bool HasParentPath(std::filesystem::path const& path) {
+	BSC__NODISCARD inline bool HasParentPath(std::filesystem::path const& path) {
 		return path.has_parent_path() and path != path.parent_path();
 	}
 
 	/// @brief Get Project Name from source file path
 	/// @param l : don't touch.
 	/// @return 
-	[[nodiscard]] /*constexpr*/ std::wstring GetProjectName(std::source_location const& l = std::source_location::current()) {
+	BSC__NODISCARD /*constexpr*/ std::wstring GetProjectName(std::source_location const& l = std::source_location::current()) {
 		std::filesystem::path path = l.file_name();
 		if (path.extension() == ".h")	// CANNOT get project name from header file
 			return {};
@@ -275,7 +242,7 @@ export namespace biscuit {
 		return {};
 	}
 
-	[[nodiscard]] std::filesystem::path GetProjectRootFolder(std::wstring const& strProjectNameToBeRemoved, std::filesystem::path path = std::filesystem::current_path()) {
+	BSC__NODISCARD std::filesystem::path GetProjectRootFolder(std::wstring const& strProjectNameToBeRemoved, std::filesystem::path path = std::filesystem::current_path()) {
 		// Init Temp Folder Names (ex, "Debug", "Release", ...)
 		static auto const strsTempFolder = []{
 			std::vector<std::wstring> folders;

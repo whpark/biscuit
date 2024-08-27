@@ -10,6 +10,8 @@ module;
 //
 //////////////////////////////////////////////////////////////////////
 
+#include "biscuit/macro.h"
+
 export module biscuit.string.defines;
 import std;
 import biscuit.aliases;
@@ -22,7 +24,7 @@ export namespace biscuit {
 
 	//template < concepts::string_elem tchar >
 	template < typename tchar >
-	[[nodiscard]] constexpr std::basic_string_view<tchar> GetSpaceString() {
+	BSC__NODISCARD constexpr std::basic_string_view<tchar> GetSpaceString() {
 	#define SPACES " \t\r\n"
 		if constexpr (std::is_same_v<tchar, char>)			{ return SPACES; }
 		else if constexpr (std::is_same_v<tchar, char8_t>)	{ return u8"" SPACES; }

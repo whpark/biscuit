@@ -24,3 +24,9 @@ import <version>;
 #	undef min
 #	undef max
 #endif
+
+//#ifndef BSC__NODISCARD
+#define BSC__NODISCARD [[nodiscard]]
+//#endif
+
+#define BSC__DEPR_SEC [[deprecated("NOT Secure. use 'sv' instead.")]]

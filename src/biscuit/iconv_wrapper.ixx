@@ -14,6 +14,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "biscuit/biscuit.h"
+#include "biscuit/macro.h"
+
 #pragma warning(push)
 #pragma warning(disable: 4819)	// codepage
 #include "iconv.h"
@@ -114,17 +116,17 @@ export namespace biscuit {
 				iconv_close(m_cd);
 		}
 
-		bool IsOpen() const {
+		BSC__NODISCARD bool IsOpen() const {
 			return m_cd != (iconv_t)-1;
 		}
 
-		bool IsTrivial() const {
+		BSC__NODISCARD bool IsTrivial() const {
 			return IsFlag(ICONV_TRIVIALP);
 		}
-		bool IsTransliterate() const {
+		BSC__NODISCARD bool IsTransliterate() const {
 			return IsFlag(ICONV_GET_TRANSLITERATE);
 		}
-		bool IsDiscardIlseq() const {
+		BSC__NODISCARD bool IsDiscardIlseq() const {
 			return IsFlag(ICONV_SET_DISCARD_ILSEQ);
 		}
 		void SetTransliterate(bool bOn = true) {
@@ -136,7 +138,7 @@ export namespace biscuit {
 
 	protected:
 		template < typename tchar >
-		bool ContinueConvert(std::basic_string<tchar>& strTo, char** psrc, size_t& remnant) const {
+		BSC__NODISCARD bool ContinueConvert(std::basic_string<tchar>& strTo, char** psrc, size_t& remnant) const {
 			while (remnant) {
 				auto size_out = strTo.size();
 				strTo.resize(strTo.size() + std::max(4uz, remnant)*sizeof(tchar), 0);
@@ -168,7 +170,7 @@ export namespace biscuit {
 		//	return Convert(std::basic_string_view<tchar_from>{strFrom});
 		//}
 		template < concepts::tchar_string_like tstring >
-		std::optional<std::basic_string<tchar_to>> Convert(tstring const& svFrom) {
+		BSC__NODISCARD std::optional<std::basic_string<tchar_to>> Convert(tstring const& svFrom) {
 			std::basic_string<tchar_to> strTo;
 
 			using tchar_from2 = std::ranges::range_value_t<tstring>;
@@ -247,7 +249,7 @@ export namespace biscuit {
 
 	public:
 		template < concepts::string_elem tchar >
-		constexpr static char const* GuessCodeFromType() {
+		BSC__NODISCARD constexpr static char const* GuessCodeFromType() {
 			using namespace std::literals;
 			if constexpr (std::is_same_v<tchar, char8_t> || std::is_same_v<tchar, char>) {
 				return "UTF-8";
@@ -280,7 +282,7 @@ export namespace biscuit {
 		};
 
 	protected:
-		bool IsFlag(int flag) const {
+		BSC__NODISCARD bool IsFlag(int flag) const {
 			int value {};
 			iconvctl(m_cd, flag, &value);
 			return value != 0;

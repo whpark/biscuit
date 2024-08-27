@@ -10,6 +10,8 @@
 
 module;
 
+#include "biscuit/macro.h"
+
 export module biscuit.concepts;
 import std;
 import biscuit.aliases;
@@ -95,15 +97,15 @@ export namespace biscuit::concepts {
 		or (std::is_same_v<as_utf_t<tchar1>, as_utf_t<tchar2>>)
 		);
 
-	//template < template < typename tchar > typename tstring_or_view, typename tchar >
-	//concept string_like = std::ranges::contiguous_range<tstring_or_view<tchar>> && string_elem<tchar>;
 	template < template < typename tchar > typename tstring_or_view, typename tchar >
-	concept string_like = requires (tstring_or_view<tchar> str) { str.data(); str.size(); };
+	concept string_like = std::ranges::contiguous_range<tstring_or_view<tchar>> && string_elem<tchar>;
+	//template < template < typename tchar > typename tstring_or_view, typename tchar >
+	//concept string_like = requires (tstring_or_view<tchar> str) { str.data(); str.size(); };
 
-	//template < typename tstring_or_view >
-	//concept tchar_string_like = std::ranges::contiguous_range<tstring_or_view> && string_elem<std::ranges::range_value_t<tstring_or_view>>;
-	template < typename tstring_or_view, typename tchar = tstring_or_view::value_type >
-	concept tchar_string_like = requires (tstring_or_view str) { str.data(); str.size(); };
+	template < typename tstring_or_view >
+	concept tchar_string_like = std::ranges::contiguous_range<tstring_or_view> && string_elem<std::ranges::range_value_t<tstring_or_view>>;
+	//template < typename tstring_or_view, typename tchar = tstring_or_view::value_type >
+	//concept tchar_string_like = requires (tstring_or_view str) { str.data(); str.size(); };
 
 
 	/// @brief json container. not completed.

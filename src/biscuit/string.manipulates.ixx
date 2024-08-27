@@ -10,6 +10,8 @@ module;
 //
 //////////////////////////////////////////////////////////////////////
 
+#include "biscuit/macro.h"
+
 export module biscuit.string.manipulates;
 import std;
 import biscuit.aliases;
@@ -22,7 +24,7 @@ namespace concepts = biscuit::concepts;
 
 namespace biscuit {
 	template < typename treturn, typename tchar >
-	[[nodiscard]] std::vector<treturn> TSplit(std::basic_string_view<tchar> sv, std::function<bool(tchar)> func) {
+	BSC__NODISCARD std::vector<treturn> TSplit(std::basic_string_view<tchar> sv, std::function<bool(tchar)> func) {
 		std::vector<treturn> r;
 		if (sv.empty())
 			return r;
@@ -41,7 +43,7 @@ namespace biscuit {
 	}
 
 	template < typename tchar, size_t max_digit_len = 0 >
-	constexpr bool CheckDigitLen(std::basic_string<tchar>& str, tchar const*& pos, tchar const* const end, int radix, tchar cFill, tchar cTerminating) {
+	BSC__NODISCARD constexpr bool CheckDigitLen(std::basic_string<tchar>& str, tchar const*& pos, tchar const* const end, int radix, tchar cFill, tchar cTerminating) {
 		if constexpr (max_digit_len != 0) {
 			if ( (pos + max_digit_len > end) or (*pos == cTerminating) )
 				return false;
@@ -82,24 +84,24 @@ namespace biscuit {
 				str += ConvertString<tchar>(std::basic_string_view<char32_t>(&v, &v+1));
 			}
 		}
-		//else if constexpr (std::is_same_v<tchar, charKSSM_t>) {
-		//	str += (v < 0xffff) ? (charKSSM_t)v : cFill;
-		//}
-		//else if constexpr (sizeof(tchar) == sizeof(char16_t)) {
-		//	if (v <= 0xffff) {
-		//		str += (char16_t)v;
-		//	} else {
-		//		str += ConvertString<tchar>(std::basic_string_view<char32_t>(&v, &v+1));
-		//	}
-		//}
-		//else if constexpr (sizeof(tchar) == sizeof(char32_t)) {
-		//	str += v;
-		//}
-		//else {
-		//	static_assert(false, "not supported");
-		//}
+		else if constexpr (std::is_same_v<tchar, charKSSM_t>) {
+			str += (v < 0xffff) ? (charKSSM_t)v : cFill;
+		}
+		else if constexpr (sizeof(tchar) == sizeof(char16_t)) {
+			if (v <= 0xffff) {
+				str += (char16_t)v;
+			} else {
+				str += ConvertString<tchar>(std::basic_string_view<char32_t>(&v, &v+1));
+			}
+		}
+		else if constexpr (sizeof(tchar) == sizeof(char32_t)) {
+			str += v;
+		}
+		else {
+			static_assert(false, "not supported");
+		}
 
-		//pos = pHexEnd-1;
+		pos = pHexEnd-1;
 
 		return true;
 	}
@@ -110,7 +112,43 @@ namespace biscuit {
 
 export namespace biscuit {
 
-	//-----------------------------------------------------------------------------
+
+	//=============================================================================================================================
+	// ToLower, ToUpper
+
+	template < concepts::string_elem tchar >
+	BSC__NODISCARD tchar ToLower(tchar c) {
+		if constexpr (std::is_same_v<tchar, char>) { return (tchar)std::tolower(c); } else { return (tchar)std::towlower(c); }
+	}
+	template < concepts::string_elem tchar >
+	BSC__NODISCARD tchar ToUpper(tchar c) {
+		if constexpr (std::is_same_v<tchar, char>) { return (tchar)std::toupper(c); } else { return (tchar)std::towupper(c); }
+	}
+
+	template < concepts::tchar_string_like tstring, typename tchar = std::ranges::range_value_t<std::remove_cvref_t<tstring>> >
+	BSC__NODISCARD std::basic_string<tchar> ToLower(tstring const& sv) {
+		std::basic_string<tchar> str;
+		str.reserve(sv.size());
+		for (auto c : sv)
+			str += ToLower(c);
+		return str;
+	}
+	template < concepts::tchar_string_like tstring, typename tchar = std::ranges::range_value_t<std::remove_cvref_t<tstring>> >
+	BSC__NODISCARD std::basic_string<tchar> ToUpper(tstring const& sv) {
+		std::basic_string<tchar> str;
+		str.reserve(sv.size());
+		for (auto c : sv)
+			str += ToUpper(c);
+		return str;
+	}
+	template < concepts::string_elem tchar > void MakeLower(std::basic_string<tchar>& str) { for (auto& c : str) MakeLower(c); }
+	template < concepts::string_elem tchar > void MakeUpper(std::basic_string<tchar>& str) { for (auto& c : str) MakeUpper(c); }
+
+	template < concepts::string_elem tchar > void MakeLower(tchar& c) { c = ToLower(c); }
+	template < concepts::string_elem tchar > void MakeUpper(tchar& c) { c = ToUpper(c); }
+
+
+	//=============================================================================================================================
 	// Trim
 	template < typename tchar >
 	void TrimLeft(std::basic_string<tchar>& str, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
@@ -133,42 +171,46 @@ export namespace biscuit {
 
 	// Trim-View
 	template < typename tchar >
-	std::basic_string_view<tchar> TrimLeftView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
+	BSC__NODISCARD std::basic_string_view<tchar> TrimLeftView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
 		if (auto pos = sv.find_first_not_of(svTrim); pos != sv.npos)
 			return { sv.begin()+pos, sv.end() };
 		else
 			return {};
 	}
 	template < typename tchar >
-	std::basic_string_view<tchar> TrimRightView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
+	BSC__NODISCARD std::basic_string_view<tchar> TrimRightView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
 		return { sv.begin(), sv.begin() + (sv.find_last_not_of(svTrim)+1) };
 	}
 	template < typename tchar >
-	std::basic_string_view<tchar> TrimView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
+	BSC__NODISCARD std::basic_string_view<tchar> TrimView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
 		return TrimRightView(TrimLeftView(sv, svTrim), svTrim);
 	}
 
-	/// @brief Split String into ...
+	//=============================================================================================================================
+	// Split
 	template < typename tchar >
-	[[nodiscard]] std::vector<std::basic_string<tchar>> Split(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters) {
+	BSC__NODISCARD std::vector<std::basic_string<tchar>> Split(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters) {
 		return TSplit<tchar, std::basic_string<tchar>>(sv, [svDelimiters](tchar c) { return svDelimiters.find(c) != svDelimiters.npos; });
 	}
 	template < typename tchar >
-	[[nodiscard]] std::vector<std::basic_string<tchar>> Split(std::basic_string_view<tchar> sv, tchar cDelimiter) {
+	BSC__NODISCARD std::vector<std::basic_string<tchar>> Split(std::basic_string_view<tchar> sv, tchar cDelimiter) {
 		return TSplit<tchar, std::basic_string<tchar>>(sv, [cDelimiter](tchar c) { return cDelimiter == c; });
 	}
 	template < typename tchar >
-	[[nodiscard]] std::vector<std::basic_string_view<tchar>> SplitView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters) {
+	BSC__NODISCARD std::vector<std::basic_string_view<tchar>> SplitView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters) {
 		return TSplit<tchar, std::basic_string_view<tchar>>(sv, [svDelimiters](tchar c) { return svDelimiters.find(c) != svDelimiters.npos; });
 	}
 	template < typename tchar >
-	[[nodiscard]] std::vector<std::basic_string_view<tchar>> SplitView(std::basic_string_view<tchar> sv, tchar cDelimiter) {
+	BSC__NODISCARD std::vector<std::basic_string_view<tchar>> SplitView(std::basic_string_view<tchar> sv, tchar cDelimiter) {
 		return TSplit<tchar, std::basic_string_view<tchar>>(sv, [cDelimiter](tchar c) { return cDelimiter == c; });
 	}
 
+	//=============================================================================================================================
+	// Escape Sequence
+
 	/// @brief Translate Escape Sequence String
 	template < typename tchar >
-	constexpr [[nodiscard]] std::optional<std::basic_string<tchar>> TranslateEscapeSequence(std::basic_string_view<tchar> sv, tchar cFill, tchar cTerminating) {
+	BSC__NODISCARD constexpr std::optional<std::basic_string<tchar>> TranslateEscapeSequence(std::basic_string_view<tchar> sv, tchar cFill, tchar cTerminating) {
 		std::basic_string<tchar> str;
 		str.reserve(sv.size());
 		const tchar* pos{};
@@ -212,13 +254,6 @@ export namespace biscuit {
 					tchar v {*pos};
 					auto iter = std::find_if(std::begin(escapes), std::end(escapes), [v](auto p){ return p.cEscape == v;});
 					str += (iter == std::end(escapes)) ? v : iter->cValue;
-					//for (auto const& [esc, value] : escapes) {
-					//	if (esc != *pos)
-					//		continue;
-					//	v = value;
-					//	break;
-					//}
-					//str += v;
 				}
 			} else {
 				str += *pos;
@@ -227,9 +262,11 @@ export namespace biscuit {
 		return str;
 	}
 
-
+	//=============================================================================================================================
+	/// @brief BinaryData to Hex String
+	/// @return 
 	template < concepts::string_elem tchar_t >
-	std::vector<std::basic_string<tchar_t>> FormatDataToHexString(std::span<uint8> data, size_t nCol, int cDelimiter, bool bAddText, int cDelimiterText) {
+	BSC__NODISCARD std::vector<std::basic_string<tchar_t>> FormatDataToHexString(std::span<uint8> data, size_t nCol, int cDelimiter, bool bAddText, int cDelimiterText) {
 		std::vector<std::basic_string<tchar_t>> result;
 
 		if (data.size())

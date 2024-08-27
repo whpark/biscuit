@@ -11,6 +11,7 @@ module;
 //////////////////////////////////////////////////////////////////////
 
 #include <simdutf.h>
+#include "biscuit/macro.h"
 
 export module biscuit.string.convert_codepage;
 import std;
@@ -23,15 +24,15 @@ namespace concepts = biscuit::concepts;
 
 export namespace biscuit {
 
-	[[nodiscard]] std::u8string& u8A(std::string& str) { return reinterpret_cast<std::u8string&>(str); }
-	[[nodiscard]] std::string& Au8(std::u8string& str) { return reinterpret_cast<std::string&>(str); }
-	[[nodiscard]] std::u8string_view Au8(std::string_view str) { return reinterpret_cast<std::u8string_view&>(str); }
-	[[nodiscard]] std::string_view u8A(std::u8string_view str) { return reinterpret_cast<std::string_view&>(str); }
+	BSC__NODISCARD std::u8string& u8A(std::string& str) { return reinterpret_cast<std::u8string&>(str); }
+	BSC__NODISCARD std::string& Au8(std::u8string& str) { return reinterpret_cast<std::string&>(str); }
+	BSC__NODISCARD std::u8string_view Au8(std::string_view str) { return reinterpret_cast<std::u8string_view&>(str); }
+	BSC__NODISCARD std::string_view u8A(std::u8string_view str) { return reinterpret_cast<std::string_view&>(str); }
 
 	//=============================================================================================================================
 	// Convert String
 	template < concepts::string_elem tchar_to, concepts::tchar_string_like tstring, typename tchar_from = tstring::value_type >
-	[[nodiscard]] std::basic_string<tchar_to> ConvertString(tstring const& str) {
+	BSC__NODISCARD std::basic_string<tchar_to> ConvertString(tstring const& str) {
 		//using tchar_from = std::remove_cvref_t<tstring>::value_type;
 		//static_assert(concepts::string_elem<tchar_to>);
 
@@ -119,7 +120,7 @@ export namespace biscuit {
 	// Convert String using iconv
 	template < concepts::string_elem tchar_to, concepts::tchar_string_like tstring,
 		xStringLiteral szCodeTo = "", xStringLiteral szCodeFrom = "", size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<tchar_to>> ConvertString_iconv(tstring const& strFrom) {
+	BSC__NODISCARD std::optional<std::basic_string<tchar_to>> ConvertString_iconv(tstring const& strFrom) {
 		using tchar_from = std::remove_cvref_t<tstring>::value_type;
 		thread_local static Ticonv<tchar_to, tchar_from, initial_dst_buf_size> iconv{szCodeTo.str, szCodeFrom.str};
 		return iconv.Convert(strFrom);
@@ -127,34 +128,34 @@ export namespace biscuit {
 
 	// codepage 949
 	template < concepts::string_elem tchar_to, size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<tchar_to>> ConvertStringFromCP949(std::string_view strFrom) {
+	BSC__NODISCARD std::optional<std::basic_string<tchar_to>> ConvertStringFromCP949(std::string_view strFrom) {
 		return ConvertString_iconv<tchar_to, std::string_view, "", "CP949", initial_dst_buf_size>(strFrom);
 	}
 
 	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
-	std::string ConvertStringToCP949(tstring const& strFrom) {
+	BSC__NODISCARD std::string ConvertStringToCP949(tstring const& strFrom) {
 		using tchar_from = std::remove_cvref_t<tstring>::value_type;
 		return ConvertString_iconv<char, tstring, "CP949", "", initial_dst_buf_size>(strFrom);
 	}
 
 	// KSSM (JOHAB)
 	template < concepts::string_elem tchar_to, size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<tchar_to>> ConvertStringFromKSSM(std::basic_string_view<charKSSM_t> strFrom) {
+	BSC__NODISCARD std::optional<std::basic_string<tchar_to>> ConvertStringFromKSSM(std::basic_string_view<charKSSM_t> strFrom) {
 		return ConvertString_iconv<tchar_to, std::basic_string_view<charKSSM_t>, "", "JOHAB", initial_dst_buf_size>(strFrom);
 	}
 
 	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<charKSSM_t>> ConvertStringToKSSM(tstring const& strFrom) {
+	BSC__NODISCARD std::optional<std::basic_string<charKSSM_t>> ConvertStringToKSSM(tstring const& strFrom) {
 		return ConvertString_iconv<char, tstring, "JOHAB", "", initial_dst_buf_size>(strFrom);
 	}
 
 	template < concepts::string_elem tchar_to, size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<tchar_to>> ConvertStringFromKSSM_MBCS(std::string_view strFrom) {
+	BSC__NODISCARD std::optional<std::basic_string<tchar_to>> ConvertStringFromKSSM_MBCS(std::string_view strFrom) {
 		return ConvertString_iconv<tchar_to, std::string_view, "", "JOHAB", initial_dst_buf_size>(strFrom);
 	}
 
 	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
-	std::optional<std::string> ConvertStringToKSSM_MBCS(tstring const& strFrom) {
+	BSC__NODISCARD std::optional<std::string> ConvertStringToKSSM_MBCS(tstring const& strFrom) {
 		return ConvertString_iconv<char, tstring, "JOHAB", "", initial_dst_buf_size>(strFrom);
 	}
 

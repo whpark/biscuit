@@ -1,5 +1,7 @@
 module;
 
+#include "biscuit/macro.h"
+
 export module biscuit.views;
 import std;
 
@@ -11,7 +13,7 @@ export namespace bisucit::views {
 	template <typename T,
 		typename TIter = decltype(std::begin(std::declval<T>())),
 		typename = decltype(std::end(std::declval<T>()))>
-	constexpr auto enumerate(T && iterable) {
+	BSC__NODISCARD constexpr auto enumerate(T && iterable) {
 		struct iterator {
 			size_t i;
 			TIter iter;
@@ -29,7 +31,7 @@ export namespace bisucit::views {
 //#endif
 
 	template < std::integral size_type, typename T, typename TIter = decltype(std::begin(std::declval<T>())), typename = decltype(std::end(std::declval<T>())) >
-	constexpr auto enumerate_as(T&& iterable) {
+	BSC__NODISCARD constexpr auto enumerate_as(T&& iterable) {
 		struct iterator {
 			size_type i;
 			TIter iter;
