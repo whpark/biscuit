@@ -1,6 +1,6 @@
 module;
-export module biscuit:arithmetic;
-import :concepts;
+export module biscuit.arithmetic;
+import biscuit.concepts;
 
 //namespace concepts = biscuit::concepts;
 

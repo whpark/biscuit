@@ -1,7 +1,7 @@
 module;
 
-export module biscuit:views;
-import std.compat;
+export module biscuit.views;
+import std;
 
 export namespace bisucit::views {
 

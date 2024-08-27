@@ -70,7 +70,8 @@
       <BuildStlModules>true</BuildStlModules>
       <WarningLevel>Level4</WarningLevel>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalBMIDirectories>$(ProjectDir);%(AdditionalBMIDirectories)</AdditionalBMIDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -97,7 +98,8 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
       <BuildStlModules>true</BuildStlModules>
       <WarningLevel>Level4</WarningLevel>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalBMIDirectories>$(ProjectDir);%(AdditionalBMIDirectories)</AdditionalBMIDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -137,6 +139,11 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
     <ClCompile Include="charset_kssm.ixx" />
     <ClCompile Include="misc.ixx" />
     <ClCompile Include="string.ixx" />
+    <ClCompile Include="string_basic.ixx" />
+    <ClCompile Include="string_manipulates.ixx" />
+    <ClCompile Include="string_compares.ixx" />
+    <ClCompile Include="string_defines.ixx" />
+    <ClCompile Include="string_convert_codepage.ixx" />
     <ClCompile Include="views.ixx" />
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@
 #include <fmt/xchar.h>
 #include <simdutf.h>
 
-import std.compat;
+import std;
 import biscuit;
 
 using namespace std::literals;

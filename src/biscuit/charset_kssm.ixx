@@ -1,8 +1,8 @@
 module;
 
-export module biscuit:kssm;
-import std.compat;
-import :aliases;
+export module biscuit.charset_kssm;
+import std;
+import biscuit.aliases;
 
 namespace biscuit::charset {
 	/// @brief KSSM is always in Big Endian. if you want it to be little-endian, use this function

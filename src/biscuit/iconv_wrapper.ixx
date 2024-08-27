@@ -19,11 +19,11 @@
 #include "iconv.h"
 #pragma warning(pop)
 
-export module biscuit:iconv_wrapper;
-import :aliases;
-import :concepts;
-import :misc;
-import std.compat;
+export module biscuit.iconv_wrapper;
+import biscuit.aliases;
+import biscuit.concepts;
+import biscuit.misc;
+import std;
 
 using namespace std::literals;
 
@@ -290,48 +290,6 @@ export namespace biscuit {
 			iconvctl(m_cd, flag, &bValue);
 		}
 	};
-
-	// helper
-	template < concepts::string_elem tchar_to, concepts::tchar_string_like tstring,
-		xStringLiteral szCodeTo = "", xStringLiteral szCodeFrom = "", size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<tchar_to>> ConvertString_iconv(tstring const& strFrom) {
-		using tchar_from = std::remove_cvref_t<tstring>::value_type;
-		thread_local static Ticonv<tchar_to, tchar_from, initial_dst_buf_size> iconv{szCodeTo.str, szCodeFrom.str};
-		return iconv.Convert(strFrom);
-	}
-
-	// codepage 949
-	template < concepts::string_elem tchar_to, size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<tchar_to>> ConvertStringFromCP949(std::string_view strFrom) {
-		return ConvertString_iconv<tchar_to, std::string_view, "", "CP949", initial_dst_buf_size>(strFrom);
-	}
-
-	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
-	std::string ConvertStringToCP949(tstring const& strFrom) {
-		using tchar_from = std::remove_cvref_t<tstring>::value_type;
-		return ConvertString_iconv<char, tstring, "CP949", "", initial_dst_buf_size>(strFrom);
-	}
-
-	// KSSM (JOHAB)
-	template < concepts::string_elem tchar_to, size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<tchar_to>> ConvertStringFromKSSM(std::basic_string_view<charKSSM_t> strFrom) {
-		return ConvertString_iconv<tchar_to, std::basic_string_view<charKSSM_t>, "", "JOHAB", initial_dst_buf_size>(strFrom);
-	}
-
-	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<charKSSM_t>> ConvertStringToKSSM(tstring const& strFrom) {
-		return ConvertString_iconv<char, tstring, "JOHAB", "", initial_dst_buf_size>(strFrom);
-	}
-
-	template < concepts::string_elem tchar_to, size_t initial_dst_buf_size = 1024 >
-	std::optional<std::basic_string<tchar_to>> ConvertStringFromKSSM_MBCS(std::string_view strFrom) {
-		return ConvertString_iconv<tchar_to, std::string_view, "", "JOHAB", initial_dst_buf_size>(strFrom);
-	}
-
-	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
-	std::optional<std::string> ConvertStringToKSSM_MBCS(tstring const& strFrom) {
-		return ConvertString_iconv<char, tstring, "JOHAB", "", initial_dst_buf_size>(strFrom);
-	}
 
 #pragma pack(pop)
 }

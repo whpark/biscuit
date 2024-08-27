@@ -1,36 +1,33 @@
-export module biscuit:color;
-import std.compat;
-import :concepts;
+module;
+
+#include <glaze/glaze.hpp>
+
+export module biscuit.color;
+import std;
 
 export namespace biscuit {
 
 	/// @brief color_rgba_t
-	union color_rgba_t {
-		struct { uint8_t r, g, b, a; };
-		uint32_t cr{};
-
+	struct color_rgba_t {
 		using this_t = color_rgba_t;
 
-		this_t& operator = (this_t const& B) { cr = B.cr; return *this; }
-		bool operator == (this_t const& B) const { return cr == B.cr; }
-		auto operator <=> (this_t const& B) const { return cr <=> B.cr; }
-		template < typename tjson >
-		friend void from_json(tjson const& j, this_t& color) {
-			color.cr = (uint32_t)(int64_t)j;
-		}
-		template < typename tjson >
-		friend void to_json(tjson& j, this_t const& color) {
-			j = (int64_t)color.cr;
-		}
+		uint8_t r, g, b, a;
 
-		template < typename archive >
-		friend void serialize(archive& ar, this_t& cr, unsigned int const file_version) {
-			ar & cr.cr;
-		}
-		template < typename archive >
-		friend archive& operator & (archive& ar, this_t& cr) {
-			ar & cr.cr;
-			return ar;
+		auto operator <=> (this_t const&) const = default;
+
+		uint32_t& Value()		{ return *(uint32_t*)this; }
+		uint32_t  Value() const	{ return *(uint32_t const*)this; }
+	protected:
+		uint32_t& ValueAll()	{ return *(uint32_t*)this; }	// for glaze only
+	public:
+		struct glaze {
+			using T = this_t;
+			static constexpr auto value = glz::object(&T::ValueAll);
+		};
+
+	public:
+		void serialize(auto& ar, unsigned int const file_version = 0) {
+			ar & Value();
 		}
 	};
 	constexpr inline color_rgba_t ColorRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a = {}) {
@@ -38,69 +35,57 @@ export namespace biscuit {
 	}
 
 	/// @brief color_bgra_t
-	union color_bgra_t {
-		struct { uint8_t b, g, r, a; };
-		uint32_t cr{};
-
+	struct color_bgra_t {
 		using this_t = color_bgra_t;
 
-		this_t& operator = (this_t const& B) { cr = B.cr; return *this; }
-		bool operator == (this_t const& B) const { return cr == B.cr; }
-		auto operator <=> (this_t const& B) const { return cr <=> B.cr; }
-		template < typename tjson >
-		friend void from_json(tjson const& j, this_t& color) {
-			color.cr = (uint32_t)(int64_t)j;
-		}
-		template < typename tjson >
-		friend void to_json(tjson& j, this_t const& color) {
-			j = (int64_t)color.cr;
-		}
+		uint8_t b, g, r, a;
 
-		template < typename archive >
-		friend void serialize(archive& ar, this_t& cr, unsigned int const file_version) {
-			ar & cr.cr;
-		}
-		template < typename archive >
-		friend archive& operator & (archive& ar, this_t& cr) {
-			ar & cr.cr;
-			return ar;
+		auto operator <=> (this_t const&) const = default;
+
+		uint32_t& Value()		{ return *(uint32_t*)this; }
+		uint32_t  Value() const	{ return *(uint32_t const*)this; }
+	protected:
+		uint32_t& ValueAll()	{ return *(uint32_t*)this; }	// for glaze only
+	public:
+		struct glaze {
+			using T = this_t;
+			static constexpr auto value = glz::object(&T::ValueAll);
+		};
+
+	public:
+		void serialize(auto& ar, unsigned int const file_version = 0) {
+			ar & Value();
 		}
 	};
 	constexpr inline color_bgra_t ColorBGRA(uint8_t b, uint8_t g, uint8_t r, uint8_t a = {}) {
-		return color_bgra_t{ .b = b, .g = g, .r = r, .a = a };
+		return color_bgra_t{.b = b, .g = g, .r = r, .a = a};
 	}
 
 	/// @brief color_abgr_t
-	union color_abgr_t {
-		struct { uint8_t a, b, g, r; };
-		uint32_t cr{};
-
+	struct color_abgr_t {
 		using this_t = color_abgr_t;
 
-		this_t& operator = (this_t const& B) { cr = B.cr; return *this; }
-		bool operator == (this_t const& B) const { return cr == B.cr; }
-		auto operator <=> (this_t const& B) const { return cr <=> B.cr; }
-		template < typename tjson >
-		friend void from_json(tjson const& j, this_t& color) {
-			color.cr = (uint32_t)(int64_t)j;
-		}
-		template < typename tjson >
-		friend void to_json(tjson& j, this_t const& color) {
-			j = (int64_t)color.cr;
-		}
+		uint8_t a, b, g, r;
 
-		template < typename archive >
-		friend void serialize(archive& ar, this_t& cr, unsigned int const file_version) {
-			ar & cr.cr;
-		}
-		template < typename archive >
-		friend archive& operator & (archive& ar, this_t& cr) {
-			ar & cr.cr;
-			return ar;
+		auto operator <=> (this_t const&) const = default;
+
+		uint32_t& Value()		{ return *(uint32_t*)this; }
+		uint32_t  Value() const	{ return *(uint32_t const*)this; }
+	protected:
+		uint32_t& ValueAll()	{ return *(uint32_t*)this; }	// for glaze only
+	public:
+		struct glaze {
+			using T = this_t;
+			static constexpr auto value = glz::object(&T::ValueAll);
+		};
+
+	public:
+		void serialize(auto& ar, unsigned int const file_version = 0) {
+			ar & Value();
 		}
 	};
-	constexpr inline color_abgr_t ColorABGR(uint8_t b, uint8_t g, uint8_t r, uint8_t a = {}) {
-		return color_abgr_t{ .a = a, .b = b, .g = g, .r = r };
+	constexpr inline color_abgr_t ColorABGR(uint8_t a, uint8_t b, uint8_t g, uint8_t r = {}) {
+		return color_abgr_t{.a = a, .b = b, .g = g, .r = r};
 	}
 
 	//-----------------------------------------------------------------------------

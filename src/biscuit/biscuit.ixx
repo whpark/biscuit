@@ -4,16 +4,19 @@ export module biscuit;
 
 import "biscuit/config.h";
 import "dll.h";
-import std.compat;
-export import :aliases;
-export import :concepts;
-export import :iconv_wrapper;
-export import :arithmetic;
-export import :color;
-export import :views;
-export import :misc;
-export import :string;
-export import :kssm;
+import std;
+export import biscuit.aliases;
+export import biscuit.concepts;
+export import biscuit.arithmetic;
+export import biscuit.color;
+export import biscuit.views;
+export import biscuit.misc;
+export import biscuit.iconv_wrapper;
+export import biscuit.charset_kssm;
+export import biscuit.string.defines;
+export import biscuit.string.compares;
+export import biscuit.string.convert_codepage;
+export import biscuit.string.manipulates;
 //export import :coord;
 
 export namespace biscuit {

@@ -13,9 +13,9 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-export module biscuit:misc;
-import :concepts;
-import std.compat;
+export module biscuit.misc;
+import biscuit.concepts;
+import std;
 
 namespace concepts = biscuit::concepts;
 

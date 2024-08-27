@@ -62,10 +62,25 @@
     <ClCompile Include="iconv_wrapper.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="string.ixx">
+    <ClCompile Include="string_convert_codepage.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="charset_kssm.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="string_defines.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="string_manipulates.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="string_compares.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="string_basic.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="string.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

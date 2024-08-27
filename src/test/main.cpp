@@ -2,7 +2,7 @@
 #include <fmt/std.h>
 #include <catch.hpp>
 
-import std.compat;
+import std;
 import biscuit;
 
 int main(int argc, char* argv[]) {
