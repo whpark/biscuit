@@ -13,10 +13,7 @@ export import biscuit.views;
 export import biscuit.misc;
 export import biscuit.iconv_wrapper;
 export import biscuit.charset_kssm;
-export import biscuit.string.defines;
-export import biscuit.string.compares;
-export import biscuit.string.convert_codepage;
-export import biscuit.string.manipulates;
+export import biscuit.string;
 //export import :coord;
 
 export namespace biscuit {

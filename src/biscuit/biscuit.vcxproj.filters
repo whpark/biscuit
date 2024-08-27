@@ -62,22 +62,22 @@
     <ClCompile Include="iconv_wrapper.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="string_convert_codepage.ixx">
+    <ClCompile Include="string.convert_codepage.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="charset_kssm.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="string_defines.ixx">
+    <ClCompile Include="string.defines.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="string_manipulates.ixx">
+    <ClCompile Include="string.manipulates.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="string_compares.ixx">
+    <ClCompile Include="string.compares.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="string_basic.ixx">
+    <ClCompile Include="string.basic.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="string.ixx">
