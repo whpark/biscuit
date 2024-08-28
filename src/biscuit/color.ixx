@@ -31,7 +31,7 @@ export namespace biscuit {
 			ar & Value();
 		}
 	};
-	BSC__NODISCARD constexpr inline color_rgba_t ColorRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a = {}) {
+	BSC__NODISCARD constexpr inline auto ColorRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a = {}) -> color_rgba_t {
 		return color_rgba_t{.r = r, .g = g, .b = b, .a = a};
 	}
 
@@ -58,7 +58,7 @@ export namespace biscuit {
 			ar & Value();
 		}
 	};
-	BSC__NODISCARD constexpr inline color_bgra_t ColorBGRA(uint8_t b, uint8_t g, uint8_t r, uint8_t a = {}) {
+	BSC__NODISCARD constexpr inline auto ColorBGRA(uint8_t b, uint8_t g, uint8_t r, uint8_t a = {}) -> color_bgra_t {
 		return color_bgra_t{.b = b, .g = g, .r = r, .a = a};
 	}
 
@@ -85,28 +85,16 @@ export namespace biscuit {
 			ar & Value();
 		}
 	};
-	BSC__NODISCARD constexpr inline color_abgr_t ColorABGR(uint8_t a, uint8_t b, uint8_t g, uint8_t r = {}) {
+	BSC__NODISCARD constexpr inline auto ColorABGR(uint8_t a, uint8_t b, uint8_t g, uint8_t r = {}) -> color_abgr_t {
 		return color_abgr_t{.a = a, .b = b, .g = g, .r = r};
 	}
 
 	//-----------------------------------------------------------------------------
-	BSC__NODISCARD constexpr inline color_rgba_t ColorRGBA(color_bgra_t cr) {
-		return color_rgba_t{ .r = cr.r, .g = cr.g, .b = cr.b, .a = cr.a };
-	}
-	BSC__NODISCARD constexpr inline color_rgba_t ColorRGBA(color_abgr_t cr) {
-		return color_rgba_t{ .r = cr.r, .g = cr.g, .b = cr.b, .a = cr.a };
-	}
-	BSC__NODISCARD constexpr inline color_bgra_t ColorBGRA(color_rgba_t cr) {
-		return color_bgra_t{ .b = cr.b, .g = cr.g, .r = cr.r, .a = cr.a };
-	}
-	BSC__NODISCARD constexpr inline color_bgra_t ColorBGRA(color_abgr_t cr) {
-		return color_bgra_t{ .b = cr.b, .g = cr.g, .r = cr.r, .a = cr.a };
-	}
-	BSC__NODISCARD constexpr inline color_abgr_t ColorABGR(color_rgba_t cr) {
-		return color_abgr_t{ .a = cr.a, .b = cr.b, .g = cr.g, .r = cr.r };
-	}
-	BSC__NODISCARD constexpr inline color_abgr_t ColorABGR(color_bgra_t cr) {
-		return color_abgr_t{ .a = cr.a, .b = cr.b, .g = cr.g, .r = cr.r };
-	}
+	BSC__NODISCARD constexpr inline auto ColorRGBA(color_bgra_t cr) { return color_rgba_t{ .r = cr.r, .g = cr.g, .b = cr.b, .a = cr.a }; }
+	BSC__NODISCARD constexpr inline auto ColorRGBA(color_abgr_t cr) { return color_rgba_t{ .r = cr.r, .g = cr.g, .b = cr.b, .a = cr.a }; }
+	BSC__NODISCARD constexpr inline auto ColorBGRA(color_rgba_t cr) { return color_bgra_t{ .b = cr.b, .g = cr.g, .r = cr.r, .a = cr.a }; }
+	BSC__NODISCARD constexpr inline auto ColorBGRA(color_abgr_t cr) { return color_bgra_t{ .b = cr.b, .g = cr.g, .r = cr.r, .a = cr.a }; }
+	BSC__NODISCARD constexpr inline auto ColorABGR(color_rgba_t cr) { return color_abgr_t{ .a = cr.a, .b = cr.b, .g = cr.g, .r = cr.r }; }
+	BSC__NODISCARD constexpr inline auto ColorABGR(color_bgra_t cr) { return color_abgr_t{ .a = cr.a, .b = cr.b, .g = cr.g, .r = cr.r }; }
 
 }

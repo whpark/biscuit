@@ -170,7 +170,7 @@ export namespace biscuit {
 		//	return Convert(std::basic_string_view<tchar_from>{strFrom});
 		//}
 		template < concepts::tchar_string_like tstring >
-		BSC__NODISCARD std::optional<std::basic_string<tchar_to>> Convert(tstring const& svFrom) {
+		BSC__NODISCARD auto Convert(tstring const& svFrom) -> std::optional<std::basic_string<tchar_to>> {
 			std::basic_string<tchar_to> strTo;
 
 			using tchar_from2 = std::ranges::range_value_t<tstring>;
@@ -249,7 +249,7 @@ export namespace biscuit {
 
 	public:
 		template < concepts::string_elem tchar >
-		BSC__NODISCARD constexpr static char const* GuessCodeFromType() {
+		BSC__NODISCARD constexpr static auto GuessCodeFromType() -> char const* {
 			using namespace std::literals;
 			if constexpr (std::is_same_v<tchar, char8_t> || std::is_same_v<tchar, char>) {
 				return "UTF-8";

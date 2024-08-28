@@ -10,100 +10,154 @@ module;
 //
 //////////////////////////////////////////////////////////////////////
 
+#include <cerrno>
 #include "biscuit/macro.h"
 
 export module biscuit.string.compares;
 import std;
 import biscuit.aliases;
 import biscuit.concepts;
-
+import biscuit.string.basic;
 
 namespace concepts = biscuit::concepts;
 
 namespace biscuit {
 
-	template < concepts::string_elem tchar, bool bUseCount, class Eval >
-	BSC__NODISCARD constexpr int tszcmp(tchar const* pszA, tchar const* pszB, size_t nCount, Eval&& eval) {
-		if constexpr (bUseCount) {
-			if (!nCount)
-				return 0;
-			if (nCount > RSIZE_MAX)
-				throw std::invalid_argument(BSC__FUNCSIG "nCount is too big!");
+	struct sToSignedInt {
+		int operator () (auto v) const {
+			return (int)v;
 		}
-		if (!pszA && !pszB)	// if both are nullptr, return 0;
-			return 0;
-		if (pszA && !pszB)	// if only one has value, its bigger.
-			return *pszA ? *pszA : 0;//1;
-		else if (!pszA && pszB)
-			return *pszB ? -*pszB : 0;//-1;
-
-		for (; *pszA && *pszB; pszA++, pszB++) {
-			int r = eval(*pszA) - eval(*pszB);
-			if (r)
-				return r;
-			if constexpr (bUseCount) {
-				if (--nCount == 0)
-					return 0;
-			}
+	};
+	struct sToLowerInt {
+		template < concepts::string_elem tchar >
+		int operator () (tchar v) const {
+			if constexpr (sizeof v > 1)
+				return std::towlower(v);
+			else
+				return std::tolower(v);
 		}
-		if (!*pszA && !*pszB)
-			return 0;
-		int r = eval(*pszA) - eval(*pszB);
-		return r;
-	}
-
-	template < concepts::string_elem tchar, bool bUseCount, class Eval >
-	BSC__NODISCARD constexpr int tszcmp(std::basic_string_view<tchar> svA, std::basic_string_view<tchar> svB, size_t nCount, Eval&& eval) {
-		if constexpr (bUseCount) {
-			if (!nCount)
-				return 0;
-			if (nCount > RSIZE_MAX)
-				throw std::invalid_argument(BSC__FUNCSIG "nCount is too big!");
+	};
+	struct sToUpperInt {
+		template < concepts::string_elem tchar >
+		int operator () (tchar v) const {
+			if constexpr (sizeof v > 1)
+				return std::towupper(v);
+			else
+				return std::toupper(v);
 		}
-		bool bEmptyA = svA.empty();
-		bool bEmptyB = svB.empty();
-		if (bEmptyA || bEmptyB) {
-			if (bEmptyA and bEmptyB)
-				return 0;
-			if (!bEmptyA)
-				return 1;
-			if (!bEmptyB)
-				return -1;
-		}
-		tchar const* pszA = svA.data();
-		tchar const* pszB = svB.data();
-		tchar const* const pszAEnd = svA.data() + svA.size();
-		tchar const* const pszBEnd = svB.data() + svB.size();
-
-		for (; pszA < pszAEnd and pszB < pszBEnd; pszA++, pszB++) {
-			int r = eval(*pszA) - eval(*pszB);
-			if (r)
-				return r;
-			if constexpr (bUseCount) {
-				if (--nCount == 0)
-					return 0;
-			}
-			if (!*pszA)	[[unlikely]]
-				return 0;
-		}
-		//if ((pszA < pszAEnd) and (pszB < pszBEnd)) [[unlkely]] // actually, never happens here.
-		//{
-		//	
-		//	return eval(*pszA, *pszB);
-		//}
-		//else {
-		if (pszA < pszAEnd)
-			return eval(*pszA);
-		if (pszB < pszBEnd)
-			return -eval(*pszB);
-		//}
-
-		return 0;
-	}
+	};
 
 }
 
 export namespace biscuit {
+
+	namespace detail {
+
+		/// @brief compare string
+		/// @return first none zero of (*pszA - *pszB)
+		///         0 if pszA == pszB, both empty (nullptr or "")
+		template < concepts::string_elem tcharA, concepts::string_elem tcharB, bool bUseCount, class Eval >
+			requires (sizeof(tcharA) == sizeof(tcharB))
+		BSC__NODISCARD constexpr int tszcmp(tcharA const* pszA, size_t lenA, tcharB const* pszB, size_t lenB) {
+			using tchar = std::remove_cvref_t<tcharA>;
+			constexpr static Eval eval{};
+			if constexpr (bUseCount) {
+				if (lenA == 0 and lenB == 0)
+					return 0;
+				if (lenA == 0)
+					return pszB ? -eval(*pszB) : 0;
+				if (lenB == 0)
+					return pszA ? eval(*pszA) : 0;
+				if ( (lenA > RSIZE_MAX) or (lenB > RSIZE_MAX) )
+					throw std::invalid_argument(BSC__FUNCSIG "too big!");
+			}
+			if (!pszA and !pszB)
+				return 0;
+			if (!pszA)
+				return -eval(*pszB);
+			if (!pszB)
+				return eval(*pszA);
+
+			for (; *pszA && *pszB; pszA++, pszB++) {
+				if constexpr (bUseCount) {
+					if (lenA == 0 and lenB == 0)
+						return 0;
+					if (lenA == 0)
+						return -eval(*pszB);
+					if (lenB == 0)
+						return eval(*pszA);
+				}
+
+				int r = eval(*pszA) - eval(*pszB);
+				if (r)
+					return r;
+
+				if constexpr (bUseCount) {
+					--lenA; --lenB;
+				}
+			}
+			if (!*pszA && !*pszB)
+				return 0;
+			int r = eval(*pszA) - eval(*pszB);
+			return r;
+		}
+
+	}
+
+	template < concepts::string_elem tchar >
+	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszcmp(tchar const* pszA, tchar const* pszB) {
+		return detail::tszcmp<tchar, tchar, false, sToSignedInt>(pszA, {}, pszB, {});
+	}
+	template < concepts::string_elem tchar >
+	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszncmp(tchar const* pszA, tchar const* pszB, size_t nCount) {
+		return detail::tszcmp<tchar, tchar, true, sToSignedInt>(pszA, nCount, pszB, nCount);
+	}
+	template < concepts::string_elem tchar >
+	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszicmp(tchar const* pszA, tchar const* pszB) {
+		return detail::tszcmp<tchar, tchar, false, sToLowerInt>(pszA, {}, pszB, {});
+	}
+	template < concepts::string_elem tchar >
+	BSC__NODISCARD BSC__DEPR_SEC constexpr int tsznicmp(tchar const* pszA, tchar const* pszB, size_t nCount) {
+		return detail::tszcmp<tchar, tchar, true, sToLowerInt>(pszA, nCount, pszB, nCount);
+	}
+
+	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
+		requires concepts::have_same_tchar<tstringA, tstringB>
+	BSC__NODISCARD constexpr int tszcmp(tstringA const& svA, tstringB const& svB) {
+		using tcharA = concepts::value_t<tstringA>;
+		using tcharB = concepts::value_t<tstringB>;
+		return detail::tszcmp<tcharA, tcharB, true, sToSignedInt>(
+			std::data(svA), std::size(svA),
+			std::data(svB), std::size(svB));
+	}
+	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
+		requires concepts::have_same_tchar<tstringA, tstringB>
+	BSC__NODISCARD constexpr int tszncmp(tstringA const& svA, tstringB const& svB, size_t nCount) {
+		using tcharA = concepts::value_t<tstringA>;
+		using tcharB = concepts::value_t<tstringB>;
+		return detail::tszcmp<tcharA, tcharB, true, sToSignedInt>(
+			std::data(svA), std::min(nCount, std::size(svA)),
+			std::data(svB), std::min(nCount, std::size(svB)));
+	}
+	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
+		requires concepts::have_same_tchar<tstringA, tstringB>
+	BSC__NODISCARD constexpr int tszicmp(tstringA const& svA, tstringB const& svB) {
+		using tcharA = concepts::value_t<tstringA>;
+		using tcharB = concepts::value_t<tstringB>;
+		return detail::tszcmp<tcharA, tcharB, true, sToLowerInt>(
+			std::data(svA), std::size(svA),
+			std::data(svB), std::size(svB));
+	}
+	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
+		requires concepts::have_same_tchar<tstringA, tstringB>
+	BSC__NODISCARD constexpr int tsznicmp(tstringA const& svA, tstringB const& svB, size_t nCount) {
+		using tcharA = concepts::value_t<tstringA>;
+		using tcharB = concepts::value_t<tstringB>;
+		return detail::tszcmp<tcharA, tcharB, true, sToLowerInt>(
+			std::data(svA), std::min(nCount, std::size(svA)),
+			std::data(svB), std::min(nCount, std::size(svB)));
+	}
+
 
 	template < typename tchar > requires std::is_integral_v<tchar>
 	BSC__NODISCARD constexpr inline bool IsDigit(tchar const c) { return (c >= '0') && (c <= '9'); }
@@ -115,8 +169,6 @@ export namespace biscuit {
 	BSC__NODISCARD constexpr inline bool IsSpace(tchar const c) { return (c == '\t') || (c == '\r') || (c == '\n') || (c == ' '); }
 	template < typename tchar > requires std::is_integral_v<tchar>
 	BSC__NODISCARD constexpr inline bool IsNotSpace(tchar const c) { return !IsSpace(c); }
-
-
 
 
 	/// @brief Compare two Strings. according to number (only for '0'-'9' are taken as number. no '-' sign, neither '.' for floating point 
@@ -194,7 +246,7 @@ export namespace biscuit {
 	}
 
 	template < typename tchar >
-	BSC__NODISCARD constexpr int CompareStringContainingNumbers(std::basic_string_view<tchar> strA, std::basic_string_view<tchar> strB, bool bIgnoreCase) {
+	BSC__NODISCARD constexpr inline int CompareStringContainingNumbers(std::basic_string_view<tchar> strA, std::basic_string_view<tchar> strB, bool bIgnoreCase) {
 		return bIgnoreCase
 			? CompareStringContainingNumbers<true>(strA, strB)
 			: CompareStringContainingNumbers<false>(strA, strB);

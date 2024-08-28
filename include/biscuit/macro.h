@@ -29,4 +29,4 @@ import <version>;
 #define BSC__NODISCARD [[nodiscard]]
 //#endif
 
-#define BSC__DEPR_SEC [[deprecated("NOT Secure. use 'sv' instead.")]]
+#define BSC__DEPR_SEC [[deprecated("NOT Secure Function. specify - __pargma warning(disable:4996)")]]

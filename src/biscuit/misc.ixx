@@ -31,8 +31,12 @@ namespace biscuit {
 export namespace biscuit {
 #pragma pack(push, 8)
 
-	template < typename tTargetDuration = std::chrono::seconds, typename tSourceClock = std::chrono::system_clock, typename tSourceDuration = typename tSourceClock::duration >
-	BSC__NODISCARD constexpr std::chrono::time_point<tSourceClock, tTargetDuration> ToLocalTime(std::chrono::time_point<tSourceClock, tSourceDuration> const& t) {
+	template < typename tTargetDuration = std::chrono::seconds,
+		typename tSourceClock = std::chrono::system_clock,
+		typename tSourceDuration = typename tSourceClock::duration >
+	BSC__NODISCARD constexpr auto ToLocalTime(std::chrono::time_point<tSourceClock, tSourceDuration> const& t)
+		-> std::chrono::time_point<tSourceClock, tTargetDuration>
+	{
 		auto lt = std::chrono::current_zone()->to_local(t);
 		return std::chrono::time_point_cast<tTargetDuration, tSourceClock, tSourceDuration>(lt);
 	}
@@ -205,7 +209,7 @@ export namespace biscuit {
 		if (svName.find('z') != svName.npos or svName.find('Z') != svName.npos) return (eAXIS)(static_cast<int>(eAXIS::Z)*eNegative);
 		return eAXIS::NONE;
 	}
-	BSC__NODISCARD constexpr inline std::basic_string_view<char> GetDirectionName(eAXIS eDirection) {
+	BSC__NODISCARD constexpr inline auto GetDirectionName(eAXIS eDirection) -> std::basic_string_view<char> {
 		using namespace std::literals;
 		switch (eDirection) {
 		case eAXIS::NONE : return ""sv;
@@ -229,7 +233,9 @@ export namespace biscuit {
 	/// @brief Get Project Name from source file path
 	/// @param l : don't touch.
 	/// @return 
-	BSC__NODISCARD /*constexpr*/ std::wstring GetProjectName(std::source_location const& l = std::source_location::current()) {
+	BSC__NODISCARD /*constexpr*/ auto GetProjectName(std::source_location const& l = std::source_location::current())
+		-> std::wstring
+	{
 		std::filesystem::path path = l.file_name();
 		if (path.extension() == ".h")	// CANNOT get project name from header file
 			return {};
@@ -242,7 +248,10 @@ export namespace biscuit {
 		return {};
 	}
 
-	BSC__NODISCARD std::filesystem::path GetProjectRootFolder(std::wstring const& strProjectNameToBeRemoved, std::filesystem::path path = std::filesystem::current_path()) {
+	BSC__NODISCARD auto GetProjectRootFolder(std::wstring const& strProjectNameToBeRemoved,
+											 std::filesystem::path path = std::filesystem::current_path()) 
+		-> std::filesystem::path
+	{
 		// Init Temp Folder Names (ex, "Debug", "Release", ...)
 		static auto const strsTempFolder = []{
 			std::vector<std::wstring> folders;
@@ -286,7 +295,10 @@ export namespace biscuit {
 		return path;
 	}
 
-	std::optional<std::filesystem::path> SetCurrentPath_ProjectFolder(std::filesystem::path const& pathRelToProjectRoot, std::source_location const& l = std::source_location::current()) {
+	auto SetCurrentPath_ProjectFolder(std::filesystem::path const& pathRelToProjectRoot,
+									  std::source_location const& l = std::source_location::current())
+		-> std::optional<std::filesystem::path>
+	{
 		// first, Get Root Folder, and then attach [pathRel]
 		auto projectName = biscuit::GetProjectName(l);
 		auto path = biscuit::GetProjectRootFolder(projectName);

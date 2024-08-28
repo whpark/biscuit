@@ -10,7 +10,7 @@
 
 module;
 
-#include "biscuit/macro.h"
+//#include "biscuit/macro.h"
 
 export module biscuit.concepts;
 import std;
@@ -106,6 +106,13 @@ export namespace biscuit::concepts {
 	concept tchar_string_like = std::ranges::contiguous_range<tstring_or_view> && string_elem<std::ranges::range_value_t<tstring_or_view>>;
 	//template < typename tstring_or_view, typename tchar = tstring_or_view::value_type >
 	//concept tchar_string_like = requires (tstring_or_view str) { str.data(); str.size(); };
+
+
+	template < tchar_string_like tstring >
+	using value_t = std::ranges::range_value_t<std::remove_cvref_t<tstring>>;
+
+	template < tchar_string_like tstringA, tchar_string_like tstrinB >
+	constexpr bool have_same_tchar = (sizeof(value_t<tstringA>) == sizeof(value_t<tstrinB>));
 
 
 	/// @brief json container. not completed.

@@ -10,7 +10,7 @@ namespace biscuit::charset {
 	/// @brief KSSM is always in Big Endian. if you want it to be little-endian, use this function
 	/// @param v KSSM value
 	/// @return little-endian KSSM Value (MSB : 1)
-	export BSC__NODISCARD constexpr charKSSM_t SwapKSSMByteOrder(charKSSM_t v) {
+	export BSC__NODISCARD constexpr auto SwapKSSMByteOrder(charKSSM_t v) -> charKSSM_t {
 		// KSSM is always Big Endian
 		if constexpr (std::endian::native == std::endian::big) {
 			return v;
@@ -20,7 +20,7 @@ namespace biscuit::charset {
 	}
 
 	namespace detail {
-		BSC__NODISCARD constexpr charKSSM_t SwapOrNot(charKSSM_t c) {
+		BSC__NODISCARD constexpr auto SwapOrNot(charKSSM_t c) -> charKSSM_t {
 			if constexpr (false) {
 				return SwapKSSMByteOrder(c);
 			}
@@ -223,11 +223,11 @@ export namespace biscuit::charset {
 		{ eKSSM::Fin_T,		L'ㅌ' }, { eKSSM::Fin_P,		L'ㅍ' }, { eKSSM::Fin_H,		L'ㅎ' },
 	};
 
-	BSC__NODISCARD constexpr charKSSM_t ComposeKSSM(eKSSM ini, eKSSM mid, eKSSM fin) {
+	BSC__NODISCARD constexpr auto ComposeKSSM(eKSSM ini, eKSSM mid, eKSSM fin) -> charKSSM_t {
 		return std::to_underlying(eKSSM::maskChar) | std::to_underlying(ini) | std::to_underlying(mid) | std::to_underlying(fin);
 	}
 
-	BSC__NODISCARD eKSSM GetKSSM_Syllable(std::map<wchar_t, eKSSM> const& map, wchar_t c, eKSSM cDefault) {
+	BSC__NODISCARD auto GetKSSM_Syllable(std::map<wchar_t, eKSSM> const& map, wchar_t c, eKSSM cDefault) -> eKSSM {
 		auto iter = map.find(c);
 		if (iter != map.end())
 			return iter->second;
@@ -235,11 +235,11 @@ export namespace biscuit::charset {
 			return cDefault;
 	}
 
-	BSC__NODISCARD eKSSM GetKSSM_Ini(wchar_t c) { return GetKSSM_Syllable(s_mapW2KSSM_Ini, c, eKSSM::Ini_Fill); }
-	BSC__NODISCARD eKSSM GetKSSM_Mid(wchar_t c) { return GetKSSM_Syllable(s_mapW2KSSM_Mid, c, eKSSM::Mid_Fill); }
-	BSC__NODISCARD eKSSM GetKSSM_Fin(wchar_t c) { return GetKSSM_Syllable(s_mapW2KSSM_Fin, c, eKSSM::Fin_Fill); }
+	BSC__NODISCARD auto GetKSSM_Ini(wchar_t c) -> eKSSM { return GetKSSM_Syllable(s_mapW2KSSM_Ini, c, eKSSM::Ini_Fill); }
+	BSC__NODISCARD auto GetKSSM_Mid(wchar_t c) -> eKSSM { return GetKSSM_Syllable(s_mapW2KSSM_Mid, c, eKSSM::Mid_Fill); }
+	BSC__NODISCARD auto GetKSSM_Fin(wchar_t c) -> eKSSM { return GetKSSM_Syllable(s_mapW2KSSM_Fin, c, eKSSM::Fin_Fill); }
 
-	BSC__NODISCARD charKSSM_t ComposeKSSM(wchar_t i, wchar_t m, wchar_t f = L'\0') {
+	BSC__NODISCARD auto ComposeKSSM(wchar_t i, wchar_t m, wchar_t f = L'\0') -> charKSSM_t {
 		auto ini = GetKSSM_Ini(i);
 		auto mid = GetKSSM_Mid(m);
 		auto fin = GetKSSM_Fin(f);
@@ -248,7 +248,7 @@ export namespace biscuit::charset {
 		return ComposeKSSM(ini, mid, fin);
 	}
 
-	BSC__NODISCARD constexpr std::tuple<charKSSM_t, charKSSM_t, charKSSM_t> DeComposeKSSM(charKSSM_t c) {
+	BSC__NODISCARD constexpr auto DeComposeKSSM(charKSSM_t c) -> std::tuple<charKSSM_t, charKSSM_t, charKSSM_t> {
 		if (c & (charKSSM_t)eKSSM::maskChar) {
 			return {
 				(charKSSM_t)(c & std::to_underlying(eKSSM::maskIni)),

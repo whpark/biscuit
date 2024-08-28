@@ -24,7 +24,7 @@ namespace concepts = biscuit::concepts;
 
 namespace biscuit {
 	template < typename treturn, typename tchar >
-	BSC__NODISCARD std::vector<treturn> TSplit(std::basic_string_view<tchar> sv, std::function<bool(tchar)> func) {
+	BSC__NODISCARD auto TSplit(std::basic_string_view<tchar> sv, std::function<bool(tchar)> func) -> std::vector<treturn> {
 		std::vector<treturn> r;
 		if (sv.empty())
 			return r;
@@ -126,7 +126,7 @@ export namespace biscuit {
 	}
 
 	template < concepts::tchar_string_like tstring, typename tchar = std::ranges::range_value_t<std::remove_cvref_t<tstring>> >
-	BSC__NODISCARD std::basic_string<tchar> ToLower(tstring const& sv) {
+	BSC__NODISCARD auto ToLower(tstring const& sv) -> std::basic_string<tchar> {
 		std::basic_string<tchar> str;
 		str.reserve(sv.size());
 		for (auto c : sv)
@@ -134,7 +134,7 @@ export namespace biscuit {
 		return str;
 	}
 	template < concepts::tchar_string_like tstring, typename tchar = std::ranges::range_value_t<std::remove_cvref_t<tstring>> >
-	BSC__NODISCARD std::basic_string<tchar> ToUpper(tstring const& sv) {
+	BSC__NODISCARD auto ToUpper(tstring const& sv) -> std::basic_string<tchar> {
 		std::basic_string<tchar> str;
 		str.reserve(sv.size());
 		for (auto c : sv)
@@ -171,37 +171,51 @@ export namespace biscuit {
 
 	// Trim-View
 	template < typename tchar >
-	BSC__NODISCARD std::basic_string_view<tchar> TrimLeftView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
+	BSC__NODISCARD auto TrimLeftView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>())
+		-> std::basic_string_view<tchar>
+	{
 		if (auto pos = sv.find_first_not_of(svTrim); pos != sv.npos)
 			return { sv.begin()+pos, sv.end() };
 		else
 			return {};
 	}
 	template < typename tchar >
-	BSC__NODISCARD std::basic_string_view<tchar> TrimRightView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
+	BSC__NODISCARD auto TrimRightView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>())
+		-> std::basic_string_view<tchar>
+	{
 		return { sv.begin(), sv.begin() + (sv.find_last_not_of(svTrim)+1) };
 	}
 	template < typename tchar >
-	BSC__NODISCARD std::basic_string_view<tchar> TrimView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
+	BSC__NODISCARD auto TrimView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>())
+		-> std::basic_string_view<tchar>
+	{
 		return TrimRightView(TrimLeftView(sv, svTrim), svTrim);
 	}
 
 	//=============================================================================================================================
 	// Split
 	template < typename tchar >
-	BSC__NODISCARD std::vector<std::basic_string<tchar>> Split(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters) {
+	BSC__NODISCARD auto Split(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters)
+		-> std::vector<std::basic_string<tchar>>
+	{
 		return TSplit<tchar, std::basic_string<tchar>>(sv, [svDelimiters](tchar c) { return svDelimiters.find(c) != svDelimiters.npos; });
 	}
 	template < typename tchar >
-	BSC__NODISCARD std::vector<std::basic_string<tchar>> Split(std::basic_string_view<tchar> sv, tchar cDelimiter) {
+	BSC__NODISCARD auto Split(std::basic_string_view<tchar> sv, tchar cDelimiter)
+		-> std::vector<std::basic_string<tchar>>
+	{
 		return TSplit<tchar, std::basic_string<tchar>>(sv, [cDelimiter](tchar c) { return cDelimiter == c; });
 	}
 	template < typename tchar >
-	BSC__NODISCARD std::vector<std::basic_string_view<tchar>> SplitView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters) {
+	BSC__NODISCARD auto SplitView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters)
+		-> std::vector<std::basic_string_view<tchar>>
+	{
 		return TSplit<tchar, std::basic_string_view<tchar>>(sv, [svDelimiters](tchar c) { return svDelimiters.find(c) != svDelimiters.npos; });
 	}
 	template < typename tchar >
-	BSC__NODISCARD std::vector<std::basic_string_view<tchar>> SplitView(std::basic_string_view<tchar> sv, tchar cDelimiter) {
+	BSC__NODISCARD auto SplitView(std::basic_string_view<tchar> sv, tchar cDelimiter)
+		-> std::vector<std::basic_string_view<tchar>>
+	{
 		return TSplit<tchar, std::basic_string_view<tchar>>(sv, [cDelimiter](tchar c) { return cDelimiter == c; });
 	}
 
@@ -210,7 +224,9 @@ export namespace biscuit {
 
 	/// @brief Translate Escape Sequence String
 	template < typename tchar >
-	BSC__NODISCARD constexpr std::optional<std::basic_string<tchar>> TranslateEscapeSequence(std::basic_string_view<tchar> sv, tchar cFill, tchar cTerminating) {
+	BSC__NODISCARD constexpr auto TranslateEscapeSequence(std::basic_string_view<tchar> sv, tchar cFill, tchar cTerminating)
+		-> std::optional<std::basic_string<tchar>>
+	{
 		std::basic_string<tchar> str;
 		str.reserve(sv.size());
 		const tchar* pos{};
@@ -266,7 +282,9 @@ export namespace biscuit {
 	/// @brief BinaryData to Hex String
 	/// @return 
 	template < concepts::string_elem tchar_t >
-	BSC__NODISCARD std::vector<std::basic_string<tchar_t>> FormatDataToHexString(std::span<uint8> data, size_t nCol, int cDelimiter, bool bAddText, int cDelimiterText) {
+	BSC__NODISCARD auto FormatDataToHexString(std::span<uint8> data, size_t nCol, int cDelimiter, bool bAddText, int cDelimiterText)
+		-> std::vector<std::basic_string<tchar_t>>
+	{
 		std::vector<std::basic_string<tchar_t>> result;
 
 		if (data.size())

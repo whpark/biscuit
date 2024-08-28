@@ -21,7 +21,10 @@
     <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="string_convert_codepage.cpp">
+    <ClCompile Include="test_string.convert_codepage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test_string.basic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

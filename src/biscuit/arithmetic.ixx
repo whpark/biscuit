@@ -12,7 +12,7 @@ export namespace biscuit {
 	/// @brief string to int/double ...
 	/// @return 
 	template < concepts::arithmetic value_t >
-	BSC__NODISCARD value_t ToNumber(std::string_view sv, int base = 0, std::from_chars_result* result = {}) {
+	BSC__NODISCARD auto ToNumber(std::string_view sv, int base = 0, std::from_chars_result* result = {}) -> value_t {
 		value_t value{};
 		auto* b = sv.data();
 		auto* e = sv.data() + sv.size();
@@ -50,7 +50,7 @@ export namespace biscuit {
 	}
 
 	template < concepts::arithmetic value_t, concepts::string_elem tchar_t >
-	BSC__NODISCARD value_t ToNumber(std::basic_string<tchar_t> const& str, int base = 0, std::from_chars_result* result = {}) {
+	BSC__NODISCARD auto ToNumber(std::basic_string<tchar_t> const& str, int base = 0, std::from_chars_result* result = {}) -> value_t {
 		return ToNumber<value_t>(std::string_view(ToString<char, tchar_t>(str)), base, result);
 	}
 
@@ -69,20 +69,20 @@ export namespace biscuit {
 	/// @brief Round
 	template < typename T_DEST = int, typename T_SOURCE = double >
 		requires (std::is_arithmetic_v<std::remove_cvref_t<T_DEST>> and std::is_arithmetic_v<std::remove_cvref_t<T_SOURCE>>)
-	BSC__NODISCARD constexpr T_DEST Round(T_SOURCE v) {
+	BSC__NODISCARD constexpr auto Round(T_SOURCE v) -> T_DEST {
 		return (T_DEST)std::round(v);
 	}
 
 	template < typename T_DEST = int, typename T_SOURCE= double >
 		requires (std::is_arithmetic_v<std::remove_cvref_t<T_DEST>> and std::is_arithmetic_v<std::remove_cvref_t<T_SOURCE>>)
-	BSC__NODISCARD constexpr T_DEST Round(T_SOURCE v, T_SOURCE place) {
+	BSC__NODISCARD constexpr auto Round(T_SOURCE v, T_SOURCE place) -> T_DEST {
 		return T_DEST(std::round(v/place*0.1)*place*10);
 		//return T_DEST(T_DEST(v/place/10+0.5*(v<T_SOURCE{}?-1:1))*place*10);
 	}
 
 	template < typename T_DEST = int, typename T_SOURCE = double >
 		requires (std::is_arithmetic_v<std::remove_cvref_t<T_DEST>> and std::is_arithmetic_v<std::remove_cvref_t<T_SOURCE>>)
-	BSC__NODISCARD constexpr T_DEST RoundOrForward(T_SOURCE v) {
+	BSC__NODISCARD constexpr auto RoundOrForward(T_SOURCE v) -> T_DEST {
 		if constexpr (std::is_integral_v<T_SOURCE>) {
 			return T_DEST(v);
 		}
@@ -94,7 +94,7 @@ export namespace biscuit {
 	/// @brief Ceil
 	template < typename T_DEST = int, typename T_SOURCE = double >
 		requires (std::is_arithmetic_v<std::remove_cvref_t<T_DEST>> and std::is_arithmetic_v<std::remove_cvref_t<T_SOURCE>>)
-	BSC__NODISCARD constexpr T_DEST Ceil(T_SOURCE v) {
+	BSC__NODISCARD constexpr auto Ceil(T_SOURCE v) -> T_DEST {
 		if constexpr (std::is_integral_v<T_DEST> && std::is_floating_point_v<T_SOURCE>) {
 			return T_DEST(std::ceil(v));	// std::ceil is not constexpr yet.
 		}
@@ -104,14 +104,14 @@ export namespace biscuit {
 	}
 	template < typename T_DEST = int, typename T_SOURCE = double >
 		requires (std::is_arithmetic_v<std::remove_cvref_t<T_DEST>> and std::is_arithmetic_v<std::remove_cvref_t<T_SOURCE>>)
-	BSC__NODISCARD constexpr T_DEST Ceil(T_SOURCE v, T_SOURCE place) {
+	BSC__NODISCARD constexpr auto Ceil(T_SOURCE v, T_SOURCE place) -> T_DEST {
 		return T_DEST(std::ceil(v/place/10)*place*10);
 	}
 
 	/// @brief Floor
 	template < typename T_DEST = int, typename T_SOURCE = double >
 		requires (std::is_arithmetic_v<std::remove_cvref_t<T_DEST>> and std::is_arithmetic_v<std::remove_cvref_t<T_SOURCE>>)
-	BSC__NODISCARD constexpr T_DEST Floor(T_SOURCE v) {
+	BSC__NODISCARD constexpr auto Floor(T_SOURCE v) -> T_DEST {
 		if constexpr (std::is_integral_v<T_DEST> && std::is_floating_point_v<T_SOURCE>) {
 			return T_DEST(std::floor(v));	// std::floor is not constexpr yet.
 		}
@@ -121,7 +121,7 @@ export namespace biscuit {
 	}
 	template < typename T_DEST = int, typename T_SOURCE = double >
 		requires (std::is_arithmetic_v<std::remove_cvref_t<T_DEST>> and std::is_arithmetic_v<std::remove_cvref_t<T_SOURCE>>)
-	BSC__NODISCARD constexpr T_DEST Floor(T_SOURCE v, T_SOURCE place) {
+	BSC__NODISCARD constexpr auto Floor(T_SOURCE v, T_SOURCE place) -> T_DEST {
 		return T_DEST(std::floor(v/place*0.1)*place*10);
 	}
 

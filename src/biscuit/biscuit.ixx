@@ -17,7 +17,7 @@ export import biscuit.string;
 //export import :coord;
 
 export namespace biscuit {
-	BISCUIT_EXPORT_DLL bool Print() {
+	BISCUIT_EXPORT_DLL auto Print() -> bool {
 		std::println("hello, biscuit!\n");
 		return true;
 	}

@@ -34,7 +34,10 @@ export namespace biscuit::inline aliases {
 	using ssize_t = std::ptrdiff_t;
 
 	constexpr size_t const SIZE_MAX = std::numeric_limits<size_t>::max();
-	constexpr size_t const RSIZE_MAX = SIZE_MAX >> 1;
+	constexpr size_t const RSIZE_MAX	// rationale max size. used for error checking.
+		= sizeof(size_t) > 4
+		? SIZE_MAX >> 16	// 48-bits. still big enough for real-world use.
+		: SIZE_MAX >> 1;
 }
 export namespace biscuit::inline literals {
 	constexpr biscuit::ssize_t operator "" z ( unsigned long long n ) { return n; }
