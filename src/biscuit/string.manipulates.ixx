@@ -114,41 +114,6 @@ export namespace biscuit {
 
 
 	//=============================================================================================================================
-	// ToLower, ToUpper
-
-	template < concepts::string_elem tchar >
-	BSC__NODISCARD tchar ToLower(tchar c) {
-		if constexpr (std::is_same_v<tchar, char>) { return (tchar)std::tolower(c); } else { return (tchar)std::towlower(c); }
-	}
-	template < concepts::string_elem tchar >
-	BSC__NODISCARD tchar ToUpper(tchar c) {
-		if constexpr (std::is_same_v<tchar, char>) { return (tchar)std::toupper(c); } else { return (tchar)std::towupper(c); }
-	}
-
-	template < concepts::tchar_string_like tstring, typename tchar = std::ranges::range_value_t<std::remove_cvref_t<tstring>> >
-	BSC__NODISCARD auto ToLower(tstring const& sv) -> std::basic_string<tchar> {
-		std::basic_string<tchar> str;
-		str.reserve(sv.size());
-		for (auto c : sv)
-			str += ToLower(c);
-		return str;
-	}
-	template < concepts::tchar_string_like tstring, typename tchar = std::ranges::range_value_t<std::remove_cvref_t<tstring>> >
-	BSC__NODISCARD auto ToUpper(tstring const& sv) -> std::basic_string<tchar> {
-		std::basic_string<tchar> str;
-		str.reserve(sv.size());
-		for (auto c : sv)
-			str += ToUpper(c);
-		return str;
-	}
-	template < concepts::string_elem tchar > void MakeLower(std::basic_string<tchar>& str) { for (auto& c : str) MakeLower(c); }
-	template < concepts::string_elem tchar > void MakeUpper(std::basic_string<tchar>& str) { for (auto& c : str) MakeUpper(c); }
-
-	template < concepts::string_elem tchar > void MakeLower(tchar& c) { c = ToLower(c); }
-	template < concepts::string_elem tchar > void MakeUpper(tchar& c) { c = ToUpper(c); }
-
-
-	//=============================================================================================================================
 	// Trim
 	template < typename tchar >
 	void TrimLeft(std::basic_string<tchar>& str, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
@@ -195,25 +160,25 @@ export namespace biscuit {
 	//=============================================================================================================================
 	// Split
 	template < typename tchar >
-	BSC__NODISCARD auto Split(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters)
+	BSC__NODISCARD inline auto Split(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters)
 		-> std::vector<std::basic_string<tchar>>
 	{
 		return TSplit<tchar, std::basic_string<tchar>>(sv, [svDelimiters](tchar c) { return svDelimiters.find(c) != svDelimiters.npos; });
 	}
 	template < typename tchar >
-	BSC__NODISCARD auto Split(std::basic_string_view<tchar> sv, tchar cDelimiter)
+	BSC__NODISCARD inline auto Split(std::basic_string_view<tchar> sv, tchar cDelimiter)
 		-> std::vector<std::basic_string<tchar>>
 	{
 		return TSplit<tchar, std::basic_string<tchar>>(sv, [cDelimiter](tchar c) { return cDelimiter == c; });
 	}
 	template < typename tchar >
-	BSC__NODISCARD auto SplitView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters)
+	BSC__NODISCARD inline auto SplitView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters)
 		-> std::vector<std::basic_string_view<tchar>>
 	{
 		return TSplit<tchar, std::basic_string_view<tchar>>(sv, [svDelimiters](tchar c) { return svDelimiters.find(c) != svDelimiters.npos; });
 	}
 	template < typename tchar >
-	BSC__NODISCARD auto SplitView(std::basic_string_view<tchar> sv, tchar cDelimiter)
+	BSC__NODISCARD inline auto SplitView(std::basic_string_view<tchar> sv, tchar cDelimiter)
 		-> std::vector<std::basic_string_view<tchar>>
 	{
 		return TSplit<tchar, std::basic_string_view<tchar>>(sv, [cDelimiter](tchar c) { return cDelimiter == c; });

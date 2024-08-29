@@ -21,34 +21,6 @@ import biscuit.string.basic;
 
 namespace concepts = biscuit::concepts;
 
-namespace biscuit {
-
-	struct sToSignedInt {
-		int operator () (auto v) const {
-			return (int)v;
-		}
-	};
-	struct sToLowerInt {
-		template < concepts::string_elem tchar >
-		int operator () (tchar v) const {
-			if constexpr (sizeof v > 1)
-				return std::towlower(v);
-			else
-				return std::tolower(v);
-		}
-	};
-	struct sToUpperInt {
-		template < concepts::string_elem tchar >
-		int operator () (tchar v) const {
-			if constexpr (sizeof v > 1)
-				return std::towupper(v);
-			else
-				return std::toupper(v);
-		}
-	};
-
-}
-
 export namespace biscuit {
 
 	namespace detail {
@@ -56,21 +28,11 @@ export namespace biscuit {
 		/// @brief compare string
 		/// @return first none zero of (*pszA - *pszB)
 		///         0 if pszA == pszB, both empty (nullptr or "")
-		template < concepts::string_elem tcharA, concepts::string_elem tcharB, bool bUseCount, class Eval >
+		template < class TEvaluator, concepts::string_elem tcharA, concepts::string_elem tcharB>
 			requires (sizeof(tcharA) == sizeof(tcharB))
-		BSC__NODISCARD constexpr int tszcmp(tcharA const* pszA, size_t lenA, tcharB const* pszB, size_t lenB) {
+		BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszcmp(tcharA const* pszA, tcharB const* pszB) {
 			using tchar = std::remove_cvref_t<tcharA>;
-			constexpr static Eval eval{};
-			if constexpr (bUseCount) {
-				if (lenA == 0 and lenB == 0)
-					return 0;
-				if (lenA == 0)
-					return pszB ? -eval(*pszB) : 0;
-				if (lenB == 0)
-					return pszA ? eval(*pszA) : 0;
-				if ( (lenA > RSIZE_MAX) or (lenB > RSIZE_MAX) )
-					throw std::invalid_argument(BSC__FUNCSIG "too big!");
-			}
+			constexpr static TEvaluator eval{};
 			if (!pszA and !pszB)
 				return 0;
 			if (!pszA)
@@ -79,46 +41,96 @@ export namespace biscuit {
 				return eval(*pszA);
 
 			for (; *pszA && *pszB; pszA++, pszB++) {
-				if constexpr (bUseCount) {
-					if (lenA == 0 and lenB == 0)
-						return 0;
-					if (lenA == 0)
-						return -eval(*pszB);
-					if (lenB == 0)
-						return eval(*pszA);
-				}
-
-				int r = eval(*pszA) - eval(*pszB);
-				if (r)
+				if (auto r = eval(*pszA) - eval(*pszB))
 					return r;
-
-				if constexpr (bUseCount) {
-					--lenA; --lenB;
-				}
 			}
-			if (!*pszA && !*pszB)
-				return 0;
 			int r = eval(*pszA) - eval(*pszB);
 			return r;
 		}
 
+		/// @brief compare string
+		/// @return first none zero of (*pszA - *pszB)
+		///         0 if pszA == pszB, both empty (nullptr or "")
+		template < class TEvaluator, concepts::string_elem tcharA, concepts::string_elem tcharB >
+			requires (sizeof(tcharA) == sizeof(tcharB))
+		BSC__NODISCARD constexpr int tszcmp(std::span<tcharA const> szA, std::span<tcharB const> szB) {
+			using tchar = std::remove_cvref_t<tcharA>;
+			constexpr static TEvaluator eval{};
+			tcharA const* pszA = szA.data();
+			tcharB const* pszB = szB.data();
+			size_t sizeA = szA.size();
+			size_t sizeB = szB.size();
+
+			if (sizeA == 0 and sizeB == 0)
+				return 0;
+			if ( (sizeA > RSIZE_MAX) or (sizeB > RSIZE_MAX) )	// check validity first, before accessing pszA or pszB
+				throw std::invalid_argument(BSC__FUNCSIG "too big!");
+			if (sizeA == 0)
+				return pszB ? -eval(*pszB) : 0;
+			if (sizeB == 0)
+				return pszA ? eval(*pszA) : 0;
+
+			if (!pszA and !pszB)
+				return 0;
+			if (!pszA)
+				return -eval(*pszB);
+			if (!pszB)
+				return eval(*pszA);
+
+			for ( ; ; pszA++, pszB++, sizeA--, sizeB--) {
+				tchar a = sizeA ? *pszA : 0;
+				tchar b = sizeB ? *pszB : 0;
+				if (auto r = eval(a) - eval(b))
+					return r;
+				if (a == 0 or b == 0)	// Actually, just need to check if either a or b is 0.
+					break;
+			}
+			return 0;
+		}
 	}
 
 	template < concepts::string_elem tchar >
 	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszcmp(tchar const* pszA, tchar const* pszB) {
-		return detail::tszcmp<tchar, tchar, false, sToSignedInt>(pszA, {}, pszB, {});
+	#pragma warning(disable: 4996)
+		return detail::tpszcmp<detail::TToTransparent<int>>(pszA, pszB);
 	}
 	template < concepts::string_elem tchar >
-	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszncmp(tchar const* pszA, tchar const* pszB, size_t nCount) {
-		return detail::tszcmp<tchar, tchar, true, sToSignedInt>(pszA, nCount, pszB, nCount);
+	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszncmp(tchar const* pszA, tchar const* pszB, size_t nMaxCount) {
+		return detail::tszcmp<detail::TToTransparent<int>>({pszA, nMaxCount}, {pszB, nMaxCount});
 	}
 	template < concepts::string_elem tchar >
 	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszicmp(tchar const* pszA, tchar const* pszB) {
-		return detail::tszcmp<tchar, tchar, false, sToLowerInt>(pszA, {}, pszB, {});
+	#pragma warning(disable: 4996)
+		return detail::tpszcmp<detail::TToLower<int>>(pszA, pszB);
 	}
 	template < concepts::string_elem tchar >
-	BSC__NODISCARD BSC__DEPR_SEC constexpr int tsznicmp(tchar const* pszA, tchar const* pszB, size_t nCount) {
-		return detail::tszcmp<tchar, tchar, true, sToLowerInt>(pszA, nCount, pszB, nCount);
+	BSC__NODISCARD BSC__DEPR_SEC constexpr int tsznicmp(tchar const* pszA, tchar const* pszB, size_t nMaxCount) {
+		return detail::tszcmp<detail::TToLower<int>>({pszA, nMaxCount}, {pszB, nMaxCount});
+	}
+
+	template < concepts::string_elem tchar, concepts::tchar_string_like tstring >
+	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszcmp(tchar const* pszA, tstring const& svB) {
+		static_assert(concepts::have_same_tchar<std::basic_string<tchar>, tstring>);
+		using tcharB = concepts::value_t<tstring>;
+		return detail::tszcmp<detail::TToTransparent<int>, tchar, tcharB>({pszA, RSIZE_MAX}, {std::data(svB), std::size(svB)});
+	}
+	template < concepts::string_elem tchar, concepts::tchar_string_like tstring >
+	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszncmp(tchar const* pszA, tstring const& svB, size_t nMaxCount) {
+		static_assert(concepts::have_same_tchar<std::basic_string<tchar>, tstring>);
+		using tcharB = concepts::value_t<tstring>;
+		return detail::tszcmp<detail::TToTransparent<int>, tchar, tcharB>({pszA, nMaxCount}, {std::data(svB), std::min(std::size(svB), nMaxCount)});
+	}
+	template < concepts::string_elem tchar, concepts::tchar_string_like tstring >
+	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszicmp(tchar const* pszA, tstring const& svB) {
+		static_assert(concepts::have_same_tchar<std::basic_string<tchar>, tstring>);
+		using tcharB = concepts::value_t<tstring>;
+		return detail::tszcmp<tchar, tchar, true, detail::TToLower<int>, tchar, tcharB >({pszA, RSIZE_MAX}, {std::data(svB), std::size(svB)});
+	}
+	template < concepts::string_elem tchar, concepts::tchar_string_like tstring >
+	BSC__NODISCARD BSC__DEPR_SEC constexpr int tsznicmp(tchar const* pszA, tstring const& svB, size_t nMaxCount) {
+		static_assert(concepts::have_same_tchar<std::basic_string<tchar>, tstring>);
+		using tcharB = concepts::value_t<tstring>;
+		return detail::tszcmp<tchar, tchar, true, detail::TToLower<int>, tchar, tcharB >({pszA, nMaxCount}, {std::data(svB), std::min(std::size(svB), nMaxCount)});
 	}
 
 	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
@@ -126,36 +138,36 @@ export namespace biscuit {
 	BSC__NODISCARD constexpr int tszcmp(tstringA const& svA, tstringB const& svB) {
 		using tcharA = concepts::value_t<tstringA>;
 		using tcharB = concepts::value_t<tstringB>;
-		return detail::tszcmp<tcharA, tcharB, true, sToSignedInt>(
-			std::data(svA), std::size(svA),
-			std::data(svB), std::size(svB));
+		return detail::tszcmp<detail::TToTransparent<int>, tcharA, tcharB>(
+			{std::data(svA), std::size(svA)},
+			{std::data(svB), std::size(svB)});
 	}
 	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
 		requires concepts::have_same_tchar<tstringA, tstringB>
-	BSC__NODISCARD constexpr int tszncmp(tstringA const& svA, tstringB const& svB, size_t nCount) {
+	BSC__NODISCARD constexpr int tszncmp(tstringA const& svA, tstringB const& svB, size_t nMaxCount) {
 		using tcharA = concepts::value_t<tstringA>;
 		using tcharB = concepts::value_t<tstringB>;
-		return detail::tszcmp<tcharA, tcharB, true, sToSignedInt>(
-			std::data(svA), std::min(nCount, std::size(svA)),
-			std::data(svB), std::min(nCount, std::size(svB)));
+		return detail::tszcmp<detail::TToTransparent<int>, tcharA, tcharB>(
+			{std::data(svA), std::min(nMaxCount, std::size(svA))},
+			{std::data(svB), std::min(nMaxCount, std::size(svB))});
 	}
 	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
 		requires concepts::have_same_tchar<tstringA, tstringB>
 	BSC__NODISCARD constexpr int tszicmp(tstringA const& svA, tstringB const& svB) {
 		using tcharA = concepts::value_t<tstringA>;
 		using tcharB = concepts::value_t<tstringB>;
-		return detail::tszcmp<tcharA, tcharB, true, sToLowerInt>(
-			std::data(svA), std::size(svA),
-			std::data(svB), std::size(svB));
+		return detail::tszcmp<detail::TToLower<int>, tcharA, tcharB>(
+			{std::data(svA), std::size(svA)},
+			{std::data(svB), std::size(svB)});
 	}
 	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
 		requires concepts::have_same_tchar<tstringA, tstringB>
-	BSC__NODISCARD constexpr int tsznicmp(tstringA const& svA, tstringB const& svB, size_t nCount) {
+	BSC__NODISCARD constexpr int tsznicmp(tstringA const& svA, tstringB const& svB, size_t nMaxCount) {
 		using tcharA = concepts::value_t<tstringA>;
 		using tcharB = concepts::value_t<tstringB>;
-		return detail::tszcmp<tcharA, tcharB, true, sToLowerInt>(
-			std::data(svA), std::min(nCount, std::size(svA)),
-			std::data(svB), std::min(nCount, std::size(svB)));
+		return detail::tszcmp<detail::TToLower<int>, tcharA, tcharB>(
+			{std::data(svA), std::min(nMaxCount, std::size(svA))},
+			{std::data(svB), std::min(nMaxCount, std::size(svB))});
 	}
 
 

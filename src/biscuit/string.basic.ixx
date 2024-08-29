@@ -20,13 +20,13 @@ import biscuit.concepts;
 
 namespace conecpts = biscuit::concepts;
 
-namespace biscuit {
-
-}
-
 export namespace biscuit {
 
 	//=============================================================================================================================
+	// tpsz... : for pointer string
+	// tsz...  : for array string
+
+	//-----------------------------------------------------------------------------------------------------------------------------
 	// tszlen String Length
 	namespace detail {
 		template < concepts::string_elem tchar >
@@ -56,17 +56,17 @@ export namespace biscuit {
 	}
 
 
-	//=============================================================================================================================
+	//-----------------------------------------------------------------------------------------------------------------------------
 	// tszcpy
 	namespace detail {
 		// tszcpy
 		template < concepts::string_elem tcharA, concepts::string_elem tcharB >
-		constexpr auto tszcpy(std::span<tcharA> dst, std::span<tcharB const> src) -> std::expected<std::span<tcharA>, errno_t> {
+		constexpr auto tszcpy(std::span<tcharA> dst, std::span<tcharB const> src) -> std::expected<std::span<tcharA>, std::error_code> {
 			auto len = std::size(src);
 			if (std::size(dst) == 0 or std::data(dst) == nullptr or std::data(src) == nullptr) {
-				return std::unexpected(EINVAL);
+				return std::unexpected(std::make_error_code(std::errc::invalid_argument));
 			}
-			errno_t err = {};
+			std::error_code err = {};
 			//std::fill(std::begin(dst), std::end(dst), (tcharA)0);	// do I need this?
 			if (len == 0) {
 				std::data(dst)[0] = 0;
@@ -75,7 +75,7 @@ export namespace biscuit {
 				//static_assert(std::is_same_v<tcharA, tcharB>);
 				if (len >= std::size(dst)) {
 					len = std::size(dst)-1;
-					err = ERANGE;
+					err = std::make_error_code(std::errc::result_out_of_range);
 				}
 				std::copy(std::data(src), std::data(src)+len, std::data(dst));
 				std::data(dst)[len] = 0;
@@ -89,9 +89,9 @@ export namespace biscuit {
 	/// @brief copy string
 	/// @return 0 if success, EINVAL if pszDest is nullptr or sizeDest is 0, ERANGE if sizeDest is too small.
 	template < concepts::string_elem tchar >
-	BSC__DEPR_SEC constexpr auto tpszcpy(tchar* pszDest, size_t sizeDest, tchar const* pszSrc) -> std::expected<tchar*, errno_t> {
+	BSC__DEPR_SEC constexpr auto tpszcpy(tchar* pszDest, size_t sizeDest, tchar const* pszSrc) -> std::expected<tchar*, std::error_code> {
 		if (!pszDest or !sizeDest or (sizeDest > RSIZE_MAX))
-			return std::unexpected(EINVAL);
+			return std::unexpected(std::make_error_code(std::errc::invalid_argument));
 		if (!pszSrc) {
 			*pszDest = 0;
 			return pszDest;
@@ -103,7 +103,7 @@ export namespace biscuit {
 				return pszDest;
 		}
 		*pszDest = 0;
-		return std::unexpected(ERANGE);
+		return std::unexpected(std::make_error_code(std::errc::result_out_of_range));
 	}
 
 
@@ -115,14 +115,14 @@ export namespace biscuit {
 		return detail::tszcpy<tcharA, tcharB>(std::span{std::data(dst), std::size(dst)}, std::span{std::data(src), std::size(src)});
 	}
 
-	//=============================================================================================================================
+	//-----------------------------------------------------------------------------------------------------------------------------
 	// tpszcat
 	template < concepts::string_elem tchar >
 	BSC__DEPR_SEC constexpr auto tpszcat(tchar* pszDest, size_t sizeDest, tchar const* pszSrc) {
 		if (!pszSrc || !*pszSrc)
 			return 0;
 		if (!pszDest || !sizeDest || (sizeDest > RSIZE_MAX))
-			return EINVAL;
+			return std::unexpected(std::make_error_code(std::errc::invalid_argument));
 		// jump to end of pszDest
 		while (*pszDest && sizeDest) {
 			pszDest++; sizeDest--;
@@ -143,172 +143,262 @@ export namespace biscuit {
 		return detail::tszcpy<tcharA, tcharB>(buf, std::span{std::data(src), std::size(src)});
 	}
 
-//	template < concepts::string_elem tchar, concepts::contiguous_type_string_container<tchar> tstring_buf >
-//	constexpr inline BSC__DEPR_SEC errno_t tszcat(tstring_buf &szDest, tchar const* pszSrc) {
-//#pragma warning(suppress:4996)
-//		return tszcat(std::data(szDest), std::size(szDest), pszSrc);
-//	}
-//	template < concepts::string_elem tchar >
-//	constexpr errno_t tszcat(tchar* pszDest, size_t sizeDest, std::basic_string_view<tchar> svSrc) {
-//		if (!pszDest or !sizeDest or (sizeDest > RSIZE_MAX) or (svSrc.size() > RSIZE_MAX))
-//			return EINVAL;
-//		auto const* const pszMax = pszDest + sizeDest;
-//		auto nCount = tszlen(pszDest, pszMax);
-//		if (nCount > RSIZE_MAX)
-//			return ERANGE;
-//		tchar* pos = pszDest + nCount;
-//		if (sizeDest <= nCount + svSrc.size() + 1) {
-//			*pos = 0;
-//			return ERANGE;
-//		}
-//		tchar const* posSrc = svSrc.data();
-//		tchar const* const pszSrcEnd = posSrc + svSrc.size();
-//		for (; (pos < pszMax) and (posSrc < pszSrcEnd); pos++, posSrc++) {
-//			*pos = *posSrc;
-//			if (!*pos)
-//				return 0;
-//		}
-//		*pos = 0;
-//		return 0;
-//	}
-//	template < concepts::string_elem tchar, concepts::contiguous_type_string_container<tchar> tstring_buf >
-//	constexpr errno_t tszcat(tstring_buf &szDest, std::basic_string_view<tchar> svSrc) {
-//		return tszcat(std::data(szDest), std::size(szDest), svSrc);
-//	}
-//	template < concepts::string_elem tchar, concepts::contiguous_type_string_container<tchar> tstring_buf >
-//	constexpr errno_t tszcat(tstring_buf &szDest, std::basic_string<tchar> const& strSrc) {
-//		return tszcat(std::data(szDest), std::size(szDest), std::basic_string_view{strSrc.data(), strSrc.size()});
-//	}
-//
-//	template < concepts::string_elem tchar >
-//	constexpr BSC__DEPR_SEC size_t tszrmchar(tchar* const& psz, int chRemove) {
-//		if (!psz || !chRemove)
-//			return 0;
-//		tchar* pos = psz;
-//		tchar* p2 {};
-//		for (; *pos; pos++) {
-//			if (*pos == chRemove) {
-//				p2 = pos + 1;
-//				break;
-//			}
-//		}
-//		if (p2) {
-//			for (; ; p2++) {
-//				if (*p2 == chRemove)
-//					continue;
-//				if (!(*pos = *p2))
-//					break;
-//				pos++;
-//			}
-//		}
-//		return pos - psz;
-//	}
-//	template < concepts::string_elem tchar >
-//	constexpr size_t tszrmchar(tchar* const psz, tchar const* const pszMax, tchar chRemove) {
-//		if (!psz || !chRemove)
-//			return 0;
-//		tchar* pos = psz;
-//		tchar* p2 {};
-//		for (; (pos < pszMax) and *pos; pos++) {
-//			if (*pos == chRemove) {
-//				p2 = pos + 1;
-//				break;
-//			}
-//		}
-//		if (p2) {
-//			for (; (pos < pszMax) and (p2 < pszMax); p2++) {
-//				if (*p2 == chRemove)
-//					continue;
-//				if (!(*pos = *p2))
-//					break;
-//				pos++;
-//			}
-//		}
-//		return pos - psz;
-//	}
-//	template < concepts::string_elem tchar, concepts::contiguous_type_string_container<tchar> tstring_buf >
-//	constexpr size_t tszrmchar(tstring_buf &sz, tchar chRemove) {
-//		return tszrmchar(std::data(sz), std::data(sz) + std::size(sz), chRemove);
-//	}
-//
-//
+	//-----------------------------------------------------------------------------------------------------------------------------
+	// tszsearch - Search Char. for advanced search, use string or string_view
 
-//	template < concepts::contiguous_string_container tstring_buf >
-//	errno_t tszupr(tstring_buf& buf) {
-//		if (!std::data(buf))
-//			return EINVAL;
-//		if (std::size(buf) > RSIZE_MAX)
-//			return ERANGE;
-//		for (auto& c : buf) {
-//			if (!c)
-//				break;
-//			MakeUpper(c);
-//		}
-//		return 0;
-//	}
-//	template < concepts::string_elem tchar >
-//	errno_t tszupr(tchar* const psz, size_t size) {
-//		if (!psz)
-//			return EINVAL;
-//		if (size > RSIZE_MAX)
-//			return ERANGE;
-//		tchar* pos = psz;
-//		for (size_t i = 0; i < size; i++) {
-//			if (!*pos)
-//				break;
-//			MakeUpper(*pos);
-//		}
-//		return 0;
-//	}
-//
-//	template < concepts::contiguous_string_container tstring_buf >
-//	errno_t tszlwr(tstring_buf& buf) {
-//		if (!std::data(buf))
-//			return EINVAL;
-//		if (std::size(buf) > RSIZE_MAX)
-//			return ERANGE;
-//		for (auto& c : buf) {
-//			if (!c)
-//				break;
-//			MakeLower(c);
-//		}
-//		return 0;
-//	}
-//	template < concepts::string_elem tchar >
-//	errno_t tszlwr(tchar* const& psz, size_t size) {
-//		if (!psz)
-//			return EINVAL;
-//		if (size > RSIZE_MAX)
-//			return ERANGE;
-//		tchar* pos = psz;
-//		for (size_t i = 0; i < size; i++) {
-//			if (!*pos)
-//				break;
-//			MakeLower(*pos);
-//		}
-//		return 0;
-//	}
-//
-//	//template < concepts::string_elem tchar >
-//	//BSC__DEPR_SEC tchar* tszrev(tchar* psz) {
-//	//	if (!psz)
-//	//		return nullptr;
-//	//	std::reverse(psz, psz + tszlen(psz));
-//	//	return psz;
-//	//}
-//	template < concepts::string_elem tchar >
-//	tchar* tszrev(tchar* psz, tchar const* const pszEnd) {
-//		if (!psz)
-//			return nullptr;
-//		std::reverse(psz, pszEnd);
-//		return psz;
-//	}
-//	template < concepts::contiguous_string_container tstring_buf >
-//	std::remove_cvref_t<decltype(tstring_buf{}[0])>* tszrev(tstring_buf& buf) {
-//		std::reverse(std::data(buf), std::data(buf)+tszlen(buf));
-//		return std::data(buf);
-//	}
+	/// @brief searches character.
+	/// @return !!! CAUTION !!! nullptr if not found.
+	template < concepts::string_elem tchar >
+	BSC__NODISCARD BSC__DEPR_SEC constexpr tchar* tpszsearch(tchar* beg, tchar ch) {
+		if (!beg)
+			return nullptr;
+		for (; *beg; beg++) {
+			if (*beg == ch)
+				return beg;
+		}
+		return nullptr;
+	}
 
+	/// @brief searches character.
+	/// @return !!! CAUTION !!! nullptr if not found.
+	template < concepts::string_elem tchar >
+	BSC__NODISCARD constexpr tchar* tszsearch(tchar* beg, tchar const* end, tchar ch) {
+		if (!beg)
+			return nullptr;
+		if (end - beg > RSIZE_MAX)
+			return nullptr;
+		for (; beg < end and *beg; beg++) {
+			if (*beg == ch)
+				return beg;
+		}
+		return nullptr;
+	}
+
+	/// @brief searches character.
+	/// @return !!! CAUTION !!! 'end' value if not found.
+	template < concepts::tchar_string_like tstring >
+	BSC__NODISCARD constexpr auto* tszsearch(tstring const& str, concepts::value_t<tstring> ch) {
+		return tszsearch(std::data(str), std::data(str)+std::size(str), ch);
+	}
+	template < concepts::tchar_string_like tstring >
+	BSC__NODISCARD constexpr auto* tszsearch(tstring&& str, concepts::value_t<tstring> ch) = delete;
+
+	//-----------------------------------------------------------------------------------------------------------------------------
+	// tszrmchar - Remove Char
+
+	/// @brief remove character from string.
+	/// @return length of string after removing character.
+	template < concepts::string_elem tchar >
+	BSC__DEPR_SEC constexpr size_t tpszrmchar(tchar* psz, int chRemove) {
+		if (!psz || !chRemove)
+			return 0;
+		tchar* dst = psz;
+		tchar const* src {};
+
+		// find first chRemove
+		for (; *dst; dst++) {
+			if (*dst == chRemove) {
+				src = dst + 1;
+				break;
+			}
+		}
+		if (!src)
+			return dst - psz;
+
+		// remove chRemove
+		for (src++; ; src++) {
+			if (*src == chRemove)
+				continue;
+			if (!(*dst = *src))
+				break;
+			dst++;
+		}
+		return dst - psz;
+	}
+
+	/// @brief remove character from string.
+	/// @return length of string after removing character.
+	template < concepts::tchar_string_like tstring >
+		requires (std::is_trivially_copyable_v<tstring>)
+	constexpr size_t tszrmchar(tstring& sz, concepts::value_t<tstring> chRemove) {
+		//auto iter = std::remove(std::begin(sz), std::end(sz), chRemove);
+		//return std::distance(std::begin(sz), iter-1);
+
+		using tchar = concepts::value_t<tstring>;
+
+		auto* const begin = std::data(sz);
+		if (!begin || !chRemove)
+			return 0;
+
+		auto const* const end = begin + std::size(sz);
+		auto* dst = begin;
+		tchar const* src = {};
+
+		// find first chRemove
+		for (; dst < end and *dst; dst++) {
+			if (*dst == chRemove) {
+				src = dst;
+				break;
+			}
+		}
+
+		// remove chRemove
+		if (!src)
+			return dst - begin;
+		for (src++; src < end; src++) {
+			if (*src == chRemove)
+				continue;
+			if (!(*dst = *src))
+				break;
+			dst++;
+		}
+		if (src == end and dst < end)
+			*dst = 0;	// !!! remove it anyway, here. if it's not removed, no null-terminator could be appended.
+
+		return dst - begin;
+	}
+
+	//-----------------------------------------------------------------------------------------------------------------------------
+	// ToLower, ToUpper
+
+	template < concepts::string_elem tchar >
+	BSC__NODISCARD inline tchar ToLower(tchar c) {
+		if constexpr (std::is_same_v<tchar, char>) { return (tchar)std::tolower(c); } else { return (tchar)std::towlower(c); }
+	}
+	template < concepts::string_elem tchar >
+	BSC__NODISCARD inline tchar ToUpper(tchar c) {
+		if constexpr (std::is_same_v<tchar, char>) { return (tchar)std::toupper(c); } else { return (tchar)std::towupper(c); }
+	}
+
+	template < concepts::tchar_string_like tstring, typename tchar = concepts::value_t<tstring> >
+	BSC__NODISCARD auto ToLower(tstring const& sv) -> std::basic_string<tchar> {
+		std::basic_string<tchar> str;
+		str.reserve(sv.size());
+		for (auto c : sv)
+			str += ToLower(c);
+		return str;
+	}
+	template < concepts::tchar_string_like tstring, typename tchar = concepts::value_t<tstring> >
+	BSC__NODISCARD auto ToUpper(tstring const& sv) -> std::basic_string<tchar> {
+		std::basic_string<tchar> str;
+		str.reserve(sv.size());
+		for (auto c : sv)
+			str += ToUpper(c);
+		return str;
+	}
+
+	template < concepts::string_elem tchar > inline void MakeLower(std::basic_string<tchar>& str) { for (auto& c : str) MakeLower(c); }
+	template < concepts::string_elem tchar > inline void MakeUpper(std::basic_string<tchar>& str) { for (auto& c : str) MakeUpper(c); }
+
+	template < concepts::string_elem tchar > inline void MakeLower(tchar& c) { c = ToLower(c); }
+	template < concepts::string_elem tchar > inline void MakeUpper(tchar& c) { c = ToUpper(c); }
+
+	//-----------------------------------------------------------------------------------------------------------------------------
+	// Upper / Lower helper class
+	namespace detail {
+
+		template < typename TReturn >
+		struct TToTransparent {
+			inline TReturn operator () (auto&& v) const { return v; }
+		};
+
+		template < typename TReturn >
+		struct TToUpper {
+			inline TReturn operator () (auto&& v) const { return ToUpper(v); }
+		};
+
+		template < typename TReturn >
+		struct TToLower {
+			inline TReturn operator () (auto&& v) const { return ToLower(v); }
+		};
+
+	}
+
+	//-----------------------------------------------------------------------------------------------------------------------------
+	// tszupr, tszlwr - Make Upper/Lower
+
+	namespace detail {
+		template < concepts::string_elem tchar, typename TEvaluator >
+		constexpr std::error_code tpsz_transform(tchar* psz, size_t size) {
+			constexpr static TEvaluator const func{};
+			if (!psz)
+				return EINVAL;
+			if (size > RSIZE_MAX)
+				return ERANGE;
+			for (; *psz and size; psz++, size--) {
+				*psz = func(*psz);
+			}
+			return 0;
+		}
+
+		template < concepts::tchar_string_like tstring, typename TEvaluator >
+			requires (std::is_trivially_copyable_v<tstring>)
+		constexpr std::error_code tsz_transform(tstring& buf) {
+			constexpr static TEvaluator const func{};
+			if (!std::data(buf))
+				return EINVAL;
+			if (std::size(buf) > RSIZE_MAX)
+				return ERANGE;
+			for (auto& c : buf) {
+				if (!c)
+					break;
+				c = func(c);
+			}
+			return 0;
+		}
+	}
+
+	template < concepts::string_elem tchar >
+	BSC__DEPR_SEC constexpr std::error_code tpszupr(tchar* psz, size_t size) {
+		return detail::tpsz_transform<tchar, detail::TToUpper<tchar>>(psz, size);
+	}
+	template < concepts::tchar_string_like tstring >
+		requires (std::is_trivially_copyable_v<tstring>)
+	std::error_code tszupr(tstring& buf) {
+		using tchar = concepts::value_t<tstring>;
+		return detail::tsz_transform<tchar, detail::TToUpper<tchar>>(buf);
+	}
+
+	//-----------------------------------------------------------------------------------------------------------------------------
+	// tszupr, tszlwr - Make Upper/Lower
+	template < concepts::string_elem tchar >
+	BSC__DEPR_SEC std::error_code tpszlwr(tchar* psz, size_t size) {
+		return detail::tpsz_transform<tchar, detail::TToLower<tchar>>(psz, size);
+	}
+	template < concepts::tchar_string_like tstring >
+		requires (std::is_trivially_copyable_v<tstring>)
+	std::error_code tszlwr(tstring& buf) {
+		using tchar = concepts::value_t<tstring>;
+		return detail::tsz_transform<tchar, detail::TToLower<tchar>>(buf);
+	}
+
+	template < concepts::string_elem tchar >
+	BSC__DEPR_SEC size_t tpszrev(tchar* psz) {
+		if (!psz)
+			return nullptr;
+	#pragma warning(suppress:4996)
+		auto len = tpszlen(psz);
+		std::reverse(psz, psz+len);
+		return len;
+	}
+	template < concepts::string_elem tchar >
+	size_t tszrev(tchar* psz, tchar const* pszMax) {
+		if (!psz)
+			return 0;
+		if (psz >= pszMax)
+			return 0;
+		auto len = detail::tszlen({psz, pszMax});
+		std::reverse(psz, psz+len);
+		return len;
+	}
+	template < concepts::tchar_string_like tstring >
+		requires (std::is_trivially_copyable_v<tstring>)
+	size_t tszrev(tstring& buf) {
+		auto len = tszlen(buf);
+		std::reverse(std::data(buf), std::data(buf)+len);
+		return len;
+	}
 
 
 }	// namespace biscuit
+
