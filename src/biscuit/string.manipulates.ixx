@@ -18,28 +18,43 @@ import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.convert_codepage;
 import biscuit.string.defines;
+import biscuit.string.basic;
 
 namespace concepts = biscuit::concepts;
 //using namespace std::literals;
 
-namespace biscuit {
-	template < typename treturn, typename tchar >
-	BSC__NODISCARD auto TSplit(std::basic_string_view<tchar> sv, std::function<bool(tchar)> func) -> std::vector<treturn> {
-		std::vector<treturn> r;
-		if (sv.empty())
-			return r;
-		tchar const* pos = sv.data();
-		tchar const* end = sv.data() + sv.size();
-		tchar const* s = pos;
-		for (; pos < end; pos++) {
-			if (!func(*pos))
-				continue;
-			r.emplace_back(s, pos);
-			s = pos+1;
-		}
-		r.emplace_back(s, end);
+namespace biscuit::detail {
+	
+	/// @brief Split stirng. delimiters must contain '\0' as data not only for null-terminator. using '\0' for searching string end.
+	template < typename treturn_item, concepts::tstring_like tstring >
+	BSC__NODISCARD auto Split(tstring&& sz, std::basic_string_view<concepts::value_t<tstring>> const& svDelimiters)
+		-> std::vector<treturn_item>
+	{
+		using tchar = concepts::value_t<tstring>;
+		using view_t = std::basic_string_view<tchar>;
 
-		return r;
+		static_assert(!std::is_same_v<treturn_item, std::basic_string_view<tchar>> or std::is_lvalue_reference_v<decltype(sz)> );
+
+		std::vector<treturn_item> result;
+		if (!std::data(sz) || !std::size(sz))
+			return result;
+		auto const* cur = std::data(sz);
+		auto const* const end = [&] {
+				if constexpr (requires (tstring v) { v.size(); }) {
+					return cur + sz.size();
+				} else {
+					return cur + biscuit::tszlen(sz);	// for the case tstring is raw array
+				}
+			}();
+		auto next = std::find_first_of(cur, end, svDelimiters.begin(), svDelimiters.end());
+		do {
+			result.emplace_back(cur, next);
+			if (next >= end)
+				break;
+			cur = next+1;
+			next = std::find_first_of(cur, end, svDelimiters.begin(), svDelimiters.end());
+		} while (true);
+		return result;
 	}
 
 	template < typename tchar, size_t max_digit_len = 0 >
@@ -159,29 +174,33 @@ export namespace biscuit {
 
 	//=============================================================================================================================
 	// Split
-	template < typename tchar >
-	BSC__NODISCARD inline auto Split(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters)
-		-> std::vector<std::basic_string<tchar>>
+	template < concepts::tstring_like tstring >
+	BSC__NODISCARD inline auto Split(tstring const& sv, std::basic_string_view<concepts::value_t<tstring>> svDelimiters)
+		-> std::vector<std::basic_string<concepts::value_t<tstring>>>
 	{
-		return TSplit<tchar, std::basic_string<tchar>>(sv, [svDelimiters](tchar c) { return svDelimiters.find(c) != svDelimiters.npos; });
+		using tchar = concepts::value_t<tstring>;
+		return detail::Split<std::basic_string<tchar>>(sv, svDelimiters);
 	}
-	template < typename tchar >
-	BSC__NODISCARD inline auto Split(std::basic_string_view<tchar> sv, tchar cDelimiter)
-		-> std::vector<std::basic_string<tchar>>
+	template < concepts::tstring_like tstring >
+	BSC__NODISCARD inline auto Split(tstring const& sv, concepts::value_t<tstring> cDelimiter)
+		-> std::vector<std::basic_string<concepts::value_t<tstring>>>
 	{
-		return TSplit<tchar, std::basic_string<tchar>>(sv, [cDelimiter](tchar c) { return cDelimiter == c; });
+		using tchar = concepts::value_t<tstring>;
+		return detail::Split<std::basic_string<tchar>>(sv, {&cDelimiter, 1uz});
 	}
-	template < typename tchar >
-	BSC__NODISCARD inline auto SplitView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svDelimiters)
-		-> std::vector<std::basic_string_view<tchar>>
+	template < concepts::tstring_like tstring >
+	BSC__NODISCARD inline auto SplitView(tstring const& sv, std::basic_string_view<concepts::value_t<tstring>> svDelimiters)
+		-> std::vector<std::basic_string_view<concepts::value_t<tstring>>>
 	{
-		return TSplit<tchar, std::basic_string_view<tchar>>(sv, [svDelimiters](tchar c) { return svDelimiters.find(c) != svDelimiters.npos; });
+		using tchar = concepts::value_t<tstring>;
+		return detail::Split<std::basic_string_view<tchar>>(sv, svDelimiters);
 	}
-	template < typename tchar >
-	BSC__NODISCARD inline auto SplitView(std::basic_string_view<tchar> sv, tchar cDelimiter)
-		-> std::vector<std::basic_string_view<tchar>>
+	template < concepts::tstring_like tstring >
+	BSC__NODISCARD inline auto SplitView(tstring const& sv, concepts::value_t<tstring> cDelimiter)
+		-> std::vector<std::basic_string_view<concepts::value_t<tstring>>>
 	{
-		return TSplit<tchar, std::basic_string_view<tchar>>(sv, [cDelimiter](tchar c) { return cDelimiter == c; });
+		using tchar = concepts::value_t<tstring>;
+		return detail::Split<std::basic_string_view<tchar>>(sv, {&cDelimiter, 1uz});
 	}
 
 	//=============================================================================================================================
@@ -204,18 +223,18 @@ export namespace biscuit {
 					return {};
 				if (*pos == (tchar)'x') { // Hex ASCII Code
 					pos++;
-					if (!CheckDigitLen<tchar, 0>(str, pos, end, 16, cFill, cTerminating))
+					if (!detail::CheckDigitLen<tchar, 0>(str, pos, end, 16, cFill, cTerminating))
 						return {};
 				} else if (*pos == (tchar)'u') { // Unicode (16 bit)
 					pos++;
-					if (!CheckDigitLen<tchar, 4>(str, pos, end, 16, cFill, cTerminating))
+					if (!detail::CheckDigitLen<tchar, 4>(str, pos, end, 16, cFill, cTerminating))
 						return {};
 				} else if (*pos == (tchar)'U') {	// Unicode (32 bit)
 					pos++;
-					if (!CheckDigitLen<tchar, 8>(str, pos, end, 16, cFill, cTerminating))
+					if (!detail::CheckDigitLen<tchar, 8>(str, pos, end, 16, cFill, cTerminating))
 						return {};
 				} else if (IsOdigit(*pos)) {		// Octal ASCII Code
-					if (!CheckDigitLen<tchar, 0>(str, pos, std::min(pos+3, end), 8, cFill, cTerminating))
+					if (!detail::CheckDigitLen<tchar, 0>(str, pos, std::min(pos+3, end), 8, cFill, cTerminating))
 						return {};
 				} else {
 					// constexpr map ... (not yet)
