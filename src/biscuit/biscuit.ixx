@@ -14,6 +14,7 @@ export import biscuit.misc;
 export import biscuit.codepage;
 export import biscuit.iconv_wrapper;
 export import biscuit.charset_kssm;
+export import biscuit.convert_codepage;
 export import biscuit.string;
 //export import :coord;
 

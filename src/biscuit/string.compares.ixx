@@ -108,32 +108,32 @@ export namespace biscuit {
 		return detail::tszcmp<detail::TToLower<int>>({pszA, nMaxCount}, {pszB, nMaxCount});
 	}
 
-	template < concepts::string_elem tchar, concepts::tchar_string_like tstring >
+	template < concepts::string_elem tchar, concepts::tstring_like tstring >
 	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszcmp(tchar const* pszA, tstring const& svB) {
 		static_assert(concepts::have_same_tchar<std::basic_string<tchar>, tstring>);
 		using tcharB = concepts::value_t<tstring>;
 		return detail::tszcmp<detail::TToTransparent<int>, tchar, tcharB>({pszA, RSIZE_MAX}, {std::data(svB), std::size(svB)});
 	}
-	template < concepts::string_elem tchar, concepts::tchar_string_like tstring >
+	template < concepts::string_elem tchar, concepts::tstring_like tstring >
 	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszncmp(tchar const* pszA, tstring const& svB, size_t nMaxCount) {
 		static_assert(concepts::have_same_tchar<std::basic_string<tchar>, tstring>);
 		using tcharB = concepts::value_t<tstring>;
 		return detail::tszcmp<detail::TToTransparent<int>, tchar, tcharB>({pszA, nMaxCount}, {std::data(svB), std::min(std::size(svB), nMaxCount)});
 	}
-	template < concepts::string_elem tchar, concepts::tchar_string_like tstring >
+	template < concepts::string_elem tchar, concepts::tstring_like tstring >
 	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszicmp(tchar const* pszA, tstring const& svB) {
 		static_assert(concepts::have_same_tchar<std::basic_string<tchar>, tstring>);
 		using tcharB = concepts::value_t<tstring>;
 		return detail::tszcmp<tchar, tchar, true, detail::TToLower<int>, tchar, tcharB >({pszA, RSIZE_MAX}, {std::data(svB), std::size(svB)});
 	}
-	template < concepts::string_elem tchar, concepts::tchar_string_like tstring >
+	template < concepts::string_elem tchar, concepts::tstring_like tstring >
 	BSC__NODISCARD BSC__DEPR_SEC constexpr int tsznicmp(tchar const* pszA, tstring const& svB, size_t nMaxCount) {
 		static_assert(concepts::have_same_tchar<std::basic_string<tchar>, tstring>);
 		using tcharB = concepts::value_t<tstring>;
 		return detail::tszcmp<tchar, tchar, true, detail::TToLower<int>, tchar, tcharB >({pszA, nMaxCount}, {std::data(svB), std::min(std::size(svB), nMaxCount)});
 	}
 
-	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
+	template < concepts::tstring_like tstringA, concepts::tstring_like tstringB >
 		requires concepts::have_same_tchar<tstringA, tstringB>
 	BSC__NODISCARD constexpr int tszcmp(tstringA const& svA, tstringB const& svB) {
 		using tcharA = concepts::value_t<tstringA>;
@@ -142,7 +142,7 @@ export namespace biscuit {
 			{std::data(svA), std::size(svA)},
 			{std::data(svB), std::size(svB)});
 	}
-	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
+	template < concepts::tstring_like tstringA, concepts::tstring_like tstringB >
 		requires concepts::have_same_tchar<tstringA, tstringB>
 	BSC__NODISCARD constexpr int tszncmp(tstringA const& svA, tstringB const& svB, size_t nMaxCount) {
 		using tcharA = concepts::value_t<tstringA>;
@@ -151,7 +151,7 @@ export namespace biscuit {
 			{std::data(svA), std::min(nMaxCount, std::size(svA))},
 			{std::data(svB), std::min(nMaxCount, std::size(svB))});
 	}
-	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
+	template < concepts::tstring_like tstringA, concepts::tstring_like tstringB >
 		requires concepts::have_same_tchar<tstringA, tstringB>
 	BSC__NODISCARD constexpr int tszicmp(tstringA const& svA, tstringB const& svB) {
 		using tcharA = concepts::value_t<tstringA>;
@@ -160,7 +160,7 @@ export namespace biscuit {
 			{std::data(svA), std::size(svA)},
 			{std::data(svB), std::size(svB)});
 	}
-	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
+	template < concepts::tstring_like tstringA, concepts::tstring_like tstringB >
 		requires concepts::have_same_tchar<tstringA, tstringB>
 	BSC__NODISCARD constexpr int tsznicmp(tstringA const& svA, tstringB const& svB, size_t nMaxCount) {
 		using tcharA = concepts::value_t<tstringA>;
@@ -193,8 +193,13 @@ export namespace biscuit {
 	/// @param pszA
 	/// @param pszB
 	/// @return 
-	template < bool bIgnoreCase = false, typename tchar >
-	BSC__NODISCARD constexpr int CompareStringContainingNumbers(std::basic_string_view<tchar> svA, std::basic_string_view<tchar> svB) {
+	template < bool bIgnoreCase = false >
+	BSC__NODISCARD constexpr int CompareNumericStrings(concepts::tstring_like auto const& svA, concepts::tstring_like auto const& svB)
+		requires (concepts::have_same_tchar<decltype(svA), decltype(svB)>)
+	{
+		using tcharA = concepts::value_t<decltype(svA)>;
+		using tcharB = concepts::value_t<decltype(svB)>;
+
 		auto const* pszA			= svA.data();
 		auto const* const pszAend	= svA.data() + svA.size();
 		auto const* pszB			= svB.data();
@@ -202,11 +207,11 @@ export namespace biscuit {
 
 		for (; (pszA < pszAend) && (pszB < pszBend); pszA++, pszB++) {
 			if (IsDigit(*pszA) && IsDigit(*pszB)) {	// for numbers
-				tchar const* const pszAs {pszA};
-				tchar const* const pszBs {pszB};
+				tcharA const* const pszAs {pszA};
+				tcharB const* const pszBs {pszB};
 
 				// skip '0'
-				auto Skip0 = [](tchar const*& psz, tchar const* const pszEnd) {
+				auto Skip0 = [](auto const*& psz, auto const* const pszEnd) {
 					for ( ; (psz < pszEnd) and ('0' == *psz); psz++)
 						;
 					};
@@ -214,7 +219,7 @@ export namespace biscuit {
 				Skip0(pszB, pszBend);
 
 				// Count Digit Length
-				auto CountDigitLength = [](tchar const*& psz, tchar const* const pszEnd) -> int {
+				auto CountDigitLength = [](auto const*& psz, auto const* const pszEnd) -> int {
 					int nDigit{};
 					for (; (psz + nDigit < pszEnd) and IsDigit(psz[nDigit]); nDigit++)
 						;
@@ -240,9 +245,9 @@ export namespace biscuit {
 				pszA--;
 				pszB--;
 			} else {
-				tchar cA = *pszA;
-				tchar cB = *pszB;
-				if constexpr (bIgnoreCase) { cA = (tchar)ToLower(cA); cB = (tchar)ToLower(cB); }
+				tcharA cA = *pszA;
+				tcharB cB = *pszB;
+				if constexpr (bIgnoreCase) { cA = ToLower(cA); cB = ToLower(cB); }
 				auto r = cA - cB;
 				if (r == 0)
 					continue;
@@ -257,20 +262,23 @@ export namespace biscuit {
 		return 0;
 	}
 
-	template < typename tchar >
-	BSC__NODISCARD constexpr inline int CompareStringContainingNumbers(std::basic_string_view<tchar> strA, std::basic_string_view<tchar> strB, bool bIgnoreCase) {
+	BSC__NODISCARD constexpr inline int CompareNumericStrings(concepts::tstring_like auto const& svA, concepts::tstring_like auto const& svB, bool bIgnoreCase)
+		requires (concepts::have_same_tchar<decltype(svA), decltype(svB)>)
+	{
 		return bIgnoreCase
-			? CompareStringContainingNumbers<true>(strA, strB)
-			: CompareStringContainingNumbers<false>(strA, strB);
+			? CompareNumericStrings<true>(svA, svB)
+			: CompareNumericStrings<false>(svA, svB);
 	}
 
-	template < typename tchar >
-	BSC__NODISCARD constexpr inline int tdszcmp(std::basic_string_view<tchar> svA, std::basic_string_view<tchar> svB) {
-		return CompareStringContainingNumbers<false>(svA, svB);
+	BSC__NODISCARD constexpr inline int tszdcmp(concepts::tstring_like auto const& svA, concepts::tstring_like auto const& svB) 
+		requires (concepts::have_same_tchar<decltype(svA), decltype(svB)>)
+	{
+		return CompareNumericStrings<false>(svA, svB);
 	}
-	template < typename tchar >
-	BSC__NODISCARD constexpr inline int tdszicmp(std::basic_string_view<tchar> svA, std::basic_string_view<tchar> svB) {
-		return CompareStringContainingNumbers<true>(svA, svB);
+	BSC__NODISCARD constexpr inline int tszdicmp(concepts::tstring_like auto const& svA, concepts::tstring_like auto const& svB) 
+		requires (concepts::have_same_tchar<decltype(svA), decltype(svB)>)
+	{
+		return CompareNumericStrings<true>(svA, svB);
 	}
 
 }	// namespace biscuit

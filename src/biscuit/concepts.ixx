@@ -97,21 +97,17 @@ export namespace biscuit::concepts {
 		or (std::is_same_v<as_utf_t<tchar1>, as_utf_t<tchar2>>)
 		);
 
-	template < template < typename tchar > typename tstring_or_view, typename tchar >
-	concept string_like = std::ranges::contiguous_range<tstring_or_view<tchar>> && string_elem<tchar>;
-	//template < template < typename tchar > typename tstring_or_view, typename tchar >
-	//concept string_like = requires (tstring_or_view<tchar> str) { str.data(); str.size(); };
 
 	template < typename tstring_or_view >
-	concept tchar_string_like = std::ranges::contiguous_range<tstring_or_view> && string_elem<std::ranges::range_value_t<tstring_or_view>>;
+	concept tstring_like = std::ranges::contiguous_range<tstring_or_view> && string_elem<std::ranges::range_value_t<tstring_or_view>>;
 	//template < typename tstring_or_view, typename tchar = tstring_or_view::value_type >
-	//concept tchar_string_like = requires (tstring_or_view str) { str.data(); str.size(); };
+	//concept tstring_like = requires (tstring_or_view str) { str.data(); str.size(); };
 
 
-	template < tchar_string_like tstring >
+	template < tstring_like tstring >
 	using value_t = std::ranges::range_value_t<std::remove_cvref_t<tstring>>;
 
-	template < tchar_string_like tstringA, tchar_string_like tstrinB >
+	template < tstring_like tstringA, tstring_like tstrinB >
 	constexpr bool have_same_tchar = (sizeof(value_t<tstringA>) == sizeof(value_t<tstrinB>));
 
 

@@ -50,7 +50,7 @@ export namespace biscuit {
 		return pos-psz;
 	}
 
-	template < concepts::tchar_string_like tstring >
+	template < concepts::tstring_like tstring >
 	BSC__NODISCARD constexpr size_t tszlen(tstring const& v) {
 		return detail::tszlen(std::span{std::data(v), std::size(v)});
 	}
@@ -107,7 +107,7 @@ export namespace biscuit {
 	}
 
 
-	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
+	template < concepts::tstring_like tstringA, concepts::tstring_like tstringB >
 		requires (std::is_trivially_copyable_v<tstringA> && concepts::have_same_tchar<tstringA, tstringB>)
 	constexpr auto tszcpy(tstringA& dst, tstringB const& src) {
 		using tcharA = std::ranges::range_value_t<std::remove_cvref_t<tstringA>>;
@@ -131,7 +131,7 @@ export namespace biscuit {
 		return tpszcpy<tchar>(pszDest, sizeDest, pszSrc);
 	}
 
-	template < concepts::tchar_string_like tstringA, concepts::tchar_string_like tstringB >
+	template < concepts::tstring_like tstringA, concepts::tstring_like tstringB >
 		requires (concepts::have_same_tchar<tstringA, tstringB>)
 	constexpr auto tszcat(tstringA& dst, tstringB const& src) {
 		using tcharA = std::ranges::range_value_t<std::remove_cvref_t<tstringA>>;
@@ -176,11 +176,11 @@ export namespace biscuit {
 
 	/// @brief searches character.
 	/// @return !!! CAUTION !!! 'end' value if not found.
-	template < concepts::tchar_string_like tstring >
+	template < concepts::tstring_like tstring >
 	BSC__NODISCARD constexpr auto* tszsearch(tstring const& str, concepts::value_t<tstring> ch) {
 		return tszsearch(std::data(str), std::data(str)+std::size(str), ch);
 	}
-	template < concepts::tchar_string_like tstring >
+	template < concepts::tstring_like tstring >
 	BSC__NODISCARD constexpr auto* tszsearch(tstring&& str, concepts::value_t<tstring> ch) = delete;
 
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -218,7 +218,7 @@ export namespace biscuit {
 
 	/// @brief remove character from string.
 	/// @return length of string after removing character.
-	template < concepts::tchar_string_like tstring >
+	template < concepts::tstring_like tstring >
 		requires (std::is_trivially_copyable_v<tstring>)
 	constexpr size_t tszrmchar(tstring& sz, concepts::value_t<tstring> chRemove) {
 		//auto iter = std::remove(std::begin(sz), std::end(sz), chRemove);
@@ -258,6 +258,29 @@ export namespace biscuit {
 		return dst - begin;
 	}
 
+	/// @brief remove character from string.
+	/// @return length of string after removing character.
+	template < concepts::tstring_like tstring >
+	BSC__NODISCARD constexpr auto tszrmcharTo(tstring const& sz, concepts::value_t<tstring> chRemove) -> std::basic_string<concepts::value_t<tstring>> {
+		using tchar = concepts::value_t<tstring>;
+		using string_t = std::basic_string<tchar>;
+
+		string_t result;
+
+		if (!std::data(sz))
+			return result;
+
+		result.reserve(std::size(sz));
+
+		for (auto c : sz) {
+			if (!c)
+				break;
+			if (c != chRemove)
+				result += c;
+		}
+		return result;
+	}
+
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// ToLower, ToUpper
 
@@ -270,7 +293,7 @@ export namespace biscuit {
 		if constexpr (std::is_same_v<tchar, char>) { return (tchar)std::toupper(c); } else { return (tchar)std::towupper(c); }
 	}
 
-	template < concepts::tchar_string_like tstring, typename tchar = concepts::value_t<tstring> >
+	template < concepts::tstring_like tstring, typename tchar = concepts::value_t<tstring> >
 	BSC__NODISCARD auto ToLower(tstring const& sv) -> std::basic_string<tchar> {
 		std::basic_string<tchar> str;
 		str.reserve(sv.size());
@@ -278,7 +301,7 @@ export namespace biscuit {
 			str += ToLower(c);
 		return str;
 	}
-	template < concepts::tchar_string_like tstring, typename tchar = concepts::value_t<tstring> >
+	template < concepts::tstring_like tstring, typename tchar = concepts::value_t<tstring> >
 	BSC__NODISCARD auto ToUpper(tstring const& sv) -> std::basic_string<tchar> {
 		std::basic_string<tchar> str;
 		str.reserve(sv.size());
@@ -331,7 +354,7 @@ export namespace biscuit {
 			return 0;
 		}
 
-		template < concepts::tchar_string_like tstring, typename TEvaluator >
+		template < concepts::tstring_like tstring, typename TEvaluator >
 			requires (std::is_trivially_copyable_v<tstring>)
 		constexpr std::error_code tsz_transform(tstring& buf) {
 			constexpr static TEvaluator const func{};
@@ -352,7 +375,7 @@ export namespace biscuit {
 	BSC__DEPR_SEC constexpr std::error_code tpszupr(tchar* psz, size_t size) {
 		return detail::tpsz_transform<tchar, detail::TToUpper<tchar>>(psz, size);
 	}
-	template < concepts::tchar_string_like tstring >
+	template < concepts::tstring_like tstring >
 		requires (std::is_trivially_copyable_v<tstring>)
 	std::error_code tszupr(tstring& buf) {
 		using tchar = concepts::value_t<tstring>;
@@ -365,7 +388,7 @@ export namespace biscuit {
 	BSC__DEPR_SEC std::error_code tpszlwr(tchar* psz, size_t size) {
 		return detail::tpsz_transform<tchar, detail::TToLower<tchar>>(psz, size);
 	}
-	template < concepts::tchar_string_like tstring >
+	template < concepts::tstring_like tstring >
 		requires (std::is_trivially_copyable_v<tstring>)
 	std::error_code tszlwr(tstring& buf) {
 		using tchar = concepts::value_t<tstring>;
@@ -391,14 +414,13 @@ export namespace biscuit {
 		std::reverse(psz, psz+len);
 		return len;
 	}
-	template < concepts::tchar_string_like tstring >
+	template < concepts::tstring_like tstring >
 		requires (std::is_trivially_copyable_v<tstring>)
 	size_t tszrev(tstring& buf) {
 		auto len = tszlen(buf);
 		std::reverse(std::data(buf), std::data(buf)+len);
 		return len;
 	}
-
 
 }	// namespace biscuit
 

@@ -27,5 +27,8 @@
     <ClCompile Include="test_string.basic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test_string.arithmetic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

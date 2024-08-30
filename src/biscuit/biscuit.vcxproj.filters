@@ -62,7 +62,7 @@
     <ClCompile Include="iconv_wrapper.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="string.convert_codepage.ixx">
+    <ClCompile Include="convert_codepage.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="charset_kssm.ixx">
@@ -84,6 +84,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="codepage.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="string.arithmetic.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

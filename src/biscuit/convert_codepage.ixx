@@ -13,11 +13,11 @@ module;
 #include <simdutf.h>
 #include "biscuit/macro.h"
 
-export module biscuit.string.convert_codepage;
+export module biscuit.convert_codepage;
 import std;
-import biscuit.misc;
 import biscuit.aliases;
 import biscuit.concepts;
+import biscuit.misc;
 import biscuit.iconv_wrapper;
 
 namespace concepts = biscuit::concepts;
@@ -29,9 +29,22 @@ export namespace biscuit {
 	BSC__NODISCARD auto	Au8(std::string_view str)	-> std::u8string_view	{ return reinterpret_cast<std::u8string_view&>(str); }
 	BSC__NODISCARD auto	u8A(std::u8string_view str) -> std::string_view		{ return reinterpret_cast<std::string_view&>(str); }
 
+
+	//-----------------------------------------------------------------------------
+	/// @brief just char -> tchar_t (this function does not change sv's values.)
+	template < typename tcharTarget, typename tcharSource >
+	constexpr std::basic_string<tcharTarget> ElevateAnsiToStandard(std::basic_string_view<tcharSource> sv) {
+		std::basic_string<tcharTarget> result;
+		result.reserve(sv.size());
+		for (auto c : sv)
+			result += static_cast<tcharTarget>(c);
+		return result;
+	}
+
+
 	//=============================================================================================================================
 	// Convert String
-	template < concepts::string_elem tchar_to, concepts::tchar_string_like tstring, typename tchar_from = tstring::value_type >
+	template < concepts::string_elem tchar_to, concepts::tstring_like tstring, typename tchar_from = tstring::value_type >
 	BSC__NODISCARD auto ConvertString(tstring const& str) -> std::basic_string<tchar_to> {
 		//using tchar_from = std::remove_cvref_t<tstring>::value_type;
 		//static_assert(concepts::string_elem<tchar_to>);
@@ -118,7 +131,7 @@ export namespace biscuit {
 
 	//=============================================================================================================================
 	// Convert String using iconv
-	template < concepts::string_elem tchar_to, concepts::tchar_string_like tstring,
+	template < concepts::string_elem tchar_to, concepts::tstring_like tstring,
 		xStringLiteral szCodeTo = "", xStringLiteral szCodeFrom = "", size_t initial_dst_buf_size = 1024 >
 	BSC__NODISCARD auto ConvertString_iconv(tstring const& strFrom) {
 		using tchar_from = std::remove_cvref_t<tstring>::value_type;
@@ -132,7 +145,7 @@ export namespace biscuit {
 		return ConvertString_iconv<tchar_to, std::string_view, "", "CP949", initial_dst_buf_size>(strFrom);
 	}
 
-	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
+	template < concepts::tstring_like tstring, size_t initial_dst_buf_size = 1024 >
 	BSC__NODISCARD auto ConvertStringToCP949(tstring const& strFrom) -> std::string {
 		using tchar_from = std::remove_cvref_t<tstring>::value_type;
 		return ConvertString_iconv<char, tstring, "CP949", "", initial_dst_buf_size>(strFrom);
@@ -144,7 +157,7 @@ export namespace biscuit {
 		return ConvertString_iconv<tchar_to, std::basic_string_view<charKSSM_t>, "", "JOHAB", initial_dst_buf_size>(strFrom);
 	}
 
-	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
+	template < concepts::tstring_like tstring, size_t initial_dst_buf_size = 1024 >
 	BSC__NODISCARD auto ConvertStringToKSSM(tstring const& strFrom) {
 		return ConvertString_iconv<char, tstring, "JOHAB", "", initial_dst_buf_size>(strFrom);
 	}
@@ -154,7 +167,7 @@ export namespace biscuit {
 		return ConvertString_iconv<tchar_to, std::string_view, "", "JOHAB", initial_dst_buf_size>(strFrom);
 	}
 
-	template < concepts::tchar_string_like tstring, size_t initial_dst_buf_size = 1024 >
+	template < concepts::tstring_like tstring, size_t initial_dst_buf_size = 1024 >
 	BSC__NODISCARD auto ConvertStringToKSSM_MBCS(tstring const& strFrom) {
 		return ConvertString_iconv<char, tstring, "JOHAB", "", initial_dst_buf_size>(strFrom);
 	}

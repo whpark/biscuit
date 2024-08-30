@@ -16,8 +16,8 @@ export module biscuit.string.manipulates;
 import std;
 import biscuit.aliases;
 import biscuit.concepts;
+import biscuit.convert_codepage;
 import biscuit.string.defines;
-import biscuit.string.convert_codepage;
 
 namespace concepts = biscuit::concepts;
 //using namespace std::literals;

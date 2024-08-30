@@ -169,7 +169,7 @@ export namespace biscuit {
 		//std::optional<std::basic_string<tchar_to>> Convert(std::basic_string<tchar_from> const& strFrom) {
 		//	return Convert(std::basic_string_view<tchar_from>{strFrom});
 		//}
-		template < concepts::tchar_string_like tstring >
+		template < concepts::tstring_like tstring >
 		BSC__NODISCARD auto Convert(tstring const& svFrom) -> std::optional<std::basic_string<tchar_to>> {
 			std::basic_string<tchar_to> strTo;
 
