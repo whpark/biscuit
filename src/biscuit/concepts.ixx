@@ -18,7 +18,7 @@ import biscuit.aliases;
 
 export namespace biscuit::concepts {
 
-	template<typename> inline constexpr bool dependent_false_v = false;
+	//template<typename> inline constexpr bool dependent_false_v = false;
 
 	/// @brief arithmetic type
 	template < typename T >

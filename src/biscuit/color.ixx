@@ -8,6 +8,7 @@ import std;
 
 export namespace biscuit {
 
+	//-----------------------------------------------------------------------------
 	/// @brief color_rgba_t
 	struct color_rgba_t {
 		using this_t = color_rgba_t;
@@ -35,6 +36,7 @@ export namespace biscuit {
 		return color_rgba_t{.r = r, .g = g, .b = b, .a = a};
 	}
 
+	//-----------------------------------------------------------------------------
 	/// @brief color_bgra_t
 	struct color_bgra_t {
 		using this_t = color_bgra_t;
@@ -62,6 +64,7 @@ export namespace biscuit {
 		return color_bgra_t{.b = b, .g = g, .r = r, .a = a};
 	}
 
+	//-----------------------------------------------------------------------------
 	/// @brief color_abgr_t
 	struct color_abgr_t {
 		using this_t = color_abgr_t;

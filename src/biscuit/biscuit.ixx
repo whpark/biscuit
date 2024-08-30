@@ -11,6 +11,7 @@ export import biscuit.arithmetic;
 export import biscuit.color;
 export import biscuit.views;
 export import biscuit.misc;
+export import biscuit.codepage;
 export import biscuit.iconv_wrapper;
 export import biscuit.charset_kssm;
 export import biscuit.string;
