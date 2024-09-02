@@ -89,6 +89,15 @@
     <ClCompile Include="string.arithmetic.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="coord.point.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="coord.base.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="coord.concepts.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\vcpkg.json" />

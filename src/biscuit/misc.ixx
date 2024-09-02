@@ -73,7 +73,7 @@ export namespace biscuit {
 	template < typename T >
 	class TCopyTransparent : public T {
 	public:
-		using base_t = T;
+		using target_t = T;
 
 		using T::T;
 		//TCopyTransparent() : T() {}
@@ -160,8 +160,8 @@ export namespace biscuit {
 		template < typename T1, typename T2 >
 		class pair : public std::pair<T1, T2> {
 		public:
-			using base_t = std::pair<T1,T2>;
-			using base_t::base_t;
+			using target_t = std::pair<T1,T2>;
+			using target_t::target_t;
 		};
 
 		//// non-const function call in const function. -----> std::remove_cvref_t

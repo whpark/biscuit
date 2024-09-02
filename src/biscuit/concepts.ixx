@@ -40,15 +40,15 @@ export namespace biscuit::concepts {
 	concept is_one_of = (std::is_same_v<tchar, ttypes> || ...);
 
 
-	/// @brief type for string buffer. ex) char buf[12]; std::array<char, 12> buf; std::vector<char> buf;...
-	template < typename tcontainer, typename type >
-	concept container =
-		requires (tcontainer v) {
-			{ v[0] }			-> std::convertible_to<type>;
-			{ std::size(v) }	-> std::convertible_to<size_t>;
-			v.begin();
-			v.end();
-	};
+	///// @brief type for string buffer. ex) char buf[12]; std::array<char, 12> buf; std::vector<char> buf;...
+	//template < typename tcontainer, typename type >
+	//concept container =
+	//	requires (tcontainer v) {
+	//		{ v[0] }			-> std::convertible_to<type>;
+	//		{ std::size(v) }	-> std::convertible_to<size_t>;
+	//		v.begin();
+	//		v.end();
+	//};
 
 
 	/// @brief type for string string.
