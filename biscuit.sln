@@ -6,6 +6,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit", "src\biscuit\bisc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "src\test\test.vcxproj", "{BAEB51D6-595E-4B31-8132-58BE4A67718F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{219901BC-F3EB-477D-BD7A-2AAC6BF9B65D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependencies", "dependencies", "{3C2340D6-6EC4-43A0-B2BE-2FF17EB38CF2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThirdParties", "src\ThirdParties\ThirdParties.vcxproj", "{730A3E73-F28D-435F-ADFD-DEF57F11F48F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -20,9 +26,17 @@ Global
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F}.Debug|x64.Build.0 = Debug|x64
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F}.Release|x64.ActiveCfg = Release|x64
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F}.Release|x64.Build.0 = Release|x64
+		{730A3E73-F28D-435F-ADFD-DEF57F11F48F}.Debug|x64.ActiveCfg = Debug|x64
+		{730A3E73-F28D-435F-ADFD-DEF57F11F48F}.Debug|x64.Build.0 = Debug|x64
+		{730A3E73-F28D-435F-ADFD-DEF57F11F48F}.Release|x64.ActiveCfg = Release|x64
+		{730A3E73-F28D-435F-ADFD-DEF57F11F48F}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BAEB51D6-595E-4B31-8132-58BE4A67718F} = {219901BC-F3EB-477D-BD7A-2AAC6BF9B65D}
+		{730A3E73-F28D-435F-ADFD-DEF57F11F48F} = {3C2340D6-6EC4-43A0-B2BE-2FF17EB38CF2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5807FAB1-E483-4E4C-82EE-CE7C0B12AF8C}
