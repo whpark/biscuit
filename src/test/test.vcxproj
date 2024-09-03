@@ -100,6 +100,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="test_coord.cpp" />
     <ClCompile Include="test_string.arithmetic.cpp" />
     <ClCompile Include="test_string.basic.cpp" />
     <ClCompile Include="test.cpp" />

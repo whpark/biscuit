@@ -9,7 +9,11 @@ import std;
 export namespace biscuit::inline literals { };
 
 // export aliases;
-export namespace biscuit::inline literals { };
+export namespace biscuit::inline aliases { };
+
+export namespace biscuit::detail {
+	struct dummy_t {};
+}
 
 // aliases for std::intXX_t
 export namespace biscuit::inline aliases {
