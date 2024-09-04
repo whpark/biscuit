@@ -41,6 +41,6 @@ export namespace biscuit {
 
 	static_assert(std::is_constructible_v<sPoint2i, double, double>);
 
-	static_assert(concepts::has_point2<sPoint2i>);
+	static_assert(concepts::coord::has_point2<sPoint2i>);
 
 }

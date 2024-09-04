@@ -27,11 +27,11 @@ export namespace biscuit {
 	static_assert(sizeof(sSize3d) == sizeof(double)*3);
 	static_assert(std::is_trivially_copyable_v<sSize2d>);
 
-	static_assert(!concepts::has_point2<sSize2i>);
-	static_assert(concepts::has_size2<sSize2i>);
-	static_assert(!concepts::has_rect2<sSize2i>);
-	static_assert(!concepts::is_point2<sSize2i>);
-	static_assert(concepts::is_size2<sSize2i>);
-	static_assert(!concepts::is_rect2<sSize2i>);
+	static_assert(!concepts::coord::has_point2<sSize2i>);
+	static_assert(concepts::coord::has_size2<sSize2i>);
+	static_assert(!concepts::coord::has_rect2<sSize2i>);
+	static_assert(!concepts::coord::is_point2<sSize2i>);
+	static_assert(concepts::coord::is_size2<sSize2i>);
+	static_assert(!concepts::coord::is_rect2<sSize2i>);
 
 }

@@ -1,10 +1,11 @@
 module;
 
 #include <glaze/glaze.hpp>
+#include "biscuit/macro.h"
 
 export module biscuit.coord.base;
 import std;
-import "biscuit/macro.h";
+//import "biscuit/macro.h";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.coord.concepts;
@@ -12,6 +13,8 @@ import biscuit.coord.concepts;
 namespace concepts = biscuit::concepts;
 
 export namespace biscuit::coord {
+
+	//using namespace biscuit::concepts::coord;
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	template < typename T >
@@ -151,23 +154,23 @@ export namespace biscuit::coord {
 		//auto& operator = (this_t&& other) { arr() = std::move(other.arr()); return *this; }
 
 		template < typename tother >
-			requires !std::is_same_v<tother, this_t> and ( concepts::generic_coord<tother> or concepts::generic_qcoord<tother> )
+			requires !std::is_same_v<tother, this_t> and concepts::coord::generic_coord<tother>
 		explicit TCoordBase(tother const& b) {
 			*this = b;
 		}
 
 		template < typename tother >
-			requires !std::is_same_v<tother, this_t> and ( concepts::generic_coord<tother> or concepts::generic_qcoord<tother> )
+			requires !std::is_same_v<tother, this_t> and concepts::coord::generic_coord<tother>
 		TCoordBase& operator = (tother const& b) {
 			using other_t = std::remove_cvref_t<tother>;
-			if constexpr (concepts::has_point2<base_t>) {
-				if constexpr (concepts::has_point2<other_t>) {
+			if constexpr (concepts::coord::has_point2<base_t>) {
+				if constexpr (concepts::coord::has_point2<other_t>) {
 					MemberSet_x(MemberGet_x(b));
 					MemberSet_y(MemberGet_y(b));
 					MemberSet_z(MemberGet_z(b));
 					MemberSet_w(MemberGet_w(b));
 				}
-				else if constexpr (concepts::has_size2<other_t>) {
+				else if constexpr (concepts::coord::has_size2<other_t>) {
 					MemberSet_x(MemberGet_width(b));
 					MemberSet_y(MemberGet_height(b));
 					MemberSet_z(MemberGet_depth(b));
@@ -176,13 +179,13 @@ export namespace biscuit::coord {
 					static_assert(false);
 				}
 			}
-			if constexpr (concepts::has_size2<base_t>) {
-				if constexpr (concepts::has_size2<other_t>) {
+			if constexpr (concepts::coord::has_size2<base_t>) {
+				if constexpr (concepts::coord::has_size2<other_t>) {
 					MemberSet_width (MemberGet_width(b));
 					MemberSet_height(MemberGet_height(b));
 					MemberSet_depth (MemberGet_depth(b));
 				}
-				else if constexpr (concepts::has_point2<other_t>) {
+				else if constexpr (concepts::coord::has_point2<other_t>) {
 					MemberSet_width (MemberGet_x(b));
 					MemberSet_height(MemberGet_y(b));
 					MemberSet_depth (MemberGet_z(b));
@@ -191,23 +194,43 @@ export namespace biscuit::coord {
 			return *this;
 		}
 
-		this_t Zero() {
-			return this_t{};
+		template < concepts::coord::generic_coord tcoord2 >
+		operator tcoord2() const {
+			tcoord2 r;
+			if constexpr (bRect or concepts::coord::generic_rect<tcoord2>) {
+				MemberSet_x(r, MemberGet_x());
+				MemberSet_y(r, MemberGet_y());
+				MemberSet_z(r, MemberGet_z());
+				MemberSet_w(r, MemberGet_w());
+				MemberSet_width(r, MemberGet_width());
+				MemberSet_depth(r, MemberGet_depth());
+				MemberSet_height(r, MemberGet_height());
+			}
+			else if constexpr (concepts::coord::generic_point<tcoord2> and bSize) {
+				MemberSet_x(r, MemberGet_width());
+				MemberSet_y(r, MemberGet_height());
+				MemberSet_z(r, MemberGet_depth());
+			}
+			else if constexpr (concepts::coord::generic_point<tcoord2> and bPoint) {
+				MemberSet_x(r, MemberGet_x());
+				MemberSet_y(r, MemberGet_y());
+				MemberSet_z(r, MemberGet_z());
+				MemberSet_w(r, MemberGet_w());
+			}
+			else if constexpr (concepts::coord::generic_size<tcoord2> and bSize) {
+				MemberSet_width(r, MemberGet_width());
+				MemberSet_height(r, MemberGet_height());
+				MemberSet_depth(r, MemberGet_depth());
+			}
+			else if constexpr (concepts::coord::generic_size<tcoord2> and bPoint) {
+				MemberSet_width(r, MemberGet_x());
+				MemberSet_height(r, MemberGet_y());
+				MemberSet_depth(r, MemberGet_z());
+			}
 		}
-		this_t All(value_t v = {}) requires (bPoint or bSize) {
-			if constexpr (count() == 1) return {v};
-			if constexpr (count() == 2) return {v, v};
-			if constexpr (count() == 3) return {v, v, v};
-			if constexpr (count() == 4) return {v, v, v, v};
-			if constexpr (count() == 6) return {v, v, v, v, v, v};
-		}
-
+		//--------------------------------------------------------------------------------------------------------------------------
 		BSC__NODISCARD auto operator <=> (this_t const&) const = default;
 		BSC__NODISCARD auto operator <=> (value_t const& v) const { return *this <=> this_t::Zero(v); }
-
-		BSC__NODISCARD auto CountNonZero() const {
-			return std::ranges::count_if(arr(), [](auto v) { return v != 0; } );
-		}
 
 		//--------------------------------------------------------------------------------------------------------------------------
 		// get member as array
@@ -238,6 +261,23 @@ export namespace biscuit::coord {
 		}
 
 		//--------------------------------------------------------------------------------------------------------------------------
+
+		this_t Zero() {
+			return this_t{};
+		}
+		this_t All(value_t v = {}) requires (bPoint or bSize) {
+			if constexpr (count() == 1) return {v};
+			if constexpr (count() == 2) return {v, v};
+			if constexpr (count() == 3) return {v, v, v};
+			if constexpr (count() == 4) return {v, v, v, v};
+			if constexpr (count() == 6) return {v, v, v, v, v, v};
+		}
+
+		BSC__NODISCARD auto CountNonZero() const {
+			return std::ranges::count_if(arr(), [](auto v) { return v != 0; } );
+		}
+
+		//--------------------------------------------------------------------------------------------------------------------------
 		BSC__NODISCARD bool IsAllValid() const requires (std::is_floating_point_v<value_t>) {
 			for (auto v : arr())
 				if ( std::isnan(v) || std::isfinite(v) )
@@ -254,6 +294,11 @@ export namespace biscuit::coord {
 			}
 			return bModified;
 		}
+
+		//--------------------------------------------------------------------------------------------------------------------------
+		// operator
+
+
 
 
 		//--------------------------------------------------------------------------------------------------------------------------
@@ -308,38 +353,60 @@ export namespace biscuit::coord {
 		}
 
 		// get/set member (for internal)
-	#define DEFINE_MEMBER_GET_SET(VAR) \
-		template < typename tgeneric_coord >\
-		BSC__NODISCARD constexpr static inline decltype(auto) MemberGet_##VAR(tgeneric_coord&& coord) {\
-			if constexpr (concepts::has_##VAR<tgeneric_coord>) { return PassValue<value_t>(coord.VAR); }\
-			else if constexpr (concepts::has_q##VAR<tgeneric_coord>) { return PassValue<value_t>(coord.VAR()); }\
-			else { return detail::dummy_t{}; }\
-		}\
+	#define DEFINE_MEMBER_GET_SET(VAR, VAR_U) \
 		BSC__NODISCARD constexpr inline decltype(auto) MemberGet_##VAR() {\
-			if constexpr (concepts::has_##VAR<base_t>) { return base_t::VAR; }\
+			if constexpr (concepts::coord::has_##VAR<base_t>) { return base_t::VAR; }\
 			else { return detail::dummy_t{}; }\
 		}\
 		BSC__NODISCARD constexpr inline auto const MemberGet_##VAR() const {\
-			if constexpr (concepts::has_##VAR<base_t>) { return base_t::VAR; }\
+			if constexpr (concepts::coord::has_##VAR<base_t>) { return base_t::VAR; }\
 			else { return detail::dummy_t{}; }\
 		}\
 		constexpr inline void MemberSet_##VAR(auto value) {\
 			if constexpr (std::is_arithmetic_v<std::remove_cvref_t<decltype(value)>>) {\
-				if constexpr (concepts::has_##VAR<base_t>) { base_t::VAR = PassValue<value_t>(value); }\
+				if constexpr (concepts::coord::has_##VAR<base_t>) { base_t::VAR = PassValue<value_t>(value); }\
 			}\
 		}\
+		\
+		template < concepts::coord::generic_coord tcoord2 >\
+		BSC__NODISCARD constexpr static inline decltype(auto) MemberGet_##VAR(tcoord2&& coord) {\
+			if constexpr (concepts::coord::has_##VAR<tcoord2>) { return PassValue<value_t>(coord.VAR); }\
+			else if constexpr (concepts::coord::has_i##VAR<tcoord2>) { return PassValue<value_t>(coord.VAR()); }\
+			else { return detail::dummy_t{}; }\
+		}\
+		template < concepts::coord::generic_coord tcoord2 >\
+		constexpr static inline void MemberSet_##VAR(tcoord2&& coord, auto value) {\
+			if constexpr (std::is_arithmetic_v<std::remove_cvref_t<decltype(value)>>) {\
+				if constexpr (concepts::coord::has_##VAR<tcoord2>) { coord.VAR = PassValue<std::remove_cvref_t<decltype(coord.VAR)>>(value); }\
+				if constexpr (concepts::coord::has_i##VAR<tcoord2>) { coord.set##VAR_U( PassValue<std::remove_cvref_t<decltype(coord.VAR)>>(value)); }\
+			}\
+		}
 
-		DEFINE_MEMBER_GET_SET(x);
-		DEFINE_MEMBER_GET_SET(y);
-		DEFINE_MEMBER_GET_SET(z);
-		DEFINE_MEMBER_GET_SET(w);
-		DEFINE_MEMBER_GET_SET(width);
-		DEFINE_MEMBER_GET_SET(height);
-		DEFINE_MEMBER_GET_SET(depth);
+		DEFINE_MEMBER_GET_SET(x, X);
+		DEFINE_MEMBER_GET_SET(y, Y);
+		DEFINE_MEMBER_GET_SET(z, Z);
+		DEFINE_MEMBER_GET_SET(w, W);
+		DEFINE_MEMBER_GET_SET(width, Width);
+		DEFINE_MEMBER_GET_SET(height, Height);
+		DEFINE_MEMBER_GET_SET(depth, Depth);
 
 	#undef DEFINE_MEMBER_GET_SET
-
 	};
+
+//#define DEFINE_MEMBER_GET_SET(VAR, VAR_U) \
+//	template < concepts::coord::generic_coord tcoord2 >\
+//	BSC__NODISCARD constexpr inline decltype(auto) MemberGet_##VAR(tcoord2&& coord) {\
+//		if constexpr (concepts::coord::has_##VAR<tcoord2>) { return coord.VAR; }\
+//		else if constexpr (concepts::coord::has_i##VAR<tcoord2>) { return coord.VAR(); }\
+//		else { return detail::dummy_t{}; }\
+//	}\
+//	template < concepts::coord::generic_coord tcoord2 >\
+//	constexpr inline void MemberSet_##VAR(tcoord2&& coord, auto value) {\
+//		if constexpr (std::is_arithmetic_v<std::remove_cvref_t<decltype(value)>>) {\
+//			if constexpr (concepts::coord::has_##VAR<tcoord2>) { coord.VAR = value; }\
+//			if constexpr (concepts::coord::has_i##VAR<tcoord2>) { coord.set##VAR_U(value); }\
+//		}\
+//	}
 
 }
 

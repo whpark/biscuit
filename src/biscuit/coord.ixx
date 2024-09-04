@@ -10,6 +10,7 @@
 #include <fmt/core.h>
 #include <fmt/xchar.h>
 #include <fmt/ostream.h>
+#include "biscuit/macro.h"
 
 export module biscuit.coord;
 import std;
@@ -51,21 +52,21 @@ export namespace biscuit {
 	////-------------------------------------------------------------------------
 	//// Archive <---------> TPoint2/3, TSize2/3, TRect2/3
 	////
-	//template < typename Archive, concepts::coord tcoord >
+	//template < typename Archive, concepts::coord::coord tcoord >
 	//Archive& Coord2Archive(const tcoord& coord, Archive& ar) {
 	//	for (const auto& v : coord.data())
 	//		ar & v;
 	//	return ar;
 	//}
 
-	//template < typename Archive, concepts::coord tcoord >
+	//template < typename Archive, concepts::coord::coord tcoord >
 	//Archive& Archive2Coord(Archive& ar, tcoord& coord) {
 	//	for (auto& v : coord.data())
 	//		ar & v;
 	//	return ar;
 	//}
 
-	//template < typename Archive, concepts::coord tcoord >
+	//template < typename Archive, concepts::coord::coord tcoord >
 	//Archive& SerializeCoord(Archive& ar, tcoord& coord) {
 	//	return ar.IsStoring() ? Coord2Archive<Archive, tcoord>(coord, ar) : Archive2Coord<Archive, tcoord>(ar, coord);
 	//}
@@ -126,52 +127,55 @@ export namespace biscuit {
 	//}
 
 
-	/// @brief Round for concepts::generic_coord
-	template < concepts::generic_coord tcoord >
-	constexpr [[nodiscard]] tcoord Round(tcoord const& coord) {
+	/// @brief Round
+	template < concepts::coord::is_coord tcoord >
+	BSC__NODISCARD constexpr tcoord Round(tcoord const& coord) {
+		using namespace biscuit::concepts::coord;
 		tcoord v;
-		if constexpr (concepts::has_x<tcoord>) { v.x = std::round(coord.x); }
-		if constexpr (concepts::has_y<tcoord>) { v.y = std::round(coord.y); }
-		if constexpr (concepts::has_z<tcoord>) { v.z = std::round(coord.z); }
-		if constexpr (concepts::has_w<tcoord>) { v.w = std::round(coord.w); }
-		if constexpr (concepts::has_width<tcoord>) { v.width = std::round(coord.width); }
-		if constexpr (concepts::has_height<tcoord>) { v.height = std::round(coord.height); }
-		if constexpr (concepts::has_depth<tcoord>) { v.depth = std::round(coord.depth); }
+		if constexpr (has_x<tcoord>) { v.x = std::round(coord.x); }
+		if constexpr (has_y<tcoord>) { v.y = std::round(coord.y); }
+		if constexpr (has_z<tcoord>) { v.z = std::round(coord.z); }
+		if constexpr (has_w<tcoord>) { v.w = std::round(coord.w); }
+		if constexpr (has_width<tcoord>) { v.width = std::round(coord.width); }
+		if constexpr (has_height<tcoord>) { v.height = std::round(coord.height); }
+		if constexpr (has_depth<tcoord>) { v.depth = std::round(coord.depth); }
 		return v;
 	}
 
-	/// @brief Ceil for concepts::generic_coord
-	template < concepts::generic_coord tcoord >
-	constexpr [[nodiscard]] tcoord Ceil(tcoord const& coord) {
+	/// @brief Ceil
+	template < concepts::coord::is_coord tcoord >
+	BSC__NODISCARD constexpr tcoord Ceil(tcoord const& coord) {
+		using namespace biscuit::concepts::coord;
 		tcoord v;
-		if constexpr (concepts::has_x<tcoord>) { v.x = std::ceil(coord.x); }
-		if constexpr (concepts::has_y<tcoord>) { v.y = std::ceil(coord.y); }
-		if constexpr (concepts::has_z<tcoord>) { v.z = std::ceil(coord.z); }
-		if constexpr (concepts::has_w<tcoord>) { v.w = std::ceil(coord.w); }
-		if constexpr (concepts::has_width<tcoord>) { v.width = std::ceil(coord.width); }
-		if constexpr (concepts::has_height<tcoord>) { v.height = std::ceil(coord.height); }
-		if constexpr (concepts::has_depth<tcoord>) { v.depth = std::ceil(coord.depth); }
+		if constexpr (has_x<tcoord>) { v.x = std::ceil(coord.x); }
+		if constexpr (has_y<tcoord>) { v.y = std::ceil(coord.y); }
+		if constexpr (has_z<tcoord>) { v.z = std::ceil(coord.z); }
+		if constexpr (has_w<tcoord>) { v.w = std::ceil(coord.w); }
+		if constexpr (has_width<tcoord>) { v.width = std::ceil(coord.width); }
+		if constexpr (has_height<tcoord>) { v.height = std::ceil(coord.height); }
+		if constexpr (has_depth<tcoord>) { v.depth = std::ceil(coord.depth); }
 		return v;
 	}
 
-	/// @brief Floor for concepts::generic_coord
-	template < concepts::generic_coord tcoord >
-	constexpr [[nodiscard]] tcoord Floor(tcoord const& coord) {
+	/// @brief Floor
+	template < concepts::coord::is_coord tcoord >
+	BSC__NODISCARD constexpr tcoord Floor(tcoord const& coord) {
+		using namespace biscuit::concepts::coord;
 		tcoord v{};
-		if constexpr (concepts::has_x<tcoord>) { v.x = std::floor(coord.x); }
-		if constexpr (concepts::has_y<tcoord>) { v.y = std::floor(coord.y); }
-		if constexpr (concepts::has_z<tcoord>) { v.z = std::floor(coord.z); }
-		if constexpr (concepts::has_w<tcoord>) { v.w = std::floor(coord.w); }
-		if constexpr (concepts::has_width<tcoord>) { v.width = std::floor(coord.width); }
-		if constexpr (concepts::has_height<tcoord>) { v.height = std::floor(coord.height); }
-		if constexpr (concepts::has_depth<tcoord>) { v.depth = std::floor(coord.depth); }
+		if constexpr (has_x<tcoord>) { v.x = std::floor(coord.x); }
+		if constexpr (has_y<tcoord>) { v.y = std::floor(coord.y); }
+		if constexpr (has_z<tcoord>) { v.z = std::floor(coord.z); }
+		if constexpr (has_w<tcoord>) { v.w = std::floor(coord.w); }
+		if constexpr (has_width<tcoord>) { v.width = std::floor(coord.width); }
+		if constexpr (has_height<tcoord>) { v.height = std::floor(coord.height); }
+		if constexpr (has_depth<tcoord>) { v.depth = std::floor(coord.depth); }
 		return v;
 	}
 
 	//-------------------------------------------------------------------------
 	// Check ROI
 
-	template < concepts::is_rect2 trect, concepts::is_size2 tsize >
+	template < concepts::coord::is_rect2 trect, concepts::coord::is_size2 tsize >
 	bool IsROI_Valid(trect const& rcROI, tsize const& sizeImage) {
 		return 1
 			&& ( (rcROI.x >= 0) && (rcROI.y >= 0) )
@@ -181,8 +185,8 @@ export namespace biscuit {
 			;
 	};
 
-	template < concepts::is_rect2 trect, concepts::is_size2 tsize >
-	[[nodiscard]] trect GetSafeROI(trect const& rc, tsize const& sizeImage) {
+	template < concepts::coord::is_rect2 trect, concepts::coord::is_size2 tsize >
+	BSC__NODISCARD trect GetSafeROI(trect const& rc, tsize const& sizeImage) {
 		trect rcSafe(rc);
 
 		if (rcSafe.width < 0) {
