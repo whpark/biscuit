@@ -3,12 +3,20 @@
 #include <version>
 #include <cstdint>
 
-import "biscuit/config.h";
-import "biscuit/macro.h";
+#include "biscuit/config.h"
+#include "biscuit/macro.h"
+
+// depedencies
+#include "units.h"
+#include "glm/glm.hpp"
 
 #if !defined(BISCUIT_EXPORTS)
 #	pragma comment(lib, "biscuit.lib")
 #endif
+
+using namespace std::literals;
+using namespace units::literals;
+
 
 //=================================================================================================================================
 // 

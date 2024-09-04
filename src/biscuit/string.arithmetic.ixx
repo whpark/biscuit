@@ -17,7 +17,7 @@ export namespace biscuit {
 	/// @return 
 	template < concepts::arithmetic tvalue >
 	BSC__NODISCARD tvalue ToNumber(std::string_view sv, int base = 10, char seperator = 0) {
-		if (sv.size() > RSIZE_MAX)
+		if (sv.size() > BSC_RSIZE_MAX)
 			return 0;
 		tvalue value{};
 		auto* b = sv.data();

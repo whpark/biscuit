@@ -1,5 +1,6 @@
 module;
 
+#include <units.h>
 #include "biscuit/config.h"
 
 export module biscuit.aliases;
@@ -29,6 +30,9 @@ export namespace biscuit::inline aliases {
 	using uchar = unsigned char;
 	using uint = uint32_t;	// conflicts with cv::
 	using charKSSM_t = uint16_t;
+
+	using rad_t = units::angle::radian_t;
+	using deg_t = units::angle::degree_t;
 }
 
 // Temporary workaround for C++23's std::ssize_t
@@ -37,11 +41,11 @@ export namespace biscuit::inline aliases {
 export namespace biscuit::inline aliases {
 	using ssize_t = std::ptrdiff_t;
 
-	constexpr size_t const SIZE_MAX = std::numeric_limits<size_t>::max();
-	constexpr size_t const RSIZE_MAX	// rationale max size. used for error checking.
+	constexpr size_t const BSC_SIZE_MAX = std::numeric_limits<size_t>::max();
+	constexpr size_t const BSC_RSIZE_MAX	// rationale max size. used for error checking.
 		= sizeof(size_t) > 4
-		? SIZE_MAX >> 16	// 48-bits. still big enough for real-world use.
-		: SIZE_MAX >> 1;
+		? BSC_SIZE_MAX >> 16	// 48-bits. still big enough for real-world use.
+		: BSC_SIZE_MAX >> 1;
 }
 export namespace biscuit::inline literals {
 	constexpr biscuit::ssize_t operator "" z ( unsigned long long n ) { return n; }

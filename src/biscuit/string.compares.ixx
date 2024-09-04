@@ -63,7 +63,7 @@ export namespace biscuit {
 
 			if (sizeA == 0 and sizeB == 0)
 				return 0;
-			if ( (sizeA > RSIZE_MAX) or (sizeB > RSIZE_MAX) )	// check validity first, before accessing pszA or pszB
+			if ( (sizeA > BSC_RSIZE_MAX) or (sizeB > BSC_RSIZE_MAX) )	// check validity first, before accessing pszA or pszB
 				throw std::invalid_argument(BSC__FUNCSIG "too big!");
 			if (sizeA == 0)
 				return pszB ? -eval(*pszB) : 0;
@@ -112,7 +112,7 @@ export namespace biscuit {
 	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszcmp(tchar const* pszA, tstring const& svB) {
 		static_assert(concepts::have_same_tchar<std::basic_string<tchar>, tstring>);
 		using tcharB = concepts::value_t<tstring>;
-		return detail::tszcmp<detail::TToTransparent<int>, tchar, tcharB>({pszA, RSIZE_MAX}, {std::data(svB), std::size(svB)});
+		return detail::tszcmp<detail::TToTransparent<int>, tchar, tcharB>({pszA, BSC_RSIZE_MAX}, {std::data(svB), std::size(svB)});
 	}
 	template < concepts::string_elem tchar, concepts::tstring_like tstring >
 	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszncmp(tchar const* pszA, tstring const& svB, size_t nMaxCount) {
@@ -124,7 +124,7 @@ export namespace biscuit {
 	BSC__NODISCARD BSC__DEPR_SEC constexpr int tpszicmp(tchar const* pszA, tstring const& svB) {
 		static_assert(concepts::have_same_tchar<std::basic_string<tchar>, tstring>);
 		using tcharB = concepts::value_t<tstring>;
-		return detail::tszcmp<tchar, tchar, true, detail::TToLower<int>, tchar, tcharB >({pszA, RSIZE_MAX}, {std::data(svB), std::size(svB)});
+		return detail::tszcmp<tchar, tchar, true, detail::TToLower<int>, tchar, tcharB >({pszA, BSC_RSIZE_MAX}, {std::data(svB), std::size(svB)});
 	}
 	template < concepts::string_elem tchar, concepts::tstring_like tstring >
 	BSC__NODISCARD BSC__DEPR_SEC constexpr int tsznicmp(tchar const* pszA, tstring const& svB, size_t nMaxCount) {

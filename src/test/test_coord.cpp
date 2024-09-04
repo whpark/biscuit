@@ -1,11 +1,20 @@
 #include <catch.hpp>
 #include <fmt/core.h>
+
+#pragma warning(push)
+#pragma warning(disable: 4127)	// conditional expression is constant
+#include "units.h"
+#pragma warning(pop)
+
 #include "biscuit/biscuit.h"
 
 import std;
 import biscuit;
 
 using namespace std::literals;
+//using namespace units;
+//using namespace units::angle;
+using namespace units::literals;
 
 namespace test {
 
@@ -77,6 +86,10 @@ namespace test {
 		QSize_<int> qSize = rect2i;
 		REQUIRE(biscuit::sPoint2i(qPt) == rect2i.pt());
 		REQUIRE(biscuit::sSize2i(qSize) == rect2i.size());
+
+		biscuit::sPoint3d pt3d{ 0.0, 2.0, 3.0 };
+		auto angle = pt3d.GetAngleXY();
+		REQUIRE(angle == 90_deg);
 	}
 
 

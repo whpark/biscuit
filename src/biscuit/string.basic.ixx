@@ -90,7 +90,7 @@ export namespace biscuit {
 	/// @return 0 if success, EINVAL if pszDest is nullptr or sizeDest is 0, ERANGE if sizeDest is too small.
 	template < concepts::string_elem tchar >
 	BSC__DEPR_SEC constexpr auto tpszcpy(tchar* pszDest, size_t sizeDest, tchar const* pszSrc) -> std::expected<tchar*, std::error_code> {
-		if (!pszDest or !sizeDest or (sizeDest > RSIZE_MAX))
+		if (!pszDest or !sizeDest or (sizeDest > BSC_RSIZE_MAX))
 			return std::unexpected(std::make_error_code(std::errc::invalid_argument));
 		if (!pszSrc) {
 			*pszDest = 0;
@@ -121,7 +121,7 @@ export namespace biscuit {
 	BSC__DEPR_SEC constexpr auto tpszcat(tchar* pszDest, size_t sizeDest, tchar const* pszSrc) {
 		if (!pszSrc || !*pszSrc)
 			return 0;
-		if (!pszDest || !sizeDest || (sizeDest > RSIZE_MAX))
+		if (!pszDest || !sizeDest || (sizeDest > BSC_RSIZE_MAX))
 			return std::unexpected(std::make_error_code(std::errc::invalid_argument));
 		// jump to end of pszDest
 		while (*pszDest && sizeDest) {
@@ -165,7 +165,7 @@ export namespace biscuit {
 	BSC__NODISCARD constexpr tchar* tszsearch(tchar* beg, tchar const* end, tchar ch) {
 		if (!beg)
 			return nullptr;
-		if (end - beg > RSIZE_MAX)
+		if (end - beg > BSC_RSIZE_MAX)
 			return nullptr;
 		for (; beg < end and *beg; beg++) {
 			if (*beg == ch)
@@ -346,7 +346,7 @@ export namespace biscuit {
 			constexpr static TEvaluator const func{};
 			if (!psz)
 				return EINVAL;
-			if (size > RSIZE_MAX)
+			if (size > BSC_RSIZE_MAX)
 				return ERANGE;
 			for (; *psz and size; psz++, size--) {
 				*psz = func(*psz);
@@ -360,7 +360,7 @@ export namespace biscuit {
 			constexpr static TEvaluator const func{};
 			if (!std::data(buf))
 				return EINVAL;
-			if (std::size(buf) > RSIZE_MAX)
+			if (std::size(buf) > BSC_RSIZE_MAX)
 				return ERANGE;
 			for (auto& c : buf) {
 				if (!c)

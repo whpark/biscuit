@@ -1,6 +1,8 @@
 module;
 
 #include <glaze/glaze.hpp>
+#include "glm/glm.hpp"
+
 #include "biscuit/macro.h"
 
 export module biscuit.coord.base;
@@ -156,8 +158,9 @@ export namespace biscuit::coord {
 		TCoordBase(value_t i0 = {}) requires(count() == 1) { arr()[0] = i0; }
 		TCoordBase(value_t i0={}, value_t i1={}) requires(count() == 2) { arr()[0] = i0; arr()[1] = i1; }
 		TCoordBase(value_t i0={}, value_t i1={}, value_t i2={}) requires(count() == 3) { arr()[0] = i0; arr()[1] = i1; arr()[2] = i2; }
-		TCoordBase(value_t i0={}, value_t i1={}, value_t i2={}, value_t i3={}) requires(count() == 4) { arr()[0] = i0; arr()[1] = i1; arr()[2] = i2; arr()[3] = i3; }
-		TCoordBase(value_t x={}, value_t y={}, value_t z={}, value_t width={}, value_t height={}, value_t depth={}) requires(count() == 6) {
+		TCoordBase(value_t i0={}, value_t i1={}, value_t i2={}, value_t i3={}) requires(count() == 4 && !bRect) { arr()[0] = i0; arr()[1] = i1; arr()[2] = i2; arr()[3] = i3; }
+		TCoordBase(value_t x={}, value_t y={}, value_t width={}, value_t height={}) requires(dim == 2 && bRect) { arr()[0] = x; arr()[1] = y; arr()[2] = width; arr()[3] = height; }
+		TCoordBase(value_t x={}, value_t y={}, value_t z={}, value_t width={}, value_t height={}, value_t depth=1) requires(dim == 3 and bRect) {
 			arr()[0] = x; arr()[1] = y; arr()[2] = z;
 			arr()[3] = width; arr()[4] = height; arr()[5] = depth;
 		}
@@ -409,7 +412,7 @@ export namespace biscuit::coord {
 
 		//=========================================================================================================================
 		// round, floor
-		template < typename tvalue_to = int >
+		template < typename tvalue_to = value_t >
 		TCoordBase<tbase_t, tvalue_to, dim, bROUND> Round() const {
 			if constexpr (count() == 2) {
 				return { (tvalue_to)std::round(arr()[0]), (tvalue_to)std::round(arr()[1]) };
@@ -428,7 +431,7 @@ export namespace biscuit::coord {
 				static_assert(false);
 			}
 		}
-		template < typename tvalue_to = int >
+		template < typename tvalue_to = value_t >
 		TCoordBase<tbase_t, tvalue_to, dim, bROUND> Floor() const {
 			if constexpr (dim == 2) {
 				return { (tvalue_to)std::floor(arr()[0]), (tvalue_to)std::floor(arr()[1]) };
@@ -442,6 +445,25 @@ export namespace biscuit::coord {
 			else if constexpr (count() == 6) {
 				return { (tvalue_to)std::floor(arr()[0]), (tvalue_to)std::floor(arr()[1]), (tvalue_to)std::floor(arr()[2]),
 					(tvalue_to)std::floor(arr()[3]), (tvalue_to)std::floor(arr()[4]), (tvalue_to)std::floor(arr()[5]) };
+			}
+			else {
+				static_assert(false);
+			}
+		}
+		template < typename tvalue_to = value_t >
+		TCoordBase<tbase_t, tvalue_to, dim, bROUND> Ceil() const {
+			if constexpr (dim == 2) {
+				return { (tvalue_to)std::ceil(arr()[0]), (tvalue_to)std::ceil(arr()[1]) };
+			}
+			else if constexpr (dim == 3) {
+				return { (tvalue_to)std::ceil(arr()[0]), (tvalue_to)std::ceil(arr()[1]), (tvalue_to)std::ceil(arr()[2]) };
+			}
+			else if constexpr (dim == 4) {
+				return { (tvalue_to)std::ceil(arr()[0]), (tvalue_to)std::ceil(arr()[1]), std::round(arr()[2]), (tvalue_to)std::ceil(arr()[3]) };
+			}
+			else if constexpr (count() == 6) {
+				return { (tvalue_to)std::ceil(arr()[0]), (tvalue_to)std::ceil(arr()[1]), (tvalue_to)std::ceil(arr()[2]),
+					(tvalue_to)std::ceil(arr()[3]), (tvalue_to)std::ceil(arr()[4]), (tvalue_to)std::ceil(arr()[5]) };
 			}
 			else {
 				static_assert(false);
