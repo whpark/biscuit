@@ -7,6 +7,9 @@ import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.coord.concepts;
 import biscuit.coord.base;
+import biscuit.coord.point;
+import biscuit.coord.size;
+
 
 export namespace biscuit {
 
@@ -16,8 +19,8 @@ export namespace biscuit {
 		using base_t = coord::TCoordBase<coord::TRect_, T, DIMENSION, bROUND>;
 		using this_t = TRect<T, DIMENSION, bROUND>;
 
-		using point_t = coord::TCoordBase<coord::TPoint_, T, DIMENSION, bROUND>;
-		using size_t = coord::TCoordBase<coord::TSize_, T, DIMENSION, bROUND>;
+		using point_t = TPoint<T, DIMENSION, bROUND>;
+		using size_t = TSize<T, DIMENSION, bROUND>;
 
 		using base_t::base_t;
 		TRect(point_t pt0, point_t pt1) {
@@ -28,12 +31,23 @@ export namespace biscuit {
 			this->pt() = pt;
 			this->size() = size;
 		}
+		using base_t::operator =;
+		using base_t::operator <=>;
 
 		BSC__NODISCARD constexpr inline auto& pt()					{ return  *reinterpret_cast<point_t*>(this); }
 		BSC__NODISCARD constexpr inline auto const& pt() const		{ return  *reinterpret_cast<point_t const*>(this); }
 		BSC__NODISCARD constexpr inline auto& size()				{ return *(reinterpret_cast<size_t*>(this)+1); }
 		BSC__NODISCARD constexpr inline auto const& size() const	{ return *(reinterpret_cast<size_t const*>(this)+1); }
 
+
+		using base_t::operator +=;
+		using base_t::operator -=;
+		using base_t::operator *=;
+		using base_t::operator /=;
+		using base_t::operator +;
+		using base_t::operator -;
+		using base_t::operator *;
+		using base_t::operator /;
 
 	};
 

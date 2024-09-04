@@ -99,11 +99,17 @@ export namespace biscuit::concepts::coord {
 	template < typename tcoord > concept generic_coord	= is_coord<tcoord> or is_icoord<tcoord>;
 
 	template < generic_coord tcoord >
+	using coord_type_t =
+		std::conditional_t<generic_point<tcoord>, biscuit::coord::mPoint_t,
+		std::conditional_t<generic_size<tcoord>, biscuit::coord::mSize_t,
+		std::conditional_t<generic_rect<tcoord>, biscuit::coord::mRect_t, void>>>;
+
+	template < generic_coord tcoord >
 	using value_t = std::remove_cvref_t<
-		std::conditional_t<has_x<tcoord>, decltype(tcoord().x),
-		std::conditional_t<has_ix<tcoord>, decltype(tcoord().x()),
-		std::conditional_t<has_width<tcoord>, decltype(tcoord().width),
-		std::conditional_t<has_iwidth<tcoord>, decltype(tcoord().width()), void>>>>>;
+		std::conditional_t<has_x<tcoord>, decltype(tcoord::x),
+		std::conditional_t<has_ix<tcoord>, decltype(tcoord::x()),
+		std::conditional_t<has_width<tcoord>, decltype(tcoord::width),
+		std::conditional_t<has_iwidth<tcoord>, decltype(tcoord::width()), void>>>>>;
 
 }
 

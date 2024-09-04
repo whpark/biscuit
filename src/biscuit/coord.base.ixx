@@ -12,6 +12,26 @@ import biscuit.coord.concepts;
 
 namespace concepts = biscuit::concepts;
 
+namespace biscuit::coord {
+
+	struct arithmetic_dummy_t {
+		inline arithmetic_dummy_t operator + (auto ) const { return *this; };
+		inline arithmetic_dummy_t operator - (auto ) const { return *this; };
+		inline arithmetic_dummy_t operator * (auto ) const { return *this; };
+		inline arithmetic_dummy_t operator / (auto ) const { return *this; };
+		friend inline arithmetic_dummy_t operator + (auto, arithmetic_dummy_t const& ) { return *this; };
+		friend inline arithmetic_dummy_t operator - (auto, arithmetic_dummy_t const& ) { return *this; };
+		friend inline arithmetic_dummy_t operator * (auto, arithmetic_dummy_t const& ) { return *this; };
+		friend inline arithmetic_dummy_t operator / (auto, arithmetic_dummy_t const& ) { return *this; };
+	};
+	inline arithmetic_dummy_t operator += (auto&, arithmetic_dummy_t const& ) { return *this; };
+	inline arithmetic_dummy_t operator -= (auto&, arithmetic_dummy_t const& ) { return *this; };
+	inline arithmetic_dummy_t operator *= (auto&, arithmetic_dummy_t const& ) { return *this; };
+	inline arithmetic_dummy_t operator /= (auto&, arithmetic_dummy_t const& ) { return *this; };
+	static_assert(!std::is_arithmetic_v<arithmetic_dummy_t>);
+
+}
+
 export namespace biscuit::coord {
 
 	//using namespace biscuit::concepts::coord;
@@ -153,24 +173,23 @@ export namespace biscuit::coord {
 		//auto& operator = (this_t const& other) { arr() = other.arr(); return *this; }
 		//auto& operator = (this_t&& other) { arr() = std::move(other.arr()); return *this; }
 
-		template < typename tother >
-			requires !std::is_same_v<tother, this_t> and concepts::coord::generic_coord<tother>
-		explicit TCoordBase(tother const& b) {
+		template < typename tcoord2 >
+			requires !std::is_same_v<tcoord2, this_t> and concepts::coord::generic_coord<tcoord2>
+		explicit TCoordBase(tcoord2 const& b) {
 			*this = b;
 		}
 
-		template < typename tother >
-			requires !std::is_same_v<tother, this_t> and concepts::coord::generic_coord<tother>
-		TCoordBase& operator = (tother const& b) {
-			using other_t = std::remove_cvref_t<tother>;
+		template < typename tcoord2 >
+			requires !std::is_same_v<tcoord2, this_t> and concepts::coord::generic_coord<tcoord2>
+		TCoordBase& operator = (tcoord2 const& b) {
 			if constexpr (concepts::coord::has_point2<base_t>) {
-				if constexpr (concepts::coord::has_point2<other_t>) {
+				if constexpr (concepts::coord::has_point2<tcoord2> or concepts::coord::has_ipoint2<tcoord2>) {
 					MemberSet_x(MemberGet_x(b));
 					MemberSet_y(MemberGet_y(b));
 					MemberSet_z(MemberGet_z(b));
 					MemberSet_w(MemberGet_w(b));
 				}
-				else if constexpr (concepts::coord::has_size2<other_t>) {
+				else if constexpr (concepts::coord::has_size2<tcoord2> or concepts::coord::has_isize2<tcoord2>) {
 					MemberSet_x(MemberGet_width(b));
 					MemberSet_y(MemberGet_height(b));
 					MemberSet_z(MemberGet_depth(b));
@@ -180,12 +199,12 @@ export namespace biscuit::coord {
 				}
 			}
 			if constexpr (concepts::coord::has_size2<base_t>) {
-				if constexpr (concepts::coord::has_size2<other_t>) {
+				if constexpr (concepts::coord::has_size2<tcoord2> or concepts::coord::has_isize2<tcoord2>) {
 					MemberSet_width (MemberGet_width(b));
 					MemberSet_height(MemberGet_height(b));
 					MemberSet_depth (MemberGet_depth(b));
 				}
-				else if constexpr (concepts::coord::has_point2<other_t>) {
+				else if constexpr (concepts::coord::has_point2<tcoord2> or concepts::coord::has_ipoint2<tcoord2>) {
 					MemberSet_width (MemberGet_x(b));
 					MemberSet_height(MemberGet_y(b));
 					MemberSet_depth (MemberGet_z(b));
@@ -227,11 +246,13 @@ export namespace biscuit::coord {
 				MemberSet_height(r, MemberGet_y());
 				MemberSet_depth(r, MemberGet_z());
 			}
+			return r;
 		}
 		//--------------------------------------------------------------------------------------------------------------------------
 		BSC__NODISCARD auto operator <=> (this_t const&) const = default;
-		BSC__NODISCARD auto operator <=> (value_t const& v) const { return *this <=> this_t::Zero(v); }
+		BSC__NODISCARD auto operator <=> (value_t const& v) const { return *this <=> this_t::All(v); }
 
+		//=========================================================================================================================
 		//--------------------------------------------------------------------------------------------------------------------------
 		// get member as array
 		//constexpr auto& arr(this auto&& self) {
@@ -262,10 +283,10 @@ export namespace biscuit::coord {
 
 		//--------------------------------------------------------------------------------------------------------------------------
 
-		this_t Zero() {
+		BSC__NODISCARD static this_t Zero() {
 			return this_t{};
 		}
-		this_t All(value_t v = {}) requires (bPoint or bSize) {
+		BSC__NODISCARD static this_t All(value_t v = {}) requires (bPoint or bSize) {
 			if constexpr (count() == 1) return {v};
 			if constexpr (count() == 2) return {v, v};
 			if constexpr (count() == 3) return {v, v, v};
@@ -295,13 +316,98 @@ export namespace biscuit::coord {
 			return bModified;
 		}
 
-		//--------------------------------------------------------------------------------------------------------------------------
+		//=========================================================================================================================
 		// operator
+		template < typename toperator, concepts::coord::generic_coord tcoord2>
+		this_t& Operation(tcoord2 const& b) {
+			constexpr static toperator op;
+			if constexpr (bRect or concepts::coord::generic_coord<tcoord2>) {
+				if constexpr (concepts::coord::has_point2<tcoord2>) {
+					op(MemberGet_x(), MemberGet_x(b));
+					op(MemberGet_y(), MemberGet_y(b));
+					op(MemberGet_z(), MemberGet_z(b));
+				}
+				if constexpr (concepts::coord::has_size2<tcoord2>) {
+					op(MemberGet_width (), MemberGet_width (b));
+					op(MemberGet_height(), MemberGet_height(b));
+					op(MemberGet_depth (), MemberGet_depth (b));
+				}
+			}
+			else if constexpr (bPoint) {
+				if constexpr (concepts::coord::has_point2<tcoord2>) {
+					op(MemberGet_x(), MemberGet_x(b));
+					op(MemberGet_y(), MemberGet_y(b));
+					op(MemberGet_z(), MemberGet_z(b));
+				}
+				else if constexpr (concepts::coord::has_size2<tcoord2>) {
+					op(MemberGet_x(), MemberGet_width(b));
+					op(MemberGet_y(), MemberGet_height(b));
+					op(MemberGet_z(), MemberGet_depth(b));
+				}
+			}
+			else if constexpr (bSize) {
+				if constexpr (concepts::coord::has_point2<tcoord2>) {
+					op(MemberGet_width(), MemberGet_x(b));
+					op(MemberGet_height(), MemberGet_y(b));
+					op(MemberGet_depth(), MemberGet_z(b));
+				}
+				else if constexpr (concepts::coord::has_size2<tcoord2>) {
+					op(MemberGet_width(), MemberGet_width(b));
+					op(MemberGet_height(), MemberGet_height(b));
+					op(MemberGet_depth(), MemberGet_depth(b));
+				}
+			}
+			return *this;
+		}
+
+		//-------------------------------------------------------------------------------------------------------------------------
+		this_t& operator += (this_t const& b) {
+			for (size_t i{}; i < count(); i++)
+				arr()[i] += b[i];
+			return *this;
+		}
+		this_t& operator -= (this_t const& b) {
+			for (size_t i{}; i < count(); i++)
+				arr()[i] -= b[i];
+			return *this;
+		}
+
+		template < concepts::coord::generic_coord tcoord2 >
+		inline this_t& operator += (tcoord2 const& b) { struct sOp { inline void operator() (auto& a, auto& b) { a += b; } }; return Operation<sOp>(b); }
+		template < concepts::coord::generic_coord tcoord2 >
+		inline this_t& operator -= (tcoord2 const& b) { struct sOp { inline void operator() (auto& a, auto& b) { a -= b; } }; return Operation<sOp>(b); }
+		template < concepts::coord::generic_coord tcoord2 >
+		inline this_t& operator *= (tcoord2 const& b) { struct sOp { inline void operator() (auto& a, auto& b) { a *= b; } }; return Operation<sOp>(b); }
+		template < concepts::coord::generic_coord tcoord2 >
+		inline this_t& operator /= (tcoord2 const& b) { struct sOp { inline void operator() (auto& a, auto& b) { a /= b; } }; return Operation<sOp>(b); }
+
+		inline this_t& operator += (concepts::arithmetic auto v) { for (auto& c : arr()) c += v; return *this; }
+		inline this_t& operator -= (concepts::arithmetic auto v) { for (auto& c : arr()) c -= v; return *this; }
+		inline this_t& operator *= (concepts::arithmetic auto v) { for (auto& c : arr()) c *= v; return *this; }
+		inline this_t& operator /= (concepts::arithmetic auto v) { for (auto& c : arr()) c /= v; return *this; }
+
+		// member wise +, -, *, /
+		BSC__NODISCARD constexpr inline this_t operator - () const { this_t r; for (size_t i{}; i < count(); i++) r[i] = -arr()[i]; return r; }
+		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
+		BSC__NODISCARD inline this_t operator + (T const& b) const { return this_t(*this) += b; }
+		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
+		BSC__NODISCARD inline this_t operator - (T const& b) const { return this_t(*this) -= b; }
+		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
+		BSC__NODISCARD inline this_t operator * (T const& b) const { return this_t(*this) *= b; }
+		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
+		BSC__NODISCARD inline this_t operator / (T const& b) const { return this_t(*this) /= b; }
+
+		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
+		BSC__NODISCARD friend inline this_t operator + (T const& a, this_t const& b) { return  b + a; }
+		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
+		BSC__NODISCARD friend inline this_t operator - (T const& a, this_t const& b) { return -b += a; }	// not just naively (-b + a)
+		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
+		BSC__NODISCARD friend inline this_t operator * (T const& a, this_t const& b) { return  b * a; }
+		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
+		friend inline this_t operator / (auto a, this_t const& b) = delete;
 
 
-
-
-		//--------------------------------------------------------------------------------------------------------------------------
+		//=========================================================================================================================
 		// round, floor
 		template < typename tvalue_to = int >
 		TCoordBase<tbase_t, tvalue_to, dim, bROUND> Round() const {
@@ -342,6 +448,7 @@ export namespace biscuit::coord {
 			}
 		}
 
+		//=========================================================================================================================
 	protected:
 		// round, floor
 		template < typename treturn = value_t >
@@ -356,11 +463,11 @@ export namespace biscuit::coord {
 	#define DEFINE_MEMBER_GET_SET(VAR, VAR_U) \
 		BSC__NODISCARD constexpr inline decltype(auto) MemberGet_##VAR() {\
 			if constexpr (concepts::coord::has_##VAR<base_t>) { return base_t::VAR; }\
-			else { return detail::dummy_t{}; }\
+			else { return arithmetic_dummy_t{}; }\
 		}\
 		BSC__NODISCARD constexpr inline auto const MemberGet_##VAR() const {\
 			if constexpr (concepts::coord::has_##VAR<base_t>) { return base_t::VAR; }\
-			else { return detail::dummy_t{}; }\
+			else { return arithmetic_dummy_t{}; }\
 		}\
 		constexpr inline void MemberSet_##VAR(auto value) {\
 			if constexpr (std::is_arithmetic_v<std::remove_cvref_t<decltype(value)>>) {\
@@ -372,13 +479,13 @@ export namespace biscuit::coord {
 		BSC__NODISCARD constexpr static inline decltype(auto) MemberGet_##VAR(tcoord2&& coord) {\
 			if constexpr (concepts::coord::has_##VAR<tcoord2>) { return PassValue<value_t>(coord.VAR); }\
 			else if constexpr (concepts::coord::has_i##VAR<tcoord2>) { return PassValue<value_t>(coord.VAR()); }\
-			else { return detail::dummy_t{}; }\
+			else { return arithmetic_dummy_t{}; }\
 		}\
 		template < concepts::coord::generic_coord tcoord2 >\
 		constexpr static inline void MemberSet_##VAR(tcoord2&& coord, auto value) {\
 			if constexpr (std::is_arithmetic_v<std::remove_cvref_t<decltype(value)>>) {\
 				if constexpr (concepts::coord::has_##VAR<tcoord2>) { coord.VAR = PassValue<std::remove_cvref_t<decltype(coord.VAR)>>(value); }\
-				if constexpr (concepts::coord::has_i##VAR<tcoord2>) { coord.set##VAR_U( PassValue<std::remove_cvref_t<decltype(coord.VAR)>>(value)); }\
+				if constexpr (concepts::coord::has_i##VAR<tcoord2>) { coord.set##VAR_U( PassValue<std::remove_cvref_t<decltype(coord.VAR())>>(value)); }\
 			}\
 		}
 

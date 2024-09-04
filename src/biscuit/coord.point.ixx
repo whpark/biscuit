@@ -1,5 +1,7 @@
 module;
 
+#include "biscuit/macro.h"
+
 export module biscuit.coord.point;
 import std;
 import biscuit.aliases;
@@ -9,8 +11,93 @@ import biscuit.coord.base;
 
 export namespace biscuit {
 
-	template < typename T, int DIMENSION, bool bROUND > requires (std::is_arithmetic_v<T>)
-	using TPoint = coord::TCoordBase<coord::TPoint_, T, DIMENSION, bROUND>;
+	//template < typename T, int DIMENSION, bool bROUND > requires (std::is_arithmetic_v<T>)
+	//using TPoint = coord::TCoordBase<coord::TPoint_, T, DIMENSION, bROUND>;
+
+	template < typename T, int DIMENSION, bool bROUND >
+		requires (std::is_arithmetic_v<T>)
+	struct TPoint : coord::TCoordBase<coord::TPoint_, T, DIMENSION, bROUND> {
+		using base_t = coord::TCoordBase<coord::TPoint_, T, DIMENSION, bROUND>;
+		using this_t = TPoint<T, DIMENSION, bROUND>;
+
+		using base_t::base_t;
+		using base_t::operator =;
+		using base_t::operator <=>;
+
+		using base_t::operator +=;
+		using base_t::operator -=;
+		using base_t::operator *=;
+		using base_t::operator /=;
+		using base_t::operator +;
+		using base_t::operator -;
+		using base_t::operator *;
+		using base_t::operator /;
+
+	//public:
+	//	// Math
+	//	BSC__NODISCARD double Distance(this_t const& pt) const {
+	//		double sum {};
+	//		for (int i{}; i < size(); i++)
+	//			sum += Square(data()[i]-pt.data()[i]);
+	//		return std::sqrt(sum);
+	//	}
+	//	BSC__NODISCARD double GetLength() const {
+	//		double sum {};
+	//		for (auto v : arr())
+	//			sum += Square(v);
+	//		return std::sqrt(sum);
+	//	}
+	//	BSC__NODISCARD rad_t GetAngleXY() const { return rad_t::atan2(this->y, this->x); }
+	//	BSC__NODISCARD rad_t GetAngleYZ() const requires (dim >= 3) { return rad_t::atan2(this->z, this->y); }
+	//	BSC__NODISCARD rad_t GetAngleZX() const requires (dim >= 3) { return rad_t::atan2(this->x, this->z); }
+
+	//	BSC__NODISCARD this_t GetNormalizedVector() const { return *this / GetLength(); }	// Length == 1.0
+	//	bool Normalize() { *this /= GetLength(); return IsAllValid(); }
+
+	//	BSC__NODISCARD this_t GetNormalVectorXY() const { return {this->y, -this->x}; }								// Perpendicular(Normal) Vector (XY-Plan)
+	//	BSC__NODISCARD this_t GetNormalVectorYZ() const requires (dim >= 3) { return {{}, this->z, -this->y}; }		// Perpendicular(Normal) Vector (YZ-Plan)
+	//	BSC__NODISCARD this_t GetNormalVectorZX() const requires (dim >= 3) { return {-this->z, {}, this->x}; }		// Perpendicular(Normal) Vector (ZX-Plan)
+	//	// Cross
+	//	BSC__NODISCARD this_t operator * (this_t const& B) const						{ return Cross(B); }
+
+	//	// Mathmatical Operator
+	//	template < typename T2 >
+	//	friend this_t operator * (cv::Matx<T2, dim, dim> const& A, this_t const& B) {
+	//		this_t C{};
+	//		//C.x = A(0, 0) * B.x + A(0, 1) * B.y + A(0, 2) * B.z;
+	//		//C.y = A(1, 0) * B.x + A(1, 1) * B.y + A(1, 2) * B.z;
+	//		//C.z = A(2, 0) * B.x + A(2, 1) * B.y + A(2, 2) * B.z;
+	//		for (int row {}; row < dim; row++) {
+	//			for (int col {}; col < dim; col++) {
+	//				C.data()[row] += A(row, col) * B.data()[col];
+	//			}
+	//		}
+	//		return C;
+	//	}
+
+	//	BSC__NODISCARD this_t Cross(this_t const& B) const requires (dim >= 3) {
+	//		return {this->y*B.z - this->z*B.y, this->z*B.x - this->x*B.z, this->x*B.y - this->y*B.x};
+	//	}
+	//	BSC__NODISCARD T CrossZ(TPointT<T, 2> const& B) const requires (dim >= 3) {
+	//		return this->x*B.y - this->y*B.x;
+	//	}
+	//	BSC__NODISCARD T CrossZ(this_t const& B) const {
+	//		return this->x*B.y - this->y*B.x;
+	//	}
+	//	BSC__NODISCARD T Dot(this_t const& B) const {
+	//		T sum{};
+	//		for (size_t i{}; i < size(); i++)
+	//			sum += data()[i] * B.data()[i];
+	//		return sum;
+	//	}
+	//	BSC__NODISCARD this_t Mul(this_t const& B) const {
+	//		auto C(*this);
+	//		for (size_t i{}; i < size(); i++)
+	//			C.data()[i] *= B.data()[i];
+	//		return C;
+	//	}
+
+	};
 
 	using sPoint2i = TPoint<int, 2, false>;
 	using sPoint3i = TPoint<int, 3, false>;
