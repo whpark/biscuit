@@ -43,7 +43,7 @@ namespace test {
 	};
 
 	TEST_CASE("coord") {
-		//using namespace biscuit;
+		using namespace biscuit;
 
 		biscuit::sRect2i rect2i{0, 0, 1, 2};
 		biscuit::sPoint2i pt2i{100, 200};
@@ -72,10 +72,18 @@ namespace test {
 		REQUIRE(rect2i.height == 4);
 
 		REQUIRE(rect2i + 2 == 2 + rect2i);
+		REQUIRE(rect2i + 3 != 2 + rect2i);
+		REQUIRE(rect2i + 2 != 3 + rect2i);
 		REQUIRE(rect2i + 3 > 2 + rect2i);
 		REQUIRE(rect2i + 2 < 3 + rect2i);
 		REQUIRE(rect2i - 2 == -2 + rect2i);
 		REQUIRE(-rect2i + 2 == 2 - rect2i);
+
+		REQUIRE(sPoint2i{150, 260} <= sPoint2i{150, 260});
+		REQUIRE(!(sPoint2i{150, 260} < sPoint2i{150, 260}));
+		REQUIRE(!(sPoint2i{150, 260} > sPoint2i{150, 260}));
+		REQUIRE(!(sPoint2i{150, 260} != sPoint2i{150, 260}));
+		REQUIRE(sPoint2i{150, 260} == sPoint2i{150, 260});
 
 		Point2i cvPt = rect2i;
 		Size2i cvSize = rect2i;
@@ -92,5 +100,138 @@ namespace test {
 		REQUIRE(angle == 90_deg);
 	}
 
+	TEST_CASE("coord.rect") {
+		using namespace biscuit;
+
+		sRect2i rc2i(100, 200, 50, 60);
+
+		REQUIRE(rc2i.Contains(sPoint2i(100, 200)));
+		REQUIRE(!rc2i.Contains(sPoint2i(150, 260)));
+		REQUIRE(rc2i.Contains(sRect2i(100, 200, 50, 60)));
+		REQUIRE(!rc2i.Contains(sRect2i(100, 200, 51, 60)));
+		REQUIRE(!rc2i.Contains(sRect2i(100, 200, 50, 61)));
+		REQUIRE(!rc2i.Contains(sRect2i( 99, 200, 50, 60)));
+		REQUIRE(!rc2i.Contains(sRect2i(100, 199, 50, 60)));
+		REQUIRE(rc2i.Contains(sRect2i(110, 210, 0, 0)));
+		REQUIRE(rc2i.Contains(sRect2i(110, 210, 0, 0)));
+		REQUIRE(sRect2i(10, 30, 0, 0).IsEmpty());
+		REQUIRE(sRect2i(10, 30, 0, 0).IsEmpty());
+		REQUIRE(sRect2i().IsEmpty());
+		REQUIRE(sRect2i().IsNull());
+	}
+
+}
+
+namespace bench {
+	struct sRect {
+		int x, y, width, height;
+
+		inline void Normalize() {
+			if (width < 0) { x = x+width; width = -width; }
+			if (height < 0) { y = y+height; height = -height; }
+		}
+
+		sRect& IntersectSafe(sRect const& b) {
+			auto pax0 = std::min(x, x+width);
+			auto pay0 = std::min(y, y+height);
+			auto pax1 = std::max(x, x+width);
+			auto pay1 = std::max(y, y+height);
+
+			auto pbx0 = std::min(b.x, b.x+b.width);
+			auto pby0 = std::min(b.y, b.y+b.height);
+			auto pbx1 = std::max(b.x, b.x+b.width);
+			auto pby1 = std::max(b.y, b.y+b.height);
+
+			x = std::max(pax0, pbx0);
+			y = std::max(pay0, pby0);
+			width = std::min(pax1, pbx1) - x;
+			height = std::min(pay1, pby1) - y;
+
+			return *this;
+		}
+
+		sRect& Intersect(sRect const& b) {
+			width = std::min(x+width, b.x+b.width);
+			height = std::min(y+height, b.y+b.height);
+			x = std::max(x, b.x);
+			y = std::max(y, b.y);
+			width -= x;
+			height -= y;
+			return *this;
+		}
+	};
+
+	struct xRect {
+		int l, t, r, b;
+
+		inline void Normalize() {
+			if (l > r) std::swap(l, r);
+			if (t > b) std::swap(t, b);
+		}
+
+		xRect& IntersectSafe0(xRect const& B) {
+			xRect result;
+			result.l = std::max(std::min(l, r), std::min(B.l, B.r));
+			result.r = std::min(std::max(l, r), std::max(B.l, B.r));
+			result.t = std::max(std::min(t, b), std::min(B.t, B.b));
+			result.b = std::min(std::max(t, b), std::max(B.t, B.b));
+			*this = result;
+			return *this;
+		}
+		xRect& IntersectSafe(xRect& B) {
+			if (l > r) std::swap(l, r);
+			if (t > b) std::swap(t, b);
+			if (B.l > B.r) std::swap(B.l, B.r);
+			if (B.t > B.b) std::swap(B.t, B.b);
+			return Intersect(B);
+		}
+		xRect& Intersect(xRect const& B) {
+			l = std::max(l, B.l);
+			r = std::min(r, B.r);
+			t = std::max(t, B.b);
+			b = std::min(t, B.t);
+			return *this;
+		}
+	};
+
+	//TEST_CASE("coord.rect.bench") {
+	//	//sRect rc0 { 30, 40, -30, -40 };
+	//	//sRect rc1 { 20, 40, -10, -20 };
+	//	//xRect rc2 { 30, 40, 0, 0 };
+	//	//xRect rc3 { 20, 40, 10, 20 };
+	//	sRect rc0 { rand(), rand(), rand(), rand()};
+	//	sRect rc1 { rand(), rand(), rand(), rand()};
+	//	sRect rc2 { rand(), rand(), rand(), rand()};
+	//	sRect rc3 { rand(), rand(), rand(), rand()};
+
+	//	BENCHMARK("sRect::IntersectSafe") {
+	//		rc0.IntersectSafe(rc1);
+	//	};
+
+	//	BENCHMARK("sRect::Intersect") {
+	//		rc0.Normalize();
+	//		rc1.Normalize();
+	//		rc0.Intersect(rc1);
+	//	};
+
+	//	BENCHMARK("sRect::Intersect2") {
+	//		rc0.Intersect(rc1);
+	//	};
+
+	//	BENCHMARK("xRect::IntersectSafe") {
+	//		rc2.IntersectSafe(rc3);
+	//	};
+
+	//	BENCHMARK("xRect::Intersect") {
+	//		rc2.Normalize();
+	//		rc2.Normalize();
+	//		rc2.Intersect(rc3);
+	//	};
+
+	//	BENCHMARK("xRect::Intersect2") {
+	//		rc2.Intersect(rc3);
+	//	};
+
+	//}
 
 }

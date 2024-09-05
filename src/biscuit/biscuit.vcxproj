@@ -133,6 +133,7 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="coord.base.ixx" />
+    <ClCompile Include="coord.bounds.ixx" />
     <ClCompile Include="coord.concepts.ixx" />
     <ClCompile Include="coord.ixx" />
     <ClCompile Include="coord.point.ixx" />

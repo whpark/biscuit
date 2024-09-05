@@ -5,11 +5,13 @@
 import std;
 import biscuit;
 
-int main(int argc, char* argv[]) {
+int main(int , char* []) {
 	biscuit::SetCurrentPath_BinFolder();
 	auto path = std::filesystem::current_path();
 	fmt::print("Current path: {}\n", path);
 
-	return Catch::Session().run(argc, argv);
+	Catch::Session session;
+	//session.configData().skipBenchmarks = true;
+	return session.run();
 }
 

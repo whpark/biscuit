@@ -22,16 +22,14 @@ export import biscuit.coord.base;
 export import biscuit.coord.point;
 export import biscuit.coord.size;
 export import biscuit.coord.rect;
-//export import :coord.point;
-//export import :coord.size;
-//export import :coord.rect;
-//export import :coord.srect;
+//export import biscuit.coord.bounds;
 //export import :coord.trans;
 //export import :coord.trans.perspective;
 
 //=============================================================================
 //
-// 참고 : 3차원 변수에 2차원 변수를 대입할 경우, Z 축 은 값을 변경시키지 않도록 했음.
+// CAUTION : when 2d variable is assigned to 3d variable, Z var axis is not changed.
+// 주의 : 3차원 변수에 2차원 변수를 대입할 경우, Z 축 은 값을 변경시키지 않도록 했음.
 //       (ex, XPoint3d pt3(1, 2, 3); XPoint2d pt2(4, 5); pt3 = pt2; assert(pt3 == XPoint3d(4, 5, 3)); )
 //
 

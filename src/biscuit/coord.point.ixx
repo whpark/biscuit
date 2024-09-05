@@ -26,7 +26,7 @@ export namespace biscuit {
 
 		using base_t::base_t;
 		using base_t::operator =;
-		using base_t::operator <=>;
+		//using base_t::operator <=>;
 
 		using base_t::operator +=;
 		using base_t::operator -=;

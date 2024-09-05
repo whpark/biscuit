@@ -22,28 +22,42 @@ export namespace biscuit {
 		using array_t = base_t::array_t;
 		using value_t = base_t::value_t;
 
-		using point_t = TPoint<T, DIMENSION, bROUND>;
-		using size_t = TSize<T, DIMENSION, bROUND>;
+		using coord_point_t = TPoint<T, DIMENSION, bROUND>;
+		using coord_size_t = TSize<T, DIMENSION, bROUND>;
+		using base_t::dim;
 
 		constexpr static inline value_t default_depth() requires (dim >= 3) { return 1; }
 
 		using base_t::base_t;
-		TRect(point_t pt0, point_t pt1) {
+		TRect(coord_point_t pt0, coord_point_t pt1) {
 			this->pt() = pt0;
 			this->size() = pt1 - pt0;
 		}
-		TRect(point_t pt, size_t size) {
+		TRect(coord_point_t pt, coord_size_t size) {
 			this->pt() = pt;
 			this->size() = size;
 		}
+		TRect(coord_size_t size) {
+			this->pt() = {};
+			this->size() = size;
+		}
 		using base_t::operator =;
-		using base_t::operator <=>;
+		//using base_t::operator <=>;
+		BSC__NODISCARD bool operator == (this_t const&) const = default;
+		BSC__NODISCARD bool operator != (this_t const&) const = default;
 
-		BSC__NODISCARD constexpr inline auto& pt()					{ return  *reinterpret_cast<point_t*>(this); }
-		BSC__NODISCARD constexpr inline auto const& pt() const		{ return  *reinterpret_cast<point_t const*>(this); }
-		BSC__NODISCARD constexpr inline auto& size()				{ return *(reinterpret_cast<size_t*>(this)+1); }
-		BSC__NODISCARD constexpr inline auto const& size() const	{ return *(reinterpret_cast<size_t const*>(this)+1); }
+		BSC__NODISCARD constexpr inline coord_point_t& pt()					{ return  *reinterpret_cast<coord_point_t*>(this); }
+		BSC__NODISCARD constexpr inline coord_point_t const& pt() const		{ return  *reinterpret_cast<coord_point_t const*>(this); }
+		BSC__NODISCARD constexpr inline coord_size_t& size()				{ return *(reinterpret_cast<coord_size_t*>(this)+1); }
+		BSC__NODISCARD constexpr inline coord_size_t const& size() const	{ return *(reinterpret_cast<coord_size_t const*>(this)+1); }
+ 
+		BSC__NODISCARD constexpr inline coord_point_t pt0() const			{ return pt(); }
+		BSC__NODISCARD constexpr inline coord_point_t pt1() const			{ return pt()+size(); }
 
+		friend auto min(this_t const&, this_t const&) = delete;
+		friend auto max(this_t const&, this_t const&) = delete;
+		friend auto min(std::initializer_list<this_t>) = delete;
+		friend auto min(std::initializer_list<this_t>) = delete;
 
 		using base_t::operator +=;
 		using base_t::operator -=;
@@ -59,7 +73,7 @@ export namespace biscuit {
 		auto CenterPoint() const { return pt()+size()/2; }
 
 		// returns true if rectangle has no area
-		bool IsRectEmpty() const {
+		bool IsEmpty() const {
 			if constexpr (dim == 2) {
 				return (this->width <= 0) || (this->height <= 0);
 			} else if constexpr (dim == 3) {
@@ -69,63 +83,23 @@ export namespace biscuit {
 				static_assert(false);
 			}
 		}
-		bool IsRectHavingLength2d() const {
-			return (width > 0) or (height > 0);
-		}
 		// returns true if rectangle is at (0,0,0) and has no area
-		bool IsRectNull() const {
-			return (pt() == {}) and (size() == {});
+		bool IsNull() const {
+			return (pt() == coord_point_t{}) and (size() == coord_size_t{});
 		}
+
+		/// @brief Valid for normalized rect
+		/// @return true if pt is in *this
 		template < concepts::coord::is_point_ tpoint >
-		bool PtInRect(tpoint const& pt) const {
-			// Normalized Rect, also, must output the same result
-			if (auto r = this->x + this->width; this->x <= r) {
-				if (pt.x < this->x || pt.x >= r) return false;
-			} else {
-				if (pt.x < r || pt.x >= this->x) return false;
-			}
-			if (auto b = this->y + this->height; this->y <= b) {
-				if (pt.y < this->y || pt.y >= b) return false;
-			} else {
-				if (pt.y < b || pt.y >= this->y) return false;
-			}
-
-			if constexpr ((dim == 3) && concepts::coord::has_z<tpoint>) {
-				if (auto b = this->z + this->depth; this->z <= b) {
-					if (pt.z < this->z || pt.z >= b) return false;
-				}
-				else {
-					if (pt.z < b || pt.z >= this->z) return false;
-				}
-			}
-			return true;
+		bool Contains(tpoint const& pt) const {
+			return (pt0() <= pt) and (pt < pt1());
 		}
 
-		// returns true if rect is within rectangle
-		/// @brief *this including B
-		/// @return 
-		bool RectInRect(this_t const& B) const {
-			for (size_t i{}; i < dim; i++) {
-				if (B.pt0().member(i) < this->pt0().member(i))
-					return false;
-				if (B.pt1().member(i) > this->pt1().member(i))
-					return false;
-			}
-			return true;
+		/// @brief Valid for normalized rect
+		/// @return return B is included in *this
+		bool Contains(this_t const& B) const {
+			return (pt0() <= B.pt0()) and (B.pt1() <= pt1());
 		}
-		/// @brief *this including B (No boundary)
-		/// @return 
-		bool RectInRectNE(this_t const& B) const {
-			for (size_t i{}; i < dim; i++) {
-				if (B.pt0().member(i) <= this->pt0().member(i))
-					return false;
-				if (B.pt1().member(i) >= this->pt1().member(i))
-					return false;
-			}
-			return true;
-		}
-
-		// Operations
 
 		// set rectangle from left, y, right, and bottom
 		void SetRect(T x = 0, T y = 0, T width = 0, T height = 0) requires (dim == 2) {
@@ -141,7 +115,7 @@ export namespace biscuit {
 		// inflate the rectangle's width, height and depth
 		this_t& InflateRect(T x, T y)						requires (dim == 2) { this->x -= x; this->y -= y; this->width += x+x; this->height += y+y; return *this; }
 		this_t& InflateRect(T x, T y, T z)					requires (dim == 3) { this->x -= x; this->y -= y; this->z -= z; this->width += x+x; this->height += y+y; this->depth += z+z; return *this; }
-		this_t& InflateRect(size_t const& size)									{ pt() -= size; size() += size+size; return *this; }
+		this_t& InflateRect(coord_size_t const& size)							{ pt() -= size; size() += size+size; return *this; }
 		this_t& InflateRect(this_t const& rect)									{ pt() -= rect.pt(); size() += rect.pt() + rect.size(); return *this; }
 		this_t& InflateRect(T l, T t, T r, T b)				requires (dim == 2) { this->x -= l; this->y -= t; this->width += l+r; this->height += t+b; return *this; }
 		this_t& InflateRect(T l, T t, T f, T r, T b, T bk)	requires (dim == 3) { this->x -= l; this->y -= t; this->z -= f; this->width += l+r; this->height += t+b; this->depth += f+bk; return *this; }
@@ -149,12 +123,12 @@ export namespace biscuit {
 		// deflate the rectangle's width, height and depth
 		this_t& DeflateRect(T x, T y)						requires (dim == 2) { this->x += x; this->y += y; this->width -= x+x; this->height -= y+y; return *this; }
 		this_t& DeflateRect(T x, T y, T z)					requires (dim == 3) { this->x += x; this->y += y; this->z += z; this->width -= x+x; this->height -= y+y; this->depth -= z+z; return *this; }
-		this_t& DeflateRect(size_t const& size)									{ pt() += size; size() -= size+size; return *this; }
+		this_t& DeflateRect(coord_size_t const& size)							{ pt() += size; size() -= size+size; return *this; }
 		this_t& DeflateRect(this_t const& rect)									{ pt() += rect.pt(); size() -= rect.pt() + rect.size(); return *this; }
 		this_t& DeflateRect(T l, T t, T r, T b)				requires (dim == 2) { this->x += l; this->y += t; this->width -= l+r; this->height -= t+b; return *this; }
 		this_t& DeflateRect(T l, T t, T f, T r, T b, T bk)	requires (dim == 3) { this->x += l; this->y += t; this->z += f; this->width -= l+r; this->height -= t+b; this->depth -= f+bk; return *this; }
 
-		void NormalizeRect() {
+		void Normalize() {
 			if (this->width < 0) {
 				this->x += this->width;
 				this->width = -this->width;
@@ -170,12 +144,12 @@ export namespace biscuit {
 				}
 			}
 		}
-		this_t GetNormalizedRect() const {
+		BSC__NODISCARD this_t GetNormalized() const {
 			this_t rect(*this);
-			rect.NormalizeRect();
+			rect.Normalize();
 			return rect;
 		}
-		bool IsNormalized() const {
+		BSC__NODISCARD bool IsNormalized() const {
 			if constexpr (dim == 2) {
 				return this->width >= 0 and this->height >= 0;
 			}
@@ -184,109 +158,55 @@ export namespace biscuit {
 			}
 		}
 
-		// set this rectangle to intersection of two others
-		this_t& IntersectRect(this_t const& b) {
-			//NormalizeRect();
-			//b.NormalizeRect();
+		/// @brief fast intersect (without normalization)
+		this_t& Intersect(this_t const& b){
+			size() = min(pt1(), b.pt1());
+			pt0() = max(pt0(), b.pt0());
+			size() -= pt0();
+			return *this;
+		}
+		/// @brief safe intersect
+		this_t& IntersectSafe(this_t const& b){
+			auto pta0 = min(pt0(), pt0()+size());
+			auto pta1 = max(pt0(), pt0()+size());
+			auto ptb0 = min(b.pt0(), b.pt0()+b.size());
+			auto ptb1 = max(b.pt0(), b.pt0()+b.size());
 
-			x = std::max(x, rect2.x);
-			y = std::max(y, rect2.y);
-			if constexpr (dim >= 3)
-				z = std::max(z, rect2.z);
-
-			pt1().x = std::min(pt1().x, rect2.pt1().x);
-			pt1().y = std::min(pt1().y, rect2.pt1().y);
-			if constexpr (dim >= 3)
-				pt1().z = std::min(pt1().z, rect2.pt1().z);
-
+			pt0() = max(pta0, ptb0);
+			size() = min(pta1, ptb1) - pt0();
 			return *this;
 		}
 
-		// set this rectangle to bounding union of two others
-		this_t& UnionRect(this_t rect2) {
-			NormalizeRect();
-			rect2.NormalizeRect();
+		/// @brief fast union (without normalization)
+		this_t& Union(this_t const& b){
+			size() = max(pt1(), b.pt1());
+			pt0() = min(pt0(), b.pt0());
+			size() -= pt0();
+			return *this;
+		}
+		/// @brief safe union
+		this_t& UnionSafe(this_t const& b){
+			auto pta0 = min(pt0(), pt0()+size());
+			auto pta1 = max(pt0(), pt0()+size());
+			auto ptb0 = min(b.pt0(), b.pt0()+b.size());
+			auto ptb1 = max(b.pt0(), b.pt0()+b.size());
 
-			pt0().x = std::min(pt0().x, rect2.pt0().x);
-			pt0().y = std::min(pt0().y, rect2.pt0().y);
-			if constexpr (dim >= 3)
-				pt0().z = std::min(pt0().z, rect2.pt0().z);
-
-			pt1().x = std::max(pt1().x, rect2.pt1().x);
-			pt1().y = std::max(pt1().y, rect2.pt1().y);
-			if constexpr (dim >= 3)
-				pt1().z = std::max(pt1().z, rect2.pt1().z);
-
+			pt0() = min(pta0, ptb0);
+			size() = max(pta1, ptb1) - pt0();
 			return *this;
 		}
 
-		bool UpdateBoundary(coord_point_t const& pt) {
-			bool bModified{};
-			for (size_t i {}; i < pt.size(); i++) {
-				if (pt0().member(i) > pt.member(i)) {
-					bModified = true;
-					pt0().member(i) = pt.member(i);
-				}
-			}
-			for (size_t i = 0; i < pt.size(); i++) {
-				if (pt1().member(i) < pt.member(i)) {
-					bModified = true;
-					pt1().member(i) = pt.member(i);
-				}
-			}
-			return bModified;
-		}
+		this_t& operator &= (this_t const& b) { return Intersect(); }
+		this_t& operator |= (this_t const& b) { return Union(); }
+
+		constexpr this_t operator & (this_t const& b) { return this_t(*this) &= b; }
+		constexpr this_t operator | (this_t const& b) { return this_t(*this) |= b; }
 
 		//-----------------------------------------------------------------------------
 		// ROI
 		//
-		template < std::integral T_INT = std::int32_t >
-		[[nodiscard]] bool IsROI_Valid(TSize2<T_INT> const& sizeImage) const {
-			if constexpr (!std::is_integral_v(T)) {
-				TRectT<T_INT, 2> rect(*this);
-				return rect.IsROI_Valid(sizeImage);
-			}
-
-			return 1
-				&& (this->left >= 0)
-				&& (this->y >= 0)
-				&& ( (sizeImage.cx < 0) || ( (this->left < sizeImage.cx) && (this->right < sizeImage.cx) && (this->left < this->right) ) )
-				&& ( (sizeImage.cy < 0) || ( (this->y < sizeImage.cy) && (this->bottom < sizeImage.cy) && (this->y < this->bottom) ) )
-				;
-		}
-
-		template < std::integral T_INT = std::int32_t >
-		bool AdjustROI(TSize2<T> const& sizeImage) {
-			NormalizeRect();
-
-			if (this->left < 0)
-				this->left = 0;
-			if (this->y < 0)
-				this->y = 0;
-			if ( (sizeImage.cx > 0) && (this->right > sizeImage.cx) )
-				this->right = sizeImage.cx;
-			if ( (sizeImage.cy > 0) && (this->bottom > sizeImage.cy) )
-				this->bottom = sizeImage.cy;
-
-			return !IsRectEmpty();
-		}
-
-		template < std::integral T_INT = std::int32_t>
-		[[nodiscard]] TRectT<T_INT, 2> GetSafeROI(TSize2<T_INT> const& sizeImage) const {
-			TRectT<T_INT, 2> rect(*this);
-
-			rect.NormalizeRect();
-
-			if (rect.left < 0)
-				rect.left = 0;
-			if (rect.y < 0)
-				rect.y = 0;
-			if ( (sizeImage.cx > 0) && (rect.right > sizeImage.cx) )
-				rect.right = sizeImage.cx;
-			if ( (sizeImage.cy > 0) && (rect.bottom > sizeImage.cy) )
-				rect.bottom = sizeImage.cy;
-
-			return rect;
+		[[nodiscard]] bool IsROI_Valid(coord_size_t const& sizeImage) const {
+			return !this_t(sizeImage).IntersectSafe(*this).IsEmpty();
 		}
 
 	};

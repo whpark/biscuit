@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
+# 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit", "src\biscuit\biscuit.vcxproj", "{4FC2059E-06A9-4B82-861D-ED3CB583303F}"
@@ -27,9 +27,7 @@ Global
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F}.Release|x64.ActiveCfg = Release|x64
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F}.Release|x64.Build.0 = Release|x64
 		{730A3E73-F28D-435F-ADFD-DEF57F11F48F}.Debug|x64.ActiveCfg = Debug|x64
-		{730A3E73-F28D-435F-ADFD-DEF57F11F48F}.Debug|x64.Build.0 = Debug|x64
 		{730A3E73-F28D-435F-ADFD-DEF57F11F48F}.Release|x64.ActiveCfg = Release|x64
-		{730A3E73-F28D-435F-ADFD-DEF57F11F48F}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

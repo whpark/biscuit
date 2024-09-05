@@ -1,5 +1,9 @@
 module;
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4201)
+#endif
+
 #include <glaze/glaze.hpp>
 #include "glm/glm.hpp"
 
@@ -26,10 +30,10 @@ namespace biscuit::coord {
 		friend inline arithmetic_dummy_t operator * (auto, arithmetic_dummy_t const& ) { return *this; };
 		friend inline arithmetic_dummy_t operator / (auto, arithmetic_dummy_t const& ) { return *this; };
 	};
-	inline arithmetic_dummy_t operator += (auto&, arithmetic_dummy_t const& ) { return *this; };
-	inline arithmetic_dummy_t operator -= (auto&, arithmetic_dummy_t const& ) { return *this; };
-	inline arithmetic_dummy_t operator *= (auto&, arithmetic_dummy_t const& ) { return *this; };
-	inline arithmetic_dummy_t operator /= (auto&, arithmetic_dummy_t const& ) { return *this; };
+	inline arithmetic_dummy_t operator += (auto&, arithmetic_dummy_t const& b) { return b; };
+	inline arithmetic_dummy_t operator -= (auto&, arithmetic_dummy_t const& b) { return b; };
+	inline arithmetic_dummy_t operator *= (auto&, arithmetic_dummy_t const& b) { return b; };
+	inline arithmetic_dummy_t operator /= (auto&, arithmetic_dummy_t const& b) { return b; };
 	static_assert(!std::is_arithmetic_v<arithmetic_dummy_t>);
 
 }
@@ -148,7 +152,7 @@ export namespace biscuit::coord {
 		constexpr static bool const bRound = bROUND;
 
 		using array_t = base_t::array_t;
-		using this_t = TCoordBase;
+		using this_t = TCoordBase<ttarget, tvalue, DIM, bROUND>;
 
 		template < typename T, int DIM >
 		using tbase_t = ttarget<T, DIM>;
@@ -284,12 +288,45 @@ export namespace biscuit::coord {
 			ar(arr());
 		}
 
+		friend auto min(this_t const& a, this_t const& b) {
+			this_t r;
+			for (size_t i{}; i < count(); i++) {
+				r[i] = std::min(a[i], b[i]);
+			}
+			return r;
+		}
+		friend auto max(this_t const& a, this_t const& b) {
+			this_t r;
+			for (size_t i{}; i < count(); i++) {
+				r[i] = std::max(a[i], b[i]);
+			}
+			return r;
+		}
+		friend auto min(std::initializer_list<this_t> l) {
+			this_t r = *l.begin();
+			for (auto& v : l) {
+				for (size_t i{}; i < count(); i++) {
+					if (r[i] > v[i]) r[i] = v[i];
+				}
+			}
+			return r;
+		}
+		friend auto max(std::initializer_list<this_t> l) {
+			this_t r = *l.begin();
+			for (auto& v : l) {
+				for (size_t i{}; i < count(); i++) {
+					if (r[i] < v[i]) r[i] = v[i];
+				}
+			}
+			return r;
+		}
+
 		//--------------------------------------------------------------------------------------------------------------------------
 
 		BSC__NODISCARD static this_t Zero() {
 			return this_t{};
 		}
-		BSC__NODISCARD static this_t All(value_t v = {}) requires (bPoint or bSize) {
+		BSC__NODISCARD static this_t All(value_t v = {}) {
 			if constexpr (count() == 1) return {v};
 			if constexpr (count() == 2) return {v, v};
 			if constexpr (count() == 3) return {v, v, v};
@@ -324,7 +361,7 @@ export namespace biscuit::coord {
 		template < typename toperator, concepts::coord::generic_coord tcoord2>
 		this_t& Operation(tcoord2 const& b) {
 			constexpr static toperator op;
-			if constexpr (bRect or concepts::coord::generic_coord<tcoord2>) {
+			if constexpr (bRect or concepts::coord::generic_rect<tcoord2>) {
 				if constexpr (concepts::coord::has_point2<tcoord2>) {
 					op(MemberGet_x(), MemberGet_x(b));
 					op(MemberGet_y(), MemberGet_y(b));
@@ -375,14 +412,21 @@ export namespace biscuit::coord {
 			return *this;
 		}
 
+	protected:
+		struct sOpA { inline void operator() (auto&& a, auto const& b) const { a += b; } };
+		struct sOpS { inline void operator() (auto&& a, auto const& b) const { a -= b; } };
+		struct sOpM { inline void operator() (auto&& a, auto const& b) const { a *= b; } };
+		struct sOpD { inline void operator() (auto&& a, auto const& b) const { a /= b; } };
+
+	public:
 		template < concepts::coord::generic_coord tcoord2 >
-		inline this_t& operator += (tcoord2 const& b) { struct sOp { inline void operator() (auto& a, auto& b) { a += b; } }; return Operation<sOp>(b); }
+		inline this_t& operator += (tcoord2 const& b) { return Operation<sOpA>(b); }
 		template < concepts::coord::generic_coord tcoord2 >
-		inline this_t& operator -= (tcoord2 const& b) { struct sOp { inline void operator() (auto& a, auto& b) { a -= b; } }; return Operation<sOp>(b); }
+		inline this_t& operator -= (tcoord2 const& b) { return Operation<sOpS>(b); }
 		template < concepts::coord::generic_coord tcoord2 >
-		inline this_t& operator *= (tcoord2 const& b) { struct sOp { inline void operator() (auto& a, auto& b) { a *= b; } }; return Operation<sOp>(b); }
+		inline this_t& operator *= (tcoord2 const& b) { return Operation<sOpM>(b); }
 		template < concepts::coord::generic_coord tcoord2 >
-		inline this_t& operator /= (tcoord2 const& b) { struct sOp { inline void operator() (auto& a, auto& b) { a /= b; } }; return Operation<sOp>(b); }
+		inline this_t& operator /= (tcoord2 const& b) { return Operation<sOpD>(b); }
 
 		inline this_t& operator += (concepts::arithmetic auto v) { for (auto& c : arr()) c += v; return *this; }
 		inline this_t& operator -= (concepts::arithmetic auto v) { for (auto& c : arr()) c -= v; return *this; }
@@ -400,13 +444,13 @@ export namespace biscuit::coord {
 		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
 		BSC__NODISCARD inline this_t operator / (T const& b) const { return this_t(*this) /= b; }
 
-		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
+		template < typename T > requires (concepts::arithmetic<T>)
 		BSC__NODISCARD friend inline this_t operator + (T const& a, this_t const& b) { return  b + a; }
-		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
-		BSC__NODISCARD friend inline this_t operator - (T const& a, this_t const& b) { return -b += a; }	// not just naively (-b + a)
-		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
+		template < typename T > requires (concepts::arithmetic<T>)
+		BSC__NODISCARD friend inline this_t operator - (T const& a, this_t const& b) { return (-b + a); }
+		template < typename T > requires (concepts::arithmetic<T>)
 		BSC__NODISCARD friend inline this_t operator * (T const& a, this_t const& b) { return  b * a; }
-		template < typename T > requires concepts::coord::generic_coord<T> or concepts::arithmetic<T>
+		template < typename T > requires (concepts::arithmetic<T>)
 		friend inline this_t operator / (auto a, this_t const& b) = delete;
 
 
@@ -484,11 +528,11 @@ export namespace biscuit::coord {
 		// get/set member (for internal)
 	#define DEFINE_MEMBER_GET_SET(VAR, VAR_U) \
 		BSC__NODISCARD constexpr inline decltype(auto) MemberGet_##VAR() {\
-			if constexpr (concepts::coord::has_##VAR<base_t>) { return base_t::VAR; }\
+			if constexpr (concepts::coord::has_##VAR<base_t>) { return (value_t&)base_t::VAR; }\
 			else { return arithmetic_dummy_t{}; }\
 		}\
 		BSC__NODISCARD constexpr inline auto const MemberGet_##VAR() const {\
-			if constexpr (concepts::coord::has_##VAR<base_t>) { return base_t::VAR; }\
+			if constexpr (concepts::coord::has_##VAR<base_t>) { return (value_t&)base_t::VAR; }\
 			else { return arithmetic_dummy_t{}; }\
 		}\
 		constexpr inline void MemberSet_##VAR(auto value) {\
