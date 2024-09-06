@@ -33,6 +33,15 @@ export namespace biscuit::concepts::coord {
 	template < typename tcoord > concept has_rect2		= has_point2<tcoord> and has_size2<tcoord>;
 	template < typename tcoord > concept has_rect3		= has_point3<tcoord> and has_size3<tcoord>;
 
+	// bounds - rect with l,t,r,b. (NOT one of is_coord)
+	template < typename tcoord > concept has_l			= requires (tcoord a) { {a.l} -> std::convertible_to<double>; };
+	template < typename tcoord > concept has_t			= requires (tcoord a) { {a.t} -> std::convertible_to<double>; };
+	template < typename tcoord > concept has_r			= requires (tcoord a) { {a.r} -> std::convertible_to<double>; };
+	template < typename tcoord > concept has_b			= requires (tcoord a) { {a.b} -> std::convertible_to<double>; };
+	template < typename tcoord > concept has_f			= requires (tcoord a) { {a.f} -> std::convertible_to<double>; };
+	template < typename tcoord > concept has_bk			= requires (tcoord a) { {a.bk} -> std::convertible_to<double>; };
+	template < typename tcoord > concept has_bounds2	= has_l<tcoord> and has_t<tcoord> and has_r<tcoord> and has_b<tcoord>;
+	template < typename tcoord > concept has_bounds3	= has_l<tcoord> and has_t<tcoord> and has_r<tcoord> and has_b<tcoord> and has_f<tcoord> and has_bk<tcoord>;
 
 	// all concepts is_... are loosely defined.
 	template < typename tcoord > concept is_point2		= has_point2<tcoord> and !has_z<tcoord> and !has_w<tcoord> and !has_rect2<tcoord>;
@@ -98,18 +107,38 @@ export namespace biscuit::concepts::coord {
 	template < typename tcoord > concept generic_rect	= is_rect_<tcoord> or is_irect_<tcoord>;
 	template < typename tcoord > concept generic_coord	= is_coord<tcoord> or is_icoord<tcoord>;
 
+	//-----------------------------------------------------------------------------------------------------------------------------
 	template < generic_coord tcoord >
 	using coord_type_t =
 		std::conditional_t<generic_point<tcoord>, biscuit::coord::mPoint_t,
 		std::conditional_t<generic_size<tcoord>, biscuit::coord::mSize_t,
 		std::conditional_t<generic_rect<tcoord>, biscuit::coord::mRect_t, void>>>;
 
-	template < generic_coord tcoord >
-	using value_t = std::remove_cvref_t<
-		std::conditional_t<has_x<tcoord>, decltype(tcoord::x),
-		std::conditional_t<has_ix<tcoord>, decltype(tcoord::x()),
-		std::conditional_t<has_width<tcoord>, decltype(tcoord::width),
-		std::conditional_t<has_iwidth<tcoord>, decltype(tcoord::width()), void>>>>>;
+	namespace detail {
+		template < generic_coord tcoord >
+		auto GetFirstCoordValue() {
+			if constexpr (has_x<tcoord>) { return tcoord().x; }
+			else if constexpr (has_width<tcoord>) { return tcoord().width; }
+			else if constexpr (has_ix<tcoord>) { return tcoord().x(); }
+			else if constexpr (has_iwidth<tcoord>) { return tcoord().width(); }
+			else { static_assert(false); }
+		}
+	}
 
+	template < is_coord tcoord >
+	constexpr int CountCoordMemberVariable() {
+		int nCount{};
+		if constexpr (has_x<tcoord>) {		nCount++; }
+		if constexpr (has_y<tcoord>) { 		nCount++; }
+		if constexpr (has_z<tcoord>) { 		nCount++; }
+		if constexpr (has_w<tcoord>) { 		nCount++; }
+		if constexpr (has_width<tcoord>) { 	nCount++; }
+		if constexpr (has_height<tcoord>) {	nCount++; }
+		if constexpr (has_depth<tcoord>) {	nCount++; }
+		return nCount;
+	}
+
+	template < generic_coord tcoord >
+	using value_t = std::remove_cvref_t<decltype(detail::GetFirstCoordValue<tcoord>())>;
 }
 

@@ -16,14 +16,14 @@ export namespace biscuit {
 	/// @brief string to int/double ...
 	/// @return 
 	template < concepts::arithmetic tvalue >
-	BSC__NODISCARD tvalue ToNumber(std::string_view sv, int base = 10, char seperator = 0) {
+	BSC__NODISCARD tvalue ToNumber(std::string_view sv, int base = 10, char separator = 0, std::from_chars_result* result = nullptr) {
 		if (sv.size() > BSC_RSIZE_MAX)
 			return 0;
 		tvalue value{};
 		auto* b = sv.data();
 		auto* e = sv.data() + sv.size();
 
-		std::string body;
+		thread_local static std::string body;
 
 		// skip leading spaces
 		while (b < e and std::isspace(*b)) b++;
@@ -56,18 +56,21 @@ export namespace biscuit {
 			}
 		}
 
-		if (seperator != 0) {
-			body = tszrmcharTo(std::string_view(b, e), seperator);
+		if (separator != 0) {
+			body = tszrmcharTo(std::string_view(b, e), separator);
 			b = body.data();
 			e = b + body.size();
 		}
 		
+		std::from_chars_result r{};
 		if constexpr (std::is_integral_v<tvalue>) {
-			std::from_chars(b, e, value, base);
+			r = std::from_chars(b, e, value, base);
 		}
 		else {
-			std::from_chars(b, e, value);
+			r = std::from_chars(b, e, value);
 		}
+		if (result)
+			*result = r;
 
 		return value;
 	}
@@ -75,25 +78,25 @@ export namespace biscuit {
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// tszto
 	template < concepts::arithmetic tvalue, concepts::tstring_like tstring >
-	BSC__NODISCARD constexpr inline tvalue tszto(tstring const& sv, int base = 10, char seperator = 0) {
+	BSC__NODISCARD constexpr inline tvalue tszto(tstring const& sv, int base = 10, char separator = 0) {
 		using tchar = concepts::value_t<tstring>;
 		if constexpr (std::is_same_v<tchar, char>) {
-			return ToNumber<tvalue>(sv, base, seperator);
+			return ToNumber<tvalue>(sv, base, separator);
 		}
 		else if constexpr (std::is_same_v<tchar, char8_t>) {
-			return ToNumber<tvalue>(u8A(sv), base, seperator);
+			return ToNumber<tvalue>(u8A(sv), base, separator);
 		}
 		else {
-			return ToNumber<tvalue>(ConvertString<char>(sv), base, seperator);
+			return ToNumber<tvalue>(ConvertString<char>(sv), base, separator);
 		}
 	}
 
 	template < concepts::tstring_like tstring >
-	BSC__NODISCARD constexpr inline auto tsztoi(tstring const& sv, int base = 10, char seperator = 0) { return tszto<int>(sv,    base, seperator); }
+	BSC__NODISCARD constexpr inline auto tsztoi(tstring const& sv, int base = 10, char separator = 0) { return tszto<int>(sv,    base, separator); }
 	template < concepts::tstring_like tstring >
-	BSC__NODISCARD constexpr inline auto tsztou(tstring const& sv, int base = 10, char seperator = 0) { return tszto<uint>(sv,   base, seperator); }
+	BSC__NODISCARD constexpr inline auto tsztou(tstring const& sv, int base = 10, char separator = 0) { return tszto<uint>(sv,   base, separator); }
 	template < concepts::tstring_like tstring >
-	BSC__NODISCARD constexpr inline auto tsztod(tstring const& sv, int base = 10, char seperator = 0) { return tszto<double>(sv, base, seperator); }
+	BSC__NODISCARD constexpr inline auto tsztod(tstring const& sv, int base = 10, char separator = 0) { return tszto<double>(sv, base, separator); }
 
 
 	//-----------------------------------------------------------------------------------------------------------------------------

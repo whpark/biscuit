@@ -20,10 +20,24 @@ namespace test {
 
 	struct Point2i {
 		int x, y;
+		auto operator <=> (Point2i const&) const = default;
+	};
+	struct Point3d {
+		double x, y, z;
+		auto operator <=> (Point3d const&) const = default;
 	};
 	struct Size2i {
 		int width, height;
 	};
+	struct Rect2d {
+		double x, y, width, height;
+		auto operator <=> (Rect2d const&) const = default;
+	};
+	struct Rect3d {
+		double x, y, z, width, height, depth;
+		auto operator <=> (Rect3d const&) const = default;
+	};
+
 
 	template < typename T >
 	struct QPoint_ {
@@ -120,11 +134,57 @@ namespace test {
 		REQUIRE(sRect2i().IsNull());
 	}
 
+	TEST_CASE("coord.from_to_string") {
+		using namespace biscuit;
+
+		sRect2d rect{1., 2., 3., 4.};
+		auto str = rect.ToString();
+		sRect2d rect2;
+		rect2.FromString(str);
+		REQUIRE(rect == rect2);
+
+		auto pt = sPoint2i{ 1, 2 };
+		str = ToString(pt);
+		sPoint2i pt2;
+		pt2.FromString(str);
+		REQUIRE(pt == pt2);
+
+		auto pt3 = sPoint3d{ 1., 2., 3. };
+		str = biscuit::ToString(pt3, "{:.3f}"sv);
+		sPoint3d pt4;
+		pt4.FromString(str);
+		REQUIRE(pt3 == pt4);
+	}
+
+	TEST_CASE("generic_coord.from_to_string") {
+		using namespace biscuit;
+
+		Rect2d rect{1., 2., 3., 4.};
+		auto str = ToString<char>(rect);
+
+		auto rect2 = FromString<Rect2d>(str);
+		REQUIRE(rect == rect2);
+
+		auto pt = Point2i{ 1, 2 };
+		str = ToString(pt);
+		auto pt2 = FromString<Point2i>(str);
+		REQUIRE(pt == pt2);
+
+		auto pt3 = Point3d{ 1., 2., 3. };
+		str = biscuit::ToString(pt3, "{:.3f}"sv);
+		auto pt4 = FromString<Point3d>(str);
+		REQUIRE(pt3 == pt4);
+
+
+	}
+
 }
 
 namespace bench {
 	struct sRect {
 		int x, y, width, height;
+
+		auto operator <=> (sRect const&) const = default;
 
 		inline void Normalize() {
 			if (width < 0) { x = x+width; width = -width; }
@@ -164,6 +224,8 @@ namespace bench {
 	struct xRect {
 		int l, t, r, b;
 
+		auto operator <=> (xRect const&) const = default;
+
 		inline void Normalize() {
 			if (l > r) std::swap(l, r);
 			if (t > b) std::swap(t, b);
@@ -194,44 +256,46 @@ namespace bench {
 		}
 	};
 
-	//TEST_CASE("coord.rect.bench") {
-	//	//sRect rc0 { 30, 40, -30, -40 };
-	//	//sRect rc1 { 20, 40, -10, -20 };
-	//	//xRect rc2 { 30, 40, 0, 0 };
-	//	//xRect rc3 { 20, 40, 10, 20 };
-	//	sRect rc0 { rand(), rand(), rand(), rand()};
-	//	sRect rc1 { rand(), rand(), rand(), rand()};
-	//	sRect rc2 { rand(), rand(), rand(), rand()};
-	//	sRect rc3 { rand(), rand(), rand(), rand()};
+#if 0
+	TEST_CASE("coord.rect.bench") {
+		//sRect rc0 { 30, 40, -30, -40 };
+		//sRect rc1 { 20, 40, -10, -20 };
+		//xRect rc2 { 30, 40, 0, 0 };
+		//xRect rc3 { 20, 40, 10, 20 };
+		sRect rc0 { rand(), rand(), rand(), rand()};
+		sRect rc1 { rand(), rand(), rand(), rand()};
+		sRect rc2 { rand(), rand(), rand(), rand()};
+		sRect rc3 { rand(), rand(), rand(), rand()};
 
-	//	BENCHMARK("sRect::IntersectSafe") {
-	//		rc0.IntersectSafe(rc1);
-	//	};
+		BENCHMARK("sRect::IntersectSafe") {
+			rc0.IntersectSafe(rc1);
+		};
 
-	//	BENCHMARK("sRect::Intersect") {
-	//		rc0.Normalize();
-	//		rc1.Normalize();
-	//		rc0.Intersect(rc1);
-	//	};
+		BENCHMARK("sRect::Intersect") {
+			rc0.Normalize();
+			rc1.Normalize();
+			rc0.Intersect(rc1);
+		};
 
-	//	BENCHMARK("sRect::Intersect2") {
-	//		rc0.Intersect(rc1);
-	//	};
+		BENCHMARK("sRect::Intersect2") {
+			rc0.Intersect(rc1);
+		};
 
-	//	BENCHMARK("xRect::IntersectSafe") {
-	//		rc2.IntersectSafe(rc3);
-	//	};
+		BENCHMARK("xRect::IntersectSafe") {
+			rc2.IntersectSafe(rc3);
+		};
 
-	//	BENCHMARK("xRect::Intersect") {
-	//		rc2.Normalize();
-	//		rc2.Normalize();
-	//		rc2.Intersect(rc3);
-	//	};
+		BENCHMARK("xRect::Intersect") {
+			rc2.Normalize();
+			rc2.Normalize();
+			rc2.Intersect(rc3);
+		};
 
-	//	BENCHMARK("xRect::Intersect2") {
-	//		rc2.Intersect(rc3);
-	//	};
+		BENCHMARK("xRect::Intersect2") {
+			rc2.Intersect(rc3);
+		};
+	}
+#endif
 
-	//}
 
 }

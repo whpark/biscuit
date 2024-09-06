@@ -63,7 +63,7 @@ TEST_CASE("string.arithmetic") {
 		REQUIRE(tsztoi("  +123456"sv) == 123456);
 		REQUIRE(tszto<uint64_t>("0xABCD'EFab'1234'9853", 0, '\'') == 0xABCD'EFab'1234'9853llu);
 		REQUIRE(tszto<int64_t>("0xABCD'EFab'1234'9853", 0, '\'') == 0);	// too big for int64_t
-		REQUIRE(tszto<int64_t>("0xABCD'EFab'1234'9853", 0) == 0xABCD);	// no seperator
+		REQUIRE(tszto<int64_t>("0xABCD'EFab'1234'9853", 0) == 0xABCD);	// no separator
 
 		REQUIRE(tsztod("1.1")		== 1.1);
 		REQUIRE(tsztod("1.1"s)		== 1.1);

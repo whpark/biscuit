@@ -139,6 +139,7 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
     <ClCompile Include="coord.point.ixx" />
     <ClCompile Include="coord.rect.ixx" />
     <ClCompile Include="coord.size.ixx" />
+    <ClCompile Include="coord.transform.ixx" />
     <ClCompile Include="dll.h" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="iconv_wrapper.ixx" />

@@ -17,9 +17,15 @@ TEST_CASE("string.manipulates") {
 		auto str = str0;	
 		str = str0; Trim(str); REQUIRE(str == "abc"s);
 		str = str0; TrimLeft(str); REQUIRE(str == "abc \t "s);
-		TrimRight(str, " "sv); REQUIRE(str == "abc \t"s);
-		TrimRight(str, "\t"sv); REQUIRE(str == "abc "s);
+		TrimRight(str, 'c'); REQUIRE(str == "abc \t "s);
+		TrimRight(str, ' '); REQUIRE(str == "abc \t"s);
+		TrimRight(str, "\t"); REQUIRE(str == "abc "s);
+		TrimRight(str, "abc "); REQUIRE(str == ""s);
 
+		str = str0; REQUIRE(TrimView<char>(str) == "abc"sv);
+		str = str0; REQUIRE(TrimLeftView<char>(str) == "abc \t "sv);
+		str = str0; REQUIRE(TrimRightView<char>(str) == " \t\r\n  abc"sv);
+		str = str0; REQUIRE(TrimView<char>(str, ' ') == "\t\r\n  abc \t"sv);
 	}
 
 	SECTION("split") {

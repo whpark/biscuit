@@ -4,6 +4,8 @@ module;
 #pragma warning(disable: 4201)
 #endif
 
+#include <fmt/core.h>
+#include <fmt/xchar.h>
 #include <glaze/glaze.hpp>
 #include "glm/glm.hpp"
 
@@ -11,10 +13,12 @@ module;
 
 export module biscuit.coord.base;
 import std;
-//import "biscuit/macro.h";
 import biscuit.aliases;
 import biscuit.concepts;
+import biscuit.misc;
 import biscuit.coord.concepts;
+import biscuit.convert_codepage;
+import biscuit.string;
 
 namespace concepts = biscuit::concepts;
 
@@ -34,7 +38,7 @@ namespace biscuit::coord {
 	inline arithmetic_dummy_t operator -= (auto&, arithmetic_dummy_t const& b) { return b; };
 	inline arithmetic_dummy_t operator *= (auto&, arithmetic_dummy_t const& b) { return b; };
 	inline arithmetic_dummy_t operator /= (auto&, arithmetic_dummy_t const& b) { return b; };
-	static_assert(!std::is_arithmetic_v<arithmetic_dummy_t>);
+	static_assert(!std::is_arithmetic_v<arithmetic_dummy_t>);	// can be used with +,-,*,/, but, not arithmetic.
 
 }
 
@@ -43,11 +47,11 @@ export namespace biscuit::coord {
 	//using namespace biscuit::concepts::coord;
 
 	//-----------------------------------------------------------------------------------------------------------------------------
-	template < typename T >
+	template < typename tvalue >
 	struct TPoint2 {
 		using coord_type_t = mPoint_t;
 		using this_t = TPoint2;
-		using value_t = T;
+		using value_t = tvalue;
 		constexpr static int const dim = 2;
 		using array_t = std::array<value_t, dim>;
 
@@ -55,22 +59,22 @@ export namespace biscuit::coord {
 
 		auto operator <=> (this_t const&) const = default;
 	};
-	template < typename T >
+	template < typename tvalue >
 	struct TPoint3 {
 		using coord_type_t = mPoint_t;
 		using this_t = TPoint3;
-		using value_t = T;
+		using value_t = tvalue;
 		constexpr static int const dim = 3;
 		using array_t = std::array<value_t, dim>;
 
 		value_t x, y, z;
 		auto operator <=> (this_t const&) const = default;
 	};
-	template < typename T >
+	template < typename tvalue >
 	struct TPoint4 {
 		using coord_type_t = mPoint_t;
 		using this_t = TPoint4;
-		using value_t = T;
+		using value_t = tvalue;
 		constexpr static int const dim = 4;
 		using array_t = std::array<value_t, dim>;
 
@@ -78,14 +82,24 @@ export namespace biscuit::coord {
 		auto operator <=> (this_t const&) const = default;
 	};
 
-	template < typename T, int DIMENSION >
-	using TPoint_ = std::conditional_t<DIMENSION == 2, TPoint2<T>, std::conditional_t<DIMENSION == 3, TPoint3<T>, std::conditional_t<DIMENSION == 4, TPoint4<T>, void >>>;
+	template < typename tvalue, int DIMENSION >
+	using TPoint_ = std::conditional_t<DIMENSION == 2, TPoint2<tvalue>, std::conditional_t<DIMENSION == 3, TPoint3<tvalue>, std::conditional_t<DIMENSION == 4, TPoint4<tvalue>, void >>>;
+
+	/// @brief Interpolation (lerp)
+	template < typename T, int dim >
+	TPoint_<T, dim> lerp(TPoint_<T, dim> const& a, TPoint_<T, dim> const& b, double t) {
+		TPoint_<T, dim> c;
+		for (int i = 0; i < dim; i++)
+			c[i] = std::lerp(a[i], b[i], t);
+		return c;
+	}
+
 
 	//-----------------------------------------------------------------------------------------------------------------------------
-	template < typename T >
+	template < typename tvalue >
 	struct TSize2 {
 		using coord_type_t = mSize_t;
-		using value_t = T;
+		using value_t = tvalue;
 		using this_t = TSize2;
 		constexpr static int const dim = 2;
 		using array_t = std::array<value_t, dim>;
@@ -93,11 +107,11 @@ export namespace biscuit::coord {
 		value_t width, height;
 		auto operator <=> (this_t const&) const = default;
 	};
-	template < typename T >
+	template < typename tvalue >
 	struct TSize3 {
 		using coord_type_t = mSize_t;
 		using this_t = TSize3;
-		using value_t = T;
+		using value_t = tvalue;
 		constexpr static int const dim = 3;
 		using array_t = std::array<value_t, dim>;
 
@@ -105,26 +119,26 @@ export namespace biscuit::coord {
 		auto operator <=> (this_t const&) const = default;
 	};
 
-	template < typename T, int DIMENSION >
-	using TSize_ = std::conditional_t<DIMENSION == 2, TSize2<T>, std::conditional_t<DIMENSION == 3, TSize3<T>, void >>;
+	template < typename tvalue, int DIMENSION >
+	using TSize_ = std::conditional_t<DIMENSION == 2, TSize2<tvalue>, std::conditional_t<DIMENSION == 3, TSize3<tvalue>, void >>;
 
 	//-----------------------------------------------------------------------------------------------------------------------------
-	template < typename T >
+	template < typename tvalue >
 	struct TRect2 {
 		using coord_type_t = mRect_t;
 		using this_t = TRect2;
-		using value_t = T;
+		using value_t = tvalue;
 		constexpr static int const dim = 2;
 		using array_t = std::array<value_t, dim*2>;
 
 		value_t x, y, width, height;
 		auto operator <=> (this_t const&) const = default;
 	};
-	template < typename T >
+	template < typename tvalue >
 	struct TRect3 {
 		using coord_type_t = mRect_t;
 		using this_t = TRect3;
-		using value_t = T;
+		using value_t = tvalue;
 		constexpr static int const dim = 3;
 		using array_t = std::array<value_t, dim*2>;
 
@@ -132,8 +146,8 @@ export namespace biscuit::coord {
 		auto operator <=> (this_t const&) const = default;
 	};
 
-	template < typename T, int DIMENSION >
-	using TRect_ = std::conditional_t<DIMENSION == 2, TRect2<T>, std::conditional_t<DIMENSION == 3, TRect3<T>, void >>;
+	template < typename tvalue, int DIMENSION >
+	using TRect_ = std::conditional_t<DIMENSION == 2, TRect2<tvalue>, std::conditional_t<DIMENSION == 3, TRect3<tvalue>, void >>;
 
 	//=============================================================================================================================
 	//template < typename ttarget >
@@ -143,23 +157,25 @@ export namespace biscuit::coord {
 	struct TCoordBase : ttarget<tvalue, DIM> {
 		using base_t = ttarget<tvalue, DIM>;
 		using coord_type_t = base_t::coord_type_t;
+		using array_t = base_t::array_t;
 		using value_t = base_t::value_t;
 		constexpr static int const dim = base_t::dim;
-		constexpr static auto count() { return base_t::array_t().size(); }
+		constexpr static auto count() { return array_t().size(); }
 		constexpr static bool const bPoint = std::is_same_v<coord_type_t, mPoint_t>;
 		constexpr static bool const bSize = std::is_same_v<coord_type_t, mSize_t>;
 		constexpr static bool const bRect = std::is_same_v<coord_type_t, mRect_t>;
 		constexpr static bool const bRound = bROUND;
 
-		using array_t = base_t::array_t;
 		using this_t = TCoordBase<ttarget, tvalue, DIM, bROUND>;
 
-		template < typename T, int DIM >
-		using tbase_t = ttarget<T, DIM>;
+		template < typename tvalue2, int DIM2 >
+		using tbase_t = ttarget<tvalue2, DIM2>;
+
+		static_assert(!std::is_integral_v<value_t> or std::is_signed_v<value_t>, "value_t must be one of floating point or signed integral.");
 
 		// constructors
 		//TCoordBase() = default;
-		TCoordBase(value_t i0 = {}) requires(count() == 1) { arr()[0] = i0; }
+		TCoordBase(value_t i0={}) requires(count() == 1) { arr()[0] = i0; }
 		TCoordBase(value_t i0={}, value_t i1={}) requires(count() == 2) { arr()[0] = i0; arr()[1] = i1; }
 		TCoordBase(value_t i0={}, value_t i1={}, value_t i2={}) requires(count() == 3) { arr()[0] = i0; arr()[1] = i1; arr()[2] = i2; }
 		TCoordBase(value_t i0={}, value_t i1={}, value_t i2={}, value_t i3={}) requires(count() == 4 && !bRect) { arr()[0] = i0; arr()[1] = i1; arr()[2] = i2; arr()[3] = i3; }
@@ -262,19 +278,39 @@ export namespace biscuit::coord {
 		//=========================================================================================================================
 		//--------------------------------------------------------------------------------------------------------------------------
 		// get member as array
-		//constexpr auto& arr(this auto&& self) {
-		//	if constexpr (std::is_const_v<std::remove_reference_t<decltype(self)>>) {
-		//		return *reinterpret_cast<std::array<value_t, DIMENSION>const*>(&self);
-		//	}
-		//	else {
-		//		return *reinterpret_cast<std::array<value_t, DIMENSION>*>(&self);
-		//	}
-		//}
 		BSC__NODISCARD constexpr inline array_t& arr()				{ return *reinterpret_cast<array_t*>(this); }
 		BSC__NODISCARD constexpr inline array_t const& arr() const	{ return *reinterpret_cast<array_t const*>(this); }
 
 		auto& operator [] (size_t i) { return arr()[i]; }
 		auto const& operator [] (size_t i) const { return arr()[i]; }
+
+		template < typename tchar = char >
+		constexpr std::basic_string<tchar> ToString() {
+			using namespace std::literals;
+			std::basic_string<tchar> str;
+			if constexpr (count() == 2)
+				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{}"sv)), arr()[0], arr()[1]);
+			else if constexpr (count() == 3)
+				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{}"sv)), arr()[0], arr()[1], arr()[2]);
+			else if constexpr (count() == 4)
+				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{},{}"sv)), arr()[0], arr()[1], arr()[2], arr()[3]);
+			else if constexpr (count() == 6)
+				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{},{},{},{}"sv)), arr()[0], arr()[1], arr()[2], arr()[3], arr()[4], arr()[5]);
+			else
+				static_assert(false);
+			TrimRight(str, ',');
+			return str;
+		}
+		template < concepts::tstring_like tstring >
+		bool FromString(tstring const& sv) {
+			size_t i{};
+			for (auto item : SplitView(sv, ',')) {
+				if (i >= count())
+					break;
+				arr()[i++] = tszto<value_t>(item, 0);
+			}
+			return i == count();
+		}
 
 		//--------------------------------------------------------------------------------------------------------------------------
 		struct glaze {
@@ -321,6 +357,14 @@ export namespace biscuit::coord {
 			return r;
 		}
 
+		/// @brief Interpolation (lerp)
+		this_t lerp(this_t const& b, double t) requires (bPoint) {
+			this_t c;
+			for (int i{}; i < dim; i++)
+				c[i] = std::lerp(arr()[i], b[i], t);
+			return c;
+		}
+
 		//--------------------------------------------------------------------------------------------------------------------------
 
 		BSC__NODISCARD static this_t Zero() {
@@ -356,6 +400,23 @@ export namespace biscuit::coord {
 			return bModified;
 		}
 
+		auto Area() requires (bSize or bRect) {
+			if constexpr (std::is_integral_v<value_t>) {
+				using return_t = std::conditional_t<sizeof(value_t) <= 2, int, int64_t>;
+				return (return_t)this->width * (return_t)this->height;
+			}
+			else
+				return this->width * this->height;
+		}
+		auto Volume() requires ((bSize or bRect) and (dim >= 3)) {
+			if constexpr (std::is_integral_v<value_t>) {
+				using return_t = std::conditional_t<sizeof(value_t) <= 2, int, int64_t>;
+				return (return_t)this->width * (return_t)this->height * (return_t)this->depth;
+			}
+			else
+				return this->width * this->height * this->depth;
+		}
+
 		//=========================================================================================================================
 		// operator
 		template < typename toperator, concepts::coord::generic_coord tcoord2>
@@ -378,6 +439,7 @@ export namespace biscuit::coord {
 					op(MemberGet_x(), MemberGet_x(b));
 					op(MemberGet_y(), MemberGet_y(b));
 					op(MemberGet_z(), MemberGet_z(b));
+					op(MemberGet_w(), MemberGet_w(b));
 				}
 				else if constexpr (concepts::coord::has_size2<tcoord2>) {
 					op(MemberGet_x(), MemberGet_width(b));
@@ -413,20 +475,20 @@ export namespace biscuit::coord {
 		}
 
 	protected:
-		struct sOpA { inline void operator() (auto&& a, auto const& b) const { a += b; } };
-		struct sOpS { inline void operator() (auto&& a, auto const& b) const { a -= b; } };
-		struct sOpM { inline void operator() (auto&& a, auto const& b) const { a *= b; } };
-		struct sOpD { inline void operator() (auto&& a, auto const& b) const { a /= b; } };
+		struct sOpAdd { inline void operator() (auto&& a, auto const& b) const { a += b; } };
+		struct sOpSub { inline void operator() (auto&& a, auto const& b) const { a -= b; } };
+		struct sOpMul { inline void operator() (auto&& a, auto const& b) const { a *= b; } };
+		struct sOpDiv { inline void operator() (auto&& a, auto const& b) const { a /= b; } };
 
 	public:
 		template < concepts::coord::generic_coord tcoord2 >
-		inline this_t& operator += (tcoord2 const& b) { return Operation<sOpA>(b); }
+		inline this_t& operator += (tcoord2 const& b) { return Operation<sOpAdd>(b); }
 		template < concepts::coord::generic_coord tcoord2 >
-		inline this_t& operator -= (tcoord2 const& b) { return Operation<sOpS>(b); }
+		inline this_t& operator -= (tcoord2 const& b) { return Operation<sOpSub>(b); }
 		template < concepts::coord::generic_coord tcoord2 >
-		inline this_t& operator *= (tcoord2 const& b) { return Operation<sOpM>(b); }
+		inline this_t& operator *= (tcoord2 const& b) { return Operation<sOpMul>(b); }
 		template < concepts::coord::generic_coord tcoord2 >
-		inline this_t& operator /= (tcoord2 const& b) { return Operation<sOpD>(b); }
+		inline this_t& operator /= (tcoord2 const& b) { return Operation<sOpDiv>(b); }
 
 		inline this_t& operator += (concepts::arithmetic auto v) { for (auto& c : arr()) c += v; return *this; }
 		inline this_t& operator -= (concepts::arithmetic auto v) { for (auto& c : arr()) c -= v; return *this; }
@@ -513,6 +575,76 @@ export namespace biscuit::coord {
 				static_assert(false);
 			}
 		}
+
+	public:
+		//=========================================================================================================================
+		BSC__NODISCARD double Distance(this_t const& pt) const requires (bPoint or bSize) {
+			double sum {};
+			for (int i{}; i < count(); i++)
+				sum += Square(arr()[i]-pt[i]);
+			return std::sqrt(sum);
+		}
+		BSC__NODISCARD double GetLength() const requires (bPoint or bSize) {
+			double sum {};
+			for (auto v : arr())
+				sum += Square(v);
+			return std::sqrt(sum);
+		}
+		BSC__NODISCARD rad_t GetAngleXY() const requires (bPoint)				{ return rad_t(std::atan2(this->y, this->x)); }
+		BSC__NODISCARD rad_t GetAngleYZ() const requires (bPoint and dim >= 3)	{ return rad_t(std::atan2(this->z, this->y)); }
+		BSC__NODISCARD rad_t GetAngleZX() const requires (bPoint and dim >= 3)	{ return rad_t(std::atan2(this->x, this->z)); }
+
+		BSC__NODISCARD this_t GetNormalized() const requires (bPoint) { return *this / GetLength(); }	// Length == 1.0
+		bool Normalize() requires (bPoint) { *this /= GetLength(); return base_t::IsAllValid(); }
+
+		BSC__NODISCARD this_t GetNormalVectorXY() const requires (bPoint)				{ return {this->y, -this->x}; }			// Perpendicular(Normal) Vector (XY-Plan)
+		BSC__NODISCARD this_t GetNormalVectorYZ() const requires (bPoint and dim >= 3)	{ return {{}, this->z, -this->y}; }		// Perpendicular(Normal) Vector (YZ-Plan)
+		BSC__NODISCARD this_t GetNormalVectorZX() const requires (bPoint and dim >= 3)	{ return {-this->z, {}, this->x}; }		// Perpendicular(Normal) Vector (ZX-Plan)
+		// Cross
+		BSC__NODISCARD this_t operator * (this_t const& B) const requires (bPoint)			 		{ return Cross(B); }
+
+		//// Mathmatical Operator
+		//template < typename T2 >
+		//friend this_t operator * (cv::Matx<T2, dim, dim> const& A, this_t const& B) {
+		//	this_t C{};
+		//	//C.x = A(0, 0) * B.x + A(0, 1) * B.y + A(0, 2) * B.z;
+		//	//C.y = A(1, 0) * B.x + A(1, 1) * B.y + A(1, 2) * B.z;
+		//	//C.z = A(2, 0) * B.x + A(2, 1) * B.y + A(2, 2) * B.z;
+		//	for (int row {}; row < dim; row++) {
+		//		for (int col {}; col < dim; col++) {
+		//			C.data()[row] += A(row, col) * B.data()[col];
+		//		}
+		//	}
+		//	return C;
+		//}
+
+		BSC__NODISCARD this_t Cross(this_t const& B) const requires (bPoint and dim >= 3) {
+			using base_t::x, base_t::y, base_t::z;
+			return {y*B.z - z*B.y, z*B.x - x*B.z, x*B.y - y*B.x};
+		}
+		BSC__NODISCARD value_t CrossZ(this_t const& B) const requires (bPoint) {
+			return this->x*B.y - this->y*B.x;
+		}
+		BSC__NODISCARD value_t Dot(this_t const& B) const requires (bPoint) {
+			value_t sum{};
+			for (size_t i{}; i < count(); i++)
+				sum += arr()[i] * B[i];
+			return sum;
+		}
+
+		//-------------------------------------------------------------------------------------------------------------------------
+		// glm
+		BSC__NODISCARD glm::vec<dim, value_t>&		vec()			requires (bPoint)				{ return *reinterpret_cast<glm::vec<dim, value_t>*>(this); }
+		BSC__NODISCARD glm::vec<dim, value_t>const&	vec() const		requires (bPoint)				{ return *reinterpret_cast<glm::vec<dim, value_t>const*>(this); }
+		BSC__NODISCARD glm::vec<2, value_t>&		vec2()			requires (bPoint and dim >= 2)	{ return *reinterpret_cast<glm::vec<2, value_t>*>(this); }
+		BSC__NODISCARD glm::vec<2, value_t>const&	vec2() const	requires (bPoint and dim >= 2)	{ return *reinterpret_cast<glm::vec<2, value_t>const*>(this); }
+		BSC__NODISCARD glm::vec<3, value_t>&		vec3()			requires (bPoint and dim >= 3)	{ return *reinterpret_cast<glm::vec<3, value_t>*>(this); }
+		BSC__NODISCARD glm::vec<3, value_t>const&	vec3() const	requires (bPoint and dim >= 3)	{ return *reinterpret_cast<glm::vec<3, value_t>const*>(this); }
+		BSC__NODISCARD glm::vec<4, value_t>&		vec4()			requires (bPoint and dim >= 4)	{ return *reinterpret_cast<glm::vec<4, value_t>*>(this); }
+		BSC__NODISCARD glm::vec<4, value_t>const&	vec4() const	requires (bPoint and dim >= 4)	{ return *reinterpret_cast<glm::vec<4, value_t>const*>(this); }
+
+		operator glm::vec<dim, value_t>&		()		 requires (bPoint) { return vec(); }
+		operator glm::vec<dim, value_t> const&	() const requires (bPoint) { return vec(); }
 
 		//=========================================================================================================================
 	protected:

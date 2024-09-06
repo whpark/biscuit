@@ -1,9 +1,10 @@
 ﻿module;
 
+#include "biscuit/config.h"
+#include "dll.h"
+
 export module biscuit;
 
-import "biscuit/config.h";
-import "dll.h";
 import std;
 export import biscuit.aliases;
 export import biscuit.concepts;

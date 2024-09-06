@@ -1,8 +1,9 @@
 module;
 
+#include "biscuit/macro.h"
+
 export module biscuit.coord.rect;
 import std;
-import "biscuit/macro.h";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.coord.concepts;
@@ -41,6 +42,7 @@ export namespace biscuit {
 			this->pt() = {};
 			this->size() = size;
 		}
+
 		using base_t::operator =;
 		//using base_t::operator <=>;
 		BSC__NODISCARD bool operator == (this_t const&) const = default;
@@ -83,6 +85,9 @@ export namespace biscuit {
 				static_assert(false);
 			}
 		}
+		bool Is1dNotEmptyXY() const {
+			return this->width > 0 or this->height > 0;
+		}
 		// returns true if rectangle is at (0,0,0) and has no area
 		bool IsNull() const {
 			return (pt() == coord_point_t{}) and (size() == coord_size_t{});
@@ -102,31 +107,31 @@ export namespace biscuit {
 		}
 
 		// set rectangle from left, y, right, and bottom
-		void SetRect(T x = 0, T y = 0, T width = 0, T height = 0) requires (dim == 2) {
+		void Set(T x = 0, T y = 0, T width = 0, T height = 0) requires (dim == 2) {
 			this->x = x; this->y = y; this->width = width; this->height = height;
 		}
-		void SetRect(T x = 0, T y = 0, T z = 0, T width = 0, T height = 0, T depth = default_depth()) requires (dim == 3) {
+		void Set(T x = 0, T y = 0, T z = 0, T width = 0, T height = 0, T depth = default_depth()) requires (dim == 3) {
 			this->x = x; this->y = y; this->z = z; this->width = width; this->height = height; this->depth = depth;
 		}
 
-		void SetRect(concepts::coord::is_point_ auto const& pt, concepts::coord::is_size_ auto const& size)		{ pt() = pt; size() = size; }
-		void SetRect(concepts::coord::is_point_ auto const& pt0, concepts::coord::is_point_ auto const& pt1)	{ pt() = pt; size() = (pt1-pt0); }
+		void Set(concepts::coord::is_point_ auto const& pt, concepts::coord::is_size_ auto const& size)		{ pt() = pt; size() = size; }
+		void Set(concepts::coord::is_point_ auto const& pt0, concepts::coord::is_point_ auto const& pt1)	{ pt() = pt; size() = (pt1-pt0); }
 
 		// inflate the rectangle's width, height and depth
-		this_t& InflateRect(T x, T y)						requires (dim == 2) { this->x -= x; this->y -= y; this->width += x+x; this->height += y+y; return *this; }
-		this_t& InflateRect(T x, T y, T z)					requires (dim == 3) { this->x -= x; this->y -= y; this->z -= z; this->width += x+x; this->height += y+y; this->depth += z+z; return *this; }
-		this_t& InflateRect(coord_size_t const& size)							{ pt() -= size; size() += size+size; return *this; }
-		this_t& InflateRect(this_t const& rect)									{ pt() -= rect.pt(); size() += rect.pt() + rect.size(); return *this; }
-		this_t& InflateRect(T l, T t, T r, T b)				requires (dim == 2) { this->x -= l; this->y -= t; this->width += l+r; this->height += t+b; return *this; }
-		this_t& InflateRect(T l, T t, T f, T r, T b, T bk)	requires (dim == 3) { this->x -= l; this->y -= t; this->z -= f; this->width += l+r; this->height += t+b; this->depth += f+bk; return *this; }
+		this_t& Inflate(T x, T y)						requires (dim == 2) { this->x -= x; this->y -= y; this->width += x+x; this->height += y+y; return *this; }
+		this_t& Inflate(T x, T y, T z)					requires (dim == 3) { this->x -= x; this->y -= y; this->z -= z; this->width += x+x; this->height += y+y; this->depth += z+z; return *this; }
+		this_t& Inflate(coord_size_t const& size)							{ pt() -= size; size() += size+size; return *this; }
+		this_t& Inflate(this_t const& rect)									{ pt() -= rect.pt(); size() += rect.pt() + rect.size(); return *this; }
+		this_t& Inflate(T l, T t, T r, T b)				requires (dim == 2) { this->x -= l; this->y -= t; this->width += l+r; this->height += t+b; return *this; }
+		this_t& Inflate(T l, T t, T f, T r, T b, T bk)	requires (dim == 3) { this->x -= l; this->y -= t; this->z -= f; this->width += l+r; this->height += t+b; this->depth += f+bk; return *this; }
 
 		// deflate the rectangle's width, height and depth
-		this_t& DeflateRect(T x, T y)						requires (dim == 2) { this->x += x; this->y += y; this->width -= x+x; this->height -= y+y; return *this; }
-		this_t& DeflateRect(T x, T y, T z)					requires (dim == 3) { this->x += x; this->y += y; this->z += z; this->width -= x+x; this->height -= y+y; this->depth -= z+z; return *this; }
-		this_t& DeflateRect(coord_size_t const& size)							{ pt() += size; size() -= size+size; return *this; }
-		this_t& DeflateRect(this_t const& rect)									{ pt() += rect.pt(); size() -= rect.pt() + rect.size(); return *this; }
-		this_t& DeflateRect(T l, T t, T r, T b)				requires (dim == 2) { this->x += l; this->y += t; this->width -= l+r; this->height -= t+b; return *this; }
-		this_t& DeflateRect(T l, T t, T f, T r, T b, T bk)	requires (dim == 3) { this->x += l; this->y += t; this->z += f; this->width -= l+r; this->height -= t+b; this->depth -= f+bk; return *this; }
+		this_t& Deflate(T x, T y)						requires (dim == 2) { this->x += x; this->y += y; this->width -= x+x; this->height -= y+y; return *this; }
+		this_t& Deflate(T x, T y, T z)					requires (dim == 3) { this->x += x; this->y += y; this->z += z; this->width -= x+x; this->height -= y+y; this->depth -= z+z; return *this; }
+		this_t& Deflate(coord_size_t const& size)							{ pt() += size; size() -= size+size; return *this; }
+		this_t& Deflate(this_t const& rect)									{ pt() += rect.pt(); size() -= rect.pt() + rect.size(); return *this; }
+		this_t& Deflate(T l, T t, T r, T b)				requires (dim == 2) { this->x += l; this->y += t; this->width -= l+r; this->height -= t+b; return *this; }
+		this_t& Deflate(T l, T t, T f, T r, T b, T bk)	requires (dim == 3) { this->x += l; this->y += t; this->z += f; this->width -= l+r; this->height -= t+b; this->depth -= f+bk; return *this; }
 
 		void Normalize() {
 			if (this->width < 0) {
@@ -165,18 +170,6 @@ export namespace biscuit {
 			size() -= pt0();
 			return *this;
 		}
-		/// @brief safe intersect
-		this_t& IntersectSafe(this_t const& b){
-			auto pta0 = min(pt0(), pt0()+size());
-			auto pta1 = max(pt0(), pt0()+size());
-			auto ptb0 = min(b.pt0(), b.pt0()+b.size());
-			auto ptb1 = max(b.pt0(), b.pt0()+b.size());
-
-			pt0() = max(pta0, ptb0);
-			size() = min(pta1, ptb1) - pt0();
-			return *this;
-		}
-
 		/// @brief fast union (without normalization)
 		this_t& Union(this_t const& b){
 			size() = max(pt1(), b.pt1());
@@ -184,17 +177,32 @@ export namespace biscuit {
 			size() -= pt0();
 			return *this;
 		}
-		/// @brief safe union
-		this_t& UnionSafe(this_t const& b){
-			auto pta0 = min(pt0(), pt0()+size());
-			auto pta1 = max(pt0(), pt0()+size());
-			auto ptb0 = min(b.pt0(), b.pt0()+b.size());
-			auto ptb1 = max(b.pt0(), b.pt0()+b.size());
 
-			pt0() = min(pta0, ptb0);
-			size() = max(pta1, ptb1) - pt0();
-			return *this;
-		}
+		//!!! Normalizing can cause an empty rect to turn falsely non-empty one. !!!///
+
+		///// @brief safe intersect
+		//this_t& IntersectSafe(this_t const& b){
+		//	auto pta0 = min(pt0(), pt0()+size());
+		//	auto pta1 = max(pt0(), pt0()+size());
+		//	auto ptb0 = min(b.pt0(), b.pt0()+b.size());
+		//	auto ptb1 = max(b.pt0(), b.pt0()+b.size());
+
+		//	pt0() = max(pta0, ptb0);
+		//	size() = min(pta1, ptb1) - pt0();
+		//	return *this;
+		//}
+
+		///// @brief safe union
+		//this_t& UnionSafe(this_t const& b){
+		//	auto pta0 = min(pt0(), pt0()+size());
+		//	auto pta1 = max(pt0(), pt0()+size());
+		//	auto ptb0 = min(b.pt0(), b.pt0()+b.size());
+		//	auto ptb1 = max(b.pt0(), b.pt0()+b.size());
+
+		//	pt0() = min(pta0, ptb0);
+		//	size() = max(pta1, ptb1) - pt0();
+		//	return *this;
+		//}
 
 		this_t& operator &= (this_t const& b) { return Intersect(); }
 		this_t& operator |= (this_t const& b) { return Union(); }

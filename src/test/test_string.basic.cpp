@@ -8,7 +8,32 @@ import biscuit;
 
 using namespace std::literals;
 
-TEST_CASE("string.basic") {
+namespace {
+
+	template < typename T >
+	struct A {
+		std::wstring str;
+		A() : str (T().value) {}
+	};
+
+	TEST_CASE("string misc") {
+
+		using namespace biscuit;
+
+		TStringLiteral<char, "abcd"> s;
+		TStringLiteral<char, "abcd"> s2;
+		TStringLiteral<char16_t, "abcd"> su;
+
+		A<TStringLiteral<wchar_t, "abcd">> a;
+
+		REQUIRE("abcd"sv == s.value);
+		//REQUIRE(&s.value == &s2.value);
+		REQUIRE(a.str == L"abcd");
+	}
+
+}
+
+TEST_CASE("string tsz tpsz") {
 	using namespace biscuit;
 	char legacy_buffer[1024] = "abcdef";
 	char* legacy_ptr = legacy_buffer;

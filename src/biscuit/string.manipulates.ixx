@@ -130,46 +130,118 @@ export namespace biscuit {
 
 	//=============================================================================================================================
 	// Trim
-	template < typename tchar >
-	void TrimLeft(std::basic_string<tchar>& str, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
-		auto pos = str.find_first_not_of(svTrim);
-		if (pos == str.npos)
-			str.clear();
-		else
-			str.erase(str.begin(), str.begin()+pos);
+	namespace detail {
+		template < concepts::tstring_like tstring, typename ttrim >
+		void TrimLeft(tstring& str, ttrim&& trim) {
+			using char_t = concepts::value_t<tstring>;
+			auto pos = str.find_first_not_of(trim);
+
+			if constexpr (requires (tstring str) { str.erase; }) {
+				if (pos == str.npos)
+					str.clear();
+				else
+					str.erase(str.begin(), str.begin()+pos);
+			}
+			else if constexpr (requires (tstring str) { str.remove_prefix; }) {
+				if (pos == str.npos)
+					str.remove_suffix(str.size());	// clear
+				else
+					str.remove_prefix(pos);
+			}
+			else {
+				static_assert(false, "not supported");
+			}
+		}
+		template < concepts::tstring_like tstring, typename ttrim >
+		void TrimRight(tstring& str, ttrim&& trim) {
+			using char_t = concepts::value_t<tstring>;
+			auto pos = str.find_last_not_of(trim);
+			if constexpr (requires (tstring str) { str.erase; }) {
+				if (pos == str.npos)
+					str.clear();
+				else
+					str.erase(str.begin() + pos + 1, str.end());
+			}
+			else if constexpr (requires (tstring str) { str.remove_prefix; }) {
+				if (pos == str.npos)
+					str.remove_suffix(str.size());	// clear
+				else
+					str.remove_suffix(str.size() - pos - 1);
+			}
+			else {
+				static_assert(false, "not supported");
+			}
+		}
 	}
-	template < typename tchar >
-	void TrimRight(std::basic_string<tchar>& str, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
-		str.erase(str.begin() + (str.find_last_not_of(svTrim) + 1), str.end());
+
+	template < concepts::tstring_like tstring >
+	void TrimLeft(tstring& str, std::basic_string_view<concepts::value_t<tstring>> trim = GetSpaceString<concepts::value_t<tstring>>()) {
+		detail::TrimLeft(str, trim);
 	}
-	//template < concepts::string_elem tchar >
-	template < typename tchar >
-	void Trim(std::basic_string<tchar>& str, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>()) {
-		TrimRight(str, svTrim);
-		TrimLeft(str, svTrim);
+	template < concepts::tstring_like tstring >
+	void TrimLeft(tstring& str, concepts::value_t<tstring> trim) {
+		detail::TrimLeft(str, trim);
+	}
+	template < concepts::tstring_like tstring >
+	void TrimRight(tstring& str, std::basic_string_view<concepts::value_t<tstring>> trim = GetSpaceString<concepts::value_t<tstring>>()) {
+		detail::TrimRight(str, trim);
+	}
+	template < concepts::tstring_like tstring >
+	void TrimRight(tstring& str, concepts::value_t<tstring> trim) {
+		detail::TrimRight(str, trim);
+	}
+
+	template < concepts::tstring_like tstring >
+	void Trim(tstring& str, std::basic_string_view<concepts::value_t<tstring>> trim = GetSpaceString<concepts::value_t<tstring>>()) {
+		TrimRight(str, trim);
+		TrimLeft(str, trim);
+	}
+	template < concepts::tstring_like tstring >
+	void Trim(tstring& str, concepts::value_t<tstring> trim) {
+		TrimRight(str, trim);
+		TrimLeft(str, trim);
 	}
 
 	// Trim-View
 	template < typename tchar >
-	BSC__NODISCARD auto TrimLeftView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>())
+	BSC__NODISCARD auto TrimLeftView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> trim = GetSpaceString<tchar>())
 		-> std::basic_string_view<tchar>
 	{
-		if (auto pos = sv.find_first_not_of(svTrim); pos != sv.npos)
-			return { sv.begin()+pos, sv.end() };
-		else
-			return {};
+		detail::TrimLeft(sv, trim);
+		return sv;
 	}
 	template < typename tchar >
-	BSC__NODISCARD auto TrimRightView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>())
+	BSC__NODISCARD auto TrimRightView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> trim = GetSpaceString<tchar>())
 		-> std::basic_string_view<tchar>
 	{
-		return { sv.begin(), sv.begin() + (sv.find_last_not_of(svTrim)+1) };
+		detail::TrimRight(sv, trim);
+		return sv;
 	}
 	template < typename tchar >
-	BSC__NODISCARD auto TrimView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> svTrim = GetSpaceString<tchar>())
+	BSC__NODISCARD auto TrimView(std::basic_string_view<tchar> sv, std::basic_string_view<tchar> trim = GetSpaceString<tchar>())
 		-> std::basic_string_view<tchar>
 	{
-		return TrimRightView(TrimLeftView(sv, svTrim), svTrim);
+		return TrimRightView(TrimLeftView(sv, trim), trim);
+	}
+	template < typename tchar >
+	BSC__NODISCARD auto TrimLeftView(std::basic_string_view<tchar> sv, tchar trim)
+		-> std::basic_string_view<tchar>
+	{
+		detail::TrimLeft(sv, trim);
+		return sv;
+	}
+	template < typename tchar >
+	BSC__NODISCARD auto TrimRightView(std::basic_string_view<tchar> sv, tchar trim)
+		-> std::basic_string_view<tchar>
+	{
+		detail::TrimRight(sv, trim);
+		return sv;
+	}
+	template < typename tchar >
+	BSC__NODISCARD auto TrimView(std::basic_string_view<tchar> sv, tchar trim)
+		-> std::basic_string_view<tchar>
+	{
+		return TrimRightView(TrimLeftView(sv, trim), trim);
 	}
 
 	//=============================================================================================================================

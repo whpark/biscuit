@@ -17,6 +17,9 @@ import std;
 //export import <glm/glm.hpp>;
 import biscuit.aliases;
 import biscuit.concepts;
+import biscuit.misc;
+import biscuit.convert_codepage;
+import biscuit.string;
 export import biscuit.coord.concepts;
 export import biscuit.coord.base;
 export import biscuit.coord.point;
@@ -33,96 +36,69 @@ export import biscuit.coord.rect;
 //       (ex, XPoint3d pt3(1, 2, 3); XPoint2d pt2(4, 5); pt3 = pt2; assert(pt3 == XPoint3d(4, 5, 3)); )
 //
 
+using namespace std::literals;
 
 export namespace biscuit {
 #pragma pack(push, 8)
 
-	/// @brief Interpolation (lerp)
-	template < typename T, int dim >
-	coord::TPoint_<T, dim> lerp(coord::TPoint_<T, dim> const& a, coord::TPoint_<T, dim> const& b, double t) {
-		coord::TPoint_<T, dim> c;
-		for (int i = 0; i < dim; i++)
-			c.member(i) = std::lerp(a.member(i), b.member(i), t);
-		return c;
-	}
-
-
-	////-------------------------------------------------------------------------
-	//// Archive <---------> TPoint2/3, TSize2/3, TRect2/3
-	////
-	//template < typename Archive, concepts::coord::coord tcoord >
-	//Archive& Coord2Archive(const tcoord& coord, Archive& ar) {
-	//	for (const auto& v : coord.data())
-	//		ar & v;
-	//	return ar;
-	//}
-
-	//template < typename Archive, concepts::coord::coord tcoord >
-	//Archive& Archive2Coord(Archive& ar, tcoord& coord) {
-	//	for (auto& v : coord.data())
-	//		ar & v;
-	//	return ar;
-	//}
-
-	//template < typename Archive, concepts::coord::coord tcoord >
-	//Archive& SerializeCoord(Archive& ar, tcoord& coord) {
-	//	return ar.IsStoring() ? Coord2Archive<Archive, tcoord>(coord, ar) : Archive2Coord<Archive, tcoord>(ar, coord);
-	//}
-
 	//-------------------------------------------------------------------------
 	// to Text, From Text
+	template < typename tchar = char, concepts::coord::generic_coord tcoord >
+		requires std::is_trivially_copyable_v<tcoord>
+	std::basic_string<tchar> ToString(tcoord const& coord) {
+		using value_t = concepts::coord::value_t<tcoord>;
+		constexpr auto dim = sizeof(tcoord) / sizeof(value_t);
+		using array_t = std::array<value_t, dim>;
+		static_assert(array_t().size() == concepts::coord::CountCoordMemberVariable<tcoord>());
 
-	template < concepts::string_elem tchar, concepts::arithmetic tvalue >
-	constexpr fmt::basic_format_string<tchar, tvalue> GetDefaultFormatSpecifier() {
-		using namespace std::literals;
-		if constexpr (std::is_same_v<tchar, char>) {
-			return "{}";
-		}
-		else if constexpr (std::is_same_v<tchar, wchar_t>) {
-			return L"{}";
-		}
-		else if constexpr (std::is_same_v<tchar, char8_t>) {
-			return u8"{}";
-		}
-		else if constexpr (std::is_same_v<tchar, char16_t>) {
-			return u"{}";
-		}
-		else if constexpr (std::is_same_v<tchar, char32_t>) {
-			return U"{}";
-		}
-		else {
+		std::basic_string<tchar> str;
+		auto const& arr = reinterpret_cast<array_t const&>(coord);
+		if constexpr (dim == 2)
+			str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{}"sv)), arr[0], arr[1]);
+		else if constexpr (dim == 3)
+			str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{}"sv)), arr[0], arr[1], arr[2]);
+		else if constexpr (dim == 4)
+			str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{},{}"sv)), arr[0], arr[1], arr[2], arr[3]);
+		else
 			static_assert(false);
-		}
+		return str;
 	}
+	template < typename tchar = char, concepts::coord::generic_coord tcoord >
+		requires std::is_trivially_copyable_v<tcoord>
+	std::basic_string<tchar> ToString(tcoord const& coord, std::basic_string_view<tchar> format) {
+		using value_t = concepts::coord::value_t<tcoord>;
+		constexpr auto dim = sizeof(tcoord) / sizeof(value_t);
+		using array_t = std::array<value_t, dim>;
+		static_assert(array_t().size() == concepts::coord::CountCoordMemberVariable<tcoord>());
 
-	////-------------------------------------------------------------------------
-	//// to Text, From Text
-	//template < typename tchar, concepts::is_coord tcoord >
-	//std::basic_string<tchar> ToString(tcoord const& coord, fmt::basic_format_string<tchar, typename tcoord::value_type> const& svFMT = GetDefaultFormatSpecifier<tchar, typename tcoord::value_type>()) {
-	//	std::basic_string<tchar> str;
-	//	//if ( !(fmt::basic_string_view<tchar>(svFMT)).data() )
-	//	//	svFMT = GetDefaultFormatSpecifier<tchar, typename tcoord::value_type>();
+		std::basic_string<tchar> str;
+		auto const& arr = reinterpret_cast<array_t const&>(coord);
+		for (int i = 0; i < dim; i++) {
+			str += std::vformat(format, std::make_format_args(arr[i]));
+			if (i < dim - 1)
+				str += ',';
+		}
+		return str;
+	}
+	template < concepts::coord::generic_coord tcoord, concepts::tstring_like tstring >
+		requires std::is_trivially_copyable_v<tcoord>
+	tcoord FromString(tstring const& sv) {
+		using value_t = concepts::coord::value_t<tcoord>;
+		constexpr auto dim = sizeof(tcoord) / sizeof(value_t);
+		using array_t = std::array<value_t, dim>;
 
-	//	for (size_t i = 0; i < coord.arr().size(); i++) {
-	//		if (i)
-	//			str += ',';
-	//		str += fmt::vformat((fmt::basic_string_view<tchar>)svFMT, fmt::make_format_args<fmt::buffer_context<tchar>>(coord[i]));
-	//	}
-	//	return str;
-	//}
-	//template < concepts::is_coord tcoord, typename tchar >
-	//tcoord FromString(std::basic_string_view<tchar> sv) {
-	//	tcoord coord;
-	//	tchar const* pos = sv.data();
-	//	tchar const* const end = sv.data() + sv.size();
-	//	for (auto& v : coord.arr()) {
-	//		if (pos >= end)
-	//			break;
-	//		v = tszto<typename tcoord::value_type>(pos, end, &pos);
-	//		if (*pos == ',') pos++;	// or....... if (*pos) pos++
-	//	}
-	//	return coord;
-	//}
+		tcoord coord{};
+		auto& arr = reinterpret_cast<array_t&>(coord);
+		static_assert(array_t().size() == concepts::coord::CountCoordMemberVariable<tcoord>());
+
+		int i{};
+		for (auto item : SplitView(sv, ',')) {
+			if (i >= dim)
+				break;
+			arr[i++] = tszto<value_t>(item, 0);
+		}
+		return coord;
+	}
 
 
 	/// @brief Round

@@ -110,6 +110,9 @@
     <ClCompile Include="coord.bounds.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="coord.transform.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\vcpkg.json" />
