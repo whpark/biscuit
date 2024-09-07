@@ -27,7 +27,7 @@ import biscuit.coord.point;
 
 namespace concepts = biscuit::concepts;
 
-export namespace biscuit {
+export namespace biscuit::coord {
 #pragma pack(push, 8)
 
 	//-----------------------------------------------------------------------------
@@ -60,12 +60,7 @@ export namespace biscuit {
 			return Trans(pt);
 		}
 
-		/// @brief 
-		/// @tparam tcoord3d : Not point3_t but one of 3d Coord.
-		/// @param pt 
-		/// @return 
-		template < typename tcoord3d > requires (concepts::tcoord3<tcoord3d, double> and !std::is_same_v<point3_t, tcoord3d>)
-		[[ nodiscard ]] tcoord3d operator () (tcoord3d const& pt) const {
+		BSC__NODISCARD tcoord3d operator () (tcoord3d const& pt) const {
 			auto v{pt};
 			((point3_t&)v) = Trans((point3_t&)pt);
 			return v;
@@ -73,7 +68,7 @@ export namespace biscuit {
 
 		/// @brief tcoord3d : not a Coord, buf has x, y, z
 		template < typename tcoord3d > requires (concepts::has__xyz<tcoord3d>) and (!concepts::tcoord3<tcoord3d, double>)
-		[[ nodiscard ]] tcoord3d operator () (tcoord3d const& pt) const {
+		BSC__NODISCARD tcoord3d operator () (tcoord3d const& pt) const {
 			auto v{pt};
 			auto r = Trans(point3_t(pt.x, pt.y, pt.z));
 			v.x = RoundOrForward<decltype(v.x)>(r.x);
@@ -86,7 +81,7 @@ export namespace biscuit {
 		/// @brief pt -> pt2
 		/// @param pt 
 		/// @return 
-		[[ nodiscard ]] point2_t operator () (point2_t const& pt) const {
+		BSC__NODISCARD point2_t operator () (point2_t const& pt) const {
 			return Trans(pt);
 		}
 
@@ -95,7 +90,7 @@ export namespace biscuit {
 		/// @param pt 
 		/// @return 
 		template < typename tcoord2d > requires (concepts::tcoord2<tcoord2d, double> and !std::is_same_v<point2_t, tcoord2d>)
-		[[ nodiscard ]] tcoord2d operator () (tcoord2d const& pt) const {
+		BSC__NODISCARD tcoord2d operator () (tcoord2d const& pt) const {
 			auto v{pt};
 			((point2_t&)v) = Trans((point2_t&)pt);
 			return v;
@@ -103,7 +98,7 @@ export namespace biscuit {
 
 		/// @brief tcoord2d : not a Coord, buf has x, y
 		template < typename tcoord2d > requires (concepts::has__xy<tcoord2d>) and (!concepts::tcoord2<tcoord2d, double>)
-		[[ nodiscard ]] tcoord2d operator () (tcoord2d const& pt) const {
+		BSC__NODISCARD tcoord2d operator () (tcoord2d const& pt) const {
 			auto v{pt};
 			auto r = Trans(point2_t(pt.x, pt.y));
 			v.x = RoundOrForward<decltype(v.x)>(r.x);
@@ -114,22 +109,22 @@ export namespace biscuit {
 
 		/// @brief double -> double
 		/// @return 
-		[[ nodiscard ]] double TransI(double length) const {
+		BSC__NODISCARD double TransI(double length) const {
 			return TransInverse(length).value_or(0.0);
 		}
 
 		/// @brief pt -> pt2
 		/// @return 
-		[[ nodiscard ]] point3_t TransI(point3_t const& pt) const {
+		BSC__NODISCARD point3_t TransI(point3_t const& pt) const {
 			return TransInverse(pt).value_or(point3_t{});
 		}
 
 		/// @brief 
-		/// @tparam tcoord3d : Not point3_t but one of 3d Coord.
+		/// @tparam tcoord3d : Not point3_t but one <<of 3d Coord.
 		/// @param pt 
 		/// @return 
 		template < typename tcoord3d > requires (concepts::tcoord3<tcoord3d, double> and !std::is_same_v<point3_t, tcoord3d>)
-		[[ nodiscard ]] tcoord3d TransI(tcoord3d const& pt) const {
+			BSC__NODISCARD tcoord3d TransI(tcoord3d const& pt) const {
 			auto v{pt};
 			((point3_t&)v) = TransInverse((point3_t&)pt).value_or(point3_t{});
 			return v;
@@ -137,7 +132,7 @@ export namespace biscuit {
 
 		/// @brief tcoord3d : not a Coord, buf has x, y, z
 		template < typename tcoord3d > requires (concepts::has__xyz<tcoord3d>) and (!concepts::tcoord3<tcoord3d, double>)
-		[[ nodiscard ]] tcoord3d TransI(tcoord3d const& pt) const {
+			BSC__NODISCARD tcoord3d TransI(tcoord3d const& pt) const {
 			auto v{pt};
 			auto r = TransInverse(point3_t(pt.x, pt.y, pt.z)).value_or(point3_t{});
 			v.x = RoundOrForward<decltype(v.x)>(r.x);
@@ -150,7 +145,7 @@ export namespace biscuit {
 		/// @brief pt -> pt2
 		/// @param pt 
 		/// @return 
-		[[ nodiscard ]] point2_t TransI(point2_t const& pt) const {
+		BSC__NODISCARD point2_t TransI(point2_t const& pt) const {
 			return TransInverse(pt).value_or(point2_t{});
 		}
 
@@ -159,7 +154,7 @@ export namespace biscuit {
 		/// @param pt 
 		/// @return 
 		template < typename tcoord2d > requires (concepts::tcoord2<tcoord2d, double> and !std::is_same_v<point2_t, tcoord2d>)
-		[[ nodiscard ]] tcoord2d TransI(tcoord2d const& pt) const {
+			BSC__NODISCARD tcoord2d TransI(tcoord2d const& pt) const {
 			auto v{pt};
 			((point2_t&)v) = TransInverse((point2_t&)pt).value_or(point2_t{});
 			return v;
@@ -167,7 +162,7 @@ export namespace biscuit {
 
 		/// @brief tcoord2d : not a Coord, buf has x, y
 		template < typename tcoord2d > requires (concepts::has__xy<tcoord2d>) and (!concepts::tcoord2<tcoord2d, double>)
-		[[ nodiscard ]] tcoord2d TransI(tcoord2d const& pt) const {
+			BSC__NODISCARD tcoord2d TransI(tcoord2d const& pt) const {
 			auto v{pt};
 			auto r = TransInverse(point2_t(pt.x, pt.y)).value_or(point2_t{});
 			v.x = RoundOrForward<decltype(v.x)>(r.x);
