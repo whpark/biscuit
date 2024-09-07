@@ -1,6 +1,4 @@
-﻿#if 0
-
-module;
+﻿module;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -14,14 +12,18 @@ module;
 //
 //////////////////////////////////////////////////////////////////////
 
-export module biscuit:coord.trans;
-import :aliases;
-import :concepts;
-import :coord.concepts;
-import :coord.point;
-import :coord.size;
-import :coord.rect;
-import std.compat;
+#include <glm/glm.hpp>
+#include "biscuit/macro.h"
+
+export module biscuit.coord.trans;
+import std;
+import biscuit.aliases;
+import biscuit.concepts;
+import biscuit.coord.concepts;
+import biscuit.coord.point;
+//import biscuit.misc;
+
+#if 1
 
 namespace concepts = biscuit::concepts;
 
@@ -34,17 +36,11 @@ export namespace biscuit {
 	public:
 		using this_t = ICoordTrans;
 		using value_type = double;
-		using point3_t = TPoint3<value_type>;
-		using point2_t = TPoint2<value_type>;
-		using size2_t = TSize2<value_type>;
-		using size3_t = TSize3<value_type>;
 
 		// Constructors
 		ICoordTrans() { }
 		virtual ~ICoordTrans() { }
 		auto operator <=> (ICoordTrans const&) const = default;
-
-		GTL__DYNAMIC_VIRTUAL_INTERFACE(ICoordTrans);
 
 	public:
 		//friend class boost::serialization::access;
@@ -54,12 +50,13 @@ export namespace biscuit {
 		}
 
 	public:
-		virtual std::unique_ptr<ICoordTrans> GetInverse() const = 0;
-
+		virtual ICoordTrans GetInverse() const = 0;
+		virtual std::unique_ptr<ICoordTrans> GetSafeInverse() const = 0;
 
 		/// @brief pt -> pt2
 		/// @return 
-		[[ nodiscard ]] point3_t operator () (point3_t const& pt) const {
+		template < concepts::coord::generic_point tpoint >
+		BSC__NODISCARD tpoint operator () (tpoint const& pt) const {
 			return Trans(pt);
 		}
 
