@@ -104,7 +104,7 @@
     <ClCompile Include="test_coord.cpp" />
     <ClCompile Include="test_string.arithmetic.cpp" />
     <ClCompile Include="test_string.basic.cpp" />
-    <ClCompile Include="test.cpp" />
+    <ClCompile Include="test_memory.cpp" />
     <ClCompile Include="test_string.convert_codepage.cpp" />
     <ClCompile Include="test_string.manipulates.cpp" />
   </ItemGroup>

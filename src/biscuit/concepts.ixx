@@ -29,6 +29,12 @@ export namespace biscuit::concepts {
 	template < typename T >
 	concept trivially_copyable = std::is_trivially_copyable_v<T>;
 
+	
+	template < typename T >
+	concept cloneable = requires (T t) {
+		{ t.clone() } -> std::convertible_to<std::unique_ptr<T>>;
+	};
+
 
 	/// @brief array or std::array
 	template < typename tarray >

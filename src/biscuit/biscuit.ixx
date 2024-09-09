@@ -8,6 +8,7 @@ export module biscuit;
 import std;
 export import biscuit.aliases;
 export import biscuit.concepts;
+export import biscuit.memory;
 export import biscuit.arithmetic;
 export import biscuit.coord;
 export import biscuit.color;
@@ -21,9 +22,4 @@ export import biscuit.string;
 //export import :coord;
 
 export namespace biscuit {
-	BISCUIT_EXPORT_DLL auto Print() -> bool {
-		std::println("hello, biscuit!\n");
-		return true;
-	}
-
 }
