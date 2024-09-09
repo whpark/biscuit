@@ -16,10 +16,6 @@ export namespace biscuit {
 	using sSize3i = TSize<int, 3, false>;
 	using sSize2d = TSize<double, 2, false>;
 	using sSize3d = TSize<double, 3, false>;
-	using xSize2i = TSize<int, 2, true>;
-	using xSize3i = TSize<int, 3, true>;
-	using xSize2d = TSize<double, 2, true>;
-	using xSize3d = TSize<double, 3, true>;
 
 	static_assert(requires(sSize2d ) { sSize2d{1.0, 2.0}; });
 	static_assert(requires(sSize3d ) { sSize3d{1.0, 2.0, 3.0}; });

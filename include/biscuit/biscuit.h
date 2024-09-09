@@ -8,7 +8,6 @@
 
 // depedencies
 #include "units.h"
-#include "glm/glm.hpp"
 
 #if !defined(BISCUIT_EXPORTS)
 #	pragma comment(lib, "biscuit.lib")

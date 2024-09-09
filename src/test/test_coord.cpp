@@ -17,6 +17,7 @@ using namespace std::literals;
 using namespace units::literals;
 
 namespace test {
+	using namespace biscuit;
 
 	struct Point2i {
 		int x, y;
@@ -57,7 +58,6 @@ namespace test {
 	};
 
 	TEST_CASE("coord") {
-		using namespace biscuit;
 
 		biscuit::sRect2i rect2i{0, 0, 1, 2};
 		biscuit::sPoint2i pt2i{100, 200};
@@ -114,8 +114,15 @@ namespace test {
 		REQUIRE(angle == 90_deg);
 	}
 
+	TEST_CASE("coord.round") {
+		sPoint3rd pt(1.5, 2.5, 3.5);
+		sPoint3i pti(pt);
+		REQUIRE(pti == sPoint3i(1, 2, 3));
+		sPoint3ri ptx(pt);
+		REQUIRE(ptx == sPoint3ri(2, 3, 4));
+	}
+
 	TEST_CASE("coord.rect") {
-		using namespace biscuit;
 
 		sRect2i rc2i(100, 200, 50, 60);
 
@@ -135,7 +142,6 @@ namespace test {
 	}
 
 	TEST_CASE("coord.from_to_string") {
-		using namespace biscuit;
 
 		sRect2d rect{1., 2., 3., 4.};
 		auto str = rect.ToString();
@@ -157,7 +163,6 @@ namespace test {
 	}
 
 	TEST_CASE("generic_coord.from_to_string") {
-		using namespace biscuit;
 
 		Rect2d rect{1., 2., 3., 4.};
 		auto str = ToString<char>(rect);

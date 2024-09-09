@@ -1,2 +1,7 @@
 #pragma once
 
+#ifdef _MSC_VER
+//#	define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+//#	define GLM_FORCE_SIMD_AVX2
+#	define _SILENCE_CXX23_DENORM_DEPRECATION_WARNING
+#endif

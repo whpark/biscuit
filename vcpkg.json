@@ -5,7 +5,7 @@
     "cereal",
     "fmt",
     "glaze",
-    "glm",
+    "eigen3",
     "libiconv",
     "simdutf",
     "spdlog",

@@ -7,7 +7,7 @@ module;
 #include <fmt/core.h>
 #include <fmt/xchar.h>
 #include <glaze/glaze.hpp>
-#include "glm/glm.hpp"
+//#include "glm/glm.hpp"
 
 #include "biscuit/macro.h"
 
@@ -15,6 +15,7 @@ export module biscuit.coord.base;
 import std;
 import biscuit.aliases;
 import biscuit.concepts;
+import biscuit.arithmetic;
 import biscuit.misc;
 import biscuit.coord.concepts;
 import biscuit.convert_codepage;
@@ -632,19 +633,19 @@ export namespace biscuit::coord {
 			return sum;
 		}
 
-		//-------------------------------------------------------------------------------------------------------------------------
-		// glm
-		BSC__NODISCARD glm::vec<dim, value_t>&		vec()			requires (bPoint)				{ return *reinterpret_cast<glm::vec<dim, value_t>*>(this); }
-		BSC__NODISCARD glm::vec<dim, value_t>const&	vec() const		requires (bPoint)				{ return *reinterpret_cast<glm::vec<dim, value_t>const*>(this); }
-		BSC__NODISCARD glm::vec<2, value_t>&		vec2()			requires (bPoint and dim >= 2)	{ return *reinterpret_cast<glm::vec<2, value_t>*>(this); }
-		BSC__NODISCARD glm::vec<2, value_t>const&	vec2() const	requires (bPoint and dim >= 2)	{ return *reinterpret_cast<glm::vec<2, value_t>const*>(this); }
-		BSC__NODISCARD glm::vec<3, value_t>&		vec3()			requires (bPoint and dim >= 3)	{ return *reinterpret_cast<glm::vec<3, value_t>*>(this); }
-		BSC__NODISCARD glm::vec<3, value_t>const&	vec3() const	requires (bPoint and dim >= 3)	{ return *reinterpret_cast<glm::vec<3, value_t>const*>(this); }
-		BSC__NODISCARD glm::vec<4, value_t>&		vec4()			requires (bPoint and dim >= 4)	{ return *reinterpret_cast<glm::vec<4, value_t>*>(this); }
-		BSC__NODISCARD glm::vec<4, value_t>const&	vec4() const	requires (bPoint and dim >= 4)	{ return *reinterpret_cast<glm::vec<4, value_t>const*>(this); }
+		////-------------------------------------------------------------------------------------------------------------------------
+		//// glm
+		//BSC__NODISCARD glm::vec<dim, value_t>&		vec()			requires (bPoint)				{ return *reinterpret_cast<glm::vec<dim, value_t>*>(this); }
+		//BSC__NODISCARD glm::vec<dim, value_t>const&	vec() const		requires (bPoint)				{ return *reinterpret_cast<glm::vec<dim, value_t>const*>(this); }
+		//BSC__NODISCARD glm::vec<2, value_t>&		vec2()			requires (bPoint and dim >= 2)	{ return *reinterpret_cast<glm::vec<2, value_t>*>(this); }
+		//BSC__NODISCARD glm::vec<2, value_t>const&	vec2() const	requires (bPoint and dim >= 2)	{ return *reinterpret_cast<glm::vec<2, value_t>const*>(this); }
+		//BSC__NODISCARD glm::vec<3, value_t>&		vec3()			requires (bPoint and dim >= 3)	{ return *reinterpret_cast<glm::vec<3, value_t>*>(this); }
+		//BSC__NODISCARD glm::vec<3, value_t>const&	vec3() const	requires (bPoint and dim >= 3)	{ return *reinterpret_cast<glm::vec<3, value_t>const*>(this); }
+		//BSC__NODISCARD glm::vec<4, value_t>&		vec4()			requires (bPoint and dim >= 4)	{ return *reinterpret_cast<glm::vec<4, value_t>*>(this); }
+		//BSC__NODISCARD glm::vec<4, value_t>const&	vec4() const	requires (bPoint and dim >= 4)	{ return *reinterpret_cast<glm::vec<4, value_t>const*>(this); }
 
-		operator glm::vec<dim, value_t>&		()		 requires (bPoint) { return vec(); }
-		operator glm::vec<dim, value_t> const&	() const requires (bPoint) { return vec(); }
+		//operator glm::vec<dim, value_t>&		()		 requires (bPoint) { return vec(); }
+		//operator glm::vec<dim, value_t> const&	() const requires (bPoint) { return vec(); }
 
 		//=========================================================================================================================
 	protected:

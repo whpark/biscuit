@@ -14,7 +14,6 @@
 
 export module biscuit.coord;
 import std;
-//export import <glm/glm.hpp>;
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.misc;

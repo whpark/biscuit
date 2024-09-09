@@ -223,10 +223,6 @@ export namespace biscuit {
 	using sRect3i = TRect<int, 3, false>;
 	using sRect2d = TRect<double, 2, false>;
 	using sRect3d = TRect<double, 3, false>;
-	using xRect2i = TRect<int, 2, true>;
-	using xRect3i = TRect<int, 3, true>;
-	using xRect2d = TRect<double, 2, true>;
-	using xRect3d = TRect<double, 3, true>;
 
 	static_assert(requires(sRect2d ) { sRect2d{1.0, 2.0, 3.0, 4.0}; });
 	static_assert(requires(sRect3d ) { sRect3d{1.0, 2.0, 3.0, 4.0, 5, 6}; });
