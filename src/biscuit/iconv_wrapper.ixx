@@ -13,13 +13,9 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "biscuit/biscuit.h"
+#include "biscuit/config.h"
 #include "biscuit/macro.h"
-
-#pragma warning(push)
-#pragma warning(disable: 4819)	// codepage
-#include "iconv.h"
-#pragma warning(pop)
+#include "biscuit/dependencies_iconv.h"
 
 export module biscuit.iconv_wrapper;
 import biscuit.aliases;

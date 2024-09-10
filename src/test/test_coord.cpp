@@ -1,12 +1,13 @@
+#include <cstddef>
 #include <catch.hpp>
 #include <fmt/core.h>
 
-#pragma warning(push)
+#include "biscuit/biscuit.h"
+
+//#pragma warning(push)
 #pragma warning(disable: 4127)	// conditional expression is constant
 #include "units.h"
-#pragma warning(pop)
-
-#include "biscuit/biscuit.h"
+//#pragma warning(pop)
 
 import std;
 import biscuit;
@@ -15,6 +16,36 @@ using namespace std::literals;
 //using namespace units;
 //using namespace units::angle;
 using namespace units::literals;
+
+namespace test {
+	using namespace biscuit;
+
+	struct sTestAlign {
+		sPoint2d pt;
+		sPoint2i pt2;
+		char a;
+		sPoint2d pt3;
+	};
+	static_assert(offsetof(sTestAlign, pt) == 0);
+	static_assert(offsetof(sTestAlign, pt2) == 16);
+	static_assert(offsetof(sTestAlign, pt3) == 32);
+	TEST_CASE("eigen_transform") {
+		Eigen::Transform<double, 2, Eigen::Affine> t;
+		t.setIdentity();
+		t.translate(Eigen::Vector2d(1, 2));
+		t.rotate(30);
+		t.scale(Eigen::Vector2d(2, 3));
+
+		Eigen::Matrix3d m = t.matrix();
+		m.transposeInPlace();
+
+
+		std::vector<int> lst { 1, 2, 3, 4, 5 };
+		auto str = std::format("{:n}", lst);
+		REQUIRE(str == "1, 2, 3, 4, 5");
+	}
+
+}
 
 namespace test {
 	using namespace biscuit;

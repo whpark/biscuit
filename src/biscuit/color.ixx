@@ -1,7 +1,8 @@
 module;
 
-#include <glaze/glaze.hpp>
+#include "biscuit/config.h"
 #include "biscuit/macro.h"
+#include "biscuit/dependencies_glaze.h"
 
 export module biscuit.color;
 import std;

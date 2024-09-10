@@ -5,17 +5,18 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-
-// depedencies
-#include "units.h"
+#include "biscuit/dependencies_eigen.h"
+#include "biscuit/dependencies_fmt.h"
+#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies_iconv.h"
+#include "biscuit/dependencies_simdutf.h"
+#include "biscuit/dependencies_units.h"
 
 #if !defined(BISCUIT_EXPORTS)
 #	pragma comment(lib, "biscuit.lib")
 #endif
 
 using namespace std::literals;
-using namespace units::literals;
-
 
 //=================================================================================================================================
 // 

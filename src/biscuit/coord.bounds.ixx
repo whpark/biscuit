@@ -1,8 +1,10 @@
-#if 0
 module;
 
+#include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include <glaze/glaze.hpp>
+#include "biscuit/dependencies_fmt.h"
+#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies_eigen.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4201)
@@ -109,20 +111,11 @@ export namespace biscuit {
 
 		template < typename tchar = char >
 		constexpr std::basic_string<tchar> ToString() {
-			using namespace std::literals;
-			std::basic_string<tchar> str;
-			if constexpr (count() == 2)
-				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{}"sv)), arr()[0], arr()[1]);
-			else if constexpr (count() == 3)
-				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{}"sv)), arr()[0], arr()[1], arr()[2]);
-			else if constexpr (count() == 4)
-				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{},{}"sv)), arr()[0], arr()[1], arr()[2], arr()[3]);
-			else if constexpr (count() == 6)
-				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{},{},{},{}"sv)), arr()[0], arr()[1], arr()[2], arr()[3], arr()[4], arr()[5]);
-			else
-				static_assert(false);
-			TrimRight(str, ',');
-			return str;
+			if constexpr (std::is_same_v<tchar, char>)			return std::format("{:n}", arr());
+			else if constexpr (std::is_same_v<tchar, wchar_t>)	return std::format(L"{:n}", arr());
+			else if constexpr (std::is_same_v<tchar, char16_t>) return std::format(u"{:n}", arr());
+			else if constexpr (std::is_same_v<tchar, char32_t>) return std::format(U"{:n}", arr());
+			else { static_assert(false); }
 		}
 		template < concepts::tstring_like tstring >
 		bool FromString(tstring const& sv) {
@@ -282,29 +275,29 @@ export namespace biscuit {
 		void Set(concepts::coord::generic_point auto const& pt0, concepts::coord::generic_point auto const& pt1) { this->pt0() = pt0; this->pt1() = pt1; }
 
 		// inflate the rectangle's width, height and depth
-		this_t& Inflate(value_t x, value_t y)						requires (dim == 2) { this->l -= x; this->t -= y;				this->r += x; this->b += y; return *this; }
-		this_t& Inflate(value_t x, value_t y, value_t z)					requires (dim == 3) { this->l -= x; this->t -= y; this->f -= z; this->r += x; this->b += y; this->bk += z; return *this; }
-		this_t& Inflate(value_t l, value_t t, value_t r, value_t b)				requires (dim == 2) { this->l -= l; this->t -= t;				this->r += r; this->b += b; return *this; }
+		this_t& Inflate(value_t x, value_t y)												requires (dim == 2) { this->l -= x; this->t -= y;				this->r += x; this->b += y; return *this; }
+		this_t& Inflate(value_t x, value_t y, value_t z)									requires (dim == 3) { this->l -= x; this->t -= y; this->f -= z; this->r += x; this->b += y; this->bk += z; return *this; }
+		this_t& Inflate(value_t l, value_t t, value_t r, value_t b)							requires (dim == 2) { this->l -= l; this->t -= t;				this->r += r; this->b += b; return *this; }
 		this_t& Inflate(value_t l, value_t t, value_t f, value_t r, value_t b, value_t bk)	requires (dim == 3) { this->l -= l; this->t -= t; this->f -= f; this->r += r; this->b += b; this->bk += bk; return *this; }
-		this_t& Inflate(this_t const& bounds)								{ pt() -= bounds.pt0(); pt1() += bounds.pt1(); return *this; }
+		this_t& Inflate(this_t const& bounds)																	{ pt() -= bounds.pt0(); pt1() += bounds.pt1(); return *this; }
 		template < concepts::coord::generic_coord tcoord >
 		this_t& Inflate(tcoord const& coord) {
-			if constexpr (concepts::coord::generic_point<tcoord>) { auto const v = coord_point_t(coord); pt0() -= v; pt1() += v; }
-			else if constexpr (concepts::coord::generic_size<tcoord>) { auto const v = coord_size_t(coord); pt0() -= v; pt1() == v; }
-			else if constexpr (concepts::coord::generic_rect<tcoord>) { auto const v = coord_rect_t(coord); pt0() -= v.pt0(); pt1() += v.pt1(); }
+			if constexpr (concepts::coord::generic_point<tcoord>)		{ auto const v = coord_point_t(coord); pt0() -= v; pt1() += v; }
+			else if constexpr (concepts::coord::generic_size<tcoord>)	{ auto const v = coord_size_t(coord); pt0() -= v; pt1() == v; }
+			else if constexpr (concepts::coord::generic_rect<tcoord>)	{ auto const v = coord_rect_t(coord); pt0() -= v.pt0(); pt1() += v.pt1(); }
 			else { static_assert(false); }
 		}
 
-		this_t& Deflate(value_t x, value_t y)						requires (dim == 2) { this->l += x; this->t += y;				this->r -= x; this->b -= y; return *this; }
-		this_t& Deflate(value_t x, value_t y, value_t z)					requires (dim == 3) { this->l += x; this->t += y; this->f += z; this->r -= x; this->b -= y; this->bk -= z; return *this; }
-		this_t& Deflate(value_t l, value_t t, value_t r, value_t b)				requires (dim == 2) { this->l += l; this->t += t;				this->r -= r; this->b -= b; return *this; }
+		this_t& Deflate(value_t x, value_t y)												requires (dim == 2) { this->l += x; this->t += y;				this->r -= x; this->b -= y; return *this; }
+		this_t& Deflate(value_t x, value_t y, value_t z)									requires (dim == 3) { this->l += x; this->t += y; this->f += z; this->r -= x; this->b -= y; this->bk -= z; return *this; }
+		this_t& Deflate(value_t l, value_t t, value_t r, value_t b)							requires (dim == 2) { this->l += l; this->t += t;				this->r -= r; this->b -= b; return *this; }
 		this_t& Deflate(value_t l, value_t t, value_t f, value_t r, value_t b, value_t bk)	requires (dim == 3) { this->l += l; this->t += t; this->f += f; this->r -= r; this->b -= b; this->bk -= bk; return *this; }
-		this_t& Deflate(this_t const& bounds)								{ pt() += bounds.pt0(); pt1() -= bounds.pt1(); return *this; }
+		this_t& Deflate(this_t const& bounds)																	{ pt() += bounds.pt0(); pt1() -= bounds.pt1(); return *this; }
 		template < concepts::coord::generic_coord tcoord >
 		this_t& Deflate(tcoord const& coord) {
-			if constexpr (concepts::coord::generic_point<tcoord>) { auto const v = coord_point_t(coord); pt0() += v; pt1() -= v; }
-			else if constexpr (concepts::coord::generic_size<tcoord>) { auto const v = coord_size_t(coord); pt0() += v; pt1() == v; }
-			else if constexpr (concepts::coord::generic_rect<tcoord>) { auto const v = coord_rect_t(coord); pt0() += v.pt0(); pt1() -= v.pt1(); }
+			if constexpr (concepts::coord::generic_point<tcoord>)		{ auto const v = coord_point_t(coord); pt0() += v; pt1() -= v; }
+			else if constexpr (concepts::coord::generic_size<tcoord>)	{ auto const v = coord_size_t(coord); pt0() += v; pt1() == v; }
+			else if constexpr (concepts::coord::generic_rect<tcoord>)	{ auto const v = coord_rect_t(coord); pt0() += v.pt0(); pt1() -= v.pt1(); }
 			else { static_assert(false); }
 		}
 
@@ -362,15 +355,15 @@ export namespace biscuit {
 		bool UpdateBoundary(coord_point_t const& pt) {
 			bool bModified{};
 			for (coord_size_t i {}; i < pt.size(); i++) {
-				if (pt0().member(i) > pt.member(i)) {
+				if (pt0()[i] > pt[i]) {
 					bModified = true;
-					pt0().member(i) = pt.member(i);
+					pt0()[i] = pt[i];
 				}
 			}
 			for (coord_size_t i = 0; i < pt.size(); i++) {
-				if (pt1().member(i) < pt.member(i)) {
+				if (pt1()[i] < pt[i]) {
 					bModified = true;
-					pt1().member(i) = pt.member(i);
+					pt1()[i] = pt[i];
 				}
 			}
 			return bModified;
@@ -401,5 +394,3 @@ export namespace biscuit {
 
 
 }
-
-#endif

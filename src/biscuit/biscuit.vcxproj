@@ -61,16 +61,16 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_SILENCE_CXX23_DENORM_DEPRECATION_WARNING;BISCUIT_EXPORTS;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BISCUIT_EXPORTS;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
-      <BuildStlModules>true</BuildStlModules>
       <WarningLevel>Level4</WarningLevel>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -88,16 +88,16 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_SILENCE_CXX23_DENORM_DEPRECATION_WARNING;BISCUIT_EXPORTS;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BISCUIT_EXPORTS;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
-      <BuildStlModules>true</BuildStlModules>
       <WarningLevel>Level4</WarningLevel>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -115,6 +115,12 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
   <ItemGroup>
     <ClInclude Include="..\..\include\biscuit\biscuit.h" />
     <ClInclude Include="..\..\include\biscuit\config.h" />
+    <ClInclude Include="..\..\include\biscuit\dependencies_eigen.h" />
+    <ClInclude Include="..\..\include\biscuit\dependencies_fmt.h" />
+    <ClInclude Include="..\..\include\biscuit\dependencies_glaze.h" />
+    <ClInclude Include="..\..\include\biscuit\dependencies_iconv.h" />
+    <ClInclude Include="..\..\include\biscuit\dependencies_simdutf.h" />
+    <ClInclude Include="..\..\include\biscuit\dependencies_units.h" />
     <ClInclude Include="..\..\include\biscuit\macro.h" />
     <ClInclude Include="..\..\include\biscuit\recursive_macro.h" />
     <ClInclude Include="framework.h" />

@@ -1,5 +1,4 @@
 #include <catch.hpp>
-#include <fmt/core.h>
 #include "biscuit/biscuit.h"
 
 import std;
@@ -26,7 +25,7 @@ namespace test_memory {
 		}
 
 		std::string Print() override {
-			return fmt::format("A{} ", i);
+			return std::format("A{} ", i);
 		}
 	};
 
@@ -41,7 +40,7 @@ namespace test_memory {
 		}
 
 		std::string Print() override {
-			return fmt::format("B{} ", b);
+			return std::format("B{} ", b);
 		}
 	};
 

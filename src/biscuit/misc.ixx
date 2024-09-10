@@ -13,6 +13,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#include "biscuit/config.h"
 #include "biscuit/macro.h"
 
 export module biscuit.misc;

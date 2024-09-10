@@ -7,10 +7,10 @@
 // PWH
 //
 //////////////////////////////////////////////////////////////////////
-#include <fmt/core.h>
-#include <fmt/xchar.h>
-#include <fmt/ostream.h>
+
+#include "biscuit/config.h"
 #include "biscuit/macro.h"
+#include "biscuit/dependencies_eigen.h"
 
 export module biscuit.coord;
 import std;
@@ -24,6 +24,7 @@ export import biscuit.coord.base;
 export import biscuit.coord.point;
 export import biscuit.coord.size;
 export import biscuit.coord.rect;
+export import biscuit.coord.bounds;
 //export import biscuit.coord.bounds;
 export import biscuit.coord.trans;
 //export import :coord.trans.perspective;
@@ -52,15 +53,11 @@ export namespace biscuit {
 
 		std::basic_string<tchar> str;
 		auto const& arr = reinterpret_cast<array_t const&>(coord);
-		if constexpr (dim == 2)
-			str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{}"sv)), arr[0], arr[1]);
-		else if constexpr (dim == 3)
-			str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{}"sv)), arr[0], arr[1], arr[2]);
-		else if constexpr (dim == 4)
-			str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{},{}"sv)), arr[0], arr[1], arr[2], arr[3]);
-		else
-			static_assert(false);
-		return str;
+		if constexpr (std::is_same_v<tchar, char>)			return std::format("{:n}", arr);
+		else if constexpr (std::is_same_v<tchar, wchar_t>)	return std::format(L"{:n}", arr);
+		else if constexpr (std::is_same_v<tchar, char16_t>) return std::format(u"{:n}", arr);
+		else if constexpr (std::is_same_v<tchar, char32_t>) return std::format(U"{:n}", arr);
+		else { static_assert(false); }
 	}
 	template < typename tchar = char, concepts::coord::generic_coord tcoord >
 		requires std::is_trivially_copyable_v<tcoord>

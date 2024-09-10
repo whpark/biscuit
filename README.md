@@ -12,7 +12,7 @@
 - cereal https://uscilab.github.io/cereal/
 - fmt https://fmt.dev
 - glaze https://github.com/stephenberry/glaze
-- glm https://github.com/g-truc/glm
+- eigen https://eigen.tuxfamily.org/
 - opencv https://opencv.org/
 - spdlog https://github.com/gabime/spdlog
 - units https://github.com/nholthaus/units

@@ -10,8 +10,9 @@ module;
 //
 //////////////////////////////////////////////////////////////////////
 
-#include <simdutf.h>
+#include "biscuit/config.h"
 #include "biscuit/macro.h"
+#include "biscuit/dependencies_simdutf.h"
 
 export module biscuit.convert_codepage;
 import std;

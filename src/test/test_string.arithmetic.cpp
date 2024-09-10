@@ -1,7 +1,4 @@
 #include <catch.hpp>
-#include <fmt/core.h>
-#include <fmt/std.h>
-#include <fmt/xchar.h>
 
 import std;
 import biscuit;
@@ -80,7 +77,7 @@ TEST_CASE("string.arithmetic") {
 
 	#define EXPECT_EQ(a, b) REQUIRE(a == b)
 		//std::locale::global(std::locale("en_US.UTF-8"));
-		auto str = fmt::format(std::locale("en_US.UTF-8"), "{:L}", 123'456'789);
+		auto str = std::format(std::locale("en_US.UTF-8"), "{:L}", 123'456'789);
 		EXPECT_EQ(str, "123,456,789");
 
 		EXPECT_EQ(AddThousandComma(L"1"sv),											L"1"sv);

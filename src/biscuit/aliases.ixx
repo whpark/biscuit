@@ -1,7 +1,8 @@
 module;
 
-#include <units.h>
 #include "biscuit/config.h"
+#include "biscuit/macro.h"
+#include "biscuit/dependencies_units.h"
 
 export module biscuit.aliases;
 import std;

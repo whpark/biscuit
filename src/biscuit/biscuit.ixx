@@ -1,6 +1,7 @@
 ﻿module;
 
 #include "biscuit/config.h"
+
 #include "dll.h"
 
 export module biscuit;

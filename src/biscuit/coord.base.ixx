@@ -4,12 +4,10 @@ module;
 #pragma warning(disable: 4201)
 #endif
 
-#include <fmt/core.h>
-#include <fmt/xchar.h>
-#include <glaze/glaze.hpp>
-//#include "glm/glm.hpp"
-
+#include "biscuit/config.h"
 #include "biscuit/macro.h"
+#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies_eigen.h"
 
 export module biscuit.coord.base;
 import std;
@@ -155,7 +153,7 @@ export namespace biscuit::coord {
 	//	requires (concepts::is_one_of<typename ttarget::coord_type_t, mPoint_t, mSize_t, mRect_t>)
 	template < template < typename, int> typename ttarget, typename tvalue, int DIM, bool bROUND >
 		requires (concepts::is_one_of<typename ttarget<tvalue, DIM>::coord_type_t, mPoint_t, mSize_t, mRect_t>)
-	struct TCoordBase : ttarget<tvalue, DIM> {
+	struct /*alignas(alignof(Eigen::Vector<tvalue, DIM>)) */TCoordBase : ttarget<tvalue, DIM> {
 		using base_t = ttarget<tvalue, DIM>;
 		using coord_type_t = base_t::coord_type_t;
 		using array_t = base_t::array_t;
@@ -287,20 +285,11 @@ export namespace biscuit::coord {
 
 		template < typename tchar = char >
 		constexpr std::basic_string<tchar> ToString() {
-			using namespace std::literals;
-			std::basic_string<tchar> str;
-			if constexpr (count() == 2)
-				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{}"sv)), arr()[0], arr()[1]);
-			else if constexpr (count() == 3)
-				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{}"sv)), arr()[0], arr()[1], arr()[2]);
-			else if constexpr (count() == 4)
-				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{},{}"sv)), arr()[0], arr()[1], arr()[2], arr()[3]);
-			else if constexpr (count() == 6)
-				str = fmt::format(fmt::runtime(ElevateAnsiToStandard<tchar>("{},{},{},{},{},{}"sv)), arr()[0], arr()[1], arr()[2], arr()[3], arr()[4], arr()[5]);
-			else
-				static_assert(false);
-			TrimRight(str, ',');
-			return str;
+			if constexpr (std::is_same_v<tchar, char>)			return std::format("{:n}", arr());
+			else if constexpr (std::is_same_v<tchar, wchar_t>)	return std::format(L"{:n}", arr());
+			else if constexpr (std::is_same_v<tchar, char16_t>) return std::format(u"{:n}", arr());
+			else if constexpr (std::is_same_v<tchar, char32_t>) return std::format(U"{:n}", arr());
+			else { static_assert(false); }
 		}
 		template < concepts::tstring_like tstring >
 		bool FromString(tstring const& sv) {
@@ -579,24 +568,30 @@ export namespace biscuit::coord {
 
 	public:
 		//=========================================================================================================================
-		BSC__NODISCARD double Distance(this_t const& pt) const requires (bPoint or bSize) {
-			double sum {};
-			for (int i{}; i < count(); i++)
-				sum += Square(arr()[i]-pt[i]);
-			return std::sqrt(sum);
+		BSC__NODISCARD constexpr inline double GetDistance(this_t const& pt) const requires (bPoint or bSize) {
+			return (*this - pt).GetDistance();
 		}
-		BSC__NODISCARD double GetLength() const requires (bPoint or bSize) {
+		BSC__NODISCARD constexpr inline double GetDistance() const requires (bPoint or bSize) {
 			double sum {};
 			for (auto v : arr())
 				sum += Square(v);
 			return std::sqrt(sum);
 		}
+		BSC__NODISCARD constexpr inline double GetTaxicabDistance(this_t const& pt) const requires (bPoint or bSize) {
+			return (*this - pt).GetTaxicabDistance();
+		}
+		BSC__NODISCARD constexpr inline double GetTaxicabDistance() const requires (bPoint or bSize) {
+			double sum {};
+			for (auto v : arr())
+				sum += std::abs(v);
+			return sum;
+		}
 		BSC__NODISCARD rad_t GetAngleXY() const requires (bPoint)				{ return rad_t(std::atan2(this->y, this->x)); }
 		BSC__NODISCARD rad_t GetAngleYZ() const requires (bPoint and dim >= 3)	{ return rad_t(std::atan2(this->z, this->y)); }
 		BSC__NODISCARD rad_t GetAngleZX() const requires (bPoint and dim >= 3)	{ return rad_t(std::atan2(this->x, this->z)); }
 
-		BSC__NODISCARD this_t GetNormalized() const requires (bPoint) { return *this / GetLength(); }	// Length == 1.0
-		bool Normalize() requires (bPoint) { *this /= GetLength(); return base_t::IsAllValid(); }
+		BSC__NODISCARD this_t GetNormalized() const requires (bPoint) { return *this / GetDistance(); }	// Length == 1.0
+		bool Normalize() requires (bPoint) { *this /= GetDistance(); return base_t::IsAllValid(); }
 
 		BSC__NODISCARD this_t GetNormalVectorXY() const requires (bPoint)				{ return {this->y, -this->x}; }			// Perpendicular(Normal) Vector (XY-Plan)
 		BSC__NODISCARD this_t GetNormalVectorYZ() const requires (bPoint and dim >= 3)	{ return {{}, this->z, -this->y}; }		// Perpendicular(Normal) Vector (YZ-Plan)
@@ -633,19 +628,21 @@ export namespace biscuit::coord {
 			return sum;
 		}
 
-		////-------------------------------------------------------------------------------------------------------------------------
-		//// glm
-		//BSC__NODISCARD glm::vec<dim, value_t>&		vec()			requires (bPoint)				{ return *reinterpret_cast<glm::vec<dim, value_t>*>(this); }
-		//BSC__NODISCARD glm::vec<dim, value_t>const&	vec() const		requires (bPoint)				{ return *reinterpret_cast<glm::vec<dim, value_t>const*>(this); }
-		//BSC__NODISCARD glm::vec<2, value_t>&		vec2()			requires (bPoint and dim >= 2)	{ return *reinterpret_cast<glm::vec<2, value_t>*>(this); }
-		//BSC__NODISCARD glm::vec<2, value_t>const&	vec2() const	requires (bPoint and dim >= 2)	{ return *reinterpret_cast<glm::vec<2, value_t>const*>(this); }
-		//BSC__NODISCARD glm::vec<3, value_t>&		vec3()			requires (bPoint and dim >= 3)	{ return *reinterpret_cast<glm::vec<3, value_t>*>(this); }
-		//BSC__NODISCARD glm::vec<3, value_t>const&	vec3() const	requires (bPoint and dim >= 3)	{ return *reinterpret_cast<glm::vec<3, value_t>const*>(this); }
-		//BSC__NODISCARD glm::vec<4, value_t>&		vec4()			requires (bPoint and dim >= 4)	{ return *reinterpret_cast<glm::vec<4, value_t>*>(this); }
-		//BSC__NODISCARD glm::vec<4, value_t>const&	vec4() const	requires (bPoint and dim >= 4)	{ return *reinterpret_cast<glm::vec<4, value_t>const*>(this); }
-
-		//operator glm::vec<dim, value_t>&		()		 requires (bPoint) { return vec(); }
-		//operator glm::vec<dim, value_t> const&	() const requires (bPoint) { return vec(); }
+		//-------------------------------------------------------------------------------------------------------------------------
+		// eigen
+		BSC__NODISCARD Eigen::Vector<value_t, dim>			vec()			requires (bPoint)				{ 
+			static_assert(sizeof(this_t) == sizeof(Eigen::Vector<value_t, dim>));
+			return *reinterpret_cast<Eigen::Vector<value_t, dim>*>(this);
+		}
+		BSC__NODISCARD Eigen::Vector<value_t, dim> const&	vec() const		requires (bPoint)				{ return *reinterpret_cast<Eigen::Vector<value_t, dim> const *>(this); }
+		BSC__NODISCARD Eigen::Vector<value_t, 2>			vec2()			requires (bPoint and dim >= 2)	{ return *reinterpret_cast<Eigen::Vector<value_t, 2>*>(this); }
+		BSC__NODISCARD Eigen::Vector<value_t, 2> const&		vec2() const	requires (bPoint and dim >= 2)	{ return *reinterpret_cast<Eigen::Vector<value_t, 2> const *>(this); }
+		BSC__NODISCARD Eigen::Vector<value_t, 3>			vec3()			requires (bPoint and dim >= 3)	{ return *reinterpret_cast<Eigen::Vector<value_t, 3>*>(this); }
+		BSC__NODISCARD Eigen::Vector<value_t, 3> const&		vec3() const	requires (bPoint and dim >= 3)	{ return *reinterpret_cast<Eigen::Vector<value_t, 3> const *>(this); }
+		BSC__NODISCARD Eigen::Vector<value_t, 4>			vec4()			requires (bPoint and dim >= 4)	{ return *reinterpret_cast<Eigen::Vector<value_t, 4>*>(this); }
+		BSC__NODISCARD Eigen::Vector<value_t, 4> const&		vec4() const	requires (bPoint and dim >= 4)	{ return *reinterpret_cast<Eigen::Vector<value_t, 4> const *>(this); }
+		operator Eigen::Vector<value_t, dim>&					()			requires (bPoint)				{ return vec(); }
+		operator Eigen::Vector<value_t, dim> const&				() const	requires (bPoint)				{ return vec(); }
 
 		//=========================================================================================================================
 	protected:
