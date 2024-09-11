@@ -198,6 +198,9 @@ export namespace biscuit::coord {
 		template < typename tcoord2 >
 			requires !std::is_same_v<tcoord2, this_t> and concepts::coord::generic_coord<tcoord2>
 		explicit TCoordBase(tcoord2 const& b) {
+			if constexpr (std::is_trivially_copyable_v<this_t>) {
+				std::memset(this, 0, sizeof(this_t));
+			}
 			*this = b;
 		}
 
@@ -208,13 +211,16 @@ export namespace biscuit::coord {
 				if constexpr (concepts::coord::has_point2<tcoord2> or concepts::coord::has_ipoint2<tcoord2>) {
 					MemberSet_x(MemberGet_x(b));
 					MemberSet_y(MemberGet_y(b));
-					MemberSet_z(MemberGet_z(b));
-					MemberSet_w(MemberGet_w(b));
+					if constexpr (dim >= 3)
+						MemberSet_z(MemberGet_z(b));
+					if constexpr (dim >= 4)
+						MemberSet_w(MemberGet_w(b));
 				}
 				else if constexpr (concepts::coord::has_size2<tcoord2> or concepts::coord::has_isize2<tcoord2>) {
 					MemberSet_x(MemberGet_width(b));
 					MemberSet_y(MemberGet_height(b));
-					MemberSet_z(MemberGet_depth(b));
+					if constexpr (dim >= 3)
+						MemberSet_z(MemberGet_depth(b));
 				}
 				else {
 					static_assert(false);
@@ -224,12 +230,14 @@ export namespace biscuit::coord {
 				if constexpr (concepts::coord::has_size2<tcoord2> or concepts::coord::has_isize2<tcoord2>) {
 					MemberSet_width (MemberGet_width(b));
 					MemberSet_height(MemberGet_height(b));
-					MemberSet_depth (MemberGet_depth(b));
+					if constexpr (dim >= 3)
+						MemberSet_depth (MemberGet_depth(b));
 				}
 				else if constexpr (concepts::coord::has_point2<tcoord2> or concepts::coord::has_ipoint2<tcoord2>) {
 					MemberSet_width (MemberGet_x(b));
 					MemberSet_height(MemberGet_y(b));
-					MemberSet_depth (MemberGet_z(b));
+					if constexpr (dim >= 3)
+						MemberSet_depth (MemberGet_z(b));
 				}
 			}
 			return *this;
@@ -305,7 +313,7 @@ export namespace biscuit::coord {
 		//--------------------------------------------------------------------------------------------------------------------------
 		struct glaze {
 			using T = this_t;
-			static constexpr auto value = glz::object(arr());
+			static constexpr auto value = glz::object(&T::arr);
 		};
 		// Archiving 
 		//friend class cereal::serialization::access;

@@ -4,7 +4,7 @@
 
 #ifdef _MSC_VER
 #	pragma warning(push)
-#	pragma warning(disable: 5054 4996)
+#	pragma warning(disable: 4127 4996 5054)
 #endif
 #include <Eigen/Core>
 #include <Eigen/Geometry>

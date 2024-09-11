@@ -26,7 +26,7 @@ export import biscuit.coord.size;
 export import biscuit.coord.rect;
 export import biscuit.coord.bounds;
 //export import biscuit.coord.bounds;
-export import biscuit.coord.trans;
+export import biscuit.coord.transform;
 //export import :coord.trans.perspective;
 
 //=============================================================================

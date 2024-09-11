@@ -3,6 +3,7 @@
 #include <fmt/core.h>
 
 #include "biscuit/biscuit.h"
+#include "biscuit/dependencies_eigen.h"
 
 //#pragma warning(push)
 #pragma warning(disable: 4127)	// conditional expression is constant
@@ -17,6 +18,8 @@ using namespace std::literals;
 //using namespace units::angle;
 using namespace units::literals;
 
+constexpr static auto const ATTR = "[coord]";
+
 namespace test {
 	using namespace biscuit;
 
@@ -29,7 +32,7 @@ namespace test {
 	static_assert(offsetof(sTestAlign, pt) == 0);
 	static_assert(offsetof(sTestAlign, pt2) == 16);
 	static_assert(offsetof(sTestAlign, pt3) == 32);
-	TEST_CASE("eigen_transform") {
+	TEST_CASE("eigen_transform", ATTR) {
 		Eigen::Transform<double, 2, Eigen::Affine> t;
 		t.setIdentity();
 		t.translate(Eigen::Vector2d(1, 2));
@@ -88,7 +91,7 @@ namespace test {
 		auto setHeight(T height) { m_height = height; }
 	};
 
-	TEST_CASE("coord") {
+	TEST_CASE("coord", ATTR) {
 
 		biscuit::sRect2i rect2i{0, 0, 1, 2};
 		biscuit::sPoint2i pt2i{100, 200};
@@ -145,7 +148,7 @@ namespace test {
 		REQUIRE(angle == 90_deg);
 	}
 
-	TEST_CASE("coord.round") {
+	TEST_CASE("coord.round", ATTR) {
 		sPoint3rd pt(1.5, 2.5, 3.5);
 		sPoint3i pti(pt);
 		REQUIRE(pti == sPoint3i(1, 2, 3));
@@ -153,7 +156,7 @@ namespace test {
 		REQUIRE(ptx == sPoint3ri(2, 3, 4));
 	}
 
-	TEST_CASE("coord.rect") {
+	TEST_CASE("coord.rect", ATTR) {
 
 		sRect2i rc2i(100, 200, 50, 60);
 
@@ -172,7 +175,7 @@ namespace test {
 		REQUIRE(sRect2i().IsNull());
 	}
 
-	TEST_CASE("coord.from_to_string") {
+	TEST_CASE("coord.from_to_string", ATTR) {
 
 		sRect2d rect{1., 2., 3., 4.};
 		auto str = rect.ToString();
@@ -193,7 +196,7 @@ namespace test {
 		REQUIRE(pt3 == pt4);
 	}
 
-	TEST_CASE("generic_coord.from_to_string") {
+	TEST_CASE("generic_coord.from_to_string", ATTR) {
 
 		Rect2d rect{1., 2., 3., 4.};
 		auto str = ToString<char>(rect);
@@ -211,11 +214,42 @@ namespace test {
 		auto pt4 = FromString<Point3d>(str);
 		REQUIRE(pt3 == pt4);
 
+	}
 
+	TEST_CASE("coord.transform", ATTR) {
+		SECTION("compatibility") {
+			Eigen::Vector3d v(1, 2, 3);
+			sPoint3d pt(v);
+			pt = v;
+		}
+
+		SECTION("2d.affine") {
+			xCoordTrans2d ct;
+
+			ct.m_transform = Eigen::Translation2d(1, 2);
+
+			sPoint3d pt(1,2,3);
+			auto pt2 = ct(pt);
+			REQUIRE(pt2 == sPoint3d(2, 4, 3));
+		}
+
+		SECTION("3d.affine") {
+			xCoordTrans3d ct;
+
+			ct.m_transform = Eigen::Translation3d(1, 2, 3);
+
+			REQUIRE(ct(sPoint3d{1, 2, 3}) == sPoint3d(2, 4, 6));
+			REQUIRE(ct(sPoint2d{1, 2}) == sPoint2d(2, 4));
+
+			ct.AdjustOffset({}, {101, 102, 103});
+			REQUIRE(ct(sPoint3d{1, 2, 3}) == sPoint3d(102, 104, 106));
+
+		}
 	}
 
 }
 
+#if 0
 namespace bench {
 	struct sRect {
 		int x, y, width, height;
@@ -292,7 +326,6 @@ namespace bench {
 		}
 	};
 
-#if 0
 	TEST_CASE("coord.rect.bench") {
 		//sRect rc0 { 30, 40, -30, -40 };
 		//sRect rc1 { 20, 40, -10, -20 };
@@ -331,7 +364,6 @@ namespace bench {
 			rc2.Intersect(rc3);
 		};
 	}
-#endif
-
-
 }
+
+#endif
