@@ -4,16 +4,13 @@
 
 #include "biscuit/biscuit.h"
 #include "biscuit/dependencies_eigen.h"
-
-//#pragma warning(push)
-#pragma warning(disable: 4127)	// conditional expression is constant
-#include "units.h"
-//#pragma warning(pop)
+#include "biscuit/dependencies_units.h"
 
 import std;
 import biscuit;
 
 using namespace std::literals;
+using namespace biscuit::literals;	// for intelli-sense
 //using namespace units;
 //using namespace units::angle;
 using namespace units::literals;
@@ -39,13 +36,62 @@ namespace test {
 		t.rotate(30);
 		t.scale(Eigen::Vector2d(2, 3));
 
-		Eigen::Matrix3d m = t.matrix();
-		m.transposeInPlace();
+		Eigen::Transform<double, 2, Eigen::Affine> t2;
+		t2 = t;
+		REQUIRE(t2.matrix() == t.matrix());
 
+		Eigen::Matrix3d m = t.matrix();
+		Eigen::Matrix3d m2 = t.matrix();
+
+		REQUIRE(m == m2);
+		m.transposeInPlace();
+		REQUIRE(m != m2);
 
 		std::vector<int> lst { 1, 2, 3, 4, 5 };
 		auto str = std::format("{:n}", lst);
 		REQUIRE(str == "1, 2, 3, 4, 5");
+	}
+
+	TEST_CASE("coord_trans", ATTR) {
+		xCoordTrans2d ct2d, ct2d2;
+		std::array<sPoint2d, 3> pts0{ { {0., 0.}, {1., 0.}, {0., 1.} } };
+		std::array<sPoint2d, 3> pts1{ { {0., 0.}, {1., 0.}, {0., 1.} } };
+		std::array<sPoint2d, 3> pts2{ { {0., 0.}, {0., 1.}, {1., 0.} } };
+
+		SECTION("1") {
+			ct2d.m_transform = Eigen::Rotation2D(30.0_deg_to_rad.value());
+			REQUIRE(ct2d != ct2d2);
+			ct2d2 = ct2d;
+			REQUIRE(ct2d == ct2d2);
+		}
+
+		SECTION("2pt") {
+			REQUIRE(ct2d.SetFrom2Points(pts0, pts1));
+			REQUIRE(ct2d(pts0[0]) == pts1[0]);
+			REQUIRE(ct2d(pts0[1]) == pts1[1]);
+			REQUIRE(ct2d(pts0[2]) == pts1[2]);
+		}
+		SECTION("3pt") {
+			REQUIRE(ct2d.SetFrom3Points(pts0, pts1));
+			REQUIRE(ct2d(pts0[0]) == pts1[0]);
+			REQUIRE(ct2d(pts0[1]) == pts1[1]);
+			REQUIRE(ct2d(pts0[2]) == pts1[2]);
+		}
+		SECTION("2pt - x<->y") {
+			REQUIRE(ct2d.SetFrom2Points(pts0, pts2));
+			REQUIRE(ct2d(pts0[0]) == pts2[0]);
+			REQUIRE(ct2d(pts0[1]) == pts2[1]);
+			REQUIRE(ct2d(pts0[2]) != pts2[2]);
+		}
+		SECTION("3pt - x<->y") {
+			REQUIRE(ct2d.SetFrom3Points(pts0, pts2));
+			REQUIRE(ct2d(pts0[0]) == pts2[0]);
+			REQUIRE(ct2d(pts0[1]) == pts2[1]);
+			REQUIRE(ct2d(pts0[2]) == pts2[2]);
+		}
+
+
+
 	}
 
 }

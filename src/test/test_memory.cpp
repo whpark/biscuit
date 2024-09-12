@@ -6,6 +6,8 @@ import biscuit;
 
 using namespace std::literals;
 
+constexpr static auto const ATTR = "[memory]";
+
 namespace test_memory {
 
 	struct Base {
@@ -44,7 +46,7 @@ namespace test_memory {
 		}
 	};
 
-	TEST_CASE("cloneable_ptr") {
+	TEST_CASE("cloneable_ptr", ATTR) {
 		biscuit::TCloneablePtr<Base> a = std::make_unique<B>();
 		biscuit::TCloneablePtr<Base> b = a;
 		REQUIRE(b);

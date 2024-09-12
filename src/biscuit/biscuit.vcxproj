@@ -159,6 +159,7 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
     <ClCompile Include="string.compares.ixx" />
     <ClCompile Include="string.defines.ixx" />
     <ClCompile Include="convert_codepage.ixx" />
+    <ClCompile Include="units.ixx" />
     <ClCompile Include="views.ixx" />
   </ItemGroup>
   <ItemGroup>

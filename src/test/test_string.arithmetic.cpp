@@ -5,7 +5,9 @@ import biscuit;
 
 using namespace std::literals;
 
-TEST_CASE("string.arithmetic") {
+constexpr static auto const ATTR = "[string]";
+
+TEST_CASE("string.arithmetic", ATTR) {
 	using namespace biscuit;
 
 	SECTION("default") {

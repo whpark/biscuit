@@ -9,7 +9,10 @@ import biscuit;
 
 using namespace std::literals;
 
-TEST_CASE("convert_codepage") {
+constexpr static auto const ATTR = "[string]";
+
+
+TEST_CASE("convert_codepage", ATTR) {
 #define SRC_TEXT "가a나b다c라d마바사똠"
 #define COMPOSE3(x, y, z) x##y##z
 #define COMPOSE2(x, y) COMPOSE3(x, y, s)

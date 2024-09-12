@@ -8,7 +8,9 @@ import biscuit;
 
 using namespace std::literals;
 
-TEST_CASE("string.manipulates") {
+constexpr static auto const ATTR = "[string]";
+
+TEST_CASE("string.manipulates", ATTR) {
 
 	using namespace biscuit;
 

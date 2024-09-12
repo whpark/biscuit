@@ -171,21 +171,22 @@ export namespace biscuit {
 		constexpr static auto const transform_mode = TRANSFORM_MODE;
 		using transform_t = Eigen::Transform<double, dim, TRANSFORM_MODE>;
 		using mat_t = transform_t::MatrixType;
-		transform_t m_transform{};
-	public:
+		transform_t m_transform{transform_t::Identity()};	// NO INITIALIZING
+		using point_t = TPoint<double, DIM, false>;
 
+	public:
 		BSC__NODISCARD virtual std::unique_ptr<ICoordTrans> clone() const { return std::make_unique<this_t>(*this); }
 
 		//friend class boost::serialization::access;
 		template < typename Archive >
 		friend void serialize(Archive &ar, std::uint32_t const version) {
-			ar(cereal::BinaryData(m_transform.data(), m_transform.matrix().array().size()*sizeof(m_transform.data()[0])));
+			auto size = m_transform.matrix().array().size() * sizeof(m_transform.data()[0]);
+			ar(cereal::BinaryData(m_transform.data(), size));
 		}
 
 	public:
-
-		bool operator == (this_t const&) const = default;
-		bool operator != (this_t const&) const = default;
+		bool operator == (this_t const& B) const { return m_transform.matrix() == B.m_transform.matrix(); }
+		bool operator != (this_t const& B) const { return m_transform.matrix() != B.m_transform.matrix(); }
 
 		//-------------------------------------------------------------------------
 		std::unique_ptr<ICoordTrans> GetInverse() const override {
@@ -238,11 +239,95 @@ export namespace biscuit {
 		}
 
 		//-------------------------------------------------------------------------
-		void AdjustOffset(sPoint3d const& origin, sPoint3d const& offset) {
-			auto pt = m_transform * (Eigen::Vector3d const&)origin;
-			auto diff = (Eigen::Vector3d const&)offset - pt;
+		BSC__NODISCARD bool SetFrom2Points(std::span<point_t const> ptsSource, std::span<point_t const> ptsTarget, bool bCalcScale = true, double dMinDeterminant = 0.0, bool bRightHanded = true) 
+			requires (dim == 2)
+		{
+			m_transform = transform_t::Identity();
+			if ( (ptsSource.size() < 2) or (ptsTarget.size() < 2) )
+				return false;
+
+			std::array<point_t, 3> ptsS{ptsSource[0], ptsSource[1]}, ptsT{ptsTarget[0], ptsTarget[1]};
+			// 세번째 점은 각각, 0번 기준으로 1번을 90도 회전시킴
+			ptsS[2].x = -(ptsS[1].y-ptsS[0].y) + ptsS[0].x;
+			ptsS[2].y =  (ptsS[1].x-ptsS[0].x) + ptsS[0].y;
+			if (bRightHanded) {
+				ptsT[2].x = -(ptsT[1].y-ptsT[0].y) + ptsT[0].x;
+				ptsT[2].y =  (ptsT[1].x-ptsT[0].x) + ptsT[0].y;
+			}
+			else {
+				ptsT[2].x =  (ptsT[1].y-ptsT[0].y) + ptsT[0].x;
+				ptsT[2].y = -(ptsT[1].x-ptsT[0].x) + ptsT[0].y;
+			}
+
+			return SetFrom3Points(ptsS, ptsT, bCalcScale, dMinDeterminant);
+		}
+		BSC__NODISCARD bool SetFrom3Points(std::span<point_t const> ptsSource, std::span<point_t const> ptsTarget, bool bCalcScale = true, double dMinDeterminant = 0.0)
+			requires (dim == 2)
+		{
+			using affine_t = Eigen::Matrix2d;
+
+			m_transform = transform_t::Identity();
+			if ( (ptsSource.size() < 3) or (ptsTarget.size() < 3) )
+				return false;
+
+			auto v1s = ptsSource[1] - ptsSource[0];
+			auto v2s = ptsSource[2] - ptsSource[0];
+			auto v1t = ptsTarget[1] - ptsTarget[0];
+			auto v2t = ptsTarget[2] - ptsTarget[0];
+
+			affine_t matS;
+			matS << v1s.x, v2s.x, v1s.y, v2s.y;
+
+			// Check.
+			double d = matS.determinant();
+			if (std::abs(d) <= dMinDeterminant)
+				return false;
+
+			affine_t matT;
+			matT << v1t.x, v2t.x, v1t.y, v2t.y;
+
+			affine_t mat = matT * matS.inverse();
+
+			if (!bCalcScale) {
+				double scale = std::abs(mat.determinant());
+				mat /= scale;
+			}
+			m_transform.matrix()(0,0) = mat(0,0);
+			m_transform.matrix()(0,1) = mat(0,1);
+			m_transform.matrix()(1,0) = mat(1,0);
+			m_transform.matrix()(1,1) = mat(1,1);
+
+			AdjustOffset(ptsSource[0], ptsTarget[0]);
+
+			return true;
+		}
+
+		//-------------------------------------------------------------------------
+		void AdjustOffset(point_t const& origin, point_t const& offset) {
+			auto pt = m_transform * origin.vec();
+			auto diff = offset.vec() - pt;
 			m_transform.translation() += diff;
 		}
+
+		void FlipLR(double x = 0.0) {
+			m_transform.matrix().row(0) *= -1;
+			if (x != 0.0)
+				m_transform.translation().x() += 2*x;
+		}
+		void FlipUD(double y = 0.0) {
+			m_transform.matrix().row(1) *= -1;
+			if (y != 0.0)
+				m_transform.translation().y() += 2*y;
+		}
+		void FlipFD(double z = 0.0) requires (dim >= 3) {
+			m_transform.matrix().row(2) *= -1;
+			if (z != 0.0)
+				m_transform.translation().z() += 2*z;
+		}
+
+		void FlipSourceX() { m_transform.matrix().col(0) *= -1; }
+		void FlipSourceY() { m_transform.matrix().col(1) *= -1; }
+		void FlipSourceZ() requires (dim >= 3) { m_transform.matrix().col(2) *= -1; }
 
 	};
 

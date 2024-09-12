@@ -8,6 +8,8 @@ import biscuit;
 
 using namespace std::literals;
 
+constexpr static auto const ATTR = "[string]";
+
 namespace {
 
 	template < typename T >
@@ -16,7 +18,7 @@ namespace {
 		A() : str (T().value) {}
 	};
 
-	TEST_CASE("string misc") {
+	TEST_CASE("string misc", ATTR) {
 
 		using namespace biscuit;
 
@@ -33,7 +35,7 @@ namespace {
 
 }
 
-TEST_CASE("string tsz tpsz") {
+TEST_CASE("string tsz tpsz", ATTR) {
 	using namespace biscuit;
 	char legacy_buffer[1024] = "abcdef";
 	char* legacy_ptr = legacy_buffer;
