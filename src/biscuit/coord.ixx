@@ -10,6 +10,7 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
+#include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_eigen.h"
 
 export module biscuit.coord;
@@ -50,14 +51,7 @@ export namespace biscuit {
 		constexpr auto dim = sizeof(tcoord) / sizeof(value_t);
 		using array_t = std::array<value_t, dim>;
 		static_assert(array_t().size() == concepts::coord::CountCoordMemberVariable<tcoord>());
-
-		std::basic_string<tchar> str;
-		auto const& arr = reinterpret_cast<array_t const&>(coord);
-		if constexpr (std::is_same_v<tchar, char>)			return std::format("{:n}", arr);
-		else if constexpr (std::is_same_v<tchar, wchar_t>)	return std::format(L"{:n}", arr);
-		else if constexpr (std::is_same_v<tchar, char16_t>) return std::format(u"{:n}", arr);
-		else if constexpr (std::is_same_v<tchar, char32_t>) return std::format(U"{:n}", arr);
-		else { static_assert(false); }
+		return biscuit::ToString<char, value_t>(reinterpret_cast<array_t const&>(coord));
 	}
 	template < typename tchar = char, concepts::coord::generic_coord tcoord >
 		requires std::is_trivially_copyable_v<tcoord>

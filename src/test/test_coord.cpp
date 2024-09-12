@@ -3,6 +3,7 @@
 #include <fmt/core.h>
 
 #include "biscuit/biscuit.h"
+#include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_eigen.h"
 #include "biscuit/dependencies_units.h"
 
@@ -48,7 +49,7 @@ namespace test {
 		REQUIRE(m != m2);
 
 		std::vector<int> lst { 1, 2, 3, 4, 5 };
-		auto str = std::format("{:n}", lst);
+		auto str = fmt::format("{:n}", lst);
 		REQUIRE(str == "1, 2, 3, 4, 5");
 	}
 

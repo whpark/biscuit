@@ -2,7 +2,6 @@ module;
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_glaze.h"
 #include "biscuit/dependencies_eigen.h"
 
@@ -20,6 +19,7 @@ import biscuit.coord.base;
 import biscuit.coord.point;
 import biscuit.coord.size;
 import biscuit.coord.rect;
+import biscuit.string;
 
 export namespace biscuit {
 
@@ -110,13 +110,7 @@ export namespace biscuit {
 		auto const& operator [] (size_t i) const { return arr()[i]; }
 
 		template < typename tchar = char >
-		constexpr std::basic_string<tchar> ToString() {
-			if constexpr (std::is_same_v<tchar, char>)			return std::format("{:n}", arr());
-			else if constexpr (std::is_same_v<tchar, wchar_t>)	return std::format(L"{:n}", arr());
-			else if constexpr (std::is_same_v<tchar, char16_t>) return std::format(u"{:n}", arr());
-			else if constexpr (std::is_same_v<tchar, char32_t>) return std::format(U"{:n}", arr());
-			else { static_assert(false); }
-		}
+		constexpr std::basic_string<tchar> ToString() { return biscuit::ToString<char, value_t>(arr()); }
 		template < concepts::tstring_like tstring >
 		bool FromString(tstring const& sv) {
 			size_t i{};
