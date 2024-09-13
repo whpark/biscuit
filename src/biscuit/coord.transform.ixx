@@ -172,6 +172,7 @@ export namespace biscuit {
 		using transform_t = Eigen::Transform<double, dim, TRANSFORM_MODE>;
 		using mat_t = transform_t::MatrixType;
 		transform_t m_transform{transform_t::Identity()};	// NO INITIALIZING
+		using vector_t = Eigen::Vector<double, dim>;
 		using point_t = TPoint<double, DIM, false>;
 
 	public:
@@ -214,22 +215,22 @@ export namespace biscuit {
 		}
 		BSC__NODISCARD virtual sPoint2d Trans(double x, double y) const {
 			if constexpr (dim == 2) {
-				auto pt = m_transform * Eigen::Vector2d(x, y);
+				auto pt = m_transform * vector_t(x, y);
 				return { pt.x(), pt.y() };
 			}
 			else if constexpr (dim == 3) {
-				auto pt = m_transform * Eigen::Vector3d(x, y, 0.0);
+				auto pt = m_transform * vector_t(x, y, 0.0);
 				return { pt.x(), pt.y() };
 			}
 			else static_assert(false);
 		}
 		BSC__NODISCARD virtual sPoint3d Trans(double x, double y, double z) const {
 			if constexpr (dim == 2) {
-				auto p = m_transform * Eigen::Vector2d(x, y);
+				auto p = m_transform * vector_t(x, y);
 				return {p.x(), p.y(), z};
 			}
 			else if constexpr (dim == 3) {
-				auto p = m_transform * Eigen::Vector3d(x, y, z);
+				auto p = m_transform * vector_t(x, y, z);
 				return {p.x(), p.y(), p.z()};
 			}
 			else static_assert(false);
@@ -292,17 +293,49 @@ export namespace biscuit {
 				double scale = std::abs(mat.determinant());
 				mat /= scale;
 			}
-			m_transform.matrix()(0,0) = mat(0,0);
-			m_transform.matrix()(0,1) = mat(0,1);
-			m_transform.matrix()(1,0) = mat(1,0);
-			m_transform.matrix()(1,1) = mat(1,1);
+			m_transform.matrix().topLeftCorner<dim, dim>() = mat;
 
 			AdjustOffset(ptsSource[0], ptsTarget[0]);
 
 			return true;
 		}
+		BSC__NODISCARD bool SetFrom4Points(std::span<point_t const> ptsSource, std::span<point_t const> ptsTaret, bool bCalcScale = true, double dMinDeterminant = 0.0) {
+			if constexpr (dim == 2) {
+				static_assert(transform_mode == Eigen::TransformTraits::Projective);
+
+			}
+			else if constexpr (dim == 3) {
+
+			}
+		}
 
 		//-------------------------------------------------------------------------
+		double Scale() const {
+			return std::sqrt(std::abs(m_transform.matrix().topLeftCorner<dim, dim>().determinant()));
+		}
+		double SetScale(double scale) {
+			double s = Scale();
+			if (s == 0.0)
+				return 0.0;
+			double rate = scale / s;
+			m_transform.matrix().topLeftCorner<dim, dim>() *= rate;
+			return rate;
+		}
+		double SetScale(double scale, point_t const& origin) {
+			vector_t offset = m_transform * origin.vec();
+			double s = Scale();
+			if (s == 0.0)
+				return 0.0;
+			double rate = scale / s;
+			m_transform.matrix().topLeftCorner<dim, dim>() *= rate;
+			AdjustOffset(origin, point_t(offset));
+			return rate;
+		}
+		double ScaleAffinePart(double rate) {
+			m_transform.matrix().topLeftCorner<dim, dim>() *= rate;
+			return rate;
+		}
+
 		void AdjustOffset(point_t const& origin, point_t const& offset) {
 			auto pt = m_transform * origin.vec();
 			auto diff = offset.vec() - pt;

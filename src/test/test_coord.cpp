@@ -1,6 +1,5 @@
 #include <cstddef>
 #include <catch.hpp>
-#include <fmt/core.h>
 
 #include "biscuit/biscuit.h"
 #include "biscuit/dependencies_fmt.h"
@@ -54,41 +53,49 @@ namespace test {
 	}
 
 	TEST_CASE("coord_trans", ATTR) {
-		xCoordTrans2d ct2d, ct2d2;
+		xCoordTrans2d ct, ct2;
 		std::array<sPoint2d, 3> pts0{ { {0., 0.}, {1., 0.}, {0., 1.} } };
 		std::array<sPoint2d, 3> pts1{ { {0., 0.}, {1., 0.}, {0., 1.} } };
 		std::array<sPoint2d, 3> pts2{ { {0., 0.}, {0., 1.}, {1., 0.} } };
 
 		SECTION("1") {
-			ct2d.m_transform = Eigen::Rotation2D(30.0_deg_to_rad.value());
-			REQUIRE(ct2d != ct2d2);
-			ct2d2 = ct2d;
-			REQUIRE(ct2d == ct2d2);
+			ct.m_transform = Eigen::Rotation2D(biscuit::deg2rad(30));
+			REQUIRE(ct != ct2);
+			ct2 = ct;
+			REQUIRE(ct == ct2);
+		}
+		SECTION("2") {
+			REQUIRE(ct.Scale() == 1);
+			ct.SetScale(3, sPoint2d(10, 10));
+			REQUIRE(ct(sPoint2d(10, 10)) == sPoint2d(10, 10));
+			REQUIRE(ct(sPoint2d(11, 10)) == sPoint2d(13, 10));
+			REQUIRE(ct(sPoint2d(10, 11)) == sPoint2d(10, 13));
+			REQUIRE(ct(sPoint2d(11, 11)) == sPoint2d(13, 13));
 		}
 
 		SECTION("2pt") {
-			REQUIRE(ct2d.SetFrom2Points(pts0, pts1));
-			REQUIRE(ct2d(pts0[0]) == pts1[0]);
-			REQUIRE(ct2d(pts0[1]) == pts1[1]);
-			REQUIRE(ct2d(pts0[2]) == pts1[2]);
+			REQUIRE(ct.SetFrom2Points(pts0, pts1));
+			REQUIRE(ct(pts0[0]) == pts1[0]);
+			REQUIRE(ct(pts0[1]) == pts1[1]);
+			REQUIRE(ct(pts0[2]) == pts1[2]);
 		}
 		SECTION("3pt") {
-			REQUIRE(ct2d.SetFrom3Points(pts0, pts1));
-			REQUIRE(ct2d(pts0[0]) == pts1[0]);
-			REQUIRE(ct2d(pts0[1]) == pts1[1]);
-			REQUIRE(ct2d(pts0[2]) == pts1[2]);
+			REQUIRE(ct.SetFrom3Points(pts0, pts1));
+			REQUIRE(ct(pts0[0]) == pts1[0]);
+			REQUIRE(ct(pts0[1]) == pts1[1]);
+			REQUIRE(ct(pts0[2]) == pts1[2]);
 		}
 		SECTION("2pt - x<->y") {
-			REQUIRE(ct2d.SetFrom2Points(pts0, pts2));
-			REQUIRE(ct2d(pts0[0]) == pts2[0]);
-			REQUIRE(ct2d(pts0[1]) == pts2[1]);
-			REQUIRE(ct2d(pts0[2]) != pts2[2]);
+			REQUIRE(ct.SetFrom2Points(pts0, pts2));
+			REQUIRE(ct(pts0[0]) == pts2[0]);
+			REQUIRE(ct(pts0[1]) == pts2[1]);
+			REQUIRE(ct(pts0[2]) != pts2[2]);
 		}
 		SECTION("3pt - x<->y") {
-			REQUIRE(ct2d.SetFrom3Points(pts0, pts2));
-			REQUIRE(ct2d(pts0[0]) == pts2[0]);
-			REQUIRE(ct2d(pts0[1]) == pts2[1]);
-			REQUIRE(ct2d(pts0[2]) == pts2[2]);
+			REQUIRE(ct.SetFrom3Points(pts0, pts2));
+			REQUIRE(ct(pts0[0]) == pts2[0]);
+			REQUIRE(ct(pts0[1]) == pts2[1]);
+			REQUIRE(ct(pts0[2]) == pts2[2]);
 		}
 
 
@@ -278,6 +285,7 @@ namespace test {
 			sPoint3d pt(1,2,3);
 			auto pt2 = ct(pt);
 			REQUIRE(pt2 == sPoint3d(2, 4, 3));
+
 		}
 
 		SECTION("3d.affine") {

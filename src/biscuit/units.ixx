@@ -22,4 +22,9 @@ export namespace biscuit::inline literals {
 		return units::angle::degree_t{ units::angle::radian_t((double)x) };
 	}
 
+	constexpr double deg2rad(double angle) { return units::angle::radian_t(units::angle::degree_t(angle)).value(); }
+	constexpr double rad2deg(double angle) { return units::angle::degree_t(angle).value(); }
+	constexpr double deg2rad(units::angle::degree_t angle) { return units::angle::radian_t(angle).value(); }
+	constexpr double rad2deg(units::angle::radian_t angle) { return units::angle::degree_t(angle).value(); }
+
 }
