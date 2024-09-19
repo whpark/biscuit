@@ -215,8 +215,14 @@ export namespace biscuit {
 		}
 		BSC__NODISCARD virtual sPoint2d Trans(double x, double y) const {
 			if constexpr (dim == 2) {
-				auto pt = m_transform * vector_t(x, y);
-				return { pt.x(), pt.y() };
+				if constexpr (m_transform.HDim == 3) {
+					auto pt = m_transform * Eigen::Vector<double, 3>(x, y, 1.0);
+					return { pt.x()/pt.z(), pt.y()/pt.z()};
+				}
+				else {
+					auto pt = m_transform * vector_t(x, y);
+					return { pt.x(), pt.y() };
+				}
 			}
 			else if constexpr (dim == 3) {
 				auto pt = m_transform * vector_t(x, y, 0.0);
@@ -226,8 +232,14 @@ export namespace biscuit {
 		}
 		BSC__NODISCARD virtual sPoint3d Trans(double x, double y, double z) const {
 			if constexpr (dim == 2) {
-				auto p = m_transform * vector_t(x, y);
-				return {p.x(), p.y(), z};
+				if constexpr (m_transform.HDim == 3) {
+					auto p = m_transform * Eigen::Vector<double, 3>(x, y, 1.0);
+					return {p.x()/p.z(), p.y()/p.z(), z};
+				}
+				else {
+					auto p = m_transform * vector_t(x, y);
+					return {p.x(), p.y(), z};
+				}
 			}
 			else if constexpr (dim == 3) {
 				auto p = m_transform * vector_t(x, y, z);
@@ -240,7 +252,7 @@ export namespace biscuit {
 		}
 
 		//-------------------------------------------------------------------------
-		BSC__NODISCARD bool SetFrom2Points(std::span<point_t const> ptsSource, std::span<point_t const> ptsTarget, bool bCalcScale = true, double dMinDeterminant = 0.0, bool bRightHanded = true) 
+		BSC__NODISCARD bool SetFrom2Pairs(std::span<point_t const> ptsSource, std::span<point_t const> ptsTarget, bool bCalcScale = true, double dMinDeterminant = 0.0, bool bRightHanded = true) 
 			requires (dim == 2)
 		{
 			m_transform = transform_t::Identity();
@@ -260,9 +272,9 @@ export namespace biscuit {
 				ptsT[2].y = -(ptsT[1].x-ptsT[0].x) + ptsT[0].y;
 			}
 
-			return SetFrom3Points(ptsS, ptsT, bCalcScale, dMinDeterminant);
+			return SetFrom3Pairs(ptsS, ptsT, bCalcScale, dMinDeterminant);
 		}
-		BSC__NODISCARD bool SetFrom3Points(std::span<point_t const> ptsSource, std::span<point_t const> ptsTarget, bool bCalcScale = true, double dMinDeterminant = 0.0)
+		BSC__NODISCARD bool SetFrom3Pairs(std::span<point_t const> ptsSource, std::span<point_t const> ptsTarget, bool bCalcScale = true, double dMinDeterminant = 0.0)
 			requires (dim == 2)
 		{
 			using affine_t = Eigen::Matrix2d;
@@ -299,13 +311,30 @@ export namespace biscuit {
 
 			return true;
 		}
-		BSC__NODISCARD bool SetFrom4Points(std::span<point_t const> ptsSource, std::span<point_t const> ptsTaret, bool bCalcScale = true, double dMinDeterminant = 0.0) {
+		BSC__NODISCARD bool SetFrom4Pairs(std::span<point_t const> ptsSource, std::span<point_t const> ptsTarget, bool bCalcScale = true, double dMinDeterminant = 0.0) {
 			if constexpr (dim == 2) {
 				static_assert(transform_mode == Eigen::TransformTraits::Projective);
-
+				// Homography
+				Eigen::Matrix<double, 8, 8> A;
+				for (int i = 0; i < 4; i++) {
+					A.row(i*2) << ptsSource[i].x, ptsSource[i].y, 1, 0, 0, 0, -ptsTarget[i].x*ptsSource[i].x, -ptsTarget[i].x*ptsSource[i].y;
+					A.row(i*2+1) << 0, 0, 0, ptsSource[i].x, ptsSource[i].y, 1, -ptsTarget[i].y*ptsSource[i].x, -ptsTarget[i].y*ptsSource[i].y;
+				}
+				Eigen::Matrix<double, 8, 1> b;
+				for (int i = 0; i < 4; i++) {
+					b(i*2, 0) = ptsTarget[i].x;
+					b(i*2+1, 0) = ptsTarget[i].y;
+				}
+				Eigen::Matrix<double, 8, 1> h = A.bdcSvd(Eigen::ComputeFullU|Eigen::ComputeFullV).solve(b);
+				mat_t& mat = m_transform.matrix();
+				mat << h(0), h(1), h(2), h(3), h(4), h(5), h(6), h(7), 1.0;
+				return true;
 			}
 			else if constexpr (dim == 3) {
 
+			}
+			else {
+				static_assert(false);
 			}
 		}
 
@@ -365,7 +394,8 @@ export namespace biscuit {
 	};
 
 	//template TCoordTransDim<2>;
-	using xCoordTrans2d = TCoordTransMat<2>;
+	using xCoordTrans2d = TCoordTransMat<2, Eigen::TransformTraits::AffineCompact>;
+	using xCoordTrans2dP = TCoordTransMat<2, Eigen::TransformTraits::Projective>;
 
 	//template TCoordTransDim<3>;
 	using xCoordTrans3d = TCoordTransMat<3>;

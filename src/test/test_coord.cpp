@@ -54,9 +54,9 @@ namespace test {
 
 	TEST_CASE("coord_trans", ATTR) {
 		xCoordTrans2d ct, ct2;
-		std::array<sPoint2d, 3> pts0{ { {0., 0.}, {1., 0.}, {0., 1.} } };
-		std::array<sPoint2d, 3> pts1{ { {0., 0.}, {1., 0.}, {0., 1.} } };
-		std::array<sPoint2d, 3> pts2{ { {0., 0.}, {0., 1.}, {1., 0.} } };
+		std::array<sPoint2d, 4> pts0{ { {0., 0.}, {1., 0.}, {0., 1.} } };
+		std::array<sPoint2d, 4> pts1{ { {0., 0.}, {1., 0.}, {0., 1.} } };
+		std::array<sPoint2d, 4> pts2{ { {0., 0.}, {0., 1.}, {1., 0.} } };
 
 		SECTION("1") {
 			ct.m_transform = Eigen::Rotation2D(biscuit::deg2rad(30));
@@ -74,31 +74,54 @@ namespace test {
 		}
 
 		SECTION("2pt") {
-			REQUIRE(ct.SetFrom2Points(pts0, pts1));
+			REQUIRE(ct.SetFrom2Pairs(pts0, pts1));
 			REQUIRE(ct(pts0[0]) == pts1[0]);
 			REQUIRE(ct(pts0[1]) == pts1[1]);
 			REQUIRE(ct(pts0[2]) == pts1[2]);
 		}
 		SECTION("3pt") {
-			REQUIRE(ct.SetFrom3Points(pts0, pts1));
+			REQUIRE(ct.SetFrom3Pairs(pts0, pts1));
 			REQUIRE(ct(pts0[0]) == pts1[0]);
 			REQUIRE(ct(pts0[1]) == pts1[1]);
 			REQUIRE(ct(pts0[2]) == pts1[2]);
 		}
 		SECTION("2pt - x<->y") {
-			REQUIRE(ct.SetFrom2Points(pts0, pts2));
+			REQUIRE(ct.SetFrom2Pairs(pts0, pts2));
 			REQUIRE(ct(pts0[0]) == pts2[0]);
 			REQUIRE(ct(pts0[1]) == pts2[1]);
 			REQUIRE(ct(pts0[2]) != pts2[2]);
 		}
 		SECTION("3pt - x<->y") {
-			REQUIRE(ct.SetFrom3Points(pts0, pts2));
+			REQUIRE(ct.SetFrom3Pairs(pts0, pts2));
 			REQUIRE(ct(pts0[0]) == pts2[0]);
 			REQUIRE(ct(pts0[1]) == pts2[1]);
 			REQUIRE(ct(pts0[2]) == pts2[2]);
 		}
 
+	}
 
+	TEST_CASE("coord_trans_4pt", ATTR) {
+		constexpr static double eps = 1.e-10;
+		std::array<sPoint2d, 4> pts0{ { {0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}} };
+		std::array<sPoint2d, 4> pts1{ { {0.0, 0.0}, {1.1, 0.0}, {0.1, 1.0}, {1.0, 1.1}} };
+
+		SECTION("4pt id") {
+			xCoordTrans2dP ct;
+			REQUIRE(ct.SetFrom4Pairs(pts0, pts0));	// Affine
+			REQUIRE(((ct.m_transform.matrix() - ct.m_transform.matrix().Identity()).cwiseAbs().array() < eps).all());
+		}
+		SECTION("4pt") {
+			xCoordTrans2dP ct;
+			REQUIRE(ct.SetFrom4Pairs(pts0, pts1));
+			for (auto [p0, p1] : std::ranges::views::zip(pts0, pts1)) {
+				REQUIRE(p1.GetDistance(ct(p0)) < eps);
+				REQUIRE(p1.GetTaxicabDistance(ct(p0)) < eps);
+			}
+			REQUIRE(((ct(pts0[0]) - pts1[0]).vec().cwiseAbs().array() < eps).all());
+			REQUIRE(((ct(pts0[1]) - pts1[1]).vec().cwiseAbs().array() < eps).all());
+			REQUIRE(((ct(pts0[2]) - pts1[2]).vec().cwiseAbs().array() < eps).all());
+			REQUIRE(((ct(pts0[3]) - pts1[3]).vec().cwiseAbs().array() < eps).all());
+		}
 
 	}
 
