@@ -5,11 +5,11 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files
 #define NOMINMAX
-//#include <windows.h>
+#include <windows.h>
 
-APIENTRY auto DllMain(HMODULE hModule,
+auto APIENTRY DllMain(HMODULE /*hModule*/,
 					  DWORD  ul_reason_for_call,
-					  LPVOID lpReserved
+					  LPVOID /*lpReserved*/
 ) -> BOOL {
 	switch (ul_reason_for_call) {
 	case DLL_PROCESS_ATTACH:

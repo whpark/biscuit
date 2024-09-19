@@ -331,7 +331,20 @@ export namespace biscuit {
 				return true;
 			}
 			else if constexpr (dim == 3) {
-
+				Eigen::Matrix3d matS, matT;
+				auto pS = ptsSource[0];
+				matS << ptsSource[1].x-pS.x, ptsSource[2].x-pS.x, ptsSource[3].x-pS.x,
+						ptsSource[1].y-pS.y, ptsSource[2].y-pS.y, ptsSource[3].y-pS.y,
+						ptsSource[1].z-pS.z, ptsSource[2].z-pS.z, ptsSource[3].z-pS.z;
+				auto pT = ptsTarget[0];
+				matT << ptsTarget[1].x-pT.x, ptsTarget[2].x-pT.x, ptsTarget[3].x-pT.x,
+						ptsTarget[1].y-pT.y, ptsTarget[2].y-pT.y, ptsTarget[3].y-pT.y,
+						ptsTarget[1].z-pT.z, ptsTarget[2].z-pT.z, ptsTarget[3].z-pT.z;
+				m_transform.setIdentity();
+				m_transform.matrix().topLeftCorner<dim, dim>() = matT * matS.inverse();
+				auto offset = pT.vec() - m_transform * pS.vec();
+				m_transform.translation() = offset;
+				return true;
 			}
 			else {
 				static_assert(false);

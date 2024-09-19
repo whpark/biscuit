@@ -100,17 +100,17 @@ namespace test {
 
 	}
 
-	TEST_CASE("coord_trans_4pt", ATTR) {
+	TEST_CASE("coord_trans_4pt 2d", ATTR) {
 		constexpr static double eps = 1.e-10;
 		std::array<sPoint2d, 4> pts0{ { {0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}} };
 		std::array<sPoint2d, 4> pts1{ { {0.0, 0.0}, {1.1, 0.0}, {0.1, 1.0}, {1.0, 1.1}} };
 
-		SECTION("4pt id") {
+		SECTION("4pt identical") {
 			xCoordTrans2dP ct;
 			REQUIRE(ct.SetFrom4Pairs(pts0, pts0));	// Affine
 			REQUIRE(((ct.m_transform.matrix() - ct.m_transform.matrix().Identity()).cwiseAbs().array() < eps).all());
 		}
-		SECTION("4pt") {
+		SECTION("4pt general") {
 			xCoordTrans2dP ct;
 			REQUIRE(ct.SetFrom4Pairs(pts0, pts1));
 			for (auto [p0, p1] : std::ranges::views::zip(pts0, pts1)) {
@@ -123,6 +123,30 @@ namespace test {
 			REQUIRE(((ct(pts0[3]) - pts1[3]).vec().cwiseAbs().array() < eps).all());
 		}
 
+	}
+
+	TEST_CASE("coord_trans_4pt - 3d", ATTR) {
+		constexpr static double eps = 1.e-10;
+		std::array<sPoint3d, 4> pts0{ { {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}} };
+		std::array<sPoint3d, 4> pts1{ { pts0[2], pts0[3], pts0[0], pts0[1] } };
+
+		SECTION("4pt identical") {
+			xCoordTrans3d ct;
+			REQUIRE(ct.SetFrom4Pairs(pts0, pts0));	// Affine
+			REQUIRE(((ct.m_transform.matrix() - ct.m_transform.matrix().Identity()).cwiseAbs().array() < eps).all());
+		}
+		SECTION("4pt general") {
+			xCoordTrans3d ct;
+			REQUIRE(ct.SetFrom4Pairs(pts0, pts1));
+			for (auto [p0, p1] : std::ranges::views::zip(pts0, pts1)) {
+				REQUIRE(p1.GetDistance(ct(p0)) < eps);
+				REQUIRE(p1.GetTaxicabDistance(ct(p0)) < eps);
+			}
+			REQUIRE(((ct(pts0[0]) - pts1[0]).vec().cwiseAbs().array() < eps).all());
+			REQUIRE(((ct(pts0[1]) - pts1[1]).vec().cwiseAbs().array() < eps).all());
+			REQUIRE(((ct(pts0[2]) - pts1[2]).vec().cwiseAbs().array() < eps).all());
+			REQUIRE(((ct(pts0[3]) - pts1[3]).vec().cwiseAbs().array() < eps).all());
+		}
 	}
 
 }
