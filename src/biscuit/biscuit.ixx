@@ -10,6 +10,7 @@ import std;
 export import biscuit.aliases;
 export import biscuit.concepts;
 export import biscuit.memory;
+export import biscuit.container_map;
 export import biscuit.arithmetic;
 export import biscuit.coord;
 export import biscuit.color;

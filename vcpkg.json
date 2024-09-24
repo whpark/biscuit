@@ -1,8 +1,8 @@
 {
   "dependencies": [
-    "boost-pfr",
     "catch2",
     "cereal",
+    "ctre",
     "fmt",
     "glaze",
     "eigen3",

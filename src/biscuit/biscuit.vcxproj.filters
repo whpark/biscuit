@@ -48,6 +48,9 @@
     <ClInclude Include="..\..\include\biscuit\dependencies_simdutf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\biscuit\dependencies_ctre.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -135,6 +138,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="units.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lazy_profile.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="container_map.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="archive.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
