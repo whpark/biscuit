@@ -53,7 +53,7 @@ export namespace biscuit {
 		}
 	};
 
-	template < concepts::string_elem tchar_to, xStringLiteral literal >
+	template < concepts::string_elem tchar_to, xStringLiteral literal, bool SWAP_BYTE = false >
 	struct TStringLiteral {
 		tchar_to value[std::size(literal.str)];
 		constexpr TStringLiteral() {
@@ -61,7 +61,12 @@ export namespace biscuit {
 				//static_assert(literal.str[i] > 0 and literal.str[i] < 127);
 				if (literal.str[i] < 0 or literal.str[i] > 127)
 					throw std::logic_error("invalid character");
-				value[i] = static_cast<tchar_to>(literal.str[i]);
+				if constexpr (SWAP_BYTE) {
+					value[i] = std::byteswap(static_cast<tchar_to>(literal.str[i]));
+				}
+				else {
+					value[i] = static_cast<tchar_to>(literal.str[i]);
+				}
 			}
 		}
 	};

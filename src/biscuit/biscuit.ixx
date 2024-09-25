@@ -21,6 +21,7 @@ export import biscuit.iconv_wrapper;
 export import biscuit.charset_kssm;
 export import biscuit.convert_codepage;
 export import biscuit.string;
+export import biscuit.archive;
 export import biscuit.units;
 //export import :coord;
 

@@ -140,6 +140,16 @@ export namespace biscuit {
 		return iconv.Convert(strFrom);
 	}
 
+	template < concepts::string_elem tchar_to, concepts::tstring_like tstring, size_t initial_dst_buf_size = 1024 >
+	BSC__NODISCARD auto ConvertString_iconv(tstring const& strFrom, std::string_view szCodeTo = "", std::string_view szCodeFrom = "") {
+		using tchar_from = std::remove_cvref_t<tstring>::value_type;
+		thread_local static std::map<std::pair<std::string_view, std::string_view>, Ticonv<tchar_to, tchar_from, initial_dst_buf_size>> map_iconv;
+		if (map_iconv.find({ szCodeTo, szCodeFrom }) == map_iconv.end())
+			map_iconv[{szCodeTo, szCodeFrom}] = Ticonv<tchar_to, tchar_from, initial_dst_buf_size>{ szCodeTo, szCodeFrom };
+		auto& iconv = map_iconv[{szCodeTo, szCodeFrom}];
+		return iconv.Convert(strFrom);
+	}
+
 	// codepage 949
 	template < concepts::string_elem tchar_to, size_t initial_dst_buf_size = 1024 >
 	BSC__NODISCARD auto ConvertStringFromCP949(std::string_view strFrom) {

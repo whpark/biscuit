@@ -26,7 +26,7 @@ import biscuit.container_map;
 
 namespace concepts = biscuit::concepts;
 
-namespace biscuit {
+export namespace biscuit {
 
 	// utf-8 string
 
@@ -38,6 +38,7 @@ namespace biscuit {
 		bool bSTRING_BE_QUOTED = false
 		/*, bool bTRANSLATE_ESCAPE_SEQUENCE_STRING_VALUE = false*/
 	>
+		requires (concepts::is_one_of<tchar, char, wchar_t, char8_t>)
 	class TLazyProfile {
 	public:
 		using this_t = TLazyProfile;
@@ -227,7 +228,7 @@ namespace biscuit {
 				// let empty lines behind.
 				for (auto iter = m_items.rbegin(); iter != m_items.rend(); iter++) {
 					auto const& cur = *iter;
-					if (gtl::TrimView<tchar>(cur).empty())
+					if (TrimView<tchar>(cur).empty())
 						continue;
 
 					m_items.insert(m_items.begin() + std::distance(iter, m_items.rend()), std::move(str));
@@ -243,7 +244,7 @@ namespace biscuit {
 
 		auto HasItem(string_view_t key) const {
 			auto sv = GetItemValueRaw(key);
-			sv = gtl::TrimView(sv);
+			sv = TrimView(sv);
 			return !sv.empty();
 		}
 
@@ -257,17 +258,17 @@ namespace biscuit {
 			auto sv = GetItemValueRaw(key);
 			if (sv.empty())
 				return vDefault;
-			sv = gtl::TrimView(sv);
+			sv = TrimView(sv);
 			if constexpr (std::is_same_v<tvalue, bool>) {
 				if (std::isdigit(sv[0]))
-					return (gtl::tsztod(sv) == 0.0) ? false : true;
-				return gtl::tsznicmp(sv, string_view_t{gtl::TStringLiteral<char_t, "true">().value}, 4) == 0;
+					return (tsztod(sv) == 0.0) ? false : true;
+				return tsznicmp(sv, string_view_t{TStringLiteral<char_t, "true">().value}, 4) == 0;
 			}
 			else if constexpr (std::is_integral_v<tvalue>) {
-				return gtl::tsztoi<tvalue>(sv);
+				return tsztoi<tvalue>(sv);
 			}
 			else if constexpr (std::is_floating_point_v<tvalue>) {
-				return gtl::tsztod<tvalue>(sv);
+				return tsztod<tvalue>(sv);
 			}
 			else if constexpr (std::is_same_v<tvalue, string_view_t>) {
 				if constexpr (bStringBeQuoted) { DeQuote(sv); }
@@ -278,7 +279,7 @@ namespace biscuit {
 				return tvalue{sv};
 			}
 			else {
-				static_assert(gtlc::dependent_false_v<tvalue>);
+				static_assert(false);
 			}
 			return {};
 		}
@@ -298,7 +299,7 @@ namespace biscuit {
 				}
 			}
 			else {
-				SetItemValueRaw(key, fmt::format(GetDefaultFormatString<tchar>(), value), comment);
+				SetItemValueRaw(key, std::format(GetDefaultFormatString<tchar>(), value), comment);
 			}
 		}
 
@@ -327,8 +328,8 @@ namespace biscuit {
 				auto [whole, key1, eq1, value1, comment1] = s_reItem(item);
 				if (!whole)
 					return false;
-				auto key = gtl::TrimView(string_view_t{key1.begin(), key1.end()});
-				auto value = gtl::TrimView(string_view_t{value1.begin(), value1.end()});
+				auto key = TrimView(string_view_t{key1.begin(), key1.end()});
+				auto value = TrimView(string_view_t{value1.begin(), value1.end()});
 				return funcIsItemDeprecated(key, value);
 			};
 			auto iter = std::remove_if(m_items.begin(), m_items.end(), Check);
@@ -449,5 +450,5 @@ namespace biscuit {
 	};
 
 
-}	// namespace gtl
+}	// namespace biscuit
 

@@ -23,17 +23,17 @@ export namespace biscuit {
 		UTF16LE = 1200,
 		UTF16BE = 1201,
 		UTF16 = (std::endian::native == std::endian::little) ? UTF16LE : UTF16BE,
-		_UTF16_other = (UTF16 == UTF16BE) ? UTF16LE : UTF16BE,
+		UTF16_OE = (UTF16 == UTF16BE) ? UTF16LE : UTF16BE,
 
 		UTF32LE = 12000,
 		UTF32BE = 12001,
 		UTF32 = (std::endian::native == std::endian::little) ? UTF32LE : UTF32BE,
-		_UTF32_other = (UTF32 == UTF32BE) ? UTF32LE : UTF32BE,
+		UTF32_OE = (UTF32 == UTF32BE) ? UTF32LE : UTF32BE,
 
-		UCS2LE = sizeof(wchar_t) == sizeof(char16_t) ? UTF16LE : UTF32LE,
-		UCS2BE = sizeof(wchar_t) == sizeof(char16_t) ? UTF16BE : UTF32BE,
-		UCS2 = (std::endian::native == std::endian::little) ? UCS2LE : UCS2BE,
-		_UCS2_other = (UCS2 == UCS2BE) ? UCS2LE : UCS2BE,
+		WCHAR_LE = sizeof(wchar_t) == sizeof(char16_t) ? UTF16LE : UTF32LE,
+		WCHAR_BE = sizeof(wchar_t) == sizeof(char16_t) ? UTF16BE : UTF32BE,
+		WCHAR = (std::endian::native == std::endian::little) ? WCHAR_LE : WCHAR_BE,
+		WCHAR_OE = (WCHAR == WCHAR_BE) ? WCHAR_LE : WCHAR_BE,
 
 
 		//------------------------
@@ -48,12 +48,14 @@ export namespace biscuit {
 	template <>					constexpr eCODEPAGE const eCODEPAGE_DEFAULT<char8_t> = eCODEPAGE::UTF8;
 	template <>					constexpr eCODEPAGE const eCODEPAGE_DEFAULT<char16_t> = eCODEPAGE::UTF16;
 	template <>					constexpr eCODEPAGE const eCODEPAGE_DEFAULT<char32_t> = eCODEPAGE::UTF32;
-	template <>					constexpr eCODEPAGE const eCODEPAGE_DEFAULT<wchar_t> = eCODEPAGE::UCS2;
+	template <>					constexpr eCODEPAGE const eCODEPAGE_DEFAULT<wchar_t> = eCODEPAGE::WCHAR;
 
 	template <typename tchar>	constexpr eCODEPAGE const eCODEPAGE_OTHER_ENDIAN = eCODEPAGE::DEFAULT;
-	template <>					constexpr eCODEPAGE const eCODEPAGE_OTHER_ENDIAN<char16_t> = eCODEPAGE::_UTF16_other;
-	template <>					constexpr eCODEPAGE const eCODEPAGE_OTHER_ENDIAN<char32_t> = eCODEPAGE::_UTF32_other;
-	template <>					constexpr eCODEPAGE const eCODEPAGE_OTHER_ENDIAN<wchar_t> = eCODEPAGE::_UCS2_other;
+	template <>					constexpr eCODEPAGE const eCODEPAGE_OTHER_ENDIAN<char> = eCODEPAGE::DEFAULT;
+	template <>					constexpr eCODEPAGE const eCODEPAGE_OTHER_ENDIAN<char8_t> = eCODEPAGE::UTF8;
+	template <>					constexpr eCODEPAGE const eCODEPAGE_OTHER_ENDIAN<char16_t> = eCODEPAGE::UTF16_OE;
+	template <>					constexpr eCODEPAGE const eCODEPAGE_OTHER_ENDIAN<char32_t> = eCODEPAGE::UTF32_OE;
+	template <>					constexpr eCODEPAGE const eCODEPAGE_OTHER_ENDIAN<wchar_t> = eCODEPAGE::WCHAR_OE;
 
 	template < eCODEPAGE eCodepage > struct char_type_from {
 		using char_type = void;
