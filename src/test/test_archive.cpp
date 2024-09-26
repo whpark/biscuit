@@ -14,9 +14,10 @@ template <typename tchar, typename tarchive >
 std::vector<std::basic_string<tchar>> ReadFile(tarchive& ar) {
 	std::vector<std::basic_string<tchar>> strs;
 	for (std::optional<std::basic_string<tchar>> r; true; ) {
-		r = ar.ReadLineA();
-		if (r)
-			strs.emplace_back(std::move(*r));
+		r = ar.template ReadLine<tchar>();
+		if (!r)
+			break;
+		strs.emplace_back(std::move(*r));
 	}
 	return strs;
 };
@@ -41,6 +42,7 @@ namespace test_archive {
 		};
 
 		std::error_code ec{};
+		std::filesystem::create_directories(uR"x(.\stream_test\)x", ec);
 		for (auto const& dir : std::filesystem::directory_iterator(uR"x(.\stream_test\)x", ec)) {
 			if (dir.is_directory() or dir.is_other())
 				continue;
@@ -58,10 +60,9 @@ namespace test_archive {
 			auto strsA = ReadFile<char>(ar);
 			REQUIRE(strs.size() == strsA.size());
 			for (int i = 0; i < strs.size(); i++) {
-				//if (strsA[i].Compare(strs[i]) != 0) {
-				//	int __{};
-				//}
-				//REQUIRE(strsA[i] == strs[i]);
+				//REQUIRE(biscuit::Compare(strsA[i], strs[i]) != 0);
+				bool b = biscuit::Compare(strsA[i], strs[i]) == 0;
+				REQUIRE(b);
 			}
 
 			//if ((codepage == eCODEPAGE::UTF16LE) or (codepage == eCODEPAGE::UTF16BE)) {
@@ -79,6 +80,7 @@ namespace test_archive {
 
 		}
 		REQUIRE(!ec);
+
 
 	#if 0
 

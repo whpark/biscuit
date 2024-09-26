@@ -45,15 +45,15 @@ export namespace biscuit {
 
 	//=============================================================================================================================
 	// Convert String
-	template < concepts::string_elem tchar_to, concepts::tstring_like tstring, typename tchar_from = tstring::value_type >
+	template < concepts::string_elem tchar_to, concepts::tstring_like tstring, typename char_from_t = tstring::value_type >
 	BSC__NODISCARD auto ConvertString(tstring const& str) -> std::basic_string<tchar_to> {
-		//using tchar_from = std::remove_cvref_t<tstring>::value_type;
+		//using char_from_t = std::remove_cvref_t<tstring>::value_type;
 		//static_assert(concepts::string_elem<tchar_to>);
 
 		// Don't know wchar_t is 2 or 4 bytes...
-		if constexpr (sizeof(tchar_from) == sizeof(tchar_to))
+		if constexpr (sizeof(char_from_t) == sizeof(tchar_to))
 			return std::basic_string<tchar_to>((tchar_to const*)str.data(), str.size());
-		else if constexpr (sizeof(tchar_from) == sizeof(char)) {	// from char or char8_t
+		else if constexpr (sizeof(char_from_t) == sizeof(char)) {	// from char or char8_t
 			//if constexpr (sizeof(tchar_to) == sizeof(char)) {
 			//	return std::basic_string<tchar_to>((tchar_to const*)str.data(), str.size());
 			//} else 
@@ -77,7 +77,7 @@ export namespace biscuit {
 				static_assert(false, "Unsupported conversion");
 			}
 		}
-		else if constexpr (sizeof(tchar_from) == sizeof(char16_t))	{ // from char16_t
+		else if constexpr (sizeof(char_from_t) == sizeof(char16_t))	{ // from char16_t
 			if constexpr (sizeof(tchar_to) == sizeof(char)) {
 				if (auto len = simdutf::utf8_length_from_utf16((char16_t const*)str.data(), str.size())) {
 					std::basic_string<tchar_to> result(len, 0);
@@ -101,7 +101,7 @@ export namespace biscuit {
 				static_assert(false, "Unsupported conversion");
 			}
 		}
-		else if constexpr (sizeof(tchar_from) == sizeof(char32_t)) {	// from char32_t
+		else if constexpr (sizeof(char_from_t) == sizeof(char32_t)) {	// from char32_t
 			if constexpr (sizeof(tchar_to) == sizeof(char)) {
 				if (auto len = simdutf::utf8_length_from_utf32((char32_t const*)str.data(), str.size())) {
 					std::basic_string<tchar_to> result(len, 0);
@@ -133,20 +133,26 @@ export namespace biscuit {
 	//=============================================================================================================================
 	// Convert String using iconv
 	template < concepts::string_elem tchar_to, concepts::tstring_like tstring,
-		xStringLiteral szCodeTo = "", xStringLiteral szCodeFrom = "", size_t initial_dst_buf_size = 1024 >
+		xStringLiteral szCodepageTo = "", xStringLiteral szCodepageFrom = "", size_t initial_dst_buf_size = 1024 >
 	BSC__NODISCARD auto ConvertString_iconv(tstring const& strFrom) {
-		using tchar_from = std::remove_cvref_t<tstring>::value_type;
-		thread_local static Ticonv<tchar_to, tchar_from, initial_dst_buf_size> iconv{szCodeTo.str, szCodeFrom.str};
+		using char_from_t = concepts::value_t<tstring>;
+		thread_local static Ticonv<tchar_to, char_from_t, initial_dst_buf_size> iconv(szCodepageTo.str, szCodepageFrom.str);
 		return iconv.Convert(strFrom);
 	}
 
 	template < concepts::string_elem tchar_to, concepts::tstring_like tstring, size_t initial_dst_buf_size = 1024 >
-	BSC__NODISCARD auto ConvertString_iconv(tstring const& strFrom, std::string_view szCodeTo = "", std::string_view szCodeFrom = "") {
-		using tchar_from = std::remove_cvref_t<tstring>::value_type;
-		thread_local static std::map<std::pair<std::string_view, std::string_view>, Ticonv<tchar_to, tchar_from, initial_dst_buf_size>> map_iconv;
-		if (map_iconv.find({ szCodeTo, szCodeFrom }) == map_iconv.end())
-			map_iconv[{szCodeTo, szCodeFrom}] = Ticonv<tchar_to, tchar_from, initial_dst_buf_size>{ szCodeTo, szCodeFrom };
-		auto& iconv = map_iconv[{szCodeTo, szCodeFrom}];
+	BSC__NODISCARD auto ConvertString_iconv(tstring const& strFrom, std::string szCodepageTo, std::string szCodepageFrom = "") {
+		using char_from_t = concepts::value_t<tstring>;
+		using iconv_t = Ticonv<tchar_to, char_from_t, initial_dst_buf_size>;
+		thread_local static std::map<std::pair<std::string, std::string>, iconv_t> map_iconv;
+		if (szCodepageTo.empty())
+			szCodepageTo = iconv_t::template GuessCodepageFromType<tchar_to>();
+		if (szCodepageFrom.empty())
+			szCodepageFrom = iconv_t::template GuessCodepageFromType<char_from_t>();
+
+		if (map_iconv.find({ szCodepageTo, szCodepageFrom }) == map_iconv.end())
+			map_iconv.emplace(std::pair{szCodepageTo, szCodepageFrom}, iconv_t(szCodepageTo, szCodepageFrom));
+		auto& iconv = map_iconv[{szCodepageTo, szCodepageFrom}];
 		return iconv.Convert(strFrom);
 	}
 
@@ -158,7 +164,7 @@ export namespace biscuit {
 
 	template < concepts::tstring_like tstring, size_t initial_dst_buf_size = 1024 >
 	BSC__NODISCARD auto ConvertStringToCP949(tstring const& strFrom) -> std::string {
-		using tchar_from = std::remove_cvref_t<tstring>::value_type;
+		using char_from_t = std::remove_cvref_t<tstring>::value_type;
 		return ConvertString_iconv<char, tstring, "CP949", "", initial_dst_buf_size>(strFrom);
 	}
 
@@ -184,4 +190,41 @@ export namespace biscuit {
 	}
 
 
+	//=============================================================================================================================
+	// Compares
+	std::strong_ordering Compare(concepts::tstring_like auto const& strA, concepts::tstring_like auto const& strB) {
+		using strA_t = std::remove_cvref_t<decltype(strA)>;
+		using strB_t = std::remove_cvref_t<decltype(strB)>;
+		using charA_t = concepts::value_t<strA_t>;
+		using charB_t = concepts::value_t<strB_t>;
+		using strA_view_t = std::basic_string_view<charA_t>;
+		using strB_view_t = std::basic_string_view<charB_t>;
+		auto lenA = std::size(strA);
+		auto lenB = std::size(strB);
+		if constexpr (std::is_array_v<strA_t>) {
+			if (lenA > 0 and strA[lenA - 1] == 0)
+				lenA--;
+		}
+		if constexpr (std::is_array_v<strB_t>) {
+			if (lenB > 0 and strB[lenB - 1] == 0)
+				lenB--;
+		}
+		strA_view_t svA(std::data(strA), lenA);
+		strB_view_t svB(std::data(strB), lenB);
+
+		if constexpr (sizeof(charA_t) == sizeof(charB_t)) {
+			return std::strong_ordering(svA.compare((strA_view_t&)svB));
+		}
+		if (lenA*sizeof(charA_t) <= lenB*sizeof(charB_t)) {
+			auto strA2 = ConvertString<charB_t>(svA);
+			return std::strong_ordering(strA2.compare(svB));
+		}
+		else {
+			auto strB2 = ConvertString<charA_t>(svB);
+			return std::strong_ordering(svA.compare(strB2));
+		}
+	}
+
+
 }	// namespace biscuit
+

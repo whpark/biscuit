@@ -97,7 +97,7 @@ export namespace biscuit {
 	//	return eCODEPAGE::DEFAULT;
 	//}
 
-	constexpr inline char const* GetCodepageName(eCODEPAGE eCodepage) {
+	constexpr inline std::string GetCodepageName(eCODEPAGE eCodepage) {
 		switch (eCodepage) {
 			using enum eCODEPAGE;
 		case UTF7 :		return "UTF-7";
@@ -108,15 +108,13 @@ export namespace biscuit {
 		case UTF32BE :	return "UTF-32BE";
 		default :
 			if (/*std::to_underlying*/(int)eCodepage) {
-				thread_local static char szCodepage[32]{0};
-				std::format_to(szCodepage, "CP{}", /*std::to_underlying(eCodepage)*/(int)eCodepage);
-				return szCodepage;
+				return std::format("CP{}", /*std::to_underlying(eCodepage)*/(int)eCodepage);
 			}
 		}
-		return nullptr;
+		return "";
 	}
 	template < typename tchar >
-	constexpr char const* GetCodepageName() {
+	constexpr std::string GetCodepageName() {
 		return GetCodepageName(eCODEPAGE_DEFAULT<tchar>);
 	}
 

@@ -15,8 +15,7 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include <ctre.hpp>
-#include <ctre-unicode.hpp>
+#include "biscuit/dependencies_ctre.h"
 
 export module biscuit.lazy_profile;
 import biscuit.aliases;

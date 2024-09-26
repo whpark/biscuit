@@ -19,13 +19,20 @@ TEST_CASE("convert_codepage", ATTR) {
 #define SRC(sig) COMPOSE2(sig, SRC_TEXT)
 
 	SECTION("iconv_wrapper") {
-		biscuit::Ticonv<char8_t, char> iconv(nullptr, "CP949");
+		biscuit::Ticonv<char8_t, char> iconv("", "CP949");
 		unsigned char str[] = { 0xb0, 0xa1, 'a', 0xb3, 0xaa, 'b', 0xb4, 0xd9, 'c', 0xb6, 0xf3, 'd', 0xb8, 0xb6, 0xb9, 0xd9, 0xbb, 0xe7, 0x8c, 0x63 };
 		auto r = iconv.Convert(std::string_view((char*)str, std::size(str)));
 		REQUIRE((bool)r);
 		REQUIRE(*r == SRC(u8));
 		auto str2 = biscuit::ConvertStringFromCP949<wchar_t>({(char*)str, std::size(str)});
 		REQUIRE(str2 == SRC(L));
+		auto str3 = biscuit::ConvertString_iconv<wchar_t>(u8"asdfsdf");
+		REQUIRE(str3);
+		REQUIRE(*str3 == L"asdfsdf");
+
+		auto str4 = biscuit::ConvertString_iconv<wchar_t>(std::string_view((char const*)str, std::size(str)), "", "CP949");
+		REQUIRE(str4);
+		REQUIRE(*str4 == L"가a나b다c라d마바사똠");
 	}
 	SECTION("iconv_wrapper") {
 		biscuit::Ticonv<biscuit::charKSSM_t, wchar_t> iconv;

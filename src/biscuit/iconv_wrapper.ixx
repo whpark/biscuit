@@ -96,20 +96,40 @@ export namespace biscuit {
 		libiconv_t m_cd{ (iconv_t)-1 };
 
 	public:
-		Ticonv(char const* to = nullptr, char const* from = nullptr) {
-			if (!to or !*to)
-				to = GuessCodeFromType<tchar_to>();
-			if (!from or !*from)
-				from = GuessCodeFromType<tchar_from>();
-			m_cd = iconv_open(to, from);
+		Ticonv(std::string const& to = "", std::string const& from = "") {	// ... 'to', 'from' are small string.
+			Open(to, from);
 		}
-		Ticonv(char const* to, char const* from, bool bTransliterate, bool bDiscardIlseq) : Ticonv(to, from) {
+		Ticonv(std::string const& to, std::string const& from, bool bTransliterate, bool bDiscardIlseq) : Ticonv(to, from) {
 			SetTransliterate(bTransliterate);
 			SetDiscardIsseq(bDiscardIlseq);
 		}
-		~Ticonv() {
-			if (IsOpen())
+		Ticonv(Ticonv const&) = delete;
+		Ticonv& operator=(Ticonv const&) = delete;
+		Ticonv(Ticonv&& B) {
+			m_cd = std::exchange(B.m_cd, (iconv_t)-1);
+		}
+		Ticonv& operator=(Ticonv&& B) {
+			if (m_cd != (iconv_t)-1)
 				iconv_close(m_cd);
+			m_cd = std::exchange(B.m_cd, (iconv_t)-1);
+			return *this;
+		}
+		~Ticonv() {
+			Close();
+		}
+
+		bool Open(std::string to = {}, std::string from = {}) {
+			Close();
+			if (to.empty())
+				to = GuessCodepageFromType<tchar_to>();
+			if (from.empty())
+				from = GuessCodepageFromType<tchar_from>();
+			m_cd = iconv_open(to.c_str(), from.c_str());
+			return IsOpen();
+		}
+		void Close() {
+			if (iconv_t cd = std::exchange(m_cd, (iconv_t)-1); cd != (iconv_t)-1)
+				iconv_close(cd);
 		}
 
 		BSC__NODISCARD bool IsOpen() const {
@@ -174,16 +194,23 @@ export namespace biscuit {
 			if (!IsOpen())
 				return {};
 
+			auto len = std::size(svFrom);
+			if constexpr (std::is_array_v<std::remove_cvref_t<tstring>>) {
+				if (len > 0 and svFrom[len-1] == 0)
+					len--;
+				if (len == 0)
+					return strTo;
+			}
 			// source
 			using char_source_buf_t = char;	// or char const
 
-			char_source_buf_t* src = (char_source_buf_t*)(svFrom.data());
-			size_t remnant_src = svFrom.size()*sizeof(tchar_from);
+			char_source_buf_t* src = (char_source_buf_t*)(std::data(svFrom));
+			size_t remnant_src = len*sizeof(tchar_from);
 
 			bool bResult = false;
 			if constexpr (std::is_same_v<tchar_from, charKSSM_t>) {
 				std::string strMBCS;
-				strMBCS.reserve(svFrom.size() * sizeof(tchar_from));
+				strMBCS.reserve(len * sizeof(tchar_from));
 				for (auto c : svFrom) {
 					if (c & 0xff00)
 						strMBCS.push_back(c >> 8);
@@ -238,14 +265,14 @@ export namespace biscuit {
 				bResult = ContinueConvert(strTo, &src, remnant_src);
 			}
 
-			if (bResult)
-				return std::move(strTo);
-			return {};
+			if (!bResult)
+				return {};
+			return std::move(strTo);
 		}
 
 	public:
 		template < concepts::string_elem tchar >
-		BSC__NODISCARD constexpr static auto GuessCodeFromType() -> char const* {
+		BSC__NODISCARD constexpr static auto GuessCodepageFromType() -> std::string_view {
 			using namespace std::literals;
 			if constexpr (std::is_same_v<tchar, char8_t> || std::is_same_v<tchar, char>) {
 				return "UTF-8";

@@ -338,10 +338,10 @@ export namespace biscuit {
 					if constexpr (!swap_byte_order and concepts::string_elem_utf<char_from_t> and concepts::string_elem_utf<char_to_t>) {
 						return ConvertString<char_to_t>(*r);
 					}
-					return ConvertString_iconv<char_to_t, char_from_t>(*r, "", GetCodepageName(m_eCodepage));	// NOT eCodepageFrom
+					return ConvertString_iconv<char_to_t>(*r, "", GetCodepageName(m_eCodepage));	// NOT eCodepageFrom
 				}
+				return {};
 			}
-			return {};
 		}
 
 	public:
