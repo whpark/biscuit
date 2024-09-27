@@ -110,7 +110,7 @@ export namespace biscuit {
 		auto const& operator [] (size_t i) const { return arr()[i]; }
 
 		template < typename tchar = char >
-		constexpr std::basic_string<tchar> ToString() { return biscuit::ToString<char, value_t>(arr()); }
+		constexpr std::basic_string<tchar> ToString() { return biscuit::FormatToTString<tchar, "{:n}">(arr()); }
 		template < concepts::tstring_like tstring >
 		bool FromString(tstring const& sv) {
 			size_t i{};

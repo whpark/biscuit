@@ -39,5 +39,8 @@
     <ClCompile Include="test_archive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test_lazy_profile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

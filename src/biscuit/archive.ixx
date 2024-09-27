@@ -240,7 +240,6 @@ export namespace biscuit {
 		/// @brief Read BOM
 		eCODEPAGE ReadCodepageBOM(eCODEPAGE eDefaultCodepage = eCODEPAGE::UTF8) requires (is_loading) {
 			CheckArchiveLoadable();
-			unsigned char c = 0;
 
 			auto peek = [](tstream& stream, std::string_view sv) -> bool {
 				std::ifstream s;
@@ -406,24 +405,24 @@ export namespace biscuit {
 					std::basic_string<char_from_t> str2;
 					str2.reserve(sv.size());
 					std::ranges::transform(sv, std::back_inserter(str2), [](auto c) { return std::byteswap(c); });
-					auto r = PutStringRaw(str2);
+					PutStringRaw(str2);
 				}
 				else {
-					return PutStringRaw(sv);
+					PutStringRaw(sv);
 				}
 			}
 			else {
 				if constexpr (!swap_byte_order and concepts::string_elem_utf<char_archive_t> and concepts::string_elem_utf<char_from_t>) {
 					if (auto str2 = ConvertString<char_archive_t>(sv); str2) {
-						PutStringRaw(str2);
+						PutStringRaw(*str2);
 					}
 					else {
 						throw std::ios_base::failure(BSC__FUNCSIG "ConvertString failed");
 					}
 				}
 				else {
-					if (auto str2 = ConvertString_iconv<char_archive_t, char_from_t>(sv, GetCodepageName(m_eCodepage), ""); str2) {
-						PutStringRaw(str2);
+					if (auto str2 = ConvertString_iconv<char_archive_t>(sv, GetCodepageName(m_eCodepage), ""); str2) {
+						PutStringRaw(*str2);
 					}
 					else {
 						throw std::ios_base::failure(BSC__FUNCSIG "ConvertString_iconv failed");
@@ -439,31 +438,31 @@ export namespace biscuit {
 			case eCODEPAGE::UTF16:
 				{
 					constexpr static TStringLiteral<char16_t, eol, swap_byte_order> const str;
-					PutString(str.str);
+					PutStringRaw(str.value);
 				}
 				break;
 			case eCODEPAGE::UTF16_OE:
 				{
 					constexpr static TStringLiteral<char16_t, eol, !swap_byte_order> const str;
-					PutString(str.str);
+					PutStringRaw(str.value);
 				}
 				break;
 			case eCODEPAGE::UTF32:
 				{
 					constexpr static TStringLiteral<char32_t, eol, swap_byte_order> const str;
-					PutString(str.str);
+					PutStringRaw(str.value);
 				}
 				break;
 			case eCODEPAGE::UTF32_OE:
 				{
 					constexpr static TStringLiteral<char32_t, eol, !swap_byte_order> const str;
-					PutString(str.str);
+					PutStringRaw(str.value);
 				}
 				break;
 			case eCODEPAGE::DEFAULT:
 			case eCODEPAGE::UTF8:
 			default:
-				PutString("\r\n");
+				PutStringRaw("\r\n");
 				break;
 			}
 		}
@@ -499,6 +498,12 @@ export namespace biscuit {
 				//std::format("{}", 0);
 			}
 		};
+
+		template < concepts::tstring_like tstring >
+		void PutLine(tstring const& sv) requires (is_storing) {
+			PutString(sv);
+			PutNewLine();
+		}
 
 	public:
 		template < typename tchar, typename ... targs >

@@ -107,6 +107,7 @@
     <ClCompile Include="test_coord.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="test_lazy_profile.cpp" />
     <ClCompile Include="test_string.arithmetic.cpp" />
     <ClCompile Include="test_string.basic.cpp" />
     <ClCompile Include="test_memory.cpp" />

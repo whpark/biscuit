@@ -15,6 +15,7 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
+#include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_ctre.h"
 
 export module biscuit.lazy_profile;
@@ -22,6 +23,7 @@ import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.archive;
 import biscuit.container_map;
+import biscuit.string;
 
 namespace concepts = biscuit::concepts;
 
@@ -298,7 +300,7 @@ export namespace biscuit {
 				}
 			}
 			else {
-				SetItemValueRaw(key, std::format(GetDefaultFormatString<tchar>(), value), comment);
+				SetItemValueRaw(key, FormatToTString<tchar, "{}">(value), comment);
 			}
 		}
 
@@ -385,7 +387,7 @@ export namespace biscuit {
 		}
 
 		bool Save(std::ostream& stream, bool bWriteBOM = !std::is_same_v<tchar, char>) const try {
-			TArchive ar(stream);
+			TArchive<std::ostream> ar(stream);
 			if (bWriteBOM) {
 				eCODEPAGE eCodepage = eCODEPAGE_DEFAULT<tchar>;
 				if (eCodepage == eCODEPAGE::DEFAULT)
@@ -395,15 +397,21 @@ export namespace biscuit {
 			for (auto& [key, section] : m_sections) {
 				if (!key.empty()) {
 					if (section.m_line.empty()) {
-						string_t str = FormatToTString<tchar, "[{}]">(key);
-						ar.WriteLine(GetDefaultFormatString<tchar>(), str);
+						string_t str;
+						if constexpr (concepts::is_one_of<tchar, char, wchar_t>) {
+							str = fmt::format(fmt::runtime(TStringLiteral<tchar, "[{}]">{}.value), key);
+						}
+						else {
+							str = fmt::format(TStringLiteral<tchar, "[{}]">{}.value, key);
+						}
+						ar.PutLine(str);
 					}
 					else {
-						ar.WriteLine(GetDefaultFormatString<tchar>(), section.m_line);
+						ar.PutLine(section.m_line);
 					}
 				}
 				for (auto& item : section.m_items) {
-					ar.WriteLine(GetDefaultFormatString<tchar>(), item);
+					ar.PutLine(item);
 				}
 			}
 			return true;

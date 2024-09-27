@@ -51,7 +51,7 @@ export namespace biscuit {
 		constexpr auto dim = sizeof(tcoord) / sizeof(value_t);
 		using array_t = std::array<value_t, dim>;
 		static_assert(array_t().size() == concepts::coord::CountCoordMemberVariable<tcoord>());
-		return biscuit::ToString<char, value_t>(reinterpret_cast<array_t const&>(coord));
+		return biscuit::FormatToTString<tchar, "{:n}">(reinterpret_cast<array_t const&>(coord));
 	}
 	template < typename tchar = char, concepts::coord::generic_coord tcoord >
 		requires std::is_trivially_copyable_v<tcoord>

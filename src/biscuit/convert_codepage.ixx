@@ -22,6 +22,7 @@ import biscuit.misc;
 import biscuit.iconv_wrapper;
 
 namespace concepts = biscuit::concepts;
+using namespace std::literals;
 
 export namespace biscuit {
 
@@ -45,30 +46,38 @@ export namespace biscuit {
 
 	//=============================================================================================================================
 	// Convert String
-	template < concepts::string_elem tchar_to, concepts::tstring_like tstring, typename char_from_t = tstring::value_type >
-	BSC__NODISCARD auto ConvertString(tstring const& str) -> std::basic_string<tchar_to> {
-		//using char_from_t = std::remove_cvref_t<tstring>::value_type;
-		//static_assert(concepts::string_elem<tchar_to>);
+	template < concepts::string_elem tchar_to, concepts::tstring_like tstring >
+	BSC__NODISCARD auto ConvertString(tstring const& str) -> std::optional<std::basic_string<tchar_to>> {
+		using char_from_t = concepts::value_t<tstring>;
+		static_assert(concepts::string_elem<char_from_t>);
+		char_from_t const* data = std::data(str);
+		auto l = std::size(str);
+		if constexpr (std::is_array_v<tstring>) {
+			if (l > 0 and str[l - 1] == 0)
+				l--;
+		}
+		if (l == 0)
+			return std::basic_string<tchar_to>{};
 
 		// Don't know wchar_t is 2 or 4 bytes...
 		if constexpr (sizeof(char_from_t) == sizeof(tchar_to))
-			return std::basic_string<tchar_to>((tchar_to const*)str.data(), str.size());
+			return std::basic_string<tchar_to>((tchar_to const*)data, l);
 		else if constexpr (sizeof(char_from_t) == sizeof(char)) {	// from char or char8_t
 			//if constexpr (sizeof(tchar_to) == sizeof(char)) {
-			//	return std::basic_string<tchar_to>((tchar_to const*)str.data(), str.size());
+			//	return std::basic_string<tchar_to>((tchar_to const*)data, str.size());
 			//} else 
 			if constexpr (sizeof(tchar_to) == sizeof(char16_t)) {
-				if (auto len = simdutf::utf16_length_from_utf8((char const*)str.data(), str.size())) {
+				if (auto len = simdutf::utf16_length_from_utf8((char const*)data, l)) {
 					std::basic_string<tchar_to> result(len, 0);
-					simdutf::convert_utf8_to_utf16((char const*)str.data(), str.size(), (char16_t*)result.data());
+					simdutf::convert_utf8_to_utf16((char const*)data, l, (char16_t*)result.data());
 					return result;
 				}
 				else return {};
 			}
 			else if constexpr (sizeof(tchar_to) == sizeof(char32_t)) {
-				if (auto len = simdutf::utf32_length_from_utf8((char const*)str.data(), str.size())) {
+				if (auto len = simdutf::utf32_length_from_utf8((char const*)data, l)) {
 					std::basic_string<tchar_to> result(len, 0);
-					simdutf::convert_utf8_to_utf32((char const*)str.data(), str.size(), (char32_t*)result.data());
+					simdutf::convert_utf8_to_utf32((char const*)data, l, (char32_t*)result.data());
 					return result;
 				}
 				else return {};
@@ -79,20 +88,20 @@ export namespace biscuit {
 		}
 		else if constexpr (sizeof(char_from_t) == sizeof(char16_t))	{ // from char16_t
 			if constexpr (sizeof(tchar_to) == sizeof(char)) {
-				if (auto len = simdutf::utf8_length_from_utf16((char16_t const*)str.data(), str.size())) {
+				if (auto len = simdutf::utf8_length_from_utf16((char16_t const*)data, l)) {
 					std::basic_string<tchar_to> result(len, 0);
-					simdutf::convert_utf16_to_utf8((char16_t const*)str.data(), str.size(), (char*)result.data());
+					simdutf::convert_utf16_to_utf8((char16_t const*)data, l, (char*)result.data());
 					return result;
 				}
 				else return {};
 			}
 			//else if constexpr (sizeof(tchar_to) == sizeof(char16_t)) {
-			//	return std::basic_string<tchar_to>((tchar_to const*)str.data(), str.size());
+			//	return std::basic_string<tchar_to>((tchar_to const*)data, l);
 			//}
 			else if constexpr (sizeof(tchar_to) == sizeof(char32_t)) {
-				if (auto len = simdutf::utf32_length_from_utf16((char16_t const*)str.data(), str.size())) {
+				if (auto len = simdutf::utf32_length_from_utf16((char16_t const*)data, l)) {
 					std::basic_string<tchar_to> result(len, 0);
-					simdutf::convert_utf16_to_utf32((char16_t const*)str.data(), str.size(), (char32_t*)result.data());
+					simdutf::convert_utf16_to_utf32((char16_t const*)data, l, (char32_t*)result.data());
 					return result;
 				}
 				else return {};
@@ -103,23 +112,23 @@ export namespace biscuit {
 		}
 		else if constexpr (sizeof(char_from_t) == sizeof(char32_t)) {	// from char32_t
 			if constexpr (sizeof(tchar_to) == sizeof(char)) {
-				if (auto len = simdutf::utf8_length_from_utf32((char32_t const*)str.data(), str.size())) {
+				if (auto len = simdutf::utf8_length_from_utf32((char32_t const*)data, l)) {
 					std::basic_string<tchar_to> result(len, 0);
-					simdutf::convert_utf32_to_utf8((char32_t const*)str.data(), str.size(), (char*)result.data());
+					simdutf::convert_utf32_to_utf8((char32_t const*)data, l, (char*)result.data());
 					return result;
 				}
 				else return {};
 			}
 			else if constexpr (sizeof(tchar_to) == sizeof(char16_t)) {
-				if (auto len = simdutf::utf16_length_from_utf32((char32_t const*)str.data(), str.size())) {
+				if (auto len = simdutf::utf16_length_from_utf32((char32_t const*)data, l)) {
 					std::basic_string<tchar_to> result(len, 0);
-					simdutf::convert_utf32_to_utf16((char32_t const*)str.data(), str.size(), (char16_t*)result.data());
+					simdutf::convert_utf32_to_utf16((char32_t const*)data, l, (char16_t*)result.data());
 					return result;
 				}
 				else return {};
 			}
 			//else if constexpr (sizeof(tchar_to) == sizeof(char32_t)) {
-			//	return std::basic_string<tchar_to>((tchar_to const*)str.data(), str.size());
+			//	return std::basic_string<tchar_to>((tchar_to const*)data, l);
 			//}
 			else {
 				static_assert(false, "Unsupported conversion");
@@ -213,15 +222,18 @@ export namespace biscuit {
 		strB_view_t svB(std::data(strB), lenB);
 
 		if constexpr (sizeof(charA_t) == sizeof(charB_t)) {
-			return std::strong_ordering(svA.compare((strA_view_t&)svB));
+		#pragma warning(suppress: 4244)
+			return (std::strong_ordering)(svA.compare((strA_view_t&)svB));
 		}
 		if (lenA*sizeof(charA_t) <= lenB*sizeof(charB_t)) {
-			auto strA2 = ConvertString<charB_t>(svA);
-			return std::strong_ordering(strA2.compare(svB));
+			auto strA2 = ConvertString<charB_t>(svA).value_or(std::basic_string<charB_t>{});
+		#pragma warning(suppress: 4244)
+			return (std::strong_ordering)(strA2.compare(svB));
 		}
 		else {
-			auto strB2 = ConvertString<charA_t>(svB);
-			return std::strong_ordering(svA.compare(strB2));
+			auto strB2 = ConvertString<charA_t>(svB).value_or(std::basic_string<charA_t>{});
+		#pragma warning(suppress: 4244)
+			return (std::strong_ordering)(svA.compare(strB2));
 		}
 	}
 

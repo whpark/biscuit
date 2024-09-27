@@ -22,7 +22,9 @@ export import biscuit.charset_kssm;
 export import biscuit.convert_codepage;
 export import biscuit.string;
 export import biscuit.archive;
+export import biscuit.lazy_profile;
 export import biscuit.units;
+
 //export import :coord;
 
 export namespace biscuit {

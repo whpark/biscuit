@@ -60,7 +60,7 @@ namespace test_archive {
 			biscuit::xIFArchive ar(dir.path());
 
 			ar.m_stream.seekg(0);
-			auto codepage = ar.ReadCodepageBOM(eCODEPAGE::UTF8);
+			[[maybe_unused]] auto codepage = ar.ReadCodepageBOM(eCODEPAGE::UTF8);
 
 			auto strsA = ReadFile<char>(ar);
 			REQUIRE(strs0.size() == strsA.size());

@@ -17,8 +17,8 @@
 #include "biscuit/macro.h"
 
 export module biscuit.misc;
-import biscuit.concepts;
 import std;
+import biscuit.concepts;
 
 namespace concepts = biscuit::concepts;
 
