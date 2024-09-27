@@ -39,7 +39,7 @@ export namespace biscuit {
 	#undef SPACES
 	}
 
-	template < typename tchar_to, xStringLiteral literal, typename ... targs >
+	template < concepts::string_elem tchar_to, xStringLiteral literal, typename ... targs >
 	std::basic_string<tchar_to> FormatToTString(targs&& ... args) {
 		fmt::basic_format_string<tchar_to, targs...>{TStringLiteral<tchar_to, literal>{}.value};	// Compiltime Validation only
 		constexpr TStringLiteral<tchar_to, literal> tfmt{};

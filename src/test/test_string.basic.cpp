@@ -32,6 +32,10 @@ namespace {
 		//REQUIRE(&s.value == &s2.value);
 		REQUIRE(a.str == L"abcd");
 	}
+}
+
+TEST_CASE("Format", ATTR) {
+	REQUIRE(biscuit::FormatToTString<wchar_t, "abc{}def{}ghi{}">(1, 2, 3) == L"abc1def2ghi3");
 
 }
 
