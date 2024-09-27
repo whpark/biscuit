@@ -1,6 +1,7 @@
 #include <catch.hpp>
 #include "biscuit/biscuit.h"
 #include "biscuit/dependencies_fmt.h"
+#include "biscuit/dependencies_ctre.h"
 
 import std;
 import biscuit;
@@ -25,11 +26,13 @@ std::vector<std::basic_string<tchar>> ReadFile(tarchive& ar) {
 
 namespace test_archive {
 
-	namespace bsc = biscuit;
+	using namespace biscuit;
+
+	auto g_eCodepageMBCS = eCODEPAGE::KO_KR_949;
 
 	TEST_CASE("archive read string", ATTR) { 
 
-		std::vector<std::u8string> const strs {
+		std::vector<std::u8string> const strs0 {
 			u8R"xx(#include <iostream>)xx",
 			u8R"xx(#include <string>)xx",
 			u8R"xx(#include <string_view>)xx",
@@ -48,51 +51,34 @@ namespace test_archive {
 				continue;
 			std::u16string strFilename(dir.path().filename().u16string());
 			auto str2 = biscuit::ToUpper(strFilename);
-			std::basic_regex<wchar_t> re{LR"xx(.*\.[Bb][Oo][Mm]\.[Cc][Xx][Xx]$)xx"};
-			if (!std::regex_match((std::wstring&)strFilename, re))
+			if (auto m = ctre::match<uR"xx(.*\.[Bb][Oo][Mm]\.[Cc][Xx][Xx]$)xx">(strFilename); !m)
 				continue;
+			//std::basic_regex<wchar_t> re{LR"xx(.*\.[Bb][Oo][Mm]\.[Cc][Xx][Xx]$)xx"};
+			//if (!std::regex_match((std::wstring&)strFilename, re))
+			//	continue;
 
 			biscuit::xIFArchive ar(dir.path());
 
 			ar.m_stream.seekg(0);
-			auto codepage = ar.ReadCodepageBOM(biscuit::eCODEPAGE::UTF8);
+			auto codepage = ar.ReadCodepageBOM(eCODEPAGE::UTF8);
 
 			auto strsA = ReadFile<char>(ar);
-			REQUIRE(strs.size() == strsA.size());
-			for (int i = 0; i < strs.size(); i++) {
-				//REQUIRE(biscuit::Compare(strsA[i], strs[i]) != 0);
-				bool b = biscuit::Compare(strsA[i], strs[i]) == 0;
+			REQUIRE(strs0.size() == strsA.size());
+			for (int i = 0; i < strs0.size(); i++) {
+				//REQUIRE(biscuit::Compare(strsA[i], strs0[i]) == 0);
+				bool b = biscuit::Compare(strsA[i], strs0[i]) == 0;
 				REQUIRE(b);
 			}
-
-			//if ((codepage == eCODEPAGE::UTF16LE) or (codepage == eCODEPAGE::UTF16BE)) {
-			//	fmt::print("---------------------------------------\n");
-			//	fmt::print("filename : {}\n", ToStringA(strFilename).c_str());
-			//	fmt::print("codepage : {}\n\n", (int)codepage);
-			//	while (stream.good()) {
-			//		if (auto r = ar.ReadLineU16(); r) {
-			//			TrimRight(*r);
-			//			std::string str = ToStringA(*r, {.from = g_eCodepageMBCS});
-			//			fmt::print("{}\n", str.c_str());
-			//		}
-			//	}
-			//}
-
 		}
 		REQUIRE(!ec);
 
-
-	#if 0
-
 		{
 			xIFArchive ar(uR"x(.\stream_test\short file.txt)x");
-			ar.ReadCodepageBOM(eCODEPAGE::DEFAULT__OR_USE_MBCS_CODEPAGE);
+			ar.ReadCodepageBOM(eCODEPAGE::DEFAULT);
 			auto strs = ReadFile<char16_t>(ar);
 
 			REQUIRE(strs.size() == 1);
-			if (strs.size() >= 1) {
-				REQUIRE(strs[0] == u"n"sv);
-			}
+			REQUIRE(strs[0] == u"n"sv);
 		}
 
 		{
@@ -100,10 +86,8 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)949);
 			auto strs = ReadFile<wchar_t>(ar);
 
-			EXPECT_EQ(strs.size(), 1);
-			if (strs.size() >= 1) {
-				REQUIRE(strs[0] == L"가나다라마바사"sv);
-			}
+			REQUIRE(strs.size() == 1);
+			REQUIRE(strs[0] == L"가나다라마바사"sv);
 		}
 
 		{
@@ -111,13 +95,11 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)949);
 			auto strs = ReadFile<char32_t>(ar);
 
-			EXPECT_EQ(strs.size(), 1);
-			if (strs.size() >= 1) {
-				REQUIRE(strs[0] == U"가나다라마바사"sv);
-			}
+			REQUIRE(strs.size() == 1);
+			REQUIRE(strs[0] == U"가나다라마바사"sv);
 		}
 
-
+	#if 1
 		if (not std::filesystem::exists(uR"x(.\stream_test\cp1250.txt)x")) {
 			static std::vector<unsigned char> const na1250 { 0x81, 0x83, 0x88, 0x90, 0x98, 0xA0, 0xAD };
 			static std::vector<unsigned char> const na1251 { 0x98, 0xA0, 0xAD };
@@ -151,17 +133,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1250);
 			auto strs = ReadFile<char8_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == u8"€‚„…†‡‰Š‹ŚŤŽŹ"sv);
-				REQUIRE(strs[1] == u8"‘’“”•–—™š›śťžź"sv);
-				REQUIRE(strs[2] == u8"ˇ˘Ł¤Ą¦§¨©Ş«¬®Ż"sv);
-				REQUIRE(strs[3] == u8"°±˛ł´µ¶·¸ąş»Ľ˝ľż"sv);
-				REQUIRE(strs[4] == u8"ŔÁÂĂÄĹĆÇČÉĘËĚÍÎĎ"sv);
-				REQUIRE(strs[5] == u8"ĐŃŇÓÔŐÖ×ŘŮÚŰÜÝŢß"sv);
-				REQUIRE(strs[6] == u8"ŕáâăäĺćçčéęëěíîď"sv);
-				REQUIRE(strs[7] == u8"đńňóôőö÷řůúűüýţ˙"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == u8"€‚„…†‡‰Š‹ŚŤŽŹ"sv);
+			REQUIRE(strs[1] == u8"‘’“”•–—™š›śťžź"sv);
+			REQUIRE(strs[2] == u8"ˇ˘Ł¤Ą¦§¨©Ş«¬®Ż"sv);
+			REQUIRE(strs[3] == u8"°±˛ł´µ¶·¸ąş»Ľ˝ľż"sv);
+			REQUIRE(strs[4] == u8"ŔÁÂĂÄĹĆÇČÉĘËĚÍÎĎ"sv);
+			REQUIRE(strs[5] == u8"ĐŃŇÓÔŐÖ×ŘŮÚŰÜÝŢß"sv);
+			REQUIRE(strs[6] == u8"ŕáâăäĺćçčéęëěíîď"sv);
+			REQUIRE(strs[7] == u8"đńňóôőö÷řůúűüýţ˙"sv);
 		}
 
 		// cp1250 -> char16_t
@@ -170,17 +150,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1250);
 			auto strs = ReadFile<char16_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == u"€‚„…†‡‰Š‹ŚŤŽŹ"sv);
-				REQUIRE(strs[1] == u"‘’“”•–—™š›śťžź"sv);
-				REQUIRE(strs[2] == u"ˇ˘Ł¤Ą¦§¨©Ş«¬®Ż"sv);
-				REQUIRE(strs[3] == u"°±˛ł´µ¶·¸ąş»Ľ˝ľż"sv);
-				REQUIRE(strs[4] == u"ŔÁÂĂÄĹĆÇČÉĘËĚÍÎĎ"sv);
-				REQUIRE(strs[5] == u"ĐŃŇÓÔŐÖ×ŘŮÚŰÜÝŢß"sv);
-				REQUIRE(strs[6] == u"ŕáâăäĺćçčéęëěíîď"sv);
-				REQUIRE(strs[7] == u"đńňóôőö÷řůúűüýţ˙"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == u"€‚„…†‡‰Š‹ŚŤŽŹ"sv);
+			REQUIRE(strs[1] == u"‘’“”•–—™š›śťžź"sv);
+			REQUIRE(strs[2] == u"ˇ˘Ł¤Ą¦§¨©Ş«¬®Ż"sv);
+			REQUIRE(strs[3] == u"°±˛ł´µ¶·¸ąş»Ľ˝ľż"sv);
+			REQUIRE(strs[4] == u"ŔÁÂĂÄĹĆÇČÉĘËĚÍÎĎ"sv);
+			REQUIRE(strs[5] == u"ĐŃŇÓÔŐÖ×ŘŮÚŰÜÝŢß"sv);
+			REQUIRE(strs[6] == u"ŕáâăäĺćçčéęëěíîď"sv);
+			REQUIRE(strs[7] == u"đńňóôőö÷řůúűüýţ˙"sv);
 		}
 		// cp1250 -> char32_t
 		{
@@ -188,17 +166,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1250);
 			auto strs = ReadFile<char32_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == U"€‚„…†‡‰Š‹ŚŤŽŹ"sv);
-				REQUIRE(strs[1] == U"‘’“”•–—™š›śťžź"sv);
-				REQUIRE(strs[2] == U"ˇ˘Ł¤Ą¦§¨©Ş«¬®Ż"sv);
-				REQUIRE(strs[3] == U"°±˛ł´µ¶·¸ąş»Ľ˝ľż"sv);
-				REQUIRE(strs[4] == U"ŔÁÂĂÄĹĆÇČÉĘËĚÍÎĎ"sv);
-				REQUIRE(strs[5] == U"ĐŃŇÓÔŐÖ×ŘŮÚŰÜÝŢß"sv);
-				REQUIRE(strs[6] == U"ŕáâăäĺćçčéęëěíîď"sv);
-				REQUIRE(strs[7] == U"đńňóôőö÷řůúűüýţ˙"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == U"€‚„…†‡‰Š‹ŚŤŽŹ"sv);
+			REQUIRE(strs[1] == U"‘’“”•–—™š›śťžź"sv);
+			REQUIRE(strs[2] == U"ˇ˘Ł¤Ą¦§¨©Ş«¬®Ż"sv);
+			REQUIRE(strs[3] == U"°±˛ł´µ¶·¸ąş»Ľ˝ľż"sv);
+			REQUIRE(strs[4] == U"ŔÁÂĂÄĹĆÇČÉĘËĚÍÎĎ"sv);
+			REQUIRE(strs[5] == U"ĐŃŇÓÔŐÖ×ŘŮÚŰÜÝŢß"sv);
+			REQUIRE(strs[6] == U"ŕáâăäĺćçčéęëěíîď"sv);
+			REQUIRE(strs[7] == U"đńňóôőö÷řůúűüýţ˙"sv);
 		}
 		// cp1250 -> wchar_t
 		{
@@ -206,17 +182,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1250);
 			auto strs = ReadFile<wchar_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == L"€‚„…†‡‰Š‹ŚŤŽŹ"sv);
-				REQUIRE(strs[1] == L"‘’“”•–—™š›śťžź"sv);
-				REQUIRE(strs[2] == L"ˇ˘Ł¤Ą¦§¨©Ş«¬®Ż"sv);
-				REQUIRE(strs[3] == L"°±˛ł´µ¶·¸ąş»Ľ˝ľż"sv);
-				REQUIRE(strs[4] == L"ŔÁÂĂÄĹĆÇČÉĘËĚÍÎĎ"sv);
-				REQUIRE(strs[5] == L"ĐŃŇÓÔŐÖ×ŘŮÚŰÜÝŢß"sv);
-				REQUIRE(strs[6] == L"ŕáâăäĺćçčéęëěíîď"sv);
-				REQUIRE(strs[7] == L"đńňóôőö÷řůúűüýţ˙"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == L"€‚„…†‡‰Š‹ŚŤŽŹ"sv);
+			REQUIRE(strs[1] == L"‘’“”•–—™š›śťžź"sv);
+			REQUIRE(strs[2] == L"ˇ˘Ł¤Ą¦§¨©Ş«¬®Ż"sv);
+			REQUIRE(strs[3] == L"°±˛ł´µ¶·¸ąş»Ľ˝ľż"sv);
+			REQUIRE(strs[4] == L"ŔÁÂĂÄĹĆÇČÉĘËĚÍÎĎ"sv);
+			REQUIRE(strs[5] == L"ĐŃŇÓÔŐÖ×ŘŮÚŰÜÝŢß"sv);
+			REQUIRE(strs[6] == L"ŕáâăäĺćçčéęëěíîď"sv);
+			REQUIRE(strs[7] == L"đńňóôőö÷řůúűüýţ˙"sv);
 		}
 
 		// cp1251 -> char8_t
@@ -225,17 +199,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1251);
 			auto strs = ReadFile<char8_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == u8"ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏ"sv);
-				REQUIRE(strs[1] == u8"ђ‘’“”•–—™љ›њќћџ"sv);
-				REQUIRE(strs[2] == u8"ЎўЈ¤Ґ¦§Ё©Є«¬®Ї"sv);
-				REQUIRE(strs[3] == u8"°±Ііґµ¶·ё№є»јЅѕї"sv);
-				REQUIRE(strs[4] == u8"АБВГДЕЖЗИЙКЛМНОП"sv);
-				REQUIRE(strs[5] == u8"РСТУФХЦЧШЩЪЫЬЭЮЯ"sv);
-				REQUIRE(strs[6] == u8"абвгдежзийклмноп"sv);
-				REQUIRE(strs[7] == u8"рстуфхцчшщъыьэюя"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == u8"ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏ"sv);
+			REQUIRE(strs[1] == u8"ђ‘’“”•–—™љ›њќћџ"sv);
+			REQUIRE(strs[2] == u8"ЎўЈ¤Ґ¦§Ё©Є«¬®Ї"sv);
+			REQUIRE(strs[3] == u8"°±Ііґµ¶·ё№є»јЅѕї"sv);
+			REQUIRE(strs[4] == u8"АБВГДЕЖЗИЙКЛМНОП"sv);
+			REQUIRE(strs[5] == u8"РСТУФХЦЧШЩЪЫЬЭЮЯ"sv);
+			REQUIRE(strs[6] == u8"абвгдежзийклмноп"sv);
+			REQUIRE(strs[7] == u8"рстуфхцчшщъыьэюя"sv);
 		}
 		// cp1251 -> char16_t
 		{
@@ -243,17 +215,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1251);
 			auto strs = ReadFile<char16_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == u"ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏ"sv);
-				REQUIRE(strs[1] == u"ђ‘’“”•–—™љ›њќћџ"sv);
-				REQUIRE(strs[2] == u"ЎўЈ¤Ґ¦§Ё©Є«¬®Ї"sv);
-				REQUIRE(strs[3] == u"°±Ііґµ¶·ё№є»јЅѕї"sv);
-				REQUIRE(strs[4] == u"АБВГДЕЖЗИЙКЛМНОП"sv);
-				REQUIRE(strs[5] == u"РСТУФХЦЧШЩЪЫЬЭЮЯ"sv);
-				REQUIRE(strs[6] == u"абвгдежзийклмноп"sv);
-				REQUIRE(strs[7] == u"рстуфхцчшщъыьэюя"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == u"ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏ"sv);
+			REQUIRE(strs[1] == u"ђ‘’“”•–—™љ›њќћџ"sv);
+			REQUIRE(strs[2] == u"ЎўЈ¤Ґ¦§Ё©Є«¬®Ї"sv);
+			REQUIRE(strs[3] == u"°±Ііґµ¶·ё№є»јЅѕї"sv);
+			REQUIRE(strs[4] == u"АБВГДЕЖЗИЙКЛМНОП"sv);
+			REQUIRE(strs[5] == u"РСТУФХЦЧШЩЪЫЬЭЮЯ"sv);
+			REQUIRE(strs[6] == u"абвгдежзийклмноп"sv);
+			REQUIRE(strs[7] == u"рстуфхцчшщъыьэюя"sv);
 		}
 		// cp1251 -> char32_t
 		{
@@ -261,17 +231,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1251);
 			auto strs = ReadFile<char32_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == U"ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏ"sv);
-				REQUIRE(strs[1] == U"ђ‘’“”•–—™љ›њќћџ"sv);
-				REQUIRE(strs[2] == U"ЎўЈ¤Ґ¦§Ё©Є«¬®Ї"sv);
-				REQUIRE(strs[3] == U"°±Ііґµ¶·ё№є»јЅѕї"sv);
-				REQUIRE(strs[4] == U"АБВГДЕЖЗИЙКЛМНОП"sv);
-				REQUIRE(strs[5] == U"РСТУФХЦЧШЩЪЫЬЭЮЯ"sv);
-				REQUIRE(strs[6] == U"абвгдежзийклмноп"sv);
-				REQUIRE(strs[7] == U"рстуфхцчшщъыьэюя"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == U"ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏ"sv);
+			REQUIRE(strs[1] == U"ђ‘’“”•–—™љ›њќћџ"sv);
+			REQUIRE(strs[2] == U"ЎўЈ¤Ґ¦§Ё©Є«¬®Ї"sv);
+			REQUIRE(strs[3] == U"°±Ііґµ¶·ё№є»јЅѕї"sv);
+			REQUIRE(strs[4] == U"АБВГДЕЖЗИЙКЛМНОП"sv);
+			REQUIRE(strs[5] == U"РСТУФХЦЧШЩЪЫЬЭЮЯ"sv);
+			REQUIRE(strs[6] == U"абвгдежзийклмноп"sv);
+			REQUIRE(strs[7] == U"рстуфхцчшщъыьэюя"sv);
 		}
 		// cp1251 -> wchar_t
 		{
@@ -279,17 +247,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1251);
 			auto strs = ReadFile<wchar_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == L"ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏ"sv);
-				REQUIRE(strs[1] == L"ђ‘’“”•–—™љ›њќћџ"sv);
-				REQUIRE(strs[2] == L"ЎўЈ¤Ґ¦§Ё©Є«¬®Ї"sv);
-				REQUIRE(strs[3] == L"°±Ііґµ¶·ё№є»јЅѕї"sv);
-				REQUIRE(strs[4] == L"АБВГДЕЖЗИЙКЛМНОП"sv);
-				REQUIRE(strs[5] == L"РСТУФХЦЧШЩЪЫЬЭЮЯ"sv);
-				REQUIRE(strs[6] == L"абвгдежзийклмноп"sv);
-				REQUIRE(strs[7] == L"рстуфхцчшщъыьэюя"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == L"ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏ"sv);
+			REQUIRE(strs[1] == L"ђ‘’“”•–—™љ›њќћџ"sv);
+			REQUIRE(strs[2] == L"ЎўЈ¤Ґ¦§Ё©Є«¬®Ї"sv);
+			REQUIRE(strs[3] == L"°±Ііґµ¶·ё№є»јЅѕї"sv);
+			REQUIRE(strs[4] == L"АБВГДЕЖЗИЙКЛМНОП"sv);
+			REQUIRE(strs[5] == L"РСТУФХЦЧШЩЪЫЬЭЮЯ"sv);
+			REQUIRE(strs[6] == L"абвгдежзийклмноп"sv);
+			REQUIRE(strs[7] == L"рстуфхцчшщъыьэюя"sv);
 		}
 
 		// cp1252 -> char8_t
@@ -298,17 +264,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1252);
 			auto strs = ReadFile<char8_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == u8"€‚ƒ„…†‡ˆ‰Š‹ŒŽ"sv);
-				REQUIRE(strs[1] == u8"‘’“”•–—˜™š›œžŸ"sv);
-				REQUIRE(strs[2] == u8"¡¢£¤¥¦§¨©ª«¬®¯"sv);
-				REQUIRE(strs[3] == u8"°±²³´µ¶·¸¹º»¼½¾¿"sv);
-				REQUIRE(strs[4] == u8"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ"sv);
-				REQUIRE(strs[5] == u8"ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß"sv);
-				REQUIRE(strs[6] == u8"àáâãäåæçèéêëìíîï"sv);
-				REQUIRE(strs[7] == u8"ðñòóôõö÷øùúûüýþÿ"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == u8"€‚ƒ„…†‡ˆ‰Š‹ŒŽ"sv);
+			REQUIRE(strs[1] == u8"‘’“”•–—˜™š›œžŸ"sv);
+			REQUIRE(strs[2] == u8"¡¢£¤¥¦§¨©ª«¬®¯"sv);
+			REQUIRE(strs[3] == u8"°±²³´µ¶·¸¹º»¼½¾¿"sv);
+			REQUIRE(strs[4] == u8"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ"sv);
+			REQUIRE(strs[5] == u8"ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß"sv);
+			REQUIRE(strs[6] == u8"àáâãäåæçèéêëìíîï"sv);
+			REQUIRE(strs[7] == u8"ðñòóôõö÷øùúûüýþÿ"sv);
 		}
 		// cp1252 -> char16_t
 		{
@@ -316,17 +280,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1252);
 			auto strs = ReadFile<char16_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == u"€‚ƒ„…†‡ˆ‰Š‹ŒŽ"sv);
-				REQUIRE(strs[1] == u"‘’“”•–—˜™š›œžŸ"sv);
-				REQUIRE(strs[2] == u"¡¢£¤¥¦§¨©ª«¬®¯"sv);
-				REQUIRE(strs[3] == u"°±²³´µ¶·¸¹º»¼½¾¿"sv);
-				REQUIRE(strs[4] == u"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ"sv);
-				REQUIRE(strs[5] == u"ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß"sv);
-				REQUIRE(strs[6] == u"àáâãäåæçèéêëìíîï"sv);
-				REQUIRE(strs[7] == u"ðñòóôõö÷øùúûüýþÿ"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == u"€‚ƒ„…†‡ˆ‰Š‹ŒŽ"sv);
+			REQUIRE(strs[1] == u"‘’“”•–—˜™š›œžŸ"sv);
+			REQUIRE(strs[2] == u"¡¢£¤¥¦§¨©ª«¬®¯"sv);
+			REQUIRE(strs[3] == u"°±²³´µ¶·¸¹º»¼½¾¿"sv);
+			REQUIRE(strs[4] == u"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ"sv);
+			REQUIRE(strs[5] == u"ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß"sv);
+			REQUIRE(strs[6] == u"àáâãäåæçèéêëìíîï"sv);
+			REQUIRE(strs[7] == u"ðñòóôõö÷øùúûüýþÿ"sv);
 		}
 		// cp1252 -> char32_t
 		{
@@ -334,17 +296,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1252);
 			auto strs = ReadFile<char32_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == U"€‚ƒ„…†‡ˆ‰Š‹ŒŽ"sv);
-				REQUIRE(strs[1] == U"‘’“”•–—˜™š›œžŸ"sv);
-				REQUIRE(strs[2] == U"¡¢£¤¥¦§¨©ª«¬®¯"sv);
-				REQUIRE(strs[3] == U"°±²³´µ¶·¸¹º»¼½¾¿"sv);
-				REQUIRE(strs[4] == U"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ"sv);
-				REQUIRE(strs[5] == U"ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß"sv);
-				REQUIRE(strs[6] == U"àáâãäåæçèéêëìíîï"sv);
-				REQUIRE(strs[7] == U"ðñòóôõö÷øùúûüýþÿ"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == U"€‚ƒ„…†‡ˆ‰Š‹ŒŽ"sv);
+			REQUIRE(strs[1] == U"‘’“”•–—˜™š›œžŸ"sv);
+			REQUIRE(strs[2] == U"¡¢£¤¥¦§¨©ª«¬®¯"sv);
+			REQUIRE(strs[3] == U"°±²³´µ¶·¸¹º»¼½¾¿"sv);
+			REQUIRE(strs[4] == U"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ"sv);
+			REQUIRE(strs[5] == U"ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß"sv);
+			REQUIRE(strs[6] == U"àáâãäåæçèéêëìíîï"sv);
+			REQUIRE(strs[7] == U"ðñòóôõö÷øùúûüýþÿ"sv);
 		}
 		// cp1252 -> wchar_t
 		{
@@ -352,17 +312,15 @@ namespace test_archive {
 			ar.ReadCodepageBOM((eCODEPAGE)1252);
 			auto strs = ReadFile<wchar_t>(ar);
 
-			EXPECT_EQ(strs.size(), 8);
-			if (strs.size() >= 8) {
-				REQUIRE(strs[0] == L"€‚ƒ„…†‡ˆ‰Š‹ŒŽ"sv);
-				REQUIRE(strs[1] == L"‘’“”•–—˜™š›œžŸ"sv);
-				REQUIRE(strs[2] == L"¡¢£¤¥¦§¨©ª«¬®¯"sv);
-				REQUIRE(strs[3] == L"°±²³´µ¶·¸¹º»¼½¾¿"sv);
-				REQUIRE(strs[4] == L"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ"sv);
-				REQUIRE(strs[5] == L"ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß"sv);
-				REQUIRE(strs[6] == L"àáâãäåæçèéêëìíîï"sv);
-				REQUIRE(strs[7] == L"ðñòóôõö÷øùúûüýþÿ"sv);
-			}
+			REQUIRE(strs.size() == 8);
+			REQUIRE(strs[0] == L"€‚ƒ„…†‡ˆ‰Š‹ŒŽ"sv);
+			REQUIRE(strs[1] == L"‘’“”•–—˜™š›œžŸ"sv);
+			REQUIRE(strs[2] == L"¡¢£¤¥¦§¨©ª«¬®¯"sv);
+			REQUIRE(strs[3] == L"°±²³´µ¶·¸¹º»¼½¾¿"sv);
+			REQUIRE(strs[4] == L"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ"sv);
+			REQUIRE(strs[5] == L"ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß"sv);
+			REQUIRE(strs[6] == L"àáâãäåæçèéêëìíîï"sv);
+			REQUIRE(strs[7] == L"ðñòóôõö÷øùúûüýþÿ"sv);
 		}
 	#endif
 	}
@@ -370,8 +328,8 @@ namespace test_archive {
 
 	TEST_CASE("WriteLine", ATTR) {
 	#if 0
-		using namespace gtl;
 		using namespace std;
+		using namespace biscuit;
 
 		// WriteLine UTF16
 		static vector<variant<u8string, u16string, u32string, wstring, string>> const strs1 { u8"가나다라", u"마바사", U"아자차카", L"타파하", };
@@ -384,13 +342,13 @@ namespace test_archive {
 			for (auto const& vstr : strs1) {
 				std::visit([&ar](auto const& str) {
 					using char_t = std::decay_t<decltype(str)>::value_type;
-					ar.WriteLine(GetDefaultFormatString<char_t>(), str);
+					ar.WriteLine("{}", str);
 						   }, vstr);
 			}
 			for (auto const& vstr : strs2) {
 				std::visit([&ar](auto const& str) {
 					using char_t = std::decay_t<decltype(str)>::value_type;
-					ar.WriteLine(GetDefaultFormatString<char_t>(), str);
+					ar.WriteLine(TStringLiteral<char_t, "{}">(), str);
 						   }, vstr);
 			}
 		}
@@ -400,3 +358,4 @@ namespace test_archive {
 	}
 
 }	// namespace test_archive
+

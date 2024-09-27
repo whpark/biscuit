@@ -12,7 +12,6 @@ export namespace biscuit {
 	//------------------------------------------------------------------------------------------
 	/// @brief Converts Codepage (Unicode <-> MBCS ...)
 	enum class eCODEPAGE : int {
-		DEFAULT__OR_USE_MBCS_CODEPAGE = 0,	// Default or use MBCS Codepage (eCODEPAGE g_eCodepageMBCS;)
 		DEFAULT = 0,
 
 		ANSI_WINDOWS = 1252,

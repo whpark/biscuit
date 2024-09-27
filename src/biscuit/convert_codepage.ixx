@@ -143,15 +143,15 @@ export namespace biscuit {
 	template < concepts::string_elem tchar_to, concepts::tstring_like tstring, size_t initial_dst_buf_size = 1024 >
 	BSC__NODISCARD auto ConvertString_iconv(tstring const& strFrom, std::string szCodepageTo, std::string szCodepageFrom = "") {
 		using char_from_t = concepts::value_t<tstring>;
-		using iconv_t = Ticonv<tchar_to, char_from_t, initial_dst_buf_size>;
-		thread_local static std::map<std::pair<std::string, std::string>, iconv_t> map_iconv;
+		using iconv_type = Ticonv<tchar_to, char_from_t, initial_dst_buf_size>;
+		thread_local static std::map<std::pair<std::string, std::string>, iconv_type> map_iconv;
 		if (szCodepageTo.empty())
-			szCodepageTo = iconv_t::template GuessCodepageFromType<tchar_to>();
+			szCodepageTo = iconv_type::template GuessCodepageFromType<tchar_to>();
 		if (szCodepageFrom.empty())
-			szCodepageFrom = iconv_t::template GuessCodepageFromType<char_from_t>();
+			szCodepageFrom = iconv_type::template GuessCodepageFromType<char_from_t>();
 
 		if (map_iconv.find({ szCodepageTo, szCodepageFrom }) == map_iconv.end())
-			map_iconv.emplace(std::pair{szCodepageTo, szCodepageFrom}, iconv_t(szCodepageTo, szCodepageFrom));
+			map_iconv.emplace(std::pair{szCodepageTo, szCodepageFrom}, iconv_type(szCodepageTo, szCodepageFrom));
 		auto& iconv = map_iconv[{szCodepageTo, szCodepageFrom}];
 		return iconv.Convert(strFrom);
 	}

@@ -37,8 +37,8 @@ export namespace biscuit {
 	#undef SPACES
 	}
 
-	template < concepts::string_elem tchar, concepts::arithmetic tvalue >
-	BSC__NODISCARD constexpr auto GetDefaultFormatSpecifier() -> std::basic_format_string<tchar, tvalue> {
+	template < concepts::string_elem tchar, typename tvalue >
+	BSC__NODISCARD constexpr auto GetDefaultFormatString() -> std::basic_format_string<tchar, tvalue> {
 		using namespace std::literals;
 		if constexpr (std::is_same_v<tchar, char>) { return "{}"; }
 		else if constexpr (std::is_same_v<tchar, wchar_t>) { return L"{}"; }
@@ -49,3 +49,4 @@ export namespace biscuit {
 	}
 
 }	// namespace biscuit
+

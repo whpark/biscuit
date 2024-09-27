@@ -287,7 +287,7 @@ export namespace biscuit {
 
 	protected:
 		template < concepts::string_elem tchar, tchar cDelimiter2 = (tchar)'\r' >
-		std::optional<std::basic_string<tchar>> GetLine(tchar cDelimiter) requires (is_loading) {
+		std::optional<std::basic_string<tchar>> GetRawLine(tchar cDelimiter) requires (is_loading) {
 			std::basic_string<tchar> str;
 
 			static_assert(concepts::is_one_of<typename tstream::char_type, char, char8_t>);
@@ -322,7 +322,7 @@ export namespace biscuit {
 			{
 				constexpr bool bSwapStreamByteOrder = (sizeof(char_to_t) >= 2) and (eCodepageFrom == eCODEPAGE_OTHER_ENDIAN<char_to_t>);
 				if constexpr (bSwapStreamByteOrder xor swap_byte_order) {
-					auto r = GetLine<char_to_t, std::byteswap(cDelimiter2)>(std::byteswap<char_to_t>(cDelimiter));
+					auto r = GetRawLine<char_to_t, std::byteswap(cDelimiter2)>(std::byteswap<char_to_t>(cDelimiter));
 					if (r) {
 						for (auto& c : r.value())
 							c = std::byteswap<char_to_t>(c);
@@ -330,15 +330,15 @@ export namespace biscuit {
 					return std::move(r);
 				}
 				else {
-					return GetLine<char_to_t, cDelimiter2>(cDelimiter);
+					return GetRawLine<char_to_t, cDelimiter2>(cDelimiter);
 				}
 			}
 			else {
 				if (auto r = TReadLine<eCodepageFrom, char_from_t, cDelimiter2>((char_from_t)cDelimiter); r) {
-					if constexpr (!swap_byte_order and concepts::string_elem_utf<char_from_t> and concepts::string_elem_utf<char_to_t>) {
+					if constexpr (eCodepageFrom == eCODEPAGE::DEFAULT and std::is_same_v<char_from_t, char>)
+						return ConvertString_iconv<char_to_t>(*r, "", GetCodepageName(m_eCodepage));	// NOT eCodepageFrom
+					else
 						return ConvertString<char_to_t>(*r);
-					}
-					return ConvertString_iconv<char_to_t>(*r, "", GetCodepageName(m_eCodepage));	// NOT eCodepageFrom
 				}
 				return {};
 			}
