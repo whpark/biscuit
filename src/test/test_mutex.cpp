@@ -9,7 +9,7 @@ using namespace std::literals;
 
 constexpr static auto const ATTR = "[mutex]";
 
-namespace test_memory {
+namespace test_mutex {
 
 	TEST_CASE("shared_recursive_mutex", ATTR) {
 		biscuit::shared_recursive_mutex m;
