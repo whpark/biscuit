@@ -18,5 +18,7 @@ namespace test_misc {
 		REQUIRE(r <= 20);
 	}
 
+	// todo: smart_ptr_container, stop_watch
+
 }	// namespace
 

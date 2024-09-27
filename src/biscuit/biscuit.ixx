@@ -26,6 +26,8 @@ export import biscuit.lazy_profile;
 export import biscuit.units;
 export import biscuit.mutex;
 export import biscuit.rand;
+export import biscuit.smart_ptr_container;
+export import biscuit.stop_watch;
 
 //export import :coord;
 
