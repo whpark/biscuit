@@ -145,13 +145,13 @@ export namespace biscuit {
 			auto pos0 = m_stream.tellg();
 			if (!m_stream.read((typename tstream::char_type*)data, size))
 				return -1;
-#ifdef _DEBUG
-			auto pos1 = m_stream.tellg();
-			auto nRead = pos1 - pos0;
-			return nRead;
-#else
-			return (stream_.tellg() - pos0);
-#endif
+//#ifdef _DEBUG
+//			auto pos1 = m_stream.tellg();
+//			auto nRead = pos1 - pos0;
+//			return nRead;
+//#else
+			return (m_stream.tellg() - pos0);
+//#endif
 		}
 
 		/// @brief Write an object.

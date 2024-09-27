@@ -25,6 +25,8 @@ export import biscuit.archive;
 export import biscuit.lazy_profile;
 export import biscuit.units;
 
+export import biscuit.mutex;
+
 //export import :coord;
 
 export namespace biscuit {
