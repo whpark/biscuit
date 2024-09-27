@@ -200,6 +200,32 @@ export namespace biscuit {
 
 
 	//=============================================================================================================================
+	// base64
+	template < typename T >
+		requires ( std::is_trivially_copyable_v<T> )
+	std::string ToBase64(std::span<T> data) {
+		std::string result;
+		auto const l = data.size() * sizeof(data[0]);
+		if (size_t len = simdutf::base64_length_from_binary(l, simdutf::base64_default); len > 0) {
+			result.assign(len, '=');
+			simdutf::binary_to_base64((char const*)data.data(), l, result.data());
+		}
+		return result;
+	}
+
+	auto FromBase64(std::string const& str) -> std::tuple<simdutf::result, std::vector<uint8_t>> {
+		std::vector<uint8_t> data;
+		simdutf::result r{simdutf::error_code::SUCCESS, 0};
+		size_t max_len = simdutf::maximal_binary_length_from_base64(str.data(), str.size());
+		if (max_len <= 0)
+			return {r, std::move(data)};
+		data.resize(max_len);
+		r = simdutf::base64_to_binary(str.data(), str.size(), (char*)data.data(), simdutf::base64_default);
+		data.resize(r.count);
+		return {r, std::move(data)};
+	}
+
+	//=============================================================================================================================
 	// Compares
 	std::strong_ordering Compare(concepts::tstring_like auto const& strA, concepts::tstring_like auto const& strB) {
 		using strA_t = std::remove_cvref_t<decltype(strA)>;

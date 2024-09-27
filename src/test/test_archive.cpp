@@ -357,5 +357,12 @@ namespace test_archive {
 	#endif
 	}
 
+	TEST_CASE("base64", ATTR) {
+		std::string data = "HELLO, World!";
+		std::string base64 = biscuit::ToBase64<char>({data.data(), data.size()});
+		auto [r, data2] = biscuit::FromBase64(base64);
+		REQUIRE(std::ranges::equal(data, data2));
+	}
+
 }	// namespace test_archive
 
