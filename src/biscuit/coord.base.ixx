@@ -306,8 +306,8 @@ export namespace biscuit::coord {
 
 		//--------------------------------------------------------------------------------------------------------------------------
 		struct glaze {
-			using T = this_t;
-			static constexpr auto value = glz::object(&T::arr);
+			using GLZ_T = this_t;
+			static constexpr auto value = glz::object(&GLZ_T::arr);
 		};
 		// Archiving 
 		//friend class cereal::serialization::access;
