@@ -3,3 +3,27 @@
 #include "./config.h"
 
 #include <glaze/glaze.hpp>
+#include <glaze/util/for_each.hpp>  // macros
+
+#define GLZ_META_DERIVED(C, parent,...)                              \
+   template <>                                                       \
+   struct glz::meta<C>                                               \
+   {                                                                 \
+      using GLZ_T = C;                                               \
+      [[maybe_unused]] static constexpr std::string_view name = #C;  \
+      static constexpr auto value = object(                          \
+        #parent, [](auto&& self) -> auto& { return (parent&)self; }, \
+        GLZ_FOR_EACH(GLZ_X, __VA_ARGS__));                           \
+   }
+
+#define GLZ_LOCAL_META_DERIVED(C, parent, ...)                       \
+   struct glaze                                                      \
+   {                                                                 \
+      using GLZ_T = C;                                               \
+      [[maybe_unused]] static constexpr std::string_view name = #C;  \
+      static constexpr auto value = glz::object(                     \
+        #parent, [](auto&& self) -> auto& { return (parent&)self; }, \
+        GLZ_FOR_EACH(GLZ_X, __VA_ARGS__));                           \
+   }
+
+

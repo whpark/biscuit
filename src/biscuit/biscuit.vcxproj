@@ -125,7 +125,6 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
     <ClInclude Include="..\..\include\biscuit\dependencies_simdutf.h" />
     <ClInclude Include="..\..\include\biscuit\dependencies_units.h" />
     <ClInclude Include="..\..\include\biscuit\macro.h" />
-    <ClInclude Include="..\..\include\biscuit\reflection_glaze.h" />
     <ClInclude Include="framework.h" />
   </ItemGroup>
   <ItemGroup>

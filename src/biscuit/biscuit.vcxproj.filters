@@ -48,9 +48,6 @@
     <ClInclude Include="..\..\include\biscuit\dependencies_ctre.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\reflection_glaze.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
