@@ -70,8 +70,6 @@ export namespace biscuit {
 
 	template < typename TCONTAINER >
 	concept has_push_pop_front = requires(TCONTAINER container) {container.push_front; container.pop_front;};
-	template < typename T >
-	concept value_has_clone = requires (T object) { object.NewClone(); };
 
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------
 	// TSmartPtrContainer
@@ -92,7 +90,6 @@ export namespace biscuit {
 		using const_reverse_iterator	= TSmartPtrIterator<typename base_t::const_reverse_iterator>;
 
 		//constexpr static auto base_has_push_pop_front_ = requires(base_t base) {base.push_front; base.pop_front;};
-		//constexpr static auto value_has_clone_ = requires (T object) { object.Clone(); };
 
 		// constructor
 		using base_t::base_t;
@@ -214,9 +211,9 @@ export namespace biscuit {
 		constexpr base_t const&	Base() const	{ return *this; }
 
 		template < typename ... Arg >
-		constexpr void AddCloneTo(TSmartPtrContainer<Arg...>& container) const requires (value_has_clone<T> || std::is_copy_constructible_v<T>) {
+		constexpr void AddCloneTo(TSmartPtrContainer<Arg...>& container) const requires (concepts::cloneable<T> || std::is_copy_constructible_v<T>) {
 			std::shared_lock lock(*this);
-			if constexpr (value_has_clone<T>) {
+			if constexpr (concepts::cloneable<T>) {
 				for (auto const& obj : *this)
 					container.push_back(obj.NewClone());
 			}
@@ -226,9 +223,9 @@ export namespace biscuit {
 			}
 		}
 		template < typename ... Arg >
-		constexpr void AddCloneFrom(TSmartPtrContainer const& container) requires (value_has_clone<T> || std::is_copy_constructible_v<T>) {
+		constexpr void AddCloneFrom(TSmartPtrContainer const& container) requires (concepts::cloneable<T> || std::is_copy_constructible_v<T>) {
 			std::shared_lock lock(*this);
-			if constexpr (value_has_clone<T>) {
+			if constexpr (concepts::cloneable<T>) {
 				for (auto const& obj : container)
 					push_back(obj.NewClone());
 			}
