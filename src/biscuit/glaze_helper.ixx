@@ -1,7 +1,6 @@
 ﻿module;
 
-#include "glaze/glaze.hpp"
-#include "biscuit/reflection_glaze.h"
+#include "biscuit/dependencies_glaze.h"
 
 export module biscuit.glaze_helper;
 import std;

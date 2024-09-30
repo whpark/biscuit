@@ -5,6 +5,8 @@
 #include <glaze/glaze.hpp>
 #include <glaze/util/for_each.hpp>  // macros
 
+#define GLZ_X(x) #x, x
+
 #define GLZ_META_DERIVED(C, parent,...)                              \
    template <>                                                       \
    struct glz::meta<C>                                               \
