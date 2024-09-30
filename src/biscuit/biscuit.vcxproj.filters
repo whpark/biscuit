@@ -18,9 +18,6 @@
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\recursive_macro.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\biscuit\biscuit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
