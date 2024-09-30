@@ -5,7 +5,7 @@
 import std;
 import biscuit;
 
-static constexpr auto const ATTR = "[sequence]";
+static constexpr auto const ATTR = "[sequence_tReturn]";
 
 namespace biscuit::seq::test {
 

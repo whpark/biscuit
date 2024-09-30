@@ -10,6 +10,7 @@ int main(int , char* []) {
 
 	Catch::Session session;
 	//session.configData().skipBenchmarks = true;
+	session.configData().testsOrTags.push_back("~[sequence]~[sequence_map]~[sequence_tReturn]");
 	return session.run();
 }
 
