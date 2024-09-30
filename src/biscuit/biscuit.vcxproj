@@ -161,6 +161,11 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
     <ClCompile Include="mutex.ixx" />
     <ClCompile Include="rand.ixx" />
     <ClCompile Include="glaze_helper.ixx" />
+    <ClCompile Include="sequence.base.ixx" />
+    <ClCompile Include="sequence.coroutine_handle.ixx" />
+    <ClCompile Include="sequence.ixx" />
+    <ClCompile Include="sequence.map.ixx" />
+    <ClCompile Include="sequence.tReturn.ixx" />
     <ClCompile Include="smart_ptr_container.ixx" />
     <ClCompile Include="stop_watch.ixx" />
     <ClCompile Include="string.arithmetic.ixx" />

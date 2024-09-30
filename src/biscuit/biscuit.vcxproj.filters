@@ -164,6 +164,21 @@
     <ClCompile Include="glaze_helper.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sequence.base.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sequence.coroutine_handle.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sequence.map.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sequence.tReturn.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sequence.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\vcpkg.json" />
