@@ -1,14 +1,30 @@
 {
-  "dependencies": [
-    "catch2",
-    "cereal",
-    "ctre",
-    "fmt",
-    "glaze",
-    "eigen3",
-    "libiconv",
-    "simdutf",
-    "spdlog",
-    "units"
-  ]
+    "dependencies":
+    [
+        "catch2",
+        "asio",
+        "cereal",
+        "ctre",
+        "fmt",
+        "glaze",
+        "eigen3",
+        "libiconv",
+        "simdutf",
+        "spdlog",
+        "units",
+        {
+            "name": "opencv",
+            "features":
+            [
+                "contrib",
+                "default-features",
+                "dnn",
+                "freetype",
+                "ipp",
+                "opengl",
+                "python"
+            ]
+        },
+        "winreg"
+    ]
 }

@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 17
+# Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit", "src\biscuit\biscuit.vcxproj", "{4FC2059E-06A9-4B82-861D-ED3CB583303F}"
@@ -11,6 +11,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependencies", "dependencies", "{3C2340D6-6EC4-43A0-B2BE-2FF17EB38CF2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThirdParties", "src\ThirdParties\ThirdParties.vcxproj", "{730A3E73-F28D-435F-ADFD-DEF57F11F48F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.win", "src\biscuit.win\biscuit.win.vcxproj", "{54A8B2BA-6919-485D-842E-E0D1B3735F42}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.shape", "src\biscuit.shape\biscuit.shape.vcxproj", "{188263C3-C6BB-4461-A3D9-1426F9D154EB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.qt", "src\biscuit.qt\biscuit.qt.vcxproj", "{B3043D2A-40E0-480D-BE84-2B2B43F9C7E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +34,18 @@ Global
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F}.Release|x64.Build.0 = Release|x64
 		{730A3E73-F28D-435F-ADFD-DEF57F11F48F}.Debug|x64.ActiveCfg = Debug|x64
 		{730A3E73-F28D-435F-ADFD-DEF57F11F48F}.Release|x64.ActiveCfg = Release|x64
+		{54A8B2BA-6919-485D-842E-E0D1B3735F42}.Debug|x64.ActiveCfg = Debug|x64
+		{54A8B2BA-6919-485D-842E-E0D1B3735F42}.Debug|x64.Build.0 = Debug|x64
+		{54A8B2BA-6919-485D-842E-E0D1B3735F42}.Release|x64.ActiveCfg = Release|x64
+		{54A8B2BA-6919-485D-842E-E0D1B3735F42}.Release|x64.Build.0 = Release|x64
+		{188263C3-C6BB-4461-A3D9-1426F9D154EB}.Debug|x64.ActiveCfg = Debug|x64
+		{188263C3-C6BB-4461-A3D9-1426F9D154EB}.Debug|x64.Build.0 = Debug|x64
+		{188263C3-C6BB-4461-A3D9-1426F9D154EB}.Release|x64.ActiveCfg = Release|x64
+		{188263C3-C6BB-4461-A3D9-1426F9D154EB}.Release|x64.Build.0 = Release|x64
+		{B3043D2A-40E0-480D-BE84-2B2B43F9C7E2}.Debug|x64.ActiveCfg = Debug|x64
+		{B3043D2A-40E0-480D-BE84-2B2B43F9C7E2}.Debug|x64.Build.0 = Debug|x64
+		{B3043D2A-40E0-480D-BE84-2B2B43F9C7E2}.Release|x64.ActiveCfg = Release|x64
+		{B3043D2A-40E0-480D-BE84-2B2B43F9C7E2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
