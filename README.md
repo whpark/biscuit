@@ -20,4 +20,5 @@
 - units https://github.com/nholthaus/units
 - opencv https://opencv.org/
 - winreg https://github.com/GiovanniDicanio/WinReg
-- 
+- tinyspline https://github.com/msteinbeck/tinyspline
+

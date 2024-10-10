@@ -107,6 +107,11 @@
     <ClCompile Include="EnvironmentVariable.ixx" />
     <ClCompile Include="win.ixx" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\biscuit\biscuit.vcxproj">
+      <Project>{4fc2059e-06a9-4b82-861d-ed3cb583303f}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

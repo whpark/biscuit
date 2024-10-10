@@ -27,11 +27,11 @@ using namespace biscuit::literals;
 
 export namespace biscuit::win {
 
-	constexpr std::string const EXT_DEFAULT_IMAGE_FILE	{ ".png"s };
-	constexpr std::string const FILTER_IMAGE_FILES		{ "Image Files(*.bmp;*.jpg;*.tiff;*.png)|*.bmp;*.jpg;*.tiff;*.png|Bitmap(*.bmp)|*.bmp|PNG File(*.png)|*.png|JPEG File(*.jpg)|*.jpg|All Files(*.*)|*.*||" };
-	constexpr std::string const IMAGE_FILE_EXTS			{ "*.bmp;*.jpg;*.jpeg;*.tiff;*.png;*.gif" };
+	/*constexpr*/ std::string const EXT_DEFAULT_IMAGE_FILE	{ ".png"s };
+	/*constexpr*/ std::string const FILTER_IMAGE_FILES		{ "Image Files(*.bmp;*.jpg;*.tiff;*.png)|*.bmp;*.jpg;*.tiff;*.png|Bitmap(*.bmp)|*.bmp|PNG File(*.png)|*.png|JPEG File(*.jpg)|*.jpg|All Files(*.*)|*.*||" };
+	/*constexpr*/ std::string const IMAGE_FILE_EXTS			{ "*.bmp;*.jpg;*.jpeg;*.tiff;*.png;*.gif" };
 
-	constexpr std::string const INVALID_CHAR_FOR_FILE_NAME { "\\/:*?<>|" };
+	/*constexpr*/ std::string const INVALID_CHAR_FOR_FILE_NAME { "\\/:*?<>|" };
 
 	//GTL__WIN_API gtl::xString GetErrorMessage(CException& e);
 	std::wstring GetErrorMessage(DWORD dwLastError) {
