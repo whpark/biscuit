@@ -15,7 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="biscuit.shape.cpp">
+    <ClCompile Include="biscuit.shape.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="shape.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

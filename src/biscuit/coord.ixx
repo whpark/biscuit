@@ -40,7 +40,6 @@ export import biscuit.coord.transform;
 using namespace std::literals;
 
 export namespace biscuit {
-#pragma pack(push, 8)
 
 	//-------------------------------------------------------------------------
 	// to Text, From Text
@@ -186,5 +185,4 @@ export namespace biscuit {
 		return rcSafe;
 	};
 
-#pragma pack(pop)
 }	// namespace gtl

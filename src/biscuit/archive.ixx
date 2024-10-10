@@ -57,10 +57,10 @@ export namespace biscuit {
 	class TArchive {
 
 	public:
-		constexpr static inline bool is_storing_only = bSTORE && !bLOAD;
-		constexpr static inline bool is_loading_only = !bSTORE && bLOAD;
-		constexpr static inline bool is_storing = bSTORE;
-		constexpr static inline bool is_loading = bLOAD;
+		constexpr static inline bool bStoringOnly = bSTORE && !bLOAD;
+		constexpr static inline bool bLoadingOnly = !bSTORE && bLOAD;
+		constexpr static inline bool bStoring = bSTORE;
+		constexpr static inline bool bLoading = bLOAD;
 		constexpr static inline eARCHIVE_BYTE_ORDERING byte_ordering = eBYTE_ORDERING;
 		constexpr static inline bool swap_byte_order = (byte_ordering == eARCHIVE_BYTE_ORDERING::network) && (std::endian::native == std::endian::little);
 
@@ -79,30 +79,33 @@ export namespace biscuit {
 		TArchive& operator = (TArchive const&) = delete;
 		TArchive& operator = (TArchive&&) = delete;
 
-		explicit TArchive(tstream& stream) requires (is_storing_only || is_loading_only)
-			: m_stream{stream}, m_bStore{is_storing}
+		explicit TArchive(tstream& stream) requires (bStoringOnly || bLoadingOnly)
+			: m_stream{stream}, m_bStore{bStoring}
 		{ }
-		TArchive(tstream& stream, bool bStore) requires (is_storing && is_loading)
+		TArchive(tstream& stream, bool bStore) requires (bStoring && bLoading)
 			: m_stream{stream}, m_bStore{bStore}
 		{ }
 
 		TArchive(std::filesystem::path const& path, std::ios_base::openmode mode = std::ios_base::binary)
-			requires (is_storing_only || is_loading_only)
-			: m_streamInternal{tstream{path, std::ios_base::binary|mode}}, m_stream(m_streamInternal.value()), m_bStore(is_storing)
+			requires (bStoringOnly || bLoadingOnly)
+			: m_streamInternal{tstream{path, std::ios_base::binary|mode}}, m_stream(m_streamInternal.value()), m_bStore(bStoring)
 		{ }
 		TArchive(std::filesystem::path const& path, bool bStore, std::ios_base::openmode mode = std::ios_base::binary)
-			requires (is_storing && is_loading)
+			requires (bStoring && bLoading)
 			: m_streamInternal{tstream{path, std::ios_base::binary|mode}}, m_stream(m_streamInternal.value()), m_bStore(bStore)
 		{ }
 
 	public:
+		constexpr static inline bool is_saving() { return bStoring; }
+		constexpr static inline bool is_loading() { return bLoading; }
+
 		/// @brief Set/Get Codepage.
 		eCODEPAGE SetCodepage(eCODEPAGE eCodepage) { return std::exchange(m_eCodepage, eCodepage); }
 		eCODEPAGE GetCodepage() const { return m_eCodepage; }
 
 	public:
 		/// @brief Write byte buffer
-		inline void Write(void const* data, std::streamsize size) requires (is_storing) {
+		inline void Write(void const* data, std::streamsize size) requires (bStoring) {
 			CheckArchiveStorable();
 			m_stream.write((typename tstream::char_type const*)data, size);
 		}
@@ -110,7 +113,7 @@ export namespace biscuit {
 		/// @brief Write an object.
 		/// @param tvalue trivially_copyable objects. (for integral value, byte ordering can be applied)
 		template < concepts::trivially_copyable tvalue >
-		inline void Write(tvalue const& v) requires (is_storing) {
+		inline void Write(tvalue const& v) requires (bStoring) {
 			CheckArchiveStorable();
 			if constexpr (swap_byte_order and std::is_integral_v<tvalue>) {
 				auto v2 = std::byteswap(v);
@@ -122,7 +125,7 @@ export namespace biscuit {
 
 		template < std::ranges::contiguous_range trange >
 			requires (std::is_trivially_copyable_v<std::ranges::range_value_t<std::remove_cvref_t<trange>>>)
-		inline void WriteRange(trange const& range) requires (is_storing) {
+		inline void WriteRange(trange const& range) requires (bStoring) {
 			CheckArchiveStorable();
 			using value_t = std::ranges::range_value_t<std::remove_cvref_t<trange>>;
 			using char_t = typename tstream::char_type;
@@ -140,7 +143,7 @@ export namespace biscuit {
 
 	public:
 		/// @brief Read byte buffer
-		inline std::streamsize Read(void* data, std::streamsize size) requires (is_loading) {
+		inline std::streamsize Read(void* data, std::streamsize size) requires (bLoading) {
 			CheckArchiveLoadable();
 			auto pos0 = m_stream.tellg();
 			if (!m_stream.read((typename tstream::char_type*)data, size))
@@ -157,7 +160,7 @@ export namespace biscuit {
 		/// @brief Write an object.
 		/// @param tvalue trivially_copyable objects. (when bSWAP_BYTE_ORDER is true, only integral or floating point value and their array  can be serialized.)
 		template < concepts::trivially_copyable tvalue >
-		inline std::streamsize Read(tvalue& v) requires (is_loading) {
+		inline std::streamsize Read(tvalue& v) requires (bLoading) {
 			using value_t = std::remove_cvref_t<tvalue>;
 			CheckArchiveLoadable();
 			if constexpr (std::is_integral_v<value_t> and swap_byte_order) {
@@ -173,7 +176,7 @@ export namespace biscuit {
 
 		template < std::ranges::contiguous_range trange >
 			requires (std::is_trivially_copyable_v<std::ranges::range_value_t<std::remove_cvref_t<trange>>>)
-		inline std::streamsize ReadRange(trange const& range) requires (is_loading) {
+		inline std::streamsize ReadRange(trange const& range) requires (bLoading) {
 			CheckArchiveLoadable();
 			using value_t = std::ranges::range_value_t<std::remove_cvref_t<trange>>;
 			using char_t = typename tstream::char_type;
@@ -192,25 +195,25 @@ export namespace biscuit {
 		//---------------------------------------------------------------------
 		// operator >>, <<, &
 		template < concepts::trivially_copyable tvalue >
-		TArchive& operator << (tvalue const& v) requires (is_storing) {
+		TArchive& operator << (tvalue const& v) requires (bStoring) {
 			Write(v);
 			return *this;
 		};
 		template < concepts::trivially_copyable tvalue >
-		TArchive& operator >> (tvalue& v) requires (is_loading) {
+		TArchive& operator >> (tvalue& v) requires (bLoading) {
 			Read(v);
 			return *this;
 		};
 		template < concepts::trivially_copyable tvalue >
 		TArchive& operator & (tvalue& v) {
-			if constexpr (is_storing && is_loading) {
+			if constexpr (bStoring && bLoading) {
 				if (m_bStore)
 					return *this << v;
 				else
 					return *this >> v;
-			} else if constexpr (is_storing) {
+			} else if constexpr (bStoring) {
 				return *this << v;
-			} else if constexpr (is_loading) {
+			} else if constexpr (bLoading) {
 				return *this >> v;
 			} else {
 				static_assert(false, "no way");
@@ -218,7 +221,7 @@ export namespace biscuit {
 			}
 		};
 		template < typename tvalue >
-		TArchive& operator & (tvalue const& v) requires (is_storing) {
+		TArchive& operator & (tvalue const& v) requires (bStoring) {
 			CheckArchiveStorable();
 			return *this << v;
 		};
@@ -226,7 +229,7 @@ export namespace biscuit {
 		//---------------------------------------------------------------------
 
 		/// @brief Write BOM
-		void WriteCodepageBOM(eCODEPAGE eCodepage) requires (is_storing) {
+		void WriteCodepageBOM(eCODEPAGE eCodepage) requires (bStoring) {
 			CheckArchiveStorable();
 			if (eCodepage == eCODEPAGE::DEFAULT) {
 				eCodepage = eCODEPAGE::UTF8;
@@ -238,7 +241,7 @@ export namespace biscuit {
 		};
 
 		/// @brief Read BOM
-		eCODEPAGE ReadCodepageBOM(eCODEPAGE eDefaultCodepage = eCODEPAGE::UTF8) requires (is_loading) {
+		eCODEPAGE ReadCodepageBOM(eCODEPAGE eDefaultCodepage = eCODEPAGE::UTF8) requires (bLoading) {
 			CheckArchiveLoadable();
 
 			auto peek = [](tstream& stream, std::string_view sv) -> bool {
@@ -286,7 +289,7 @@ export namespace biscuit {
 
 	protected:
 		template < concepts::string_elem tchar, tchar cDelimiter2 = (tchar)'\r' >
-		std::optional<std::basic_string<tchar>> GetRawLine(tchar cDelimiter) requires (is_loading) {
+		std::optional<std::basic_string<tchar>> GetRawLine(tchar cDelimiter) requires (bLoading) {
 			std::basic_string<tchar> str;
 
 			static_assert(concepts::is_one_of<typename tstream::char_type, char, char8_t>);
@@ -312,7 +315,7 @@ export namespace biscuit {
 		}
 
 		template < eCODEPAGE eCodepageFrom, concepts::string_elem tchar_to, tchar_to cDelimiter2 = (tchar_to)'\n' >
-		inline std::optional<std::basic_string<tchar_to>> TReadLine(tchar_to cDelimiter = (tchar_to)'\n') requires (is_loading) {
+		inline std::optional<std::basic_string<tchar_to>> TReadLine(tchar_to cDelimiter = (tchar_to)'\n') requires (bLoading) {
 			using char_from_t = typename char_type_from<eCodepageFrom>::char_type;
 			using char_to_t = std::remove_cvref_t<tchar_to>;
 			if constexpr (std::is_same_v<char_to_t, char_from_t>
@@ -346,7 +349,7 @@ export namespace biscuit {
 	public:
 		/// @brief Read / Write String
 		template < concepts::string_elem tchar_to, tchar_to cDelimiter2 = (tchar_to)'\r' >
-		std::optional<std::basic_string<tchar_to>> ReadLine(tchar_to cDelimiter = '\n') requires (is_loading) {
+		std::optional<std::basic_string<tchar_to>> ReadLine(tchar_to cDelimiter = '\n') requires (bLoading) {
 			CheckArchiveLoadable();
 			switch (m_eCodepage) {
 			case eCODEPAGE::UTF8 :
@@ -375,15 +378,15 @@ export namespace biscuit {
 			}
 		};
 
-		template <char cDelimiter2 = '\r'>		inline auto	ReadLineA(char cDelimiter = '\n')			requires (is_loading) { return ReadLine<char, cDelimiter2>(cDelimiter); }
-		template <char8_t cDelimiter2 = u8'\r'>	inline auto	ReadLineU8(char8_t cDelimiter = u8'\n')		requires (is_loading) { return ReadLine<char8_t, cDelimiter2>(cDelimiter); }
-		template <char16_t cDelimiter2 = u'\r'>	inline auto	ReadLineU16(char16_t cDelimiter = u'\n')	requires (is_loading) { return ReadLine<char16_t, cDelimiter2>(cDelimiter); }
-		template <char32_t cDelimiter2 = U'\r'>	inline auto	ReadLineU32(char32_t cDelimiter = U'\n')	requires (is_loading) { return ReadLine<char32_t, cDelimiter2>(cDelimiter); }
-		template <wchar_t cDelimiter2 = L'\r'>	inline auto	ReadLineW(wchar_t cDelimiter = L'\n')		requires (is_loading) { return ReadLine<wchar_t, cDelimiter2>(cDelimiter); }
+		template <char cDelimiter2 = '\r'>		inline auto	ReadLineA(char cDelimiter = '\n')			requires (bLoading) { return ReadLine<char, cDelimiter2>(cDelimiter); }
+		template <char8_t cDelimiter2 = u8'\r'>	inline auto	ReadLineU8(char8_t cDelimiter = u8'\n')		requires (bLoading) { return ReadLine<char8_t, cDelimiter2>(cDelimiter); }
+		template <char16_t cDelimiter2 = u'\r'>	inline auto	ReadLineU16(char16_t cDelimiter = u'\n')	requires (bLoading) { return ReadLine<char16_t, cDelimiter2>(cDelimiter); }
+		template <char32_t cDelimiter2 = U'\r'>	inline auto	ReadLineU32(char32_t cDelimiter = U'\n')	requires (bLoading) { return ReadLine<char32_t, cDelimiter2>(cDelimiter); }
+		template <wchar_t cDelimiter2 = L'\r'>	inline auto	ReadLineW(wchar_t cDelimiter = L'\n')		requires (bLoading) { return ReadLine<wchar_t, cDelimiter2>(cDelimiter); }
 
 	protected:
 		template < concepts::tstring_like tstring >
-		inline void PutStringRaw(tstring const& str) requires (is_storing) {
+		inline void PutStringRaw(tstring const& str) requires (bStoring) {
 			using char_t = concepts::value_t<tstring>;
 			static_assert(concepts::is_one_of<typename tstream::char_type, char, char8_t>);
 			//if (!m_stream)
@@ -392,7 +395,7 @@ export namespace biscuit {
 		}
 
 		template < eCODEPAGE eCodepage, concepts::tstring_like tstring >
-		void PutStringCodepage(tstring const& sv) requires (is_storing) {
+		void PutStringCodepage(tstring const& sv) requires (bStoring) {
 			using char_from_t = concepts::value_t<tstring>;
 			using char_archive_t = typename char_type_from<eCodepage>::char_type;
 
@@ -433,7 +436,7 @@ export namespace biscuit {
 
 	public:
 		template < xStringLiteral eol = "\r\n" >
-		void PutNewLine() requires (is_storing) {
+		void PutNewLine() requires (bStoring) {
 			switch (m_eCodepage) {
 			case eCODEPAGE::UTF16:
 				{
@@ -469,7 +472,7 @@ export namespace biscuit {
 
 		/// @brief Read / Write String
 		template < concepts::tstring_like tstring >
-		void PutString(tstring const& sv) requires (is_storing) {
+		void PutString(tstring const& sv) requires (bStoring) {
 			CheckArchiveStorable();
 
 			switch (m_eCodepage) {
@@ -500,40 +503,40 @@ export namespace biscuit {
 		};
 
 		template < concepts::tstring_like tstring >
-		void PutLine(tstring const& sv) requires (is_storing) {
+		void PutLine(tstring const& sv) requires (bStoring) {
 			PutString(sv);
 			PutNewLine();
 		}
 
 	public:
 		template < typename tchar, typename ... targs >
-		inline void TWriteString(fmt::basic_format_string<tchar, targs...> sv, targs&& ... args) requires (is_storing) {
+		inline void TWriteString(fmt::basic_format_string<tchar, targs...> sv, targs&& ... args) requires (bStoring) {
 			CheckArchiveStorable();
 			std::basic_string<tchar> str = fmt::vformat(sv, std::forward<targs>(args)...);
 			WriteString(str);
 		}
-		template < typename ... targs > inline void WriteString(fmt::basic_format_string<char, targs ...> sv, targs&& ... args) requires (is_storing) { TWriteString<char, targs ...>(sv, args...); }
-		template < typename ... targs > inline void WriteString(fmt::basic_format_string<char8_t, targs ...> sv, targs&& ... args) requires (is_storing) { TWriteString<char8_t, targs ...>(sv, args...); }
-		template < typename ... targs > inline void WriteString(fmt::basic_format_string<char16_t, targs ...> sv, targs&& ... args) requires (is_storing) { TWriteString<char16_t, targs ...>(sv, args...); }
-		template < typename ... targs > inline void WriteString(fmt::basic_format_string<char32_t, targs ...> sv, targs&& ... args) requires (is_storing) { TWriteString<char32_t, targs ...>(sv, args...); }
-		template < typename ... targs > inline void WriteString(fmt::basic_format_string<wchar_t, targs ...> sv, targs&& ... args) requires (is_storing) { TWriteString<wchar_t, targs ...>(sv, args...); }
+		template < typename ... targs > inline void WriteString(fmt::basic_format_string<char, targs ...> sv, targs&& ... args) requires (bStoring) { TWriteString<char, targs ...>(sv, args...); }
+		template < typename ... targs > inline void WriteString(fmt::basic_format_string<char8_t, targs ...> sv, targs&& ... args) requires (bStoring) { TWriteString<char8_t, targs ...>(sv, args...); }
+		template < typename ... targs > inline void WriteString(fmt::basic_format_string<char16_t, targs ...> sv, targs&& ... args) requires (bStoring) { TWriteString<char16_t, targs ...>(sv, args...); }
+		template < typename ... targs > inline void WriteString(fmt::basic_format_string<char32_t, targs ...> sv, targs&& ... args) requires (bStoring) { TWriteString<char32_t, targs ...>(sv, args...); }
+		template < typename ... targs > inline void WriteString(fmt::basic_format_string<wchar_t, targs ...> sv, targs&& ... args) requires (bStoring) { TWriteString<wchar_t, targs ...>(sv, args...); }
 
 		template < typename tchar, typename ... targs >
-		inline void TWriteLine(fmt::basic_format_string<tchar, targs...> sv, targs&& ... args) requires (is_storing) {
+		inline void TWriteLine(fmt::basic_format_string<tchar, targs...> sv, targs&& ... args) requires (bStoring) {
 			CheckArchiveStorable();
 			std::basic_string<tchar> str = fmt::vformat(sv, std::forward<targs>(args)...);
 			WriteString(str);
 			PutNewLine();
 		}
-		template < typename ... targs > inline void WriteLine(fmt::basic_format_string<char, targs ...> sv, targs&& ... args) requires (is_storing) { TWriteLine<char, targs ...>(sv, args...); }
-		template < typename ... targs > inline void WriteLine(fmt::basic_format_string<char8_t, targs ...> sv, targs&& ... args) requires (is_storing) { TWriteLine<char8_t, targs ...>(sv, args...); }
-		template < typename ... targs > inline void WriteLine(fmt::basic_format_string<char16_t, targs ...> sv, targs&& ... args) requires (is_storing) { TWriteLine<char16_t, targs ...>(sv, args...); }
-		template < typename ... targs > inline void WriteLine(fmt::basic_format_string<char32_t, targs ...> sv, targs&& ... args) requires (is_storing) { TWriteLine<char32_t, targs ...>(sv, args...); }
-		template < typename ... targs > inline void WriteLine(fmt::basic_format_string<wchar_t, targs ...> sv, targs&& ... args) requires (is_storing) { TWriteLine<wchar_t, targs ...>(sv, args...); }
+		template < typename ... targs > inline void WriteLine(fmt::basic_format_string<char, targs ...> sv, targs&& ... args) requires (bStoring) { TWriteLine<char, targs ...>(sv, args...); }
+		template < typename ... targs > inline void WriteLine(fmt::basic_format_string<char8_t, targs ...> sv, targs&& ... args) requires (bStoring) { TWriteLine<char8_t, targs ...>(sv, args...); }
+		template < typename ... targs > inline void WriteLine(fmt::basic_format_string<char16_t, targs ...> sv, targs&& ... args) requires (bStoring) { TWriteLine<char16_t, targs ...>(sv, args...); }
+		template < typename ... targs > inline void WriteLine(fmt::basic_format_string<char32_t, targs ...> sv, targs&& ... args) requires (bStoring) { TWriteLine<char32_t, targs ...>(sv, args...); }
+		template < typename ... targs > inline void WriteLine(fmt::basic_format_string<wchar_t, targs ...> sv, targs&& ... args) requires (bStoring) { TWriteLine<wchar_t, targs ...>(sv, args...); }
 
 		//---------------------------------------------------------------------
 		// Read / Write Size
-		template < size_t nMinItemSize = 4 > requires (is_loading)
+		template < size_t nMinItemSize = 4 > requires (bLoading)
 		size_t LoadFlexSize() {
 			static_assert(std::ranges::any_of({1, 2, 4, sizeof(size_t)}, nMinItemSize));
 			CheckArchiveLoadable();
@@ -572,7 +575,7 @@ export namespace biscuit {
 				return size.u64;
 			}
 		}
-		template < size_t nMinItemSize = 4 > requires (is_storing)
+		template < size_t nMinItemSize = 4 > requires (bStoring)
 		TArchive& StoreFlexSize(size_t size) {
 			static_assert(std::ranges::any_of({1, 2, 4, sizeof(size_t)}, nMinItemSize));
 			CheckArchiveStorable();
@@ -620,12 +623,12 @@ export namespace biscuit {
 
 		//-----------------------------------------------------------------------------
 		// std::pair
-		template < typename T1, typename T2 > requires (is_storing)
+		template < typename T1, typename T2 > requires (bStoring)
 		TArchive& operator << (const std::pair<T1, T2>& p) {
 			CheckArchiveStorable();
 			return *this << p.first << p.second;
 		}
-		template < typename T1, typename T2 > requires (is_loading)
+		template < typename T1, typename T2 > requires (bLoading)
 		TArchive& operator >> (std::pair<T1, T2>& p) {
 			CheckArchiveLoadable();
 			return *this >> p.first >> p.second;
@@ -634,7 +637,7 @@ export namespace biscuit {
 		TArchive& operator & (std::pair<T1, T2>& p) {
 			return (*this) & p.first & p.second;
 		}
-		template < typename T1, typename T2 > requires (is_storing)
+		template < typename T1, typename T2 > requires (bStoring)
 		TArchive& operator & (std::pair<T1, T2> const& p) {
 			CheckArchiveStorable();
 			return *this << (p);
@@ -642,14 +645,14 @@ export namespace biscuit {
 
 	protected:
 		constexpr inline void CheckArchiveLoadable() {
-			if constexpr (is_storing && is_loading) {
+			if constexpr (bStoring && bLoading) {
 				if (m_bStore) {
 					throw std::ios_base::failure(BSC__FUNCSIG "NOT an archive for loading!");
 				}
 			}
 		}
 		constexpr inline void CheckArchiveStorable() {
-			if constexpr (is_storing && is_loading) {
+			if constexpr (bStoring && bLoading) {
 				if (!m_bStore) {
 					throw std::ios_base::failure(BSC__FUNCSIG "NOT an archive for storing!");
 				}

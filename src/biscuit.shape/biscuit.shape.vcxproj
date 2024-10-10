@@ -103,12 +103,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="biscuit.shape.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\biscuit\biscuit.vcxproj">
       <Project>{4fc2059e-06a9-4b82-861d-ed3cb583303f}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="biscuit.shape.ixx" />
+    <ClCompile Include="entities.ixx" />
+    <ClCompile Include="shape.ixx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

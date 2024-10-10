@@ -99,7 +99,12 @@ export namespace biscuit {
 
 		auto operator <=> (this_t const&) const = default;
 
-
+		void SetRectEmptyForMinMax2d() {
+			this->l =  std::numeric_limits<value_t>::max();
+			this->t =  std::numeric_limits<value_t>::max();
+			this->r = -std::numeric_limits<value_t>::max();
+			this->b = -std::numeric_limits<value_t>::max();
+		}
 		//=========================================================================================================================
 		//--------------------------------------------------------------------------------------------------------------------------
 		// get member as array
@@ -369,10 +374,10 @@ export namespace biscuit {
 	using sBounds3i = TBounds<int, 3, false>;
 	using sBounds2d = TBounds<double, 2, false>;
 	using sBounds3d = TBounds<double, 3, false>;
-	using xBounds2i = TBounds<int, 2, true>;
-	using xBounds3i = TBounds<int, 3, true>;
-	using xBounds2d = TBounds<double, 2, true>;
-	using xBounds3d = TBounds<double, 3, true>;
+	using sBounds2ri = TBounds<int, 2, true>;
+	using sBounds3ri = TBounds<int, 3, true>;
+	using sBounds2rd = TBounds<double, 2, true>;
+	using sBounds3rd = TBounds<double, 3, true>;
 
 	static_assert(requires(sBounds2d ) { sBounds2d{1.0, 2.0, 3.0, 4.0}; });
 	static_assert(requires(sBounds3d ) { sBounds3d{1.0, 2.0, 3.0, 4.0, 5, 6}; });

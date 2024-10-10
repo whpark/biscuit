@@ -26,6 +26,7 @@
             ]
         },
         "tinyspline",
-        "winreg"
+        "winreg",
+        "magic-enum"
     ]
 }
