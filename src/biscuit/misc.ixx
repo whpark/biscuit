@@ -45,6 +45,11 @@ export namespace biscuit {
 	BSC__NODISCARD constexpr auto ToLocalTime_ms(auto t) { return ToLocalTime<std::chrono::milliseconds>(t); }
 	BSC__NODISCARD constexpr auto ToLocalTime_us(auto t) { return ToLocalTime<std::chrono::microseconds>(t); }
 
+	BSC__NODISCARD constexpr auto To_s(auto t) { return std::chrono::duration_cast<std::chrono::seconds>(t); }
+	BSC__NODISCARD constexpr auto To_ms(auto t) { return std::chrono::duration_cast<std::chrono::milliseconds>(t); }
+	BSC__NODISCARD constexpr auto To_us(auto t) { return std::chrono::duration_cast<std::chrono::microseconds>(t); }
+
+
 	template < concepts::string_elem tchar, size_t N >
 	struct xStringLiteral {
 		tchar str[N];

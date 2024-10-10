@@ -7,12 +7,17 @@
 - misc : miscellaneous
 
 ### dependencies
-- boost https://www.boost.org/
+- // boost https://www.boost.org/
+- asio https://think-async.com/Asio/
 - catch2 https://github.com/catchorg/Catch2
 - cereal https://uscilab.github.io/cereal/
 - fmt https://fmt.dev
 - glaze https://github.com/stephenberry/glaze
 - eigen https://eigen.tuxfamily.org/
-- opencv https://opencv.org/
+- libiconv https://www.gnu.org/software/libiconv/
+- simdutf https://github.com/simdutf/simdutf
 - spdlog https://github.com/gabime/spdlog
 - units https://github.com/nholthaus/units
+- opencv https://opencv.org/
+- winreg https://github.com/GiovanniDicanio/WinReg
+- 
