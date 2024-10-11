@@ -39,12 +39,20 @@
 */
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <cereal/cereal.hpp>
+#include "biscuit/macro.h"
+#include "biscuit/dependencies_fmt.h"
+#include "biscuit/dependencies_eigen.h"
+#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies_units.h"
+#include "biscuit/dependencies_cereal.h"
 
 export module biscuit.shape.entities;
 import std;
 import biscuit;
 import biscuit.shape.shape;
+import biscuit.shape.entities.layer;
+import biscuit.shape.entities.dot;
+import biscuit.shape.entities.circle;
 
 #if 0
 
@@ -97,12 +105,12 @@ export namespace biscuit::shape {
 		virtual void FlipZ() override { for (auto& b : m_boundaries) b.FlipZ(); }
 		virtual void Reverse() override {
 		}
-		virtual void Transform(xCoordTrans3d const& ct, bool bRightHanded) override {
+		virtual void Transform(ct_t const& ct, bool bRightHanded) override {
 		};
-		virtual bool UpdateBoundary(rect_t& rectBoundary) const override {
+		virtual bool UpdateBounds(rect_t& rectBoundary) const override {
 			bool b{};
 			for (auto const& bound : m_boundaries) {
-				b |= bound.UpdateBoundary(rectBoundary);
+				b |= bound.UpdateBounds(rectBoundary);
 			}
 			return b;
 		}
@@ -239,8 +247,8 @@ export namespace biscuit::shape {
 		virtual void FlipY() override {}
 		virtual void FlipZ() override {}
 		virtual void Reverse() override {}
-		virtual void Transform(xCoordTrans3d const& ct, bool bRightHanded /*= ct.IsRightHanded()*/) override {};
-		virtual bool UpdateBoundary(rect_t&) const override { return false; };
+		virtual void Transform(ct_t const& ct, bool bRightHanded /*= ct.IsRightHanded()*/) override {};
+		virtual bool UpdateBounds(rect_t&) const override { return false; };
 		virtual void Draw(ICanvas& canvas) const override {
 			//xShape::Draw(canvas);
 		};

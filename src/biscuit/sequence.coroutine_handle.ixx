@@ -126,6 +126,8 @@ export namespace biscuit::seq {
 	/// @brief coroutine handle
 	class ICoroutineHandle {	// interface, pure virtual
 	public:
+		virtual ~ICoroutineHandle() = default;
+
 		virtual void Destroy() = 0;
 		virtual bool Valid() const = 0;
 		virtual void Resume() = 0;

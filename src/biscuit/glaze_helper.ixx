@@ -64,14 +64,14 @@ export namespace biscuit {
 	//	};
 	//};
 
-}	// namespace gtl;
+}	// namespace biscuit;
 
 
 //template <>
 //struct glz::detail::to_json<cv::Mat> {
 //	template <auto Opts, is_context Ctx, class B, class IX>
 //	inline static void op(auto&& value, Ctx&& ctx, B&& b, IX&& ix) {
-//		to_json<gtl::cvMat>::op<Opts>(gtl::cvMat(value), std::forward<Ctx>(ctx), std::forward<B>(b), std::forward<IX>(ix));
+//		to_json<biscuit::cvMat>::op<Opts>(biscuit::cvMat(value), std::forward<Ctx>(ctx), std::forward<B>(b), std::forward<IX>(ix));
 //	}
 //};
 //
@@ -79,8 +79,8 @@ export namespace biscuit {
 //struct glz::detail::from_json<cv::Mat> {
 //	template <auto Opts, is_context Ctx, class B, class IX>
 //	inline static void op(auto&& value, Ctx&& ctx, B&& b, IX&& ix) {
-//		gtl::cvMat m;
-//		from_json<gtl::cvMat>::op<Opts>(m, std::forward<Ctx>(ctx), std::forward<B>(b), std::forward<IX>(ix));
+//		biscuit::cvMat m;
+//		from_json<biscuit::cvMat>::op<Opts>(m, std::forward<Ctx>(ctx), std::forward<B>(b), std::forward<IX>(ix));
 //		value = m;
 //	}
 //};
@@ -133,7 +133,7 @@ export namespace biscuit {
 //struct glz::detail::to_json<std::wstring> {
 //	template <auto Opts, is_context Ctx, class B, class IX>
 //	inline static void op(auto&& value, Ctx&& ctx, B&& b, IX&& ix) {
-//		to_json<std::string>::op<Opts>(gtl::WtoU8A(value), std::forward<Ctx>(ctx), std::forward<B>(b), std::forward<IX>(ix));
+//		to_json<std::string>::op<Opts>(biscuit::WtoU8A(value), std::forward<Ctx>(ctx), std::forward<B>(b), std::forward<IX>(ix));
 //	}
 //};
 //
@@ -143,7 +143,7 @@ export namespace biscuit {
 //	GLZ_ALWAYS_INLINE static void op(auto&& value, Ctx&& ctx, B&& b, IX&& ix) {
 //		std::string str;
 //		from_json<std::string>::op<Opts>(str, std::forward<Ctx>(ctx), std::forward<B>(b), std::forward<IX>(ix));
-//		value = gtl::U8toW(str);
+//		value = biscuit::U8toW(str);
 //	}
 //};
 //
@@ -171,7 +171,7 @@ export namespace biscuit {
 //struct glz::detail::to_json<std::u32string> {
 //	template <auto Opts, is_context Ctx, class B, class IX>
 //	inline static void op(auto&& value, Ctx&& ctx, B&& b, IX&& ix) {
-//		to_json<std::u8string>::op<Opts>(gtl::ToStringU8(value), std::forward<Ctx>(ctx), std::forward<B>(b), std::forward<IX>(ix));
+//		to_json<std::u8string>::op<Opts>(biscuit::ToStringU8(value), std::forward<Ctx>(ctx), std::forward<B>(b), std::forward<IX>(ix));
 //	}
 //};
 //
@@ -181,7 +181,7 @@ export namespace biscuit {
 //	GLZ_ALWAYS_INLINE static void op(auto&& value, Ctx&& ctx, B&& b, IX&& ix) {
 //		std::u8string str;
 //		from_json<std::u8string>::op<Opts>(str, std::forward<Ctx>(ctx), std::forward<B>(b), std::forward<IX>(ix));
-//		value = gtl::ToStringU32(str);
+//		value = biscuit::ToStringU32(str);
 //	}
 //};
 //

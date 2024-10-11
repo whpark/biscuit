@@ -173,6 +173,9 @@ export namespace biscuit {
 		}
 
 		//--------------------------------------------------------------------------------------------------------------------------
+		value_t Width() const { return this->r - this->l; }
+		value_t Height() const { return this->b - this->t; }
+		value_t Depth() const requires (dim >= 3) { return this->bk - this->f; }
 
 		BSC__NODISCARD static this_t Zero() {
 			return this_t{};
@@ -210,18 +213,18 @@ export namespace biscuit {
 		auto Area() {
 			if constexpr (std::is_integral_v<value_t>) {
 				using return_t = std::conditional_t<sizeof(value_t) <= 2, int, int64_t>;
-				return (return_t)this->width * (return_t)this->height;
+				return (return_t)this->Width() * (return_t)this->Height();
 			}
 			else
-				return this->width * this->height;
+				return this->Width() * this->Height();
 		}
 		auto Volume() requires (dim >= 3) {
 			if constexpr (std::is_integral_v<value_t>) {
 				using return_t = std::conditional_t<sizeof(value_t) <= 2, int, int64_t>;
-				return (return_t)this->width * (return_t)this->height * (return_t)this->depth;
+				return (return_t)this->Width() * (return_t)this->Height() * (return_t)this->Depth();
 			}
 			else
-				return this->width * this->height * this->depth;
+				return this->Width() * this->Height() * this->Depth();
 		}
 
 
@@ -351,15 +354,15 @@ export namespace biscuit {
 		constexpr this_t operator & (this_t const& b) { return this_t(*this) &= b; }
 		constexpr this_t operator | (this_t const& b) { return this_t(*this) |= b; }
 
-		bool UpdateBoundary(coord_point_t const& pt) {
+		bool UpdateBounds(coord_point_t const& pt) {
 			bool bModified{};
-			for (coord_size_t i {}; i < pt.size(); i++) {
+			for (size_t i {}; i < pt.count(); i++) {
 				if (pt0()[i] > pt[i]) {
 					bModified = true;
 					pt0()[i] = pt[i];
 				}
 			}
-			for (coord_size_t i = 0; i < pt.size(); i++) {
+			for (size_t i = 0; i < pt.count(); i++) {
 				if (pt1()[i] < pt[i]) {
 					bModified = true;
 					pt1()[i] = pt[i];

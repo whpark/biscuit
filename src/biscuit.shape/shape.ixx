@@ -12,8 +12,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "biscuit/macro.h"
+#include "biscuit/dependencies_fmt.h"
+#include "biscuit/dependencies_eigen.h"
 #include "biscuit/dependencies_glaze.h"
-#include <cereal/cereal.hpp>
+#include "biscuit/dependencies_units.h"
+#include "biscuit/dependencies_cereal.h"
 
 export module biscuit.shape.shape;
 import std;
@@ -21,11 +24,12 @@ import biscuit;
 
 export namespace biscuit::shape {
 
-	using char_t = char;
-	using string_t = std::string;
+	using char_t = wchar_t;
+	using string_t = std::wstring;
 	using point_t = sPoint3d;
-	using rect_t = sRect3d;
-	using bounds_t = sBounds3d;
+	//using rect_t = sRect3d;
+	using rect_t = sBounds3d;
+	using ct_t = xCoordTrans3d;
 	struct line_t { point_t pt0, pt1; };
 
 	//-------------------------------------------------------------------------
@@ -162,6 +166,7 @@ export namespace biscuit::shape {
 		using this_t = xShape;
 
 	public:
+		constexpr static inline uint32_t s_version{1u};
 		color_t m_color{};
 		int m_eLineType{};
 		string_t m_strLineType;
@@ -179,7 +184,6 @@ export namespace biscuit::shape {
 
 	public:
 		xShape() = default;
-	private:
 		xShape(xShape const&) = default;
 		xShape(xShape&&) = default;
 		xShape& operator = (xShape const&) = default;
@@ -188,7 +192,7 @@ export namespace biscuit::shape {
 		virtual ~xShape() {}
 
 	public:
-		virtual std::unique_ptr<xShape> clone() = 0;
+		virtual std::unique_ptr<xShape> clone() const = 0;
 		virtual eSHAPE GetShapeType() const { return eSHAPE::none; }
 
 		auto operator <=> (xShape const&) const = default;
@@ -206,6 +210,7 @@ export namespace biscuit::shape {
 				"color", &GLZ_T::m_color, "LineType", &GLZ_T::m_eLineType, "LineTypeName", &GLZ_T::m_strLineType, "LineWeight", &GLZ_T::m_lineWeight,
 				"Visible", &GLZ_T::m_bVisible, "Transparent", &GLZ_T::m_bTransparent, "Cookie", &GLZ_T::m_cookie);
 		};
+
 		template < typename archive >
 		friend void serialize(archive& ar, xShape& shape, unsigned int const file_version) {
 			ar & shape.m_color.Value();
@@ -222,15 +227,15 @@ export namespace biscuit::shape {
 		static string_t const& GetShapeName(eSHAPE eType);
 
 		//virtual point_t PointAt(double t) const = 0;
-		virtual std::optional<std::pair<point_t, point_t>> GetStartEndPoint() const = 0;
+		virtual std::optional<line_t> GetStartEndPoint() const = 0;
 		virtual void FlipX() = 0;
 		virtual void FlipY() = 0;
 		virtual void FlipZ() = 0;
 		virtual void Reverse() = 0;
-		virtual void Transform(xCoordTrans3d const& ct, bool bRightHanded /*= ct.IsRightHanded()*/) = 0;
-		virtual bool UpdateBounds(bounds_t&) const = 0;
-		virtual bounds_t GetBounds() const {
-			bounds_t bounds;
+		virtual void Transform(ct_t const& ct, bool bRightHanded /*= ct.IsRightHanded()*/) = 0;
+		virtual bool UpdateBounds(rect_t&) const = 0;
+		virtual rect_t GetBounds() const {
+			rect_t bounds;
 			bounds.SetRectEmptyForMinMax2d();
 			UpdateBounds(bounds);
 			return bounds;
@@ -250,10 +255,12 @@ export namespace biscuit::shape {
 	};
 
 
-	bool CohenSutherlandLineClip(biscuit::sRect2d roi, biscuit::sPoint2d& pt0, biscuit::sPoint2d& pt1);
+	bool CohenSutherlandLineClip(sBounds2d roi, sBounds2d& pt0, sBounds2d& pt1);
+
+	using shapes_t = TSmartPtrContainer<xShape, TCloneablePtr, std::deque>;
 
 }
 
 export CEREAL_CLASS_VERSION(biscuit::shape::sLineType, 1);
-//BOOST_CLASS_VERSION(biscuit::shape::xShape, 1);
+export CEREAL_CLASS_VERSION(biscuit::shape::xShape, biscuit::shape::xShape::s_version);
 

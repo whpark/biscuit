@@ -29,6 +29,24 @@ namespace biscuit {
 		TCloneablePtr& operator = (this_t&& other) { base_t::operator = (std::move(other)); return *this; }
 		// copy operator
 		TCloneablePtr& operator = (this_t const& other) { *this = other ? std::move(other->clone()) : nullptr; return*this;}
-	};
 
+		bool operator == (this_t const& other) const {
+			bool bEmpty = !*this;
+			bool bEmptyOther = !other;
+			if (bEmpty and bEmptyOther) return true;
+			else if (bEmpty or bEmptyOther) return false;
+			return **this == *other;
+		}
+		bool operator != (this_t const& other) const { return !(*this == other); }
+		bool operator < (this_t const& other) const {
+			bool bEmpty = !*this;
+			bool bEmptyOther = !other;
+			if (bEmpty and bEmptyOther) return false;
+			else if (bEmpty) return true;
+			else if (bEmptyOther) return false;
+			return **this < *other;
+		}
+		bool operator > (this_t const& other) const { return other < *this; }
+	};
 }
+

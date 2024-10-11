@@ -1,52 +1,39 @@
-﻿//////////////////////////////////////////////////////////////////////
+﻿module;
+
+//////////////////////////////////////////////////////////////////////
 //
 // canvas.h:
 //
 // PWH
 // 2017.07.20
 // 2021.05.28 from QCanvas -> canvas
+// 2024-10-10. biscuit
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#include "biscuit/macro.h"
+#include "biscuit/dependencies_fmt.h"
+#include "biscuit/dependencies_eigen.h"
+#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies_units.h"
+#include "biscuit/dependencies_cereal.h"
+#include "biscuit/dependencies_opencv.h"
 
-//#include <afxwin.h>
+export module biscuit.shape.canvas;
+import std;
+import biscuit;
+import biscuit.shape.shape;
 
-#include "shape_primitives.h"
-
-namespace gtl::shape {
-#pragma pack(push, 8)
-
-#pragma warning(push)
-#pragma warning(disable: 4275)
-
-	//=============================================================================================================================
-	// CoordSystem
-
-	////-------------------------------------------------------------------------
-	///// @brief 3점(or 2점) 얼라인.
-	//class CCoordSystem : public xCoordTransChain {
-	//public:
-	//	//ct_t ctShape2Real_;	// DXF 좌표계에서 실 좌표계.
-	//	//ct_t ctAlign_;			// Align 미세 보정. (3 점 보정)
-	//	//ct_t ctReal2Canvas_;	// 실좌표계 -> Canvas(ex, Scanner) 좌표계
-
-	//public:
-	//	//CCoordSystem() = default;
-	//	//CCoordSystem(const CCoordSystem&) = default;
-	//	//CCoordSystem& operator = (const CCoordSystem&) = default;
-	//	//CQCoordSystem(CQCoordSystem&&) = default;
-	//	//CQCoordSystem& operator = (CQCoordSystem&&) = default;
-
-	//	GTL__DYNAMIC_VIRTUAL_BASE(CCoordSystem)
-	//};
+export namespace biscuit::shape {
+//#pragma warning(push)
+//#pragma warning(disable: 4275)
 
 	//class xShape;
 	class xText;
 	class xMText;
 
 	class ICanvas;
-	extern GTL__SHAPE_API void Canvas_Spline(ICanvas& canvas, int degree, std::span<point_t const> pts, std::span<double const> knots, bool bLoop);
+	void Canvas_Spline(ICanvas& canvas, int degree, std::span<point_t const> pts, std::span<double const> knots, bool bLoop);
 
 	//=============================================================================================================================
 	// ICanvas : Interface of Canvas
@@ -84,11 +71,14 @@ namespace gtl::shape {
 		void SetCT(ICoordTrans const& ct) {
 			if (auto* pCT = dynamic_cast<xCoordTransChain const*>(&ct); pCT) {
 				m_ct = *pCT;
-				m_ct.GetInv(m_ctI);
+				if (auto ctI = m_ct.GetInverse())
+					m_ctI = std::move(*(xCoordTransChain*)ctI.release());
+				else
+					m_ctI.Init();
 			} else {
-				m_ct.clear();
+				m_ct.Init();
 				m_ct *= ct;
-				m_ctI.clear();
+				m_ctI.Init();
 				if (auto ctI = ct.GetInverse())
 					m_ctI *= *ctI;
 			}
@@ -106,7 +96,7 @@ namespace gtl::shape {
 
 		void MoveTo(point_t pt) {
 			pt = Trans(pt);
-			if ( pt.IsAllValid() and (m_min_jump_length != 0.0) and (m_ptLast.Distance(pt) < m_min_jump_length) )
+			if ( pt.IsAllValid() and (m_min_jump_length != 0.0) and (m_ptLast.GetDistance(pt) < m_min_jump_length) )
 				return;
 			MoveTo_Target(pt);
 			m_ptLast = pt;
@@ -125,31 +115,32 @@ namespace gtl::shape {
 			MoveTo(pt0);
 			LineTo(pt1);
 		}
-		virtual void Arc(point_t const& ptCenter, double radius, deg_t t0, deg_t tLength) {
-			int n = Round(std::abs(tLength * std::numbers::pi * radius / m_target_interpolation_inverval));
-			deg_t t1 = t0+tLength;
-			MoveTo(radius * point_t{cos(t0), sin(t0), .0}+ptCenter);
+		virtual void Arc(point_t const& ptCenter, double radius, rad_t t0, rad_t tLength) {
+			int n = Round(std::abs(rad_t(tLength).value() * radius / m_target_interpolation_inverval));
+			rad_t t1 = t0+tLength;
+			MoveTo(radius * point_t{units::math::cos(t0), units::math::sin(t0), .0}+ptCenter);
 			for (int i = 1; i <= n; i++) {
-				deg_t t {std::lerp(t0, t1, (double)i/n)};
+				rad_t t { t0 + (t1-t0)*(double)i/n };
 				constexpr static auto m2pi = std::numbers::pi*2;
-				double c = radius * cos(t);
-				double s = radius * sin(t);
-				xPoint2d pt(ptCenter.x + c, ptCenter.y+s);
+				double c = radius * units::math::cos(t);
+				double s = radius * units::math::sin(t);
+				sPoint2d pt(ptCenter.x + c, ptCenter.y+s);
 				LineTo(pt);
 			}
 		}
-		virtual void Ellipse(point_t const& ptCenter, double radius1, double radius2, deg_t tFirstAxis, deg_t t0, deg_t tLength) {
+		virtual void Ellipse(point_t const& ptCenter, double radius1, double radius2, rad_t tFirstAxis, rad_t t0, rad_t tLength) {
 			xCoordTrans2d ct;
-			ct.Init(1.0, (rad_t)tFirstAxis, point_t{}, ptCenter);
+			//ct.Init(1.0, (rad_t)tFirstAxis, point_t{}, ptCenter);
+			ct.SetFromAngle2d(tFirstAxis, point_t{}, ptCenter);
 
-			deg_t t1 = t0 + tLength;
-			MoveTo(ct(point_t{radius1*cos(t0), radius2*sin(t0)}));
-			int n = Round<int, double>(tLength * std::numbers::pi * std::max(radius1, radius2) / m_target_interpolation_inverval);
+			rad_t t1 = t0 + tLength;
+			MoveTo(ct(point_t{radius1*units::math::cos(t0), radius2*units::math::sin(t0)}));
+			int n = Round(rad_t(tLength).value() * std::max(radius1, radius2) / m_target_interpolation_inverval);
 			for (int i = 0; i <= n; i++) {
-				deg_t t {std::lerp(t0, t1, (double)i/n)};
+				rad_t t { t0 + (t0-t1) * (double)i / n };
 				constexpr static auto m2pi = std::numbers::pi*2;
-				double c = cos(t);
-				double s = sin(t);
+				double c = units::math::cos(t);
+				double s = units::math::sin(t);
 				LineTo(ct(point_t{radius1*c, radius2*s}));
 			}
 		}
@@ -161,7 +152,7 @@ namespace gtl::shape {
 		virtual void Text(xMText const& text) {
 		}
 
-		virtual std::optional<xRect2d> GetClippingRect() {
+		virtual std::optional<sBounds2d> GetClippingRect() {
 			return std::nullopt;
 		}
 
@@ -174,7 +165,7 @@ namespace gtl::shape {
 
 	//=============================================================================================================================
 	// IQDeviceScanner : Interface of Canvas
-	class GTL__SHAPE_CLASS ICanvasScanner : public ICanvas {
+	class ICanvasScanner : public ICanvas {
 		friend class ICanvas;
 
 	public:
@@ -200,7 +191,7 @@ namespace gtl::shape {
 
 	//=============================================================================================================================
 	// ICanvas : Interface of Canvas
-	class GTL__SHAPE_CLASS xCanvasMat : public ICanvas {
+	class xCanvasMat : public ICanvas {
 	public:
 		cv::Mat& m_img;
 
@@ -234,11 +225,11 @@ namespace gtl::shape {
 		//virtual void LineRelTo(const point_t& pt, bool bShowDirection = false) { LineTo(m_ptLast + pt, bShowDirection); }
 		//virtual void ArcRelTo(const point_t& ptCenter, deg_t dTLength) { ArcTo(m_ptLast + ptCenter, dTLength); }
 	
-		std::optional<xRect2d> GetClippingRect() override {
-			xRect2d rc;
-			rc.pt0() = m_ctI(xPoint2d(0, 0));
-			rc.pt1() = m_ctI(xPoint2d(m_img.cols, m_img.rows));
-			rc.NormalizeRect();
+		std::optional<sBounds2d> GetClippingRect() override {
+			sBounds2d rc;
+			rc.pt0() = m_ctI(sPoint2d(0.0, 0.0));
+			rc.pt1() = m_ctI(sPoint2d(m_img.cols, m_img.rows));
+			rc.Normalize();
 			return rc;
 		}
 	};
@@ -265,7 +256,7 @@ namespace gtl::shape {
 		virtual void Arc(point_t const& ptCenter, double radius, deg_t t0, deg_t tLength) override {
 			if constexpr (round_down_arc) {
 				point_t ptC = Trans(ptCenter);
-				xPoint3i ptCi((int)ptC.x, (int)ptC.y, (int)ptC.z);	// RoundDrop
+				sPoint3i ptCi((int)ptC.x, (int)ptC.y, (int)ptC.z);	// RoundDrop
 				ptC = TransI(ptCi);
 				ICanvas::Arc(ptC, radius, t0, tLength);
 			} else {
@@ -413,8 +404,6 @@ namespace gtl::shape {
 	//GTL__API std::vector<point_t> AddLaserOffsetToLine(std::span<point_t const> pts, double dThickness, bool bLoop);
 
 
-#pragma warning(pop)
-#pragma pack(pop)
-}
-
+//#pragma warning(pop)
+}	// namespace biscuit::shape
 

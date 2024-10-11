@@ -185,4 +185,5 @@ export namespace biscuit {
 		return rcSafe;
 	};
 
-}	// namespace gtl
+}	// namespace biscuit
+

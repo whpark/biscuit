@@ -18,10 +18,8 @@
 #include "biscuit/dependencies_glaze.h"
 #include "biscuit/dependencies_units.h"
 
-
 #include <cereal/types/polymorphic.hpp>
 //#include <cereal/archives/binary.hpp>
-
 
 export module biscuit.coord.transform;
 import std;
@@ -101,6 +99,8 @@ export namespace biscuit {
 		}
 
 	public:
+		void Init() { m_chain.clear(); }
+
 		xCoordTransChain& operator *= (xCoordTransChain const& B)	{
 			std::ranges::copy(B.m_chain, std::back_inserter(m_chain));
 			return *this;
@@ -350,6 +350,10 @@ export namespace biscuit {
 				static_assert(false);
 			}
 		}
+		void SetFromAngle2d(rad_t angle, point_t const& origin, point_t const& offset) {
+			m_transform.matrix().topLeftCorner<2, 2>() = Eigen::Rotation2D<double>(angle.value()).matrix();
+			AdjustOffset(origin, offset);
+		}
 
 		//-------------------------------------------------------------------------
 		double Scale() const {
@@ -414,4 +418,4 @@ export namespace biscuit {
 	using xCoordTrans3d = TCoordTransMat<3>;
 
 #pragma pack(pop)
-}	// namespace gtl
+}	// namespace biscuit

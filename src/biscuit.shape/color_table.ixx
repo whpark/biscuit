@@ -1,18 +1,24 @@
-﻿//////////////////////////////////////////////////////////////////////
+﻿module;
+
+//////////////////////////////////////////////////////////////////////
 //
 // canvas.h:
 //
 // PWH
 // 2017.07.20
 // 2021.06.01 from Mocha
+// 2024-10-10. biscuit
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#pragma once
+export module biscuit.shape.color_table;
+import std;
+import biscuit;
+import biscuit.shape.shape;
 
-namespace gtl::shape {
+export namespace biscuit::shape {
 
-	constexpr static inline std::array<color_t, 256> const colorTable_s {{
+	constexpr std::array<color_t, 256> const colorTable_s {{
 		ColorRGBA( (uint8_t)(255*0),        (uint8_t)(255*0),        (uint8_t)(255*0) ),                        // unused
 		ColorRGBA( (uint8_t)(255*1),        (uint8_t)(255*0),        (uint8_t)(255*0) ),                        // 1
 		ColorRGBA( (uint8_t)(255*1),        (uint8_t)(255*1),        (uint8_t)(255*0) ),        
@@ -271,4 +277,5 @@ namespace gtl::shape {
 		ColorRGBA( (uint8_t)(255*1),        (uint8_t)(255*1),        (uint8_t)(255*1) ),                 // 255
 	}};
 
-}	// namespace gtl::shape
+}	// export namespace biscuit::shape
+

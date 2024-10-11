@@ -24,5 +24,26 @@
     <ClCompile Include="shape.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="entities.impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.layer.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="color_table.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="canvas.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.dot.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.circle.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.arc.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
