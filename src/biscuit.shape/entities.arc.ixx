@@ -63,30 +63,30 @@ export namespace biscuit::shape {
 				m_angle_start = -m_angle_start;
 		}
 		point_t At(rad_t t) const { return m_ptCenter + m_radius * point_t{units::math::cos(t), units::math::sin(t)}; };
-		virtual bool UpdateBounds(rect_t& rectBoundary) const override {
+		virtual bool UpdateBounds(rect_t& bounds) const override {
 			bool bResult{};
 			// todo : ... upgrade?
 			rect_t rectMax(m_ptCenter, m_ptCenter);
 			rectMax.pt0() -= point_t{m_radius, m_radius};
 			rectMax.pt1() += point_t{m_radius, m_radius};
-			if (rectBoundary.Contains(rectMax))
+			if (bounds.Contains(rectMax))
 				return bResult;
 			auto start = m_angle_start;
 			if (start < 0_deg)
 				start += 360_deg;
 			auto end = start + m_angle_length;
-			bResult |= rectBoundary.UpdateBounds(At(start));
-			bResult |= rectBoundary.UpdateBounds(At(end));
+			bResult |= bounds.UpdateBounds(At(start));
+			bResult |= bounds.UpdateBounds(At(end));
 			if (start > end)
 				std::swap(start, end);
 			int count{};
 			int iend = (int)end.value();
 			for (int t = (int)std::floor((start/90.0_deg).value())*90+90; t <= iend; t += 90) {
 				switch (t%360) {
-				case 0 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{m_radius, 0.}); break;
-				case 90 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{0., m_radius}); break;
-				case 180 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{-m_radius, 0.}); break;
-				case 270 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{0., -m_radius}); break;
+				case 0 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{m_radius, 0.}); break;
+				case 90 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{0., m_radius}); break;
+				case 180 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{-m_radius, 0.}); break;
+				case 270 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{0., -m_radius}); break;
 				}
 				if (count++ >=4)
 					break;
@@ -97,29 +97,6 @@ export namespace biscuit::shape {
 			xShape::Draw(canvas);
 			canvas.Arc(m_ptCenter, m_radius, m_angle_start, m_angle_length);
 		}
-		//virtual void PrintOut(std::wostream& os) const override {
-		//	base_t::PrintOut(os);
-		//	fmt::print(os, L"\tangle_start:{} deg, length:{} deg\n", (double)(deg_t)m_angle_start, (double)(deg_t)m_angle_length);
-		//}
-
-		//virtual bool LoadFromCADJson(json_t& _j) override {
-		//	xCircle::LoadFromCADJson(_j);
-		//	using namespace std::literals;
-		//	gtl::bjson j(_j);
-
-		//	m_angle_start = deg_t{(double)j["staangle"sv]};
-		//	bool bCCW = j["isccw"sv].value_or(0) != 0;
-		//	deg_t angle_end { (double)j["endangle"sv] };
-		//	m_angle_length = angle_end - m_angle_start;
-		//	if (bCCW) {
-		//		if (m_angle_length < 0_deg)
-		//			m_angle_length += 360_deg;
-		//	} else {
-		//		if (m_angle_length > 0_deg)
-		//			m_angle_length -= 360_deg;
-		//	}
-		//	return true;
-		//}
 
 		deg_t AdjustAngle(deg_t angle) const {
 			angle = units::math::fmod(angle, 360._deg);

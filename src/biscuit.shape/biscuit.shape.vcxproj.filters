@@ -66,6 +66,12 @@
     <ClCompile Include="entities.text.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="entities.insert.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.hatch.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shape_macro.h">

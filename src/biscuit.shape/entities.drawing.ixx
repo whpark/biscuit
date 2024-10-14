@@ -137,7 +137,7 @@ export namespace biscuit::shape {
 			return m_layers.front();
 		}
 
-		bool AddEntity(std::unique_ptr<xShape> rShape, std::map<string_t, xLayer*> const& mapLayers, std::map<string_t, xBlock*> const& mapBlocks, rect_t& rectBoundary);
+		bool AddEntity(std::unique_ptr<xShape> rShape, std::map<string_t, xLayer*> const& mapLayers, std::map<string_t, xBlock*> const& mapBlocks, rect_t& bounds);
 
 	public:
 		//virtual bool LoadFromCADJson(json_t& _j) override;

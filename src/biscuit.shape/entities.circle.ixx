@@ -39,7 +39,6 @@ export namespace biscuit::shape {
 	public:
 		BSC__SHAPE_BASE(xCircle, xShape, eSHAPE::circle_xy, 1u, m_ptCenter, m_radius, m_angle_length);
 
-		//virtual point_t PointAt(double t) const override {};
 		virtual std::optional<line_t> GetStartEndPoint() const override {
 			auto pt = m_ptCenter+point_t{m_radius,0,0};
 			return line_t{ pt, pt };
@@ -55,30 +54,16 @@ export namespace biscuit::shape {
 			if (!bRightHanded)
 				m_angle_length = -m_angle_length;
 		}
-		virtual bool UpdateBounds(rect_t& rectBoundary) const override {
+		virtual bool UpdateBounds(rect_t& bounds) const override {
 			bool bResult{};
-			bResult |= rectBoundary.UpdateBounds(point_t(m_ptCenter.x-m_radius, m_ptCenter.y-m_radius, m_ptCenter.z));
-			bResult |= rectBoundary.UpdateBounds(point_t(m_ptCenter.x+m_radius, m_ptCenter.y+m_radius, m_ptCenter.z));
+			bResult |= bounds.UpdateBounds(point_t(m_ptCenter.x-m_radius, m_ptCenter.y-m_radius, m_ptCenter.z));
+			bResult |= bounds.UpdateBounds(point_t(m_ptCenter.x+m_radius, m_ptCenter.y+m_radius, m_ptCenter.z));
 			return bResult;
 		};
 		virtual void Draw(ICanvas& canvas) const override {
 			xShape::Draw(canvas);
 			canvas.Arc(m_ptCenter, m_radius, 0._deg, m_angle_length);
 		}
-		//virtual void PrintOut(std::wostream& os) const override {
-		//	xShape::PrintOut(os);
-		//	fmt::print(os, L"\tcenter({},{},{}), r {}\n", m_ptCenter.x, m_ptCenter.y, m_ptCenter.z, m_radius);
-		//}
-
-		//virtual bool LoadFromCADJson(json_t& _j) override {
-		//	xShape::LoadFromCADJson(_j);
-		//	using namespace std::literals;
-		//	gtl::bjson j(_j);
-
-		//	m_ptCenter = PointFrom(j["basePoint"sv]);
-		//	m_radius = j["radious"sv];
-		//	return true;
-		//}
 	};
 }	// namespace biscuit::shape
 BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xCircle);
@@ -94,7 +79,6 @@ export namespace biscuit::shape {
 	public:
 		BSC__SHAPE_BASE(xArc, xCircle, eSHAPE::arc_xy, 1u, m_angle_start);
 
-		//virtual point_t PointAt(double t) const override {};
 		virtual std::optional<line_t> GetStartEndPoint() const override {
 			auto c = units::math::cos(m_angle_start);
 			auto s = units::math::sin(m_angle_start);
@@ -118,30 +102,30 @@ export namespace biscuit::shape {
 				m_angle_start = -m_angle_start;
 		}
 		point_t At(rad_t t) const { return m_ptCenter + m_radius * point_t{units::math::cos(t), units::math::sin(t)}; };
-		virtual bool UpdateBounds(rect_t& rectBoundary) const override {
+		virtual bool UpdateBounds(rect_t& bounds) const override {
 			bool bResult{};
 			// todo : ... upgrade?
 			rect_t rectMax(m_ptCenter, m_ptCenter);
 			rectMax.pt0() -= point_t{m_radius, m_radius};
 			rectMax.pt1() += point_t{m_radius, m_radius};
-			if (rectBoundary.Contains(rectMax))
+			if (bounds.Contains(rectMax))
 				return bResult;
 			auto start = m_angle_start;
 			if (start < 0_deg)
 				start += 360_deg;
 			auto end = start + m_angle_length;
-			bResult |= rectBoundary.UpdateBounds(At(start));
-			bResult |= rectBoundary.UpdateBounds(At(end));
+			bResult |= bounds.UpdateBounds(At(start));
+			bResult |= bounds.UpdateBounds(At(end));
 			if (start > end)
 				std::swap(start, end);
 			int count{};
 			int iend = (int)end.value();
 			for (int t = (int)std::floor((start/90.0_deg).value())*90+90; t <= iend; t += 90) {
 				switch (t%360) {
-				case 0 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{m_radius, 0.}); break;
-				case 90 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{0., m_radius}); break;
-				case 180 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{-m_radius, 0.}); break;
-				case 270 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{0., -m_radius}); break;
+				case 0 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{m_radius, 0.}); break;
+				case 90 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{0., m_radius}); break;
+				case 180 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{-m_radius, 0.}); break;
+				case 270 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{0., -m_radius}); break;
 				}
 				if (count++ >=4)
 					break;
@@ -152,29 +136,6 @@ export namespace biscuit::shape {
 			xShape::Draw(canvas);
 			canvas.Arc(m_ptCenter, m_radius, m_angle_start, m_angle_length);
 		}
-		//virtual void PrintOut(std::wostream& os) const override {
-		//	base_t::PrintOut(os);
-		//	fmt::print(os, L"\tangle_start:{} deg, length:{} deg\n", (double)(deg_t)m_angle_start, (double)(deg_t)m_angle_length);
-		//}
-
-		//virtual bool LoadFromCADJson(json_t& _j) override {
-		//	xCircle::LoadFromCADJson(_j);
-		//	using namespace std::literals;
-		//	gtl::bjson j(_j);
-
-		//	m_angle_start = deg_t{(double)j["staangle"sv]};
-		//	bool bCCW = j["isccw"sv].value_or(0) != 0;
-		//	deg_t angle_end { (double)j["endangle"sv] };
-		//	m_angle_length = angle_end - m_angle_start;
-		//	if (bCCW) {
-		//		if (m_angle_length < 0_deg)
-		//			m_angle_length += 360_deg;
-		//	} else {
-		//		if (m_angle_length > 0_deg)
-		//			m_angle_length -= 360_deg;
-		//	}
-		//	return true;
-		//}
 
 		deg_t AdjustAngle(deg_t angle) const {
 			angle = units::math::fmod(angle, 360._deg);
@@ -204,8 +165,6 @@ export namespace biscuit::shape {
 			arc.m_ptCenter.y = ptBulge.y + (arc.m_radius / h) * (ptCenterOfLine.y - ptBulge.y);
 			arc.m_angle_start = rad_t(std::atan2(pt0.y - arc.m_ptCenter.y, pt0.x - arc.m_ptCenter.x));
 			rad_t dT1 = rad_t(std::atan2(pt1.y - arc.m_ptCenter.y, pt1.x - arc.m_ptCenter.x));
-			//arc.m_eDirection = (dBulge > 0) ? 1 : -1;
-			//arc.m_dTLength = (dBulge > 0) ? fabs(dT1-arc.m_dT0) : -fabs(dT1-arc.m_dT0);
 			if (bulge > 0) {
 				while (dT1 < arc.m_angle_start)
 					dT1 += rad_t(std::numbers::pi*2);
@@ -218,7 +177,6 @@ export namespace biscuit::shape {
 
 			return arc;
 		}
-
 	};
 }	// namespace biscuit::shape
 BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xArc);
@@ -267,41 +225,6 @@ export namespace biscuit::shape {
 			xShape::Draw(canvas);
 			canvas.Ellipse(m_ptCenter, m_radius, m_radiusH, m_angle_first_axis, m_angle_start, m_angle_length);
 		}
-		//virtual void PrintOut(std::wostream& os) const override {
-		//	xArc::PrintOut(os);
-		//	fmt::print(os, L"\tradiusH:{}, angle_first_axis:{} deg\n", m_radiusH, (double)(deg_t)m_angle_first_axis);
-		//}
-
-		//virtual bool LoadFromCADJson(json_t& _j) override {
-		//	xShape::LoadFromCADJson(_j);
-		//	using namespace std::literals;
-		//	gtl::bjson j(_j);
-
-		//	m_ptCenter = PointFrom(j["basePoint"sv]);
-		//	point_t firstAxis = PointFrom(j["secPoint"sv]);
-		//	m_angle_first_axis = deg_t::atan2(firstAxis.y, firstAxis.x);
-		//	double ratio = j["ratio"sv];
-		//	m_radius = firstAxis.GetLength();
-		//	m_radiusH = ratio * m_radius;
-
-		//	rad_t t0 {(double)j["staparam"sv]};
-		//	rad_t t1 {(double)j["endparam"sv]};
-		//	bool bCCW = j["isccw"sv];
-
-		//	m_angle_start = t0;
-		//	m_angle_length = t1-t0;
-
-		//	if (bCCW) {
-		//		if (m_angle_length < 0_deg)
-		//			m_angle_length += 360_deg;
-		//	} else {
-		//		if (m_angle_length > 0_deg)
-		//			m_angle_length -= 360_deg;
-		//	}
-
-		//	return true;
-		//}
-
 	};
 }
 BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xEllipse);

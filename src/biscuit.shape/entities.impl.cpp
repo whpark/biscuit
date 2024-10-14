@@ -298,9 +298,9 @@ namespace biscuit::shape {
 		using namespace std::literals;
 		static std::map<std::string, std::function<std::unique_ptr<xShape>()> > const mapCreator = {
 			{ "3dFace"s,				nullptr },
-			//{ "ARC"s,					[](){ return std::make_unique<xArc>(); } },
+			{ "ARC"s,					[](){ return std::make_unique<xArc>(); } },
 			{ "BLOCK"s,					nullptr },
-			//{ "CIRCLE"s,				[](){ return std::make_unique<xCircle>(); } },
+			{ "CIRCLE"s,				[](){ return std::make_unique<xCircle>(); } },
 			{ "DIMENSION"s,				nullptr },
 			{ "DIMALIGNED"s,			nullptr },
 			{ "DIMLINEAR"s,				nullptr },
@@ -309,20 +309,20 @@ namespace biscuit::shape {
 			{ "DIMANGULAR"s,			nullptr },
 			{ "DIMANGULAR3P"s,			nullptr },
 			{ "DIMORDINATE"s,			nullptr },
-			//{ "ELLIPSE"s,				[](){ return std::make_unique<xEllipse>(); } },
-			//{ "HATCH"s,					[](){ return std::make_unique<xHatch>(); } },
+			{ "ELLIPSE"s,				[](){ return std::make_unique<xEllipse>(); } },
+			{ "HATCH"s,					[](){ return std::make_unique<xHatch>(); } },
 			{ "IMAGE"s,					nullptr },
-			//{ "INSERT"s,				[](){ return std::make_unique<xInsert>(); } },
+			{ "INSERT"s,				[](){ return std::make_unique<xInsert>(); } },
 			{ "LEADER"s,				nullptr },
-			//{ "LINE"s,					[](){ return std::make_unique<xLine>(); } },
-			//{ "LWPOLYLINE"s,			[](){ return std::make_unique<xPolylineLW>(); } },
-			//{ "MTEXT"s,					[](){ return std::make_unique<xMText>(); } },
-			//{ "POINT"s,					[](){ return std::make_unique<xDot>(); } },
-			//{ "POLYLINE"s,				[](){ return std::make_unique<xPolyline>(); } },
+			{ "LINE"s,					[](){ return std::make_unique<xLine>(); } },
+			{ "LWPOLYLINE"s,			[](){ return std::make_unique<xPolylineLW>(); } },
+			{ "MTEXT"s,					[](){ return std::make_unique<xMText>(); } },
+			{ "POINT"s,					[](){ return std::make_unique<xDot>(); } },
+			{ "POLYLINE"s,				[](){ return std::make_unique<xPolyline>(); } },
 			{ "RAY"s,					nullptr },
 			{ "SOLID"s,					nullptr },
-			//{ "SPLINE"s,				[](){ return std::make_unique<xSpline>(); } },
-			//{ "TEXT"s,					[](){ return std::make_unique<xText>(); } },
+			{ "SPLINE"s,				[](){ return std::make_unique<xSpline>(); } },
+			{ "TEXT"s,					[](){ return std::make_unique<xText>(); } },
 			{ "TRACE"s,					nullptr },
 			{ "UNDERLAY"s,				nullptr },
 			{ "VERTEX"s,				nullptr },
@@ -440,7 +440,6 @@ namespace biscuit::shape {
 		return pt0.GetDistance(pt) <= dMinGap;
 	}
 
-#if 0
 	void xPolyline::Draw(ICanvas& canvas) const {
 		xShape::Draw(canvas);
 		if (m_pts.empty())
@@ -494,7 +493,7 @@ namespace biscuit::shape {
 		return shapes;
 	}
 
-	bool xDrawing::AddEntity(std::unique_ptr<xShape> rShape, std::map<string_t, xLayer*> const& mapLayers, std::map<string_t, xBlock*> const& mapBlocks, rect_t& rectB) {
+	bool xDrawing::AddEntity(std::unique_ptr<xShape> rShape, std::map<string_t, xLayer*> const& mapLayers, std::map<string_t, xBlock*> const& mapBlocks, rect_t& bounds) {
 		if (!rShape)
 			return false;
 
@@ -559,7 +558,7 @@ namespace biscuit::shape {
 							if (rShapeNew->m_lineWeight == (int)eLINE_WIDTH::ByBlock) {
 								rShapeNew->m_lineWeight = pBlock->m_lineWeight;
 							}
-							if (!AddEntity(std::move(rShapeNew), mapLayers, mapBlocks, rectB)) {
+							if (!AddEntity(std::move(rShapeNew), mapLayers, mapBlocks, bounds)) {
 								DEBUG_PRINT("CANNOT Add Shape\n");
 								//return false;
 							}
@@ -595,7 +594,7 @@ namespace biscuit::shape {
 					rShape->m_lineWeight = pLayer->m_lineWeight;
 				}
 
-				rShape->UpdateBounds(rectB);
+				rShape->UpdateBounds(bounds);
 				pLayer->m_shapes.push_back(std::move(rShape));
 
 			} else {
@@ -608,8 +607,6 @@ namespace biscuit::shape {
 
 		return true;
 	}
-
-#endif
 
 };
 
