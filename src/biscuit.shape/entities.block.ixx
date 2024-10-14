@@ -20,6 +20,8 @@
 #include "biscuit/dependencies_units.h"
 #include "biscuit/dependencies_cereal.h"
 
+#include "shape_macro.h"
+
 export module biscuit.shape.entities.block;
 import std;
 import biscuit;
@@ -32,47 +34,15 @@ export namespace biscuit::shape {
 	// internally
 	class xBlock : public xLayer {
 	public:
-		using base_t = xLayer;
-		using this_t = xBlock;
-
-	public:
-	 	constexpr static inline uint32_t s_version{1u};
 		string_t m_layer;
 		point_t m_pt;
 
 	public:
-		virtual bool Compare(xShape const& B_) const override {
-			if (!base_t::Compare(B_))
-				return false;
-			this_t const& B = (this_t const&)B_;
-			return true
-				and (m_layer == B.m_layer)
-				and (m_pt == B.m_pt)
-				;
-		}
-		virtual eSHAPE GetShapeType() const { return eSHAPE::block; }
-
-		GTL__DYNAMIC_VIRTUAL_DERIVED(xBlock);
-		auto operator <=> (xBlock const&) const = default;
-
-		template < typename archive >
-		friend void serialize(archive& ar, xBlock& var, unsigned int const file_version) {
-			boost::serialization::base_object<xLayer>(var);
-			ar & var;
-		}
-		template < typename archive >
-		friend archive& operator & (archive& ar, xBlock& var) {
-			ar & boost::serialization::base_object<xLayer>(var);
-
-			ar & var.m_layer & var.m_pt;
-
-			return ar;
-		}
+		BSC__SHAPE_BASE(xBlock, xLayer, eSHAPE::block, 1u, m_layer, m_pt);
 
 	};
 
 }
 
-export CEREAL_REGISTER_TYPE(biscuit::shape::xBlock);
-export CEREAL_REGISTER_POLYMORPHIC_RELATION(biscuit::shape::xShape, biscuit::shape::xBlock);
-export CEREAL_CLASS_VERSION(biscuit::shape::xBlock, biscuit::shape::xBlock::s_version);
+BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xBlock);
+

@@ -51,8 +51,10 @@ import std;
 import biscuit;
 import biscuit.shape.shape;
 import biscuit.shape.entities.layer;
+import biscuit.shape.entities.block;
 import biscuit.shape.entities.dot;
 import biscuit.shape.entities.circle;
+import biscuit.shape.entities.arc;
 
 #if 0
 
