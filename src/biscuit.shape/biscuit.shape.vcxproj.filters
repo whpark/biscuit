@@ -51,6 +51,9 @@
     <ClCompile Include="entities.ellipse.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="entities.drawing.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shape_macro.h">

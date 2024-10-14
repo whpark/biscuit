@@ -23,7 +23,8 @@ namespace biscuit {
 		TCloneablePtr(std::unique_ptr<T>&& other) : base_t(std::move(other)) {}
 		TCloneablePtr(this_t&& other) : base_t(std::move(other)) {}
 		// copy constructor
-		TCloneablePtr(this_t const& other) : base_t(other ? other->clone() : nullptr) {}
+		TCloneablePtr(std::unique_ptr<T> const& other) : base_t(other ? std::move(other->clone()) : nullptr) {}
+		TCloneablePtr(this_t const& other) : base_t(other ? std::move(other->clone()) : nullptr) {}
 
 		TCloneablePtr& operator = (std::unique_ptr<T>&& other) { base_t::operator = (std::move(other)); return *this; }
 		TCloneablePtr& operator = (this_t&& other) { base_t::operator = (std::move(other)); return *this; }

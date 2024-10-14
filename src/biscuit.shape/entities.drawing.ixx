@@ -1,4 +1,6 @@
-﻿//////////////////////////////////////////////////////////////////////
+﻿module;
+
+//////////////////////////////////////////////////////////////////////
 //
 // shape_others.h:
 //
@@ -17,48 +19,33 @@
 #include "biscuit/dependencies_units.h"
 #include "biscuit/dependencies_cereal.h"
 
+#include "shape_macro.h"
+
 export module biscuit.shape.entities.drawing;
 import std;
 import biscuit;
 import biscuit.shape.shape;
 import biscuit.shape.canvas;
+import biscuit.shape.entities.layer;
+import biscuit.shape.entities.block;
 
 export namespace biscuit::shape {
 
 	class xDrawing : public xShape {
 	public:
-		using base_t = xShape;
-		using this_t = xDrawing;
+		using variable_t = std::variant<int, double, point_t, string_t>;
+		std::map<std::string, variable_t> m_vars;
+		std::deque<sLineType> m_line_types;
+		//boost::ptr_deque<xBlock> blocks;
+		rect_t m_bounds;
+		std::list<xLayer> m_layers;
+		//TSmartPtrContainer<xLayer, TCloneablePtr, std::deque> m_layers;
 
 	public:
-		constexpr static inline uint32_t s_version{1u};
-		std::map<std::string, variable_t> m_vars;
-		boost::ptr_deque<line_type_t> m_line_types;
-		//boost::ptr_deque<xBlock> blocks;
-		rect_t m_rectBoundary;
-		boost::ptr_deque<xLayer> m_layers;
-
-		//xDrawing() = default;
-		//xDrawing(xDrawing const&) = default;
-		//xDrawing(xDrawing &&) = default;
-		//xDrawing& operator = (xDrawing const&) = default;
-		//xDrawing& operator = (xDrawing &&) = default;
-
-		virtual bool Compare(xShape const& B_) const override {
-			if (!base_t::Compare(B_))
-				return false;
-			this_t const& B = (this_t const&)B_;
-			return true
-				and ( m_vars			== B.m_vars )
-				and ( m_line_types		== B.m_line_types )
-				and ( m_rectBoundary	== B.m_rectBoundary )
-				and ( m_layers			== B.m_layers )
-				;
-		}
-		virtual eSHAPE GetShapeType() const { return eSHAPE::drawing; }
+		BSC__SHAPE_BASE(xDrawing, xShape, eSHAPE::drawing, 1u, m_vars, m_line_types, m_layers);
 
 		//virtual point_t PointAt(double t) const override { throw std::exception{GTL__FUNCSIG "not here."}; return point_t {}; }	// no PointAt();
-		virtual std::optional<std::pair<point_t, point_t>> GetStartEndPoint() const override {
+		virtual std::optional<line_t> GetStartEndPoint() const override {
 			if (m_layers.empty())
 				return {};
 			auto r0 = m_layers.front().GetStartEndPoint();
@@ -67,13 +54,13 @@ export namespace biscuit::shape {
 			auto r1 = m_layers.back().GetStartEndPoint();
 			if (!r1)
 				return {};
-			return std::pair{ r0->first, r1->second };
+			return line_t{ r0->pt0, r1->pt1 };
 		}
 		virtual void FlipX() override { for (auto& layer : m_layers) layer.FlipX(); }
 		virtual void FlipY() override { for (auto& layer : m_layers) layer.FlipY(); }
 		virtual void FlipZ() override { for (auto& layer : m_layers) layer.FlipZ(); }
 		virtual void Reverse() override {
-			std::ranges::reverse(m_layers.base());
+			std::ranges::reverse(m_layers);
 			for (auto& layer : m_layers) {
 				layer.Reverse();
 			}
@@ -101,15 +88,12 @@ export namespace biscuit::shape {
 			}
 			return result;
 		}
-		virtual void PrintOut(std::wostream& os) const override {
-			for (auto& layer : m_layers) {
-				layer.PrintOut(os);
-			}
-		}
+		//virtual void PrintOut(std::wostream& os) const override {
+		//	for (auto& layer : m_layers) {
+		//		layer.PrintOut(os);
+		//	}
+		//}
 
-		GTL__DYNAMIC_VIRTUAL_DERIVED(xDrawing);
-		//GTL__REFLECTION_DERIVED(xDrawing, xShape);
-		//GTL__REFLECTION_MEMBERS(vars, line_types, layers);
 	#if 0
 		bool operator == (xDrawing const& B) const {
 			if ((base_t const&)*this != (base_t const&)B)
@@ -141,25 +125,6 @@ export namespace biscuit::shape {
 			return true;
 		}
 	#endif
-		auto operator <=> (xDrawing const&) const = default;
-
-		template < typename archive >
-		friend void serialize(archive& ar, xDrawing& var, unsigned int const file_version) {
-			ar & var;
-		}
-		template < typename archive >
-		friend archive& operator & (archive& ar, xDrawing& var) {
-			ar & boost::serialization::base_object<xShape>(var);
-
-			ar & var.m_vars;
-			ar & var.m_line_types;
-			//ar & var.blocks;
-			ar & var.m_rectBoundary;
-			ar & var.m_layers;
-
-			return ar;
-		}
-
 		xLayer& Layer(string_t const& name) {
 			if (auto iter = std::find_if(m_layers.begin(), m_layers.end(), [&name](xLayer const& layer) -> bool { return name == layer.m_name; }); iter != m_layers.end())
 				return *iter;
@@ -174,7 +139,7 @@ export namespace biscuit::shape {
 		bool AddEntity(std::unique_ptr<xShape> rShape, std::map<string_t, xLayer*> const& mapLayers, std::map<string_t, xBlock*> const& mapBlocks, rect_t& rectBoundary);
 
 	public:
-		virtual bool LoadFromCADJson(json_t& _j) override;
+		//virtual bool LoadFromCADJson(json_t& _j) override;
 
 		void clear() {
 			m_vars.clear();
@@ -183,10 +148,7 @@ export namespace biscuit::shape {
 		}
 	};
 
-
-#pragma pack(pop)
 }
 
-export CEREAL_REGISTER_TYPE(biscuit::shape::xDrawing);
-export CEREAL_REGISTER_POLYMORPHIC_RELATION(biscuit::shape::xShape, biscuit::shape::xDrawing);
-export CEREAL_CLASS_VERSION(biscuit::shape::xDrawing, biscuit::shape::xDrawing::s_version);
+BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xDrawing);
+
