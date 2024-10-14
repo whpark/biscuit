@@ -85,7 +85,7 @@ export namespace biscuit {
 		}
 		TBounds(this_t const&) = default;
 		TBounds(this_t&&) = default;
-		TBounds(concepts::coord::generic_point auto const& pt0, concepts::coord::generic_point auto const& pt1) { this->pt0() = pt0; this->pt1 = pt1; }
+		TBounds(concepts::coord::generic_point auto const& pt0, concepts::coord::generic_point auto const& pt1) { this->pt0() = pt0; this->pt1() = pt1; }
 		TBounds(concepts::coord::generic_point auto const& pt,  concepts::coord::generic_size auto const& size) { this->pt0() = pt, this->pt1() = pt+size; }
 		TBounds(concepts::coord::generic_size auto const& size) { this->pt0() = coord_point_t{}; this->pt1() = pt+size; }
 		TBounds(coord_rect_t const& rect) { this->pt0() = rect; this->pt1() = rect.pt1(); }

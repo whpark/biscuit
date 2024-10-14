@@ -20,6 +20,8 @@
 #include "biscuit/dependencies_units.h"
 #include "biscuit/dependencies_cereal.h"
 
+#include "shape_macro.h"
+
 export module biscuit.shape.entities.dot;
 import std;
 import biscuit;
@@ -30,31 +32,10 @@ export namespace biscuit::shape {
 
 	class xDot : public xShape {
 	public:
-		using base_t = xShape;
-		using this_t = xDot;
-
-	public:
-		constexpr static inline uint32_t s_version{1u};
 		point_t m_pt;
 
 	public:
-		virtual std::unique_ptr<xShape> clone() const override { return std::unique_ptr<this_t>(new this_t(*this)); }
-		auto& base() { return static_cast<base_t&>(*this); }
-		auto const& base() const { return static_cast<base_t const&>(*this); }
-		auto operator <=> (this_t const&) const = default;
-
-		template < typename archive >
-		void serialize(archive& ar, unsigned int const file_version) {
-			ar(base(), m_pt);
-		}
-
-		virtual bool Compare(xShape const& B_) const override {
-			if (!base_t::Compare(B_))
-				return false;
-			this_t const& B = (this_t const&)B_;
-			return (m_pt == B.m_pt);
-		}
-		virtual eSHAPE GetShapeType() const { return eSHAPE::dot; }
+		BSC__SHAPE_BASE(xDot, xShape, eSHAPE::dot, 1u, m_pt);
 
 		//virtual point_t PointAt(double t) const override { return pt; };
 		virtual std::optional<line_t> GetStartEndPoint() const override {
@@ -92,7 +73,5 @@ export namespace biscuit::shape {
 
 }
 
-export CEREAL_REGISTER_TYPE(biscuit::shape::xDot);
-export CEREAL_REGISTER_POLYMORPHIC_RELATION(biscuit::shape::xShape, biscuit::shape::xDot);
-export CEREAL_CLASS_VERSION(biscuit::shape::xDot, biscuit::shape::xDot::s_version);
+BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xDot);
 

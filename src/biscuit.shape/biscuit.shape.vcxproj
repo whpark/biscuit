@@ -119,6 +119,9 @@
     <ClCompile Include="entities.layer.ixx" />
     <ClCompile Include="shape.ixx" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="shape_macro.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

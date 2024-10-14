@@ -20,6 +20,8 @@
 #include "biscuit/dependencies_units.h"
 #include "biscuit/dependencies_cereal.h"
 
+#include "shape_macro.h"
+
 export module biscuit.shape.entities.circle;
 import std;
 import biscuit;
@@ -30,31 +32,12 @@ export namespace biscuit::shape {
 
 	class xCircle : public xShape {
 	public:
-		using base_t = xShape;
-		using this_t = xCircle;
-
-	public:
-		constexpr static inline uint32_t s_version{1u};
 		point_t m_ptCenter;
 		double m_radius{};
 		deg_t m_angle_length{360_deg};	// 회전 방향.
 
 	public:
-		virtual std::unique_ptr<xShape> clone() const override { return std::unique_ptr<this_t>(new this_t(*this)); }
-		auto& base() { return static_cast<base_t&>(*this); }
-		auto const& base() const { return static_cast<base_t const&>(*this); }
-		auto operator <=> (this_t const&) const = default;
-		template < typename archive >
-		void serialize(archive& ar, unsigned int const file_version) {
-			ar(base(), m_ptCenter, m_radius, m_angle_length);
-		}
-		virtual bool Compare(xShape const& B_) const override {
-			if (!base_t::Compare(B_))
-				return false;
-			this_t const& B = (this_t const&)B_;
-			return *this == B;
-		}
-		virtual eSHAPE GetShapeType() const { return eSHAPE::circle_xy; }
+		BSC__SHAPE_BASE(xCircle, xShape, eSHAPE::circle_xy, 1u, m_ptCenter, m_radius, m_angle_length);
 
 		//virtual point_t PointAt(double t) const override {};
 		virtual std::optional<line_t> GetStartEndPoint() const override {
@@ -97,9 +80,146 @@ export namespace biscuit::shape {
 		//	return true;
 		//}
 	};
+
+#if 1
+	class xArc : public xCircle {
+	public:
+		deg_t m_angle_start{};
+
+	public:
+		BSC__SHAPE_BASE(xArc, xCircle, eSHAPE::arc_xy, 1u, m_angle_start);
+
+		//virtual point_t PointAt(double t) const override {};
+		virtual std::optional<line_t> GetStartEndPoint() const override {
+			auto c = units::math::cos(m_angle_start);
+			auto s = units::math::sin(m_angle_start);
+			auto pt0 = m_ptCenter + m_radius*point_t{c, s};
+			c = units::math::cos(m_angle_start + m_angle_length);
+			s = units::math::sin(m_angle_start + m_angle_length);
+			auto pt1 = m_ptCenter + m_radius*point_t{c, s};
+			return line_t{ pt0, pt1 };
+		}
+		virtual void FlipX() override { base_t::FlipX(); m_angle_start = AdjustAngle(180._deg - m_angle_start); }
+		virtual void FlipY() override { base_t::FlipY(); m_angle_start = AdjustAngle(-m_angle_start); }
+		virtual void FlipZ() override { base_t::FlipZ(); m_angle_start = AdjustAngle(180._deg - m_angle_start); }	// ????.....  성립 안되지만,
+		virtual void Reverse() override {
+			m_angle_start = m_angle_start+m_angle_length;
+			m_angle_length = -m_angle_length;
+		}
+		virtual void Transform(ct_t const& ct, bool bRightHanded) override {
+			// todo : ... upgrade?
+			base_t::Transform(ct, bRightHanded);
+			if (!bRightHanded)
+				m_angle_start = -m_angle_start;
+		}
+		point_t At(rad_t t) const { return m_ptCenter + m_radius * point_t{units::math::cos(t), units::math::sin(t)}; };
+		virtual bool UpdateBounds(rect_t& rectBoundary) const override {
+			bool bResult{};
+			// todo : ... upgrade?
+			rect_t rectMax(m_ptCenter, m_ptCenter);
+			rectMax.pt0() -= point_t{m_radius, m_radius};
+			rectMax.pt1() += point_t{m_radius, m_radius};
+			if (rectBoundary.Contains(rectMax))
+				return bResult;
+			auto start = m_angle_start;
+			if (start < 0_deg)
+				start += 360_deg;
+			auto end = start + m_angle_length;
+			bResult |= rectBoundary.UpdateBounds(At(start));
+			bResult |= rectBoundary.UpdateBounds(At(end));
+			if (start > end)
+				std::swap(start, end);
+			int count{};
+			int iend = (int)end.value();
+			for (int t = (int)std::floor((start/90.0_deg).value())*90+90; t <= iend; t += 90) {
+				switch (t%360) {
+				case 0 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{m_radius, 0.}); break;
+				case 90 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{0., m_radius}); break;
+				case 180 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{-m_radius, 0.}); break;
+				case 270 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{0., -m_radius}); break;
+				}
+				if (count++ >=4)
+					break;
+			}
+			return bResult;
+		}
+		virtual void Draw(ICanvas& canvas) const override {
+			xShape::Draw(canvas);
+			canvas.Arc(m_ptCenter, m_radius, m_angle_start, m_angle_length);
+		}
+		//virtual void PrintOut(std::wostream& os) const override {
+		//	base_t::PrintOut(os);
+		//	fmt::print(os, L"\tangle_start:{} deg, length:{} deg\n", (double)(deg_t)m_angle_start, (double)(deg_t)m_angle_length);
+		//}
+
+		//virtual bool LoadFromCADJson(json_t& _j) override {
+		//	xCircle::LoadFromCADJson(_j);
+		//	using namespace std::literals;
+		//	gtl::bjson j(_j);
+
+		//	m_angle_start = deg_t{(double)j["staangle"sv]};
+		//	bool bCCW = j["isccw"sv].value_or(0) != 0;
+		//	deg_t angle_end { (double)j["endangle"sv] };
+		//	m_angle_length = angle_end - m_angle_start;
+		//	if (bCCW) {
+		//		if (m_angle_length < 0_deg)
+		//			m_angle_length += 360_deg;
+		//	} else {
+		//		if (m_angle_length > 0_deg)
+		//			m_angle_length -= 360_deg;
+		//	}
+		//	return true;
+		//}
+
+		deg_t AdjustAngle(deg_t angle) const {
+			angle = units::math::fmod(angle, 360._deg);
+			if (angle < 0._deg)
+				angle += 360._deg;
+			return angle;
+		}
+
+		static xArc GetFromBulge(double bulge, point_t const& pt0, point_t const& pt1) {
+			xArc arc;
+			sPoint2d vecPerpendicular(-(pt0.y-pt1.y), (pt0.x-pt1.x));
+			// Normalize
+			{
+				double d = vecPerpendicular.GetDistance();
+				vecPerpendicular.x /= d;
+				vecPerpendicular.y /= d;
+			}
+			sPoint2d ptCenterOfLine((pt0.x+pt1.x)/2., (pt0.y+pt1.y)/2.);
+			double l = pt1.GetDistance(pt0)/2.;
+			sPoint2d ptBulge;
+			ptBulge.x = ptCenterOfLine.x + vecPerpendicular.x * (bulge * l);
+			ptBulge.y = ptCenterOfLine.y + vecPerpendicular.y * (bulge * l);
+			double h = ptBulge.GetDistance(ptCenterOfLine);
+			arc.m_radius = (Square(l) + Square(h)) / (2 * h);
+
+			arc.m_ptCenter.x = ptBulge.x + (arc.m_radius / h) * (ptCenterOfLine.x - ptBulge.x);
+			arc.m_ptCenter.y = ptBulge.y + (arc.m_radius / h) * (ptCenterOfLine.y - ptBulge.y);
+			arc.m_angle_start = rad_t(std::atan2(pt0.y - arc.m_ptCenter.y, pt0.x - arc.m_ptCenter.x));
+			rad_t dT1 = rad_t(std::atan2(pt1.y - arc.m_ptCenter.y, pt1.x - arc.m_ptCenter.x));
+			//arc.m_eDirection = (dBulge > 0) ? 1 : -1;
+			//arc.m_dTLength = (dBulge > 0) ? fabs(dT1-arc.m_dT0) : -fabs(dT1-arc.m_dT0);
+			if (bulge > 0) {
+				while (dT1 < arc.m_angle_start)
+					dT1 += rad_t(std::numbers::pi*2);
+				arc.m_angle_length = dT1 - arc.m_angle_start;
+			} else {
+				while (dT1 > arc.m_angle_start)
+					dT1 -= rad_t(std::numbers::pi*2);
+				arc.m_angle_length = dT1 - arc.m_angle_start;
+			}
+
+			return arc;
+		}
+
+	};
+#endif
+
+
 }
 
-export CEREAL_REGISTER_TYPE(biscuit::shape::xCircle);
-export CEREAL_REGISTER_POLYMORPHIC_RELATION(biscuit::shape::xShape, biscuit::shape::xCircle);
-export CEREAL_CLASS_VERSION(biscuit::shape::xCircle, biscuit::shape::xCircle::s_version);
+//BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xCircle);
+//BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xArc);
 

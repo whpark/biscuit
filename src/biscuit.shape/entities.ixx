@@ -266,3 +266,4 @@ export namespace biscuit::shape {
 CEREAL_CLASS_EXPORT_GUID(biscuit::shape::xHatch, "hatch")
 
 #endif
+
