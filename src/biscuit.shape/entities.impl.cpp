@@ -155,7 +155,7 @@ namespace biscuit::shape {
 			} else {
 				// failed both tests, so calculate the line segment to clip
 				// from an outside point to an intersection with clip edge
-				double x, y;
+				double x{x0}, y{y1};
 
 				// At least one endpoint is outside the clip rectangle; pick it.
 				auto outcodeOut = outcode1 > outcode0 ? outcode1 : outcode0;

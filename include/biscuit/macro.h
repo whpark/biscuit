@@ -6,7 +6,6 @@ import <version>;
 #	include <source_location>
 #	define BSC__FUNCSIG std::string(std::source_location::current().function_name()) + " : "
 #else
-// TODO: Reference additional headers your program requires here.
 // until c++20 source_location
 #	if defined (_MSC_VER)
 #		define BSC__FUNCSIG __FUNCSIG__ " : "
@@ -25,11 +24,13 @@ import <version>;
 #	undef max
 #endif
 
-//#ifndef BSC__NODISCARD
-#define BSC__NODISCARD [[nodiscard]]
-//#endif
+#ifndef BSC__NODISCARD
+#	define BSC__NODISCARD [[nodiscard]]
+#endif
 
-#define BSC__DEPR_SEC [[deprecated("NOT Secure Function. specify - __pargma warning(disable:4996)")]]
+#ifndef BSC__DEPR_SEC
+#	define BSC__DEPR_SEC [[deprecated("NOT Secure Function. specify - __pargma warning(disable:4996)")]]
+#endif
 
 //=================================================================================================================================
 // MACRO FOR_EACH

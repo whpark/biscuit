@@ -147,10 +147,10 @@ export namespace biscuit::shape {
 		virtual void Spline(int degree, std::span<point_t const> pts, std::span<double const> knots, bool bLoop) {
 			Canvas_Spline(*this, degree, pts, knots, bLoop);
 		}
-		virtual void Text(xText const& text) {
-		}
-		virtual void Text(xMText const& text) {
-		}
+		//virtual void Text(xText const& /*text*/) {
+		//}
+		//virtual void Text(xMText const& /*text*/) {
+		//}
 
 		virtual std::optional<sBounds2d> GetClippingRect() {
 			return std::nullopt;

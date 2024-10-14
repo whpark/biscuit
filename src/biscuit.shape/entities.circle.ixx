@@ -97,7 +97,6 @@ export namespace biscuit::shape {
 		//	return true;
 		//}
 	};
-
 }
 
 export CEREAL_REGISTER_TYPE(biscuit::shape::xCircle);

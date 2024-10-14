@@ -77,14 +77,14 @@ export namespace biscuit::shape {
 			if (!bRightHanded)
 				m_angle_start = -m_angle_start;
 		}
-		auto At(auto t) const { return m_ptCenter + m_radius * point_t{units::math::cos(t), units::math::sin(t)}; };
+		point_t At(rad_t t) const { return m_ptCenter + m_radius * point_t{units::math::cos(t), units::math::sin(t)}; };
 		virtual bool UpdateBounds(rect_t& rectBoundary) const override {
 			bool bResult{};
 			// todo : ... upgrade?
 			rect_t rectMax(m_ptCenter, m_ptCenter);
 			rectMax.pt0() -= point_t{m_radius, m_radius};
 			rectMax.pt1() += point_t{m_radius, m_radius};
-			if (rectBoundary.RectInRect(rectMax))
+			if (rectBoundary.Contains(rectMax))
 				return bResult;
 			auto start = m_angle_start;
 			if (start < 0_deg)
@@ -95,7 +95,7 @@ export namespace biscuit::shape {
 			if (start > end)
 				std::swap(start, end);
 			int count{};
-			int iend = end;
+			int iend = (int)end.value();
 			for (int t = (int)std::floor(deg_t(start/90_deg).value())*90+90; t <= iend; t += 90) {
 				switch (t%360) {
 				case 0 :		bResult |= rectBoundary.UpdateBounds(m_ptCenter + point_t{m_radius, 0.}); break;
@@ -112,48 +112,29 @@ export namespace biscuit::shape {
 			xShape::Draw(canvas);
 			canvas.Arc(m_ptCenter, m_radius, m_angle_start, m_angle_length);
 		}
-		virtual void PrintOut(std::wostream& os) const override {
-			xCircle::PrintOut(os);
-			fmt::print(os, L"\tangle_start:{} deg, length:{} deg\n", (double)(deg_t)m_angle_start, (double)(deg_t)m_angle_length);
-		}
+		//virtual void PrintOut(std::wostream& os) const override {
+		//	xCircle::PrintOut(os);
+		//	fmt::print(os, L"\tangle_start:{} deg, length:{} deg\n", (double)(deg_t)m_angle_start, (double)(deg_t)m_angle_length);
+		//}
 
-		virtual std::unique_ptr<xShape> clone() const override {
-			return std::make_unique<this_t>(*this);
-		}
-		GTL__DYNAMIC_VIRTUAL_DERIVED(xArc);
-		//GTL__REFLECTION_VIRTUAL_DERIVED(xArc, xCircle);
-		//GTL__REFLECTION_MEMBERS(m_angle_start);
-		auto operator <=> (xArc const&) const = default;
+		//virtual bool LoadFromCADJson(json_t& _j) override {
+		//	xCircle::LoadFromCADJson(_j);
+		//	using namespace std::literals;
+		//	gtl::bjson j(_j);
 
-		template < typename archive >
-		friend void serialize(archive& ar, xArc& var, unsigned int const file_version) {
-			boost::serialization::base_object<xCircle>(var);
-			ar & var;
-		}
-		template < typename archive >
-		friend archive& operator & (archive& ar, xArc& var) {
-			ar & boost::serialization::base_object<xCircle>(var);
-			return ar & var.m_angle_start;
-		}
-
-		virtual bool LoadFromCADJson(json_t& _j) override {
-			xCircle::LoadFromCADJson(_j);
-			using namespace std::literals;
-			gtl::bjson j(_j);
-
-			m_angle_start = deg_t{(double)j["staangle"sv]};
-			bool bCCW = j["isccw"sv].value_or(0) != 0;
-			deg_t angle_end { (double)j["endangle"sv] };
-			m_angle_length = angle_end - m_angle_start;
-			if (bCCW) {
-				if (m_angle_length < 0_deg)
-					m_angle_length += 360_deg;
-			} else {
-				if (m_angle_length > 0_deg)
-					m_angle_length -= 360_deg;
-			}
-			return true;
-		}
+		//	m_angle_start = deg_t{(double)j["staangle"sv]};
+		//	bool bCCW = j["isccw"sv].value_or(0) != 0;
+		//	deg_t angle_end { (double)j["endangle"sv] };
+		//	m_angle_length = angle_end - m_angle_start;
+		//	if (bCCW) {
+		//		if (m_angle_length < 0_deg)
+		//			m_angle_length += 360_deg;
+		//	} else {
+		//		if (m_angle_length > 0_deg)
+		//			m_angle_length -= 360_deg;
+		//	}
+		//	return true;
+		//}
 
 		deg_t AdjustAngle(deg_t angle) const {
 			//if ( (angle < 0) || (angle > 360.) ) {
@@ -162,33 +143,34 @@ export namespace biscuit::shape {
 			//}
 			//while (angle < 0)
 			//	angle += 360.;
-			angle = std::fmod(angle, 360.);
-			if (angle < 0.)
+			angle = units::math::fmod(angle, 360._deg);
+			//angle = std::fmod(angle.value(), 360.);
+			if (angle < 0._deg)
 				angle += 360.;
 			return angle;
 		}
 
 		static xArc GetFromBulge(double bulge, point_t const& pt0, point_t const& pt1) {
 			xArc arc;
-			xPoint2d vecPerpendicular(-(pt0.y-pt1.y), (pt0.x-pt1.x));
+			sPoint2d vecPerpendicular(-(pt0.y-pt1.y), (pt0.x-pt1.x));
 			// Normalize
 			{
-				double d = vecPerpendicular.Distance(xPoint2d(0.0, 0.0));
+				double d = vecPerpendicular.GetDistance();
 				vecPerpendicular.x /= d;
 				vecPerpendicular.y /= d;
 			}
-			xPoint2d ptCenterOfLine((pt0.x+pt1.x)/2., (pt0.y+pt1.y)/2.);
-			double l = pt1.Distance(pt0)/2.;
-			xPoint2d ptBulge;
+			sPoint2d ptCenterOfLine((pt0.x+pt1.x)/2., (pt0.y+pt1.y)/2.);
+			double l = pt1.GetDistance(pt0)/2.;
+			sPoint2d ptBulge;
 			ptBulge.x = ptCenterOfLine.x + vecPerpendicular.x * (bulge * l);
 			ptBulge.y = ptCenterOfLine.y + vecPerpendicular.y * (bulge * l);
-			double h = ptBulge.Distance(ptCenterOfLine);
+			double h = ptBulge.GetDistance(ptCenterOfLine);
 			arc.m_radius = (Square(l) + Square(h)) / (2 * h);
 
 			arc.m_ptCenter.x = ptBulge.x + (arc.m_radius / h) * (ptCenterOfLine.x - ptBulge.x);
 			arc.m_ptCenter.y = ptBulge.y + (arc.m_radius / h) * (ptCenterOfLine.y - ptBulge.y);
-			arc.m_angle_start = rad_t::atan2(pt0.y - arc.m_ptCenter.y, pt0.x - arc.m_ptCenter.x);
-			rad_t dT1 = rad_t::atan2(pt1.y - arc.m_ptCenter.y, pt1.x - arc.m_ptCenter.x);
+			arc.m_angle_start = units::math::atan2(pt0.y - arc.m_ptCenter.y, pt0.x - arc.m_ptCenter.x);
+			rad_t dT1 = units::math::atan2(pt1.y - arc.m_ptCenter.y, pt1.x - arc.m_ptCenter.x);
 			//arc.m_eDirection = (dBulge > 0) ? 1 : -1;
 			//arc.m_dTLength = (dBulge > 0) ? fabs(dT1-arc.m_dT0) : -fabs(dT1-arc.m_dT0);
 			if (bulge > 0) {
@@ -209,5 +191,6 @@ export namespace biscuit::shape {
 }
 
 export CEREAL_REGISTER_TYPE(biscuit::shape::xArc);
-export CEREAL_REGISTER_POLYMORPHIC_RELATION(biscuit::shape::xShape, biscuit::shape::xArc);
+export CEREAL_REGISTER_POLYMORPHIC_RELATION(biscuit::shape::xCircle, biscuit::shape::xArc);
 export CEREAL_CLASS_VERSION(biscuit::shape::xArc, biscuit::shape::xArc::s_version);
+
