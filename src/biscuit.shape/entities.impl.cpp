@@ -45,61 +45,6 @@ namespace biscuit::shape {
 	#endif
 	}
 
-
-	//// from openCV
-	//bool clipLine(sSize2i size, sPoint2d& pt1, sPoint2d& pt2) {
-	//	if( size.cx <= 0 || size.cy <= 0 )
-	//		return false;
-
-	//	auto right = size.cx-1, bottom = size.cy-1;
-	//	auto &x1 = pt1.x, &y1 = pt1.y, &x2 = pt2.x, &y2 = pt2.y;
-
-	//	int c1 = (x1 < 0) + (x1 > right) * 2 + (y1 < 0) * 4 + (y1 > bottom) * 8;
-	//	int c2 = (x2 < 0) + (x2 > right) * 2 + (y2 < 0) * 4 + (y2 > bottom) * 8;
-
-	//	if( (c1 & c2) == 0 && (c1 | c2) != 0 )
-	//	{
-	//		int64 a;
-	//		if( c1 & 12 )
-	//		{
-	//			a = c1 < 8 ? 0 : bottom;
-	//			x1 += (int64)((double)(a - y1) * (x2 - x1) / (y2 - y1));
-	//			y1 = a;
-	//			c1 = (x1 < 0) + (x1 > right) * 2;
-	//		}
-	//		if( c2 & 12 )
-	//		{
-	//			a = c2 < 8 ? 0 : bottom;
-	//			x2 += (int64)((double)(a - y2) * (x2 - x1) / (y2 - y1));
-	//			y2 = a;
-	//			c2 = (x2 < 0) + (x2 > right) * 2;
-	//		}
-	//		if( (c1 & c2) == 0 && (c1 | c2) != 0 )
-	//		{
-	//			if( c1 )
-	//			{
-	//				a = c1 == 1 ? 0 : right;
-	//				y1 += (int64)((double)(a - x1) * (y2 - y1) / (x2 - x1));
-	//				x1 = a;
-	//				c1 = 0;
-	//			}
-	//			if( c2 )
-	//			{
-	//				a = c2 == 1 ? 0 : right;
-	//				y2 += (int64)((double)(a - x2) * (y2 - y1) / (x2 - x1));
-	//				x2 = a;
-	//				c2 = 0;
-	//			}
-	//		}
-
-	//		//assert( (c1 & c2) != 0 || (x1 | y1 | x2 | y2) >= 0 );
-	//	}
-
-	//	return (c1 | c2) == 0;
-	//}
-
-
-
 	// Cohen-Sutherland clipping algorithm clips a line from
 	// P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with 
 	// diagonal from (xmin, ymin) to (xmax, ymax).

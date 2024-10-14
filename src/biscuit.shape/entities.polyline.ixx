@@ -98,28 +98,6 @@ export namespace biscuit::shape {
 			return bModified;
 		};
 		virtual void Draw(ICanvas& canvas) const override;
-		//virtual void PrintOut(std::wostream& os) const override {
-		//	xShape::PrintOut(os);
-		//	fmt::print(os, L"\t{}", m_bLoop ? L"loop ":L"");
-		//	for (auto const& pt : m_pts)
-		//		fmt::print(os, L"({},{},{},{}), ", pt.x, pt.y, pt.z, pt.w);
-		//	fmt::print(os, L"\n");
-		//}
-		//virtual bool LoadFromCADJson(json_t& _j) override {
-		//	xShape::LoadFromCADJson(_j);
-		//	using namespace std::literals;
-		//	gtl::bjson j(_j);
-
-		//	auto jpts = j["vertlist"sv];
-		//	auto apts = jpts.json().as_array();
-		//	for (auto iter = apts.begin(); iter != apts.end(); iter++) {
-		//		m_pts.push_back(polypoint_t{});
-		//		m_pts.back() = PolyPointFromVertex(*iter);
-		//	}
-
-		//	m_bLoop = (j["flags"].value_or(0) & 1) != 0;
-		//	return true;
-		//}
 
 		shapes_t Split() const;
 
