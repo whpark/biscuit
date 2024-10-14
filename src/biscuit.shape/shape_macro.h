@@ -19,7 +19,7 @@
 		void serialize(archive& ar, unsigned int const file_version) {\
 			ar(base() __VA_OPT__(,) __VA_ARGS__);\
 		}\
-		GLZ_LOCAL_META_DERIVED(CLASS_NAME, BASE_NAME, __VA_ARGS__);\
+		GLZ_LOCAL_META_DERIVED(CLASS_NAME, BASE_NAME __VA_OPT__(,) __VA_ARGS__);\
 
 	
 #define BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(CLASS_NAME)\

@@ -120,6 +120,10 @@
     <ClCompile Include="entities.ixx" />
     <ClCompile Include="entities.impl.cpp" />
     <ClCompile Include="entities.layer.ixx" />
+    <ClCompile Include="entities.line.ixx" />
+    <ClCompile Include="entities.polyline.ixx" />
+    <ClCompile Include="entities.spline.ixx" />
+    <ClCompile Include="entities.text.ixx" />
     <ClCompile Include="shape.ixx" />
   </ItemGroup>
   <ItemGroup>

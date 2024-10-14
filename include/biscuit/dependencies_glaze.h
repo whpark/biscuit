@@ -33,7 +33,7 @@
       using GLZ_T = C;                                               \
       [[maybe_unused]] static constexpr std::string_view name = #C;  \
       static constexpr auto value = object(                          \
-        #parent, [](auto&& self) -> auto& { return (parent&)self; }, \
+        #parent, [](auto&& self) -> auto& { return (parent&)self; } __VA_OPT__(,) \
         GLZ_FOR_EACH(GLZ_X, __VA_ARGS__));                           \
    }
 
@@ -43,7 +43,7 @@
       using GLZ_T = C;                                               \
       [[maybe_unused]] static constexpr std::string_view name = #C;  \
       static constexpr auto value = glz::object(                     \
-        #parent, [](auto&& self) -> auto& { return (parent&)self; }, \
+        #parent, [](auto&& self) -> auto& { return (parent&)self; } __VA_OPT__(,) \
         GLZ_FOR_EACH(GLZ_X, __VA_ARGS__));                           \
    }
 

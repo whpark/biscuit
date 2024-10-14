@@ -54,6 +54,18 @@
     <ClCompile Include="entities.drawing.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="entities.line.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.polyline.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.spline.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.text.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shape_macro.h">

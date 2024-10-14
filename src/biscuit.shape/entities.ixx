@@ -55,6 +55,11 @@ import biscuit.shape.entities.block;
 import biscuit.shape.entities.dot;
 import biscuit.shape.entities.circle;
 import biscuit.shape.entities.arc;
+import biscuit.shape.entities.line;
+import biscuit.shape.entities.polyline;
+import biscuit.shape.entities.text;
+import biscuit.shape.entities.spline;
+import biscuit.shape.entities.drawing;
 
 #if 0
 
