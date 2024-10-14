@@ -30,15 +30,19 @@ import biscuit.shape.canvas;
 import biscuit.shape.entities.circle;
 import biscuit.shape.entities.arc;
 
-#if 0
+#if 1
 export namespace biscuit::shape {
 
 	class xEllipse : public xArc {
 	public:
+		point_t m_ptCenter;
+		double m_radius{};
+		deg_t m_angle_length{360_deg};	// 회전 방향.
+		deg_t m_angle_start{};
 		double m_radiusH{};
 		deg_t m_angle_first_axis{};
 
-		BSC__SHAPE_BASE(xEllipse, xArc, eSHAPE::ellipse_xy, 1u, m_radiusH, m_angle_first_axis);
+		BSC__SHAPE_BASE(xEllipse, xArc, eSHAPE::ellipse_xy, 1u, m_ptCenter, m_radius, m_angle_length, m_angle_start, m_radiusH, m_angle_first_axis);
 
 		virtual std::optional<line_t> GetStartEndPoint() const override {
 			xCoordTrans2d ct;
@@ -53,11 +57,11 @@ export namespace biscuit::shape {
 
 			return line_t{ pt0, pt1 };
 		}
-		virtual void FlipX() override { xArc::FlipX(); m_angle_first_axis = 180._deg - m_angle_first_axis; }
-		virtual void FlipY() override { xArc::FlipY(); m_angle_first_axis = - m_angle_first_axis; }
-		virtual void FlipZ() override { xArc::FlipZ(); m_angle_first_axis = 180._deg - m_angle_first_axis; }
+		virtual void FlipX() override { base_t::FlipX(); m_angle_first_axis = 180._deg - m_angle_first_axis; }
+		virtual void FlipY() override { base_t::FlipY(); m_angle_first_axis = - m_angle_first_axis; }
+		virtual void FlipZ() override { base_t::FlipZ(); m_angle_first_axis = 180._deg - m_angle_first_axis; }
 		virtual void Transform(ct_t const& ct, bool bRightHanded) override {
-			xArc::Transform(ct, bRightHanded);
+			base_t::Transform(ct, bRightHanded);
 			m_radiusH = ct.Trans(m_radiusH);
 			if (!bRightHanded)
 				m_angle_first_axis = -m_angle_first_axis;
@@ -73,41 +77,6 @@ export namespace biscuit::shape {
 			xShape::Draw(canvas);
 			canvas.Ellipse(m_ptCenter, m_radius, m_radiusH, m_angle_first_axis, m_angle_start, m_angle_length);
 		}
-		//virtual void PrintOut(std::wostream& os) const override {
-		//	xArc::PrintOut(os);
-		//	fmt::print(os, L"\tradiusH:{}, angle_first_axis:{} deg\n", m_radiusH, (double)(deg_t)m_angle_first_axis);
-		//}
-
-		//virtual bool LoadFromCADJson(json_t& _j) override {
-		//	xShape::LoadFromCADJson(_j);
-		//	using namespace std::literals;
-		//	gtl::bjson j(_j);
-
-		//	m_ptCenter = PointFrom(j["basePoint"sv]);
-		//	point_t firstAxis = PointFrom(j["secPoint"sv]);
-		//	m_angle_first_axis = deg_t::atan2(firstAxis.y, firstAxis.x);
-		//	double ratio = j["ratio"sv];
-		//	m_radius = firstAxis.GetLength();
-		//	m_radiusH = ratio * m_radius;
-
-		//	rad_t t0 {(double)j["staparam"sv]};
-		//	rad_t t1 {(double)j["endparam"sv]};
-		//	bool bCCW = j["isccw"sv];
-
-		//	m_angle_start = t0;
-		//	m_angle_length = t1-t0;
-
-		//	if (bCCW) {
-		//		if (m_angle_length < 0_deg)
-		//			m_angle_length += 360_deg;
-		//	} else {
-		//		if (m_angle_length > 0_deg)
-		//			m_angle_length -= 360_deg;
-		//	}
-
-		//	return true;
-		//}
-
 	};
 
 }

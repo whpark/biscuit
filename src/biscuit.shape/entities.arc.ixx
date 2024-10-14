@@ -29,7 +29,7 @@ import biscuit.shape.shape;
 import biscuit.shape.canvas;
 import biscuit.shape.entities.circle;
 
-#if 0
+#if 1
 export namespace biscuit::shape {
 
 	class xArc : public xCircle {
@@ -67,8 +67,8 @@ export namespace biscuit::shape {
 			bool bResult{};
 			// todo : ... upgrade?
 			rect_t rectMax(m_ptCenter, m_ptCenter);
-			rectMax.pt0() -= point_t{m_radius, m_radius};
-			rectMax.pt1() += point_t{m_radius, m_radius};
+			rectMax.pt0() -= point_t(m_radius, m_radius);
+			rectMax.pt1() += point_t(m_radius, m_radius);
 			if (bounds.Contains(rectMax))
 				return bResult;
 			auto start = m_angle_start;
@@ -83,10 +83,10 @@ export namespace biscuit::shape {
 			int iend = (int)end.value();
 			for (int t = (int)std::floor((start/90.0_deg).value())*90+90; t <= iend; t += 90) {
 				switch (t%360) {
-				case 0 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{m_radius, 0.}); break;
-				case 90 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{0., m_radius}); break;
-				case 180 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{-m_radius, 0.}); break;
-				case 270 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t{0., -m_radius}); break;
+				case 0 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t(m_radius, 0.)); break;
+				case 90 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t(0., m_radius)); break;
+				case 180 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t(-m_radius, 0.)); break;
+				case 270 :		bResult |= bounds.UpdateBounds(m_ptCenter + point_t(0., -m_radius)); break;
 				}
 				if (count++ >=4)
 					break;
