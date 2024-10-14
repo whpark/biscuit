@@ -165,8 +165,7 @@ export namespace biscuit::shape {
 		}
 
 	};
-
 }
 
-//BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xArc);
+BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xArc);
 #endif

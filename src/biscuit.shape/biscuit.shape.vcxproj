@@ -115,6 +115,7 @@
     <ClCompile Include="entities.block.ixx" />
     <ClCompile Include="entities.circle.ixx" />
     <ClCompile Include="entities.dot.ixx" />
+    <ClCompile Include="entities.ellipse.ixx" />
     <ClCompile Include="entities.ixx" />
     <ClCompile Include="entities.impl.cpp" />
     <ClCompile Include="entities.layer.ixx" />
