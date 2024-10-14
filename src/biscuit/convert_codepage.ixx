@@ -26,8 +26,8 @@ using namespace std::literals;
 
 export namespace biscuit {
 
-	BSC__NODISCARD auto	u8A(std::string& str)		-> std::u8string&		{ return reinterpret_cast<std::u8string&>(str); }
-	BSC__NODISCARD auto	Au8(std::u8string& str)		-> std::string&			{ return reinterpret_cast<std::string&>(str); }
+	BSC__NODISCARD auto	Au8(std::string& str)		-> std::u8string&		{ return reinterpret_cast<std::u8string&>(str); }
+	BSC__NODISCARD auto	u8A(std::u8string& str)		-> std::string&			{ return reinterpret_cast<std::string&>(str); }
 	BSC__NODISCARD auto	Au8(std::string_view str)	-> std::u8string_view	{ return reinterpret_cast<std::u8string_view&>(str); }
 	BSC__NODISCARD auto	u8A(std::u8string_view str) -> std::string_view		{ return reinterpret_cast<std::string_view&>(str); }
 

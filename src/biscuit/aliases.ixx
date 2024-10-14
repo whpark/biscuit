@@ -53,3 +53,4 @@ export namespace biscuit::inline literals {
 	constexpr std::size_t operator "" uz ( unsigned long long n ) { return n; }
 }
 #endif
+

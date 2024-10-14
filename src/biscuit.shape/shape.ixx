@@ -24,8 +24,10 @@ import biscuit;
 
 export namespace biscuit::shape {
 
-	using char_t = wchar_t;
-	using string_t = std::wstring;
+	//using char_t = wchar_t;
+	//using string_t = std::wstring;
+	using char_t = char;
+	using string_t = std::string;
 	using point_t = sPoint3d;
 	//using rect_t = sRect3d;
 	using rect_t = sBounds3d;
@@ -115,20 +117,8 @@ export namespace biscuit::shape {
 		auto operator <=> (sCookie const&) const = default;
 
 		template < typename archive >
-		friend void serialize(archive& ar, sCookie& var, unsigned int const file_version) {
-			ar & (ptrdiff_t&)var.ptr;
-			ar & var.buffer;
-			ar & var.str;
-			decltype(var.duration)::rep count{};
-			if constexpr (archive::is_saving()) {
-				count = var.duration.count();
-			}
-			ar & count;
-
-			if constexpr (archive::is_loading()) {
-				var.duration = std::chrono::nanoseconds(count);
-			}
-			return ar;
+		void serialize(archive& ar, unsigned int const file_version) {
+			ar((ptrdiff_t&)ptr, buffer, str, duration);
 		};
 	};
 
@@ -143,13 +133,8 @@ export namespace biscuit::shape {
 		auto operator <=> (sLineType const&) const = default;
 
 		template < typename archive >
-		friend void serialize(archive& ar, sLineType& var, unsigned int const file_version) {
-			ar & var.name;
-			ar & var.flags;
-			ar & var.path;
-			if (file_version >= 1) {
-				ar & var.description;
-			}
+		void serialize(archive& ar, unsigned int const file_version) {
+			ar(name, flags, path, description);
 		}
 	};
 
@@ -159,7 +144,7 @@ export namespace biscuit::shape {
 	/// @brief shape interface class
 	class xShape {
 	protected:
-		friend class xDrawing;
+		//friend class xDrawing;
 		//mutable int m_crIndex{};		// 0 : byblock, 256 : bylayer, negative : layer is turned off (optional)
 	public:
 		//mutable string_t m_strLayer;	// temporary value. (while loading from dxf)
@@ -212,15 +197,8 @@ export namespace biscuit::shape {
 		};
 
 		template < typename archive >
-		friend void serialize(archive& ar, xShape& shape, unsigned int const file_version) {
-			ar & shape.m_color.Value();
-			ar & shape.m_cookie;
-			ar & shape.m_strLineType;
-			ar & shape.m_lineWeight;
-			ar & shape.m_eLineType;
-			ar & shape.m_bVisible;
-			ar & shape.m_bTransparent;
-			return ar;
+		void serialize(archive& ar, unsigned int const file_version) {
+			ar(m_color.Value(), m_cookie, m_strLineType, m_lineWeight, m_eLineType, m_bVisible, m_bTransparent);
 		}
 
 		string_t const& GetShapeName() const { return GetShapeName(GetShapeType()); }
@@ -261,6 +239,7 @@ export namespace biscuit::shape {
 
 }
 
+export CEREAL_CLASS_VERSION(biscuit::shape::sCookie, 1);
 export CEREAL_CLASS_VERSION(biscuit::shape::sLineType, 1);
 export CEREAL_CLASS_VERSION(biscuit::shape::xShape, biscuit::shape::xShape::s_version);
 
