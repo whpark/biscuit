@@ -18,7 +18,7 @@ import biscuit.shape.shape;
 
 export namespace biscuit::shape {
 
-	constexpr std::array<color_t, 256> const colorTable_s {{
+	constexpr std::array<color_t, 256> const s_colorTable {{
 		ColorRGBA( (uint8_t)(255*0),        (uint8_t)(255*0),        (uint8_t)(255*0) ),                        // unused
 		ColorRGBA( (uint8_t)(255*1),        (uint8_t)(255*0),        (uint8_t)(255*0) ),                        // 1
 		ColorRGBA( (uint8_t)(255*1),        (uint8_t)(255*1),        (uint8_t)(255*0) ),        

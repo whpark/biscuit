@@ -11,6 +11,7 @@ module biscuit.shape.entities;
 
 import std;
 import biscuit;
+import biscuit.shape.color_table;
 import biscuit.shape.shape;
 import biscuit.shape.canvas;
 import biscuit.shape.entities.layer;
@@ -413,8 +414,8 @@ namespace biscuit::shape {
 		}
 	}
 
-	std::deque<std::unique_ptr<xShape>> xPolyline::Split() const {
-		std::deque<std::unique_ptr<xShape>> shapes;
+	shapes_t xPolyline::Split() const {
+		shapes_t shapes;
 
 		auto nPt = m_pts.size();
 		if (!m_bLoop)
@@ -493,7 +494,7 @@ namespace biscuit::shape {
 						bool const bIsRightHanded = ct.IsRightHanded();
 
 						for (auto const& rShape : rBlockNew->m_shapes) {
-							auto rShapeNew = rShape.NewClone();
+							auto rShapeNew = rShape.clone();
 							rShapeNew->Transform(ct, bIsRightHanded);
 							// color
 							if (rShapeNew->m_crIndex == 0) {
@@ -522,15 +523,15 @@ namespace biscuit::shape {
 				}
 
 				// color
-				if (rShape->m_color.cr == -1) {
+				if (rShape->m_color.Value() == -1u) {
 					int m_crIndex = rShape->m_crIndex;
 					if (m_crIndex == 256) {
 						m_crIndex = pLayer->m_crIndex;
 						rShape->m_color = pLayer->m_color;
 					}
-					if (rShape->m_color.cr == -1) {
-						if ( (m_crIndex > 0) and (m_crIndex < colorTable_s.size()) )
-							rShape->m_color = colorTable_s[m_crIndex];
+					if (rShape->m_color.Value() == -1u) {
+						if ( (m_crIndex > 0) and (m_crIndex < s_colorTable.size()) )
+							rShape->m_color = s_colorTable[m_crIndex];
 					}
 				}
 
