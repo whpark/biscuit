@@ -19,6 +19,8 @@
 #include "biscuit/dependencies_units.h"
 #include "biscuit/dependencies_cereal.h"
 
+#include "shape_macro.h"
+
 export module biscuit.shape.entities.layer;
 import std;
 import biscuit;
@@ -28,55 +30,35 @@ export namespace biscuit::shape {
 
 	class xLayer : public xShape {
 	public:
-		using base_t = xShape;
-		using this_t = xLayer;
-
-	public:
-		constexpr static inline uint32_t s_version{1u};
 		string_t m_name;
 		int m_flags{};
 		shapes_t m_shapes;
 		bool m_bUse{true};
 
 	public:
-		xLayer() = default;
-	protected:
-		xLayer(xLayer const&) = default;
-		xLayer& operator=(xLayer const&) = default;
-		xLayer(xLayer&&) = default;
-		xLayer& operator=(xLayer&&) = default;
-	public:
 		~xLayer() override = default;
 
 	public:
-		virtual std::unique_ptr<xShape> clone() const override { return std::unique_ptr<xLayer>(new xLayer(*this)); }
-		auto& base() { return static_cast<base_t&>(*this); }
-		auto const& base() const { return static_cast<base_t const&>(*this); }
-		auto operator <=> (this_t const&) const = default;
+		BSC__SHAPE_BASE(xLayer, xShape, eSHAPE::layer, 1u, m_name, m_flags, m_bUse, m_shapes);
+		//virtual bool Compare(xShape const& B_) const override {
+		//	if (!base_t::Compare(B_))
+		//		return false;
+		//	this_t const& B = (this_t const&)B_;
+		//	if ((m_name != B.m_name)
+		//		or (m_bUse != B.m_bUse)
+		//		or (m_flags != B.m_flags)
+		//		)
+		//		return false;
+		//	if (m_shapes.size() != B.m_shapes.size())
+		//		return false;
+		//	if (!std::ranges::equal(m_shapes.Base(), B.m_shapes.Base(), [](auto const& a, auto const& b) { return a->Compare(*b); }))
+		//		return false;
+		//	return true;
+		//}
 
-		template < typename archive >
-		void serialize(archive& ar, unsigned int const file_version) {
-			ar(base(), m_name, m_flags, m_shapes.Base(), m_bUse);
-		}
-
-		virtual bool Compare(xShape const& B_) const override {
-			if (!base_t::Compare(B_))
-				return false;
-			this_t const& B = (this_t const&)B_;
-			if ((m_name != B.m_name)
-				or (m_bUse != B.m_bUse)
-				or (m_flags != B.m_flags)
-				)
-				return false;
-			if (m_shapes.size() != B.m_shapes.size())
-				return false;
-			if (!std::ranges::equal(m_shapes.Base(), B.m_shapes.Base(), [](auto const& a, auto const& b) { return a->Compare(*b); }))
-				return false;
-			return true;
-		}
-
-		virtual eSHAPE GetShapeType() const { return eSHAPE::layer; }
+		//virtual eSHAPE GetShapeType() const { return eSHAPE::layer; }
 		//virtual point_t PointAt(double t) const override { throw std::exception{GTL__FUNCSIG "not here."}; return point_t {}; }	// no PointAt();
+
 		virtual std::optional<line_t> GetStartEndPoint() const override {
 			if (m_shapes.empty())
 				return {};
@@ -193,7 +175,5 @@ export namespace biscuit::shape {
 
 }	// namespace biscuit::shape;
 
-export CEREAL_REGISTER_TYPE(biscuit::shape::xLayer);
-export CEREAL_REGISTER_POLYMORPHIC_RELATION(biscuit::shape::xShape, biscuit::shape::xLayer);
-export CEREAL_CLASS_VERSION(biscuit::shape::xLayer, biscuit::shape::xLayer::s_version);
+BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xLayer);
 

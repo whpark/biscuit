@@ -124,7 +124,29 @@ export namespace biscuit {
 		constexpr auto const&				operator [](base_t::size_type offset) const { return *(base_t::operator [](offset)); }
 
 		// operator <=>
-		auto operator <=> (this_t const&) const = default;
+		//auto operator <=> (this_t const&) const = default;
+		bool operator == (this_t const& other) const {
+			if (base_t::size() != other.size())
+				return false;
+			for (auto p0 = begin(), p1 = other.begin(); p0 != end(); p0++, p1++) {
+				if (*p0 != *p1)
+					return false;
+			}
+			//for (size_t i{}; i < base_t::size(); i++) {
+			//	if ((*this)[i] != other[i])
+			//		return false;
+			//}
+			return true;
+		}
+		bool operator != (this_t const& other) const {
+			return !(*this == other);
+		}
+		bool operator < (this_t const& other) const {
+			return base_t::operator <(other);
+		}
+		bool operator > (this_t const& other) const {
+			return base_t::operator >(other);
+		}
 
 		// Concurrent Operation (Thread Safe operation)
 		constexpr auto& push_front(TSmartPtr<T>&& r) requires has_push_pop_front<base_t> {
