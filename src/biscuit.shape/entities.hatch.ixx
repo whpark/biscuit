@@ -44,7 +44,8 @@ export namespace biscuit::shape {
 		int m_deflines{};
 		std::vector<xPolyline> m_boundaries;
 
-		BSC__SHAPE_BASE(xHatch, xShape, eSHAPE::hatch, 1u, m_name, m_bSolid, m_bAssociative, m_nLoops, m_hstyle, m_hpattern, m_bDouble, m_angle, m_scale, m_deflines, m_boundaries);
+		BSC__SHAPE_BASE_DEFINITION(xHatch, xShape, eSHAPE::hatch);
+		BSC__SHAPE_ARCHIVE_MEMBER(xHatch, xShape, 1u, m_name, m_bSolid, m_bAssociative, m_nLoops, m_hstyle, m_hpattern, m_bDouble, m_angle, m_scale, m_deflines, m_boundaries);
 
 		//virtual point_t PointAt(double t) const override {};
 		virtual std::optional<line_t> GetStartEndPoint() const override { return {}; }
@@ -52,7 +53,7 @@ export namespace biscuit::shape {
 		virtual void FlipY() override { for (auto& b : m_boundaries) b.FlipY(); }
 		virtual void FlipZ() override { for (auto& b : m_boundaries) b.FlipZ(); }
 		virtual void Reverse() override { }
-		virtual void Transform(ct_t const& ct, bool bRightHanded) override { };
+		virtual void Transform(ct_t const&, bool) override { };
 		virtual bool UpdateBounds(rect_t& bounds) const override {
 			bool b{};
 			for (auto const& bound : m_boundaries) {

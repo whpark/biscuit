@@ -89,6 +89,8 @@ export namespace biscuit {
 
 	public:
 
+		using base_t::operator ();
+
 		bool operator == (this_t const&) const = default;
 		bool operator != (this_t const&) const = default;
 		BSC__NODISCARD std::unique_ptr<ICoordTrans> clone() const override { return std::make_unique<xCoordTransChain>(*this); }
@@ -186,6 +188,8 @@ export namespace biscuit {
 		}
 
 	public:
+		using base_t::operator ();
+
 		bool operator == (this_t const& B) const { return m_transform.matrix() == B.m_transform.matrix(); }
 		bool operator != (this_t const& B) const { return m_transform.matrix() != B.m_transform.matrix(); }
 
@@ -354,6 +358,22 @@ export namespace biscuit {
 			m_transform.matrix().topLeftCorner<2, 2>() = Eigen::Rotation2D<double>(angle.value()).matrix();
 			AdjustOffset(origin, offset);
 		}
+		static Eigen::Matrix3d GetRotatingMatrixXY(rad_t angle) {
+			Eigen::Matrix3d mat;
+			mat = Eigen::AngleAxisd(angle.value(), Eigen::Vector3d::UnitZ());
+			return mat;
+		}
+		static Eigen::Matrix3d GetRotatingMatrixYZ(rad_t angle) {
+			Eigen::Matrix3d mat;
+			mat = Eigen::AngleAxisd(angle.value(), Eigen::Vector3d::UnitX());
+			return mat;
+		}
+		static Eigen::Matrix3d GetRotatingMatrixZX(rad_t angle) {
+			Eigen::Matrix3d mat;
+			mat = Eigen::AngleAxisd(angle.value(), Eigen::Vector3d::UnitY());
+			return mat;
+		}
+
 
 		//-------------------------------------------------------------------------
 		double Scale() const {

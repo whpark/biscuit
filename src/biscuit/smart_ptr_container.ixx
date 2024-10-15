@@ -237,7 +237,7 @@ export namespace biscuit {
 			std::shared_lock lock(*this);
 			if constexpr (concepts::cloneable<T>) {
 				for (auto const& obj : *this)
-					container.push_back(obj.NewClone());
+					container.push_back(obj.clone());
 			}
 			else if constexpr (std::is_copy_constructible_v<T>) {
 				for (auto const& obj : *this)
@@ -249,7 +249,7 @@ export namespace biscuit {
 			std::shared_lock lock(*this);
 			if constexpr (concepts::cloneable<T>) {
 				for (auto const& obj : container)
-					push_back(obj.NewClone());
+					push_back(obj.clone());
 			}
 			else if constexpr (std::is_copy_constructible_v<T>) {
 				for (auto const& obj : container)

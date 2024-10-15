@@ -14,7 +14,7 @@ import biscuit;
 import biscuit.shape.color_table;
 import biscuit.shape.shape;
 import biscuit.shape.canvas;
-import biscuit.shape.entities.layer;
+import biscuit.shape.entities;
 
 using namespace std::literals;
 
@@ -23,25 +23,29 @@ namespace biscuit::shape {
 
 	template <typename... T>
 	constexpr void print_local(fmt::wformat_string<T ...> fmt, T&&... args) {
-		return fmt::vprint(fmt, fmt::make_wformat_args(args...));
+		fmt::vprint(fmt, fmt::make_wformat_args(args...));
 	}
 
 	template <typename... T>
-	constexpr void print_local(std::format_string<T ...> fmt, T&&... args) {
-		return fmt::vprint(fmt, fmt::make_format_args(args...));
+	constexpr void print_local(fmt::format_string<T ...> fmt, T&&... args) {
+		fmt::vprint(fmt, fmt::make_format_args(args...));
 	}
 
 	template < typename ... T>
-	constexpr void DEBUG_PRINT(std::wstring_view fmt, T&& ... args) {
+	constexpr void DEBUG_PRINT(fmt::wformat_string<T ...> fmt, T&& ... args) {
 	#ifdef _DEBUG
-		print_local(fmt, std::forward<T>(args)...);
+		fmt::print(fmt::runtime(fmt.get()), std::forward<T>(args) ...);
+		//fmt::vprint(fmt, fmt::make_wformat_args(args...));
+		//print_local(fmt, std::forward<T>(args) ...);
 	#else
 	#endif
 	}
 	template < typename ... T>
-	constexpr void DEBUG_PRINT(std::string_view fmt, T&& ... args) {
+	constexpr void DEBUG_PRINT(std::format_string<T ...> fmt, T&& ... args) {
 	#ifdef _DEBUG
-		print_local(fmt, std::forward<T>(args)...);
+		fmt::print(fmt::runtime(fmt.get()), std::forward<T>(args) ...);
+		//fmt::vprint(fmt, fmt::make_format_args(args...));
+		//print_local(fmt, std::forward<T>(args) ...);
 	#else
 	#endif
 	}
@@ -196,45 +200,45 @@ namespace biscuit::shape {
 	string_t const& xShape::GetShapeName(eSHAPE eType) {
 		using namespace std::literals;
 		static std::map<eSHAPE, string_t> const map = {
-			{ eSHAPE::none,				L"none" },
-			{ eSHAPE::e3dface,			L"3dFace"s },
-			{ eSHAPE::arc_xy,			L"ARC"s },
-			{ eSHAPE::block,			L"BLOCK"s },
-			{ eSHAPE::circle_xy,		L"CIRCLE"s },
-			{ eSHAPE::dimension,		L"DIMENSION"s },
-			{ eSHAPE::dimaligned,		L"DIMALIGNED"s },
-			{ eSHAPE::dimlinear,		L"DIMLINEAR"s },
-			{ eSHAPE::dimradial,		L"DIMRADIAL"s },
-			{ eSHAPE::dimdiametric,		L"DIMDIAMETRIC"s },
-			{ eSHAPE::dimangular,		L"DIMANGULAR"s },
-			{ eSHAPE::dimangular3p,		L"DIMANGULAR3P"s },
-			{ eSHAPE::dimordinate,		L"DIMORDINATE"s },
-			{ eSHAPE::ellipse_xy,		L"ELLIPSE"s },
-			{ eSHAPE::hatch,			L"HATCH"s },
-			{ eSHAPE::image,			L"IMAGE"s },
-			{ eSHAPE::insert,			L"INSERT"s },
-			{ eSHAPE::leader,			L"LEADER"s },
-			{ eSHAPE::line,				L"LINE"s },
-			{ eSHAPE::lwpolyline,		L"LWPOLYLINE"s },
-			{ eSHAPE::mtext,			L"MTEXT"s },
-			{ eSHAPE::dot,				L"POINT"s },
-			{ eSHAPE::polyline,			L"POLYLINE"s },
-			{ eSHAPE::ray,				L"RAY"s },
-			{ eSHAPE::solid,			L"SOLID"s },
-			{ eSHAPE::spline,			L"SPLINE"s },
-			{ eSHAPE::text,				L"TEXT"s },
-			{ eSHAPE::trace,			L"TRACE"s },
-			{ eSHAPE::underlay,			L"UNDERLAY"s },
-			{ eSHAPE::vertex,			L"VERTEX"s },
-			{ eSHAPE::viewport,			L"VIEWPORT"s },
-			{ eSHAPE::xline,			L"XLINE"s },
-			{ eSHAPE::layer,			L"LAYER"s },
-			{ eSHAPE::drawing,			L"DRAWING"s },
+			{ eSHAPE::none,				"none" },
+			{ eSHAPE::e3dface,			"3dFace"s },
+			{ eSHAPE::arc_xy,			"ARC"s },
+			{ eSHAPE::block,			"BLOCK"s },
+			{ eSHAPE::circle_xy,		"CIRCLE"s },
+			{ eSHAPE::dimension,		"DIMENSION"s },
+			{ eSHAPE::dimaligned,		"DIMALIGNED"s },
+			{ eSHAPE::dimlinear,		"DIMLINEAR"s },
+			{ eSHAPE::dimradial,		"DIMRADIAL"s },
+			{ eSHAPE::dimdiametric,		"DIMDIAMETRIC"s },
+			{ eSHAPE::dimangular,		"DIMANGULAR"s },
+			{ eSHAPE::dimangular3p,		"DIMANGULAR3P"s },
+			{ eSHAPE::dimordinate,		"DIMORDINATE"s },
+			{ eSHAPE::ellipse_xy,		"ELLIPSE"s },
+			{ eSHAPE::hatch,			"HATCH"s },
+			{ eSHAPE::image,			"IMAGE"s },
+			{ eSHAPE::insert,			"INSERT"s },
+			{ eSHAPE::leader,			"LEADER"s },
+			{ eSHAPE::line,				"LINE"s },
+			{ eSHAPE::lwpolyline,		"LWPOLYLINE"s },
+			{ eSHAPE::mtext,			"MTEXT"s },
+			{ eSHAPE::dot,				"POINT"s },
+			{ eSHAPE::polyline,			"POLYLINE"s },
+			{ eSHAPE::ray,				"RAY"s },
+			{ eSHAPE::solid,			"SOLID"s },
+			{ eSHAPE::spline,			"SPLINE"s },
+			{ eSHAPE::text,				"TEXT"s },
+			{ eSHAPE::trace,			"TRACE"s },
+			{ eSHAPE::underlay,			"UNDERLAY"s },
+			{ eSHAPE::vertex,			"VERTEX"s },
+			{ eSHAPE::viewport,			"VIEWPORT"s },
+			{ eSHAPE::xline,			"XLINE"s },
+			{ eSHAPE::layer,			"LAYER"s },
+			{ eSHAPE::drawing,			"DRAWING"s },
 		};
 
 		auto iter = map.find(eType);
 		if (iter == map.end()) {
-			static auto const empty = L""s;
+			static auto const empty = ""s;
 			return empty;
 		}
 		return iter->second;
@@ -433,7 +437,7 @@ namespace biscuit::shape {
 			} else {
 				xArc arc = xArc::GetFromBulge(pt0.Bulge(), pt0, pt1);
 				(xShape&)arc = *(xShape*)this;
-				shapes.push_back(arc.NewClone());
+				shapes.push_back(arc.clone());
 			}
 		}
 		return shapes;
@@ -449,52 +453,59 @@ namespace biscuit::shape {
 			if (xInsert* pInsert = dynamic_cast<xInsert*>(rShape.get()); pInsert) {
 				auto iter = mapBlocks.find(pInsert->m_name);
 				if (iter == mapBlocks.end()) {
-					DEBUG_PRINT(L"No Block : {}\n", pInsert->m_name);
+					DEBUG_PRINT("No Block : {}\n", pInsert->m_name);
 					return false;
 				}
-				auto* pBlock = iter->pt1;
+				auto* pBlock = iter->second;
 				if (!pBlock) {
-					DEBUG_PRINT(L"Internal ERROR (Block Name : {})\n", pInsert->m_name);
+					DEBUG_PRINT("Internal ERROR (Block Name : {})\n", pInsert->m_name);
 					return false;
 				}
 
 				ct_t ct;
 				// todo : 순서 확인 (scale->rotate ? or rotate->scale ?)
-				if (pInsert->m_xscale != 1.0) {
-					ct.m_mat(0, 0) *= pInsert->m_xscale;
-					ct.m_mat(0, 1) *= pInsert->m_xscale;
-					ct.m_mat(0, 2) *= pInsert->m_xscale;
+				if (pInsert->m_xscale != 1.0 or pInsert->m_yscale != 1.0 or pInsert->m_zscale != 1.0) {
+					ct.m_transform.matrix() = Eigen::Scaling(pInsert->m_xscale, pInsert->m_yscale, pInsert->m_zscale) * ct.m_transform.matrix();
 				}
-				if (pInsert->m_yscale != 1.0) {
-					ct.m_mat(1, 0) *= pInsert->m_yscale;
-					ct.m_mat(1, 1) *= pInsert->m_yscale;
-					ct.m_mat(1, 2) *= pInsert->m_yscale;
-				}
-				if (pInsert->m_zscale != 1.0) {
-					ct.m_mat(2, 0) *= pInsert->m_zscale;
-					ct.m_mat(2, 1) *= pInsert->m_zscale;
-					ct.m_mat(2, 2) *= pInsert->m_zscale;
-				}
+				//if (pInsert->m_xscale != 1.0) {
+				//	ct.m_mat(0, 0) *= pInsert->m_xscale;
+				//	ct.m_mat(0, 1) *= pInsert->m_xscale;
+				//	ct.m_mat(0, 2) *= pInsert->m_xscale;
+				//}
+				//if (pInsert->m_yscale != 1.0) {
+				//	ct.m_mat(1, 0) *= pInsert->m_yscale;
+				//	ct.m_mat(1, 1) *= pInsert->m_yscale;
+				//	ct.m_mat(1, 2) *= pInsert->m_yscale;
+				//}
+				//if (pInsert->m_zscale != 1.0) {
+				//	ct.m_mat(2, 0) *= pInsert->m_zscale;
+				//	ct.m_mat(2, 1) *= pInsert->m_zscale;
+				//	ct.m_mat(2, 2) *= pInsert->m_zscale;
+				//}
 
 				if (pInsert->m_angle != 0.0_deg) {
-					ct.m_mat = ct.GetRotatingMatrixXY(pInsert->m_angle) * ct.m_mat;
+					ct.m_transform.matrix() = ct.GetRotatingMatrixXY(pInsert->m_angle) * ct.m_transform.matrix();
 				}
 
-				ct.m_origin = pBlock->m_pt;
+				//ct.m_origin = pBlock->m_pt;
+				{
+					auto pt0 = ct(point_t{});
+					ct.AdjustOffset(pBlock->m_pt, pt0);
+				}
 
 				for (int y = 0; y < pInsert->m_nRow; y++) {
 					for (int x = 0; x < pInsert->m_nCol; x++) {
 
-						std::unique_ptr<xBlock> rBlockNew { dynamic_cast<xBlock*>(pBlock->NewClone().release()) };
+						std::unique_ptr<xBlock> rBlockNew { dynamic_cast<xBlock*>(pBlock->clone().release()) };
 						if (!rBlockNew)
 							continue;
 
-						ct.m_offset.x = x*pInsert->m_spacingCol + pInsert->m_pt.x;
-						ct.m_offset.y = y*pInsert->m_spacingRow + pInsert->m_pt.y;
+						ct.m_transform.translation().x() = x*pInsert->m_spacingCol + pInsert->m_pt.x;
+						ct.m_transform.translation().y() = y*pInsert->m_spacingRow + pInsert->m_pt.y;
 						bool const bIsRightHanded = ct.IsRightHanded();
 
-						for (auto const& rShape : rBlockNew->m_shapes) {
-							auto rShapeNew = rShape.clone();
+						for (auto const& rItem : rBlockNew->m_shapes) {
+							auto rShapeNew = rItem.clone();
 							rShapeNew->Transform(ct, bIsRightHanded);
 							// color
 							if (rShapeNew->m_crIndex == 0) {
@@ -516,22 +527,22 @@ namespace biscuit::shape {
 
 		default :
 			if (auto iter = mapLayers.find(rShape->m_strLayer); iter != mapLayers.end()) {
-				auto* pLayer = iter->pt1;
+				auto* pLayer = iter->second;
 				if (!pLayer) {
-					DEBUG_PRINT(L"Internal Error : Layer {}\n", rShape->m_strLayer);
+					DEBUG_PRINT("Internal Error : Layer {}\n", rShape->m_strLayer);
 					return false;
 				}
 
 				// color
-				if (rShape->m_color.Value() == -1u) {
-					int m_crIndex = rShape->m_crIndex;
-					if (m_crIndex == 256) {
-						m_crIndex = pLayer->m_crIndex;
+				if (rShape->m_color.Value() == (uint32_t)-1) {
+					int crIndex = rShape->m_crIndex;
+					if (crIndex == 256) {
+						crIndex = pLayer->m_crIndex;
 						rShape->m_color = pLayer->m_color;
 					}
-					if (rShape->m_color.Value() == -1u) {
-						if ( (m_crIndex > 0) and (m_crIndex < s_colorTable.size()) )
-							rShape->m_color = s_colorTable[m_crIndex];
+					if (rShape->m_color.Value() == (uint32_t)-1) {
+						if ( (crIndex > 0) and (crIndex < s_colorTable.size()) )
+							rShape->m_color = s_colorTable[crIndex];
 					}
 				}
 
@@ -544,7 +555,7 @@ namespace biscuit::shape {
 				pLayer->m_shapes.push_back(std::move(rShape));
 
 			} else {
-				DEBUG_PRINT(L"No Layer : {}\n", rShape->m_strLayer);
+				DEBUG_PRINT("No Layer : {}\n", rShape->m_strLayer);
 				return false;
 			}
 

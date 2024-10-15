@@ -30,7 +30,6 @@ import biscuit.shape.canvas;
 import biscuit.shape.entities.circle;
 import biscuit.shape.entities.arc;
 
-#if 1
 export namespace biscuit::shape {
 
 	class xEllipse : public xArc {
@@ -42,7 +41,8 @@ export namespace biscuit::shape {
 		double m_radiusH{};
 		deg_t m_angle_first_axis{};
 
-		BSC__SHAPE_BASE(xEllipse, xArc, eSHAPE::ellipse_xy, 1u, m_ptCenter, m_radius, m_angle_length, m_angle_start, m_radiusH, m_angle_first_axis);
+		BSC__SHAPE_BASE_DEFINITION(xEllipse, xArc, eSHAPE::ellipse_xy);
+		BSC__SHAPE_ARCHIVE_MEMBER(xEllipse, xArc, 1u, m_ptCenter, m_radius, m_angle_length, m_angle_start, m_radiusH, m_angle_first_axis);
 
 		virtual std::optional<line_t> GetStartEndPoint() const override {
 			xCoordTrans2d ct;
@@ -82,5 +82,4 @@ export namespace biscuit::shape {
 }
 
 BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xEllipse);
-#endif
 

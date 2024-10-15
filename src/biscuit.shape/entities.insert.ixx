@@ -42,7 +42,8 @@ export namespace biscuit::shape {
 		double m_spacingCol{};
 		double m_spacingRow{};
 
-		BSC__SHAPE_BASE(xInsert, xShape, eSHAPE::insert, 1u, m_name, m_pt, m_xscale, m_yscale, m_zscale, m_angle, m_nCol, m_nRow, m_spacingCol, m_spacingRow);
+		BSC__SHAPE_BASE_DEFINITION(xInsert, xShape, eSHAPE::insert);
+		BSC__SHAPE_ARCHIVE_MEMBER(xInsert, xShape, 1u, m_name, m_pt, m_xscale, m_yscale, m_zscale, m_angle, m_nCol, m_nRow, m_spacingCol, m_spacingRow);
 
 		virtual std::optional<line_t> GetStartEndPoint() const override { return {}; }
 		virtual void FlipX() override {}

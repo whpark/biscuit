@@ -43,7 +43,8 @@ export namespace biscuit::shape {
 		//TSmartPtrContainer<xLayer, TCloneablePtr, std::deque> m_layers;
 
 	public:
-		BSC__SHAPE_BASE(xDrawing, xShape, eSHAPE::drawing, 1u, m_vars, m_line_types, m_layers);
+		BSC__SHAPE_BASE_DEFINITION(xDrawing, xShape, eSHAPE::drawing);
+		BSC__SHAPE_ARCHIVE_MEMBER(xDrawing, xShape, 1u, m_vars, m_line_types, m_layers);
 
 		//virtual point_t PointAt(double t) const override { throw std::exception{GTL__FUNCSIG "not here."}; return point_t {}; }	// no PointAt();
 		virtual std::optional<line_t> GetStartEndPoint() const override {

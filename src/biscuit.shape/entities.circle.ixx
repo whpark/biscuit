@@ -37,7 +37,8 @@ export namespace biscuit::shape {
 		deg_t m_angle_length{360_deg};	// 회전 방향.
 
 	public:
-		BSC__SHAPE_BASE(xCircle, xShape, eSHAPE::circle_xy, 1u, m_ptCenter, m_radius, m_angle_length);
+		BSC__SHAPE_BASE_DEFINITION(xCircle, xShape, eSHAPE::circle_xy);
+		BSC__SHAPE_ARCHIVE_MEMBER(xCircle, xShape, 1u, m_ptCenter, m_radius, m_angle_length);
 
 		virtual std::optional<line_t> GetStartEndPoint() const override {
 			auto pt = m_ptCenter + point_t(m_radius,0,0);

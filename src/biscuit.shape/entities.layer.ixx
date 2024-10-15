@@ -40,7 +40,8 @@ export namespace biscuit::shape {
 		~xLayer() override = default;
 
 	public:
-		BSC__SHAPE_BASE(xLayer, xShape, eSHAPE::layer, 1u, m_name, m_flags, m_bUse, m_shapes);
+		BSC__SHAPE_BASE_DEFINITION(xLayer, xShape, eSHAPE::layer);
+		BSC__SHAPE_ARCHIVE_MEMBER(xLayer, xShape, 1u, m_name, m_flags, m_bUse, m_shapes);
 		//virtual bool Compare(xShape const& B_) const override {
 		//	if (!base_t::Compare(B_))
 		//		return false;

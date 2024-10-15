@@ -117,7 +117,7 @@ export namespace biscuit::shape {
 		auto operator <=> (sCookie const&) const = default;
 
 		template < typename archive >
-		void serialize(archive& ar, unsigned int const file_version) {
+		void serialize(archive& ar, [[maybe_unused]] std::uint32_t const file_version) {
 			ar((ptrdiff_t&)ptr, buffer, str, duration);
 		};
 	};
@@ -133,7 +133,7 @@ export namespace biscuit::shape {
 		auto operator <=> (sLineType const&) const = default;
 
 		template < typename archive >
-		void serialize(archive& ar, unsigned int const file_version) {
+		void serialize(archive& ar, [[maybe_unused]] std::uint32_t const file_version) {
 			ar(name, flags, path, description);
 		}
 	};
@@ -144,10 +144,11 @@ export namespace biscuit::shape {
 	/// @brief shape interface class
 	class xShape {
 	protected:
-		//friend class xDrawing;
-		//mutable int m_crIndex{};		// 0 : byblock, 256 : bylayer, negative : layer is turned off (optional)
+		friend class xDrawing;
+		mutable int m_crIndex{};		// 0 : byblock, 256 : bylayer, negative : layer is turned off (optional)
 	public:
-		//mutable string_t m_strLayer;	// temporary value. (while loading from dxf)
+		mutable string_t m_strLayer;	// temporary value. (while loading from dxf)
+	public:
 		using this_t = xShape;
 
 	public:
@@ -197,7 +198,7 @@ export namespace biscuit::shape {
 		};
 
 		template < typename archive >
-		void serialize(archive& ar, unsigned int const file_version) {
+		void serialize(archive& ar, [[maybe_unused]] std::uint32_t const file_version) {
 			ar(m_color.Value(), m_cookie, m_strLineType, m_lineWeight, m_eLineType, m_bVisible, m_bTransparent);
 		}
 

@@ -29,7 +29,6 @@ import biscuit.shape.shape;
 import biscuit.shape.canvas;
 import biscuit.shape.entities.circle;
 
-#if 1
 export namespace biscuit::shape {
 
 	class xArc : public xCircle {
@@ -37,7 +36,8 @@ export namespace biscuit::shape {
 		deg_t m_angle_start{};
 
 	public:
-		BSC__SHAPE_BASE(xArc, xCircle, eSHAPE::arc_xy, 1u, m_angle_start);
+		BSC__SHAPE_BASE_DEFINITION(xArc, xCircle, eSHAPE::arc_xy);
+		BSC__SHAPE_ARCHIVE_MEMBER(xArc, xCircle, 1u, m_angle_start);
 
 		//virtual point_t PointAt(double t) const override {};
 		virtual std::optional<line_t> GetStartEndPoint() const override {
@@ -145,4 +145,3 @@ export namespace biscuit::shape {
 }
 
 BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xArc);
-#endif

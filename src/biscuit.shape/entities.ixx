@@ -45,6 +45,7 @@ export import biscuit.shape.entities.block;
 export import biscuit.shape.entities.dot;
 export import biscuit.shape.entities.circle;
 export import biscuit.shape.entities.arc;
+export import biscuit.shape.entities.ellipse;
 export import biscuit.shape.entities.line;
 export import biscuit.shape.entities.polyline;
 export import biscuit.shape.entities.text;

@@ -35,7 +35,8 @@ export namespace biscuit::shape {
 		point_t m_pt;
 
 	public:
-		BSC__SHAPE_BASE(xDot, xShape, eSHAPE::dot, 1u, m_pt);
+		BSC__SHAPE_BASE_DEFINITION(xDot, xShape, eSHAPE::dot);
+		BSC__SHAPE_ARCHIVE_MEMBER(xDot, xShape, 1u, m_pt);
 
 		//virtual point_t PointAt(double t) const override { return pt; };
 		virtual std::optional<line_t> GetStartEndPoint() const override {
@@ -45,7 +46,7 @@ export namespace biscuit::shape {
 		virtual void FlipY() override { m_pt.y = -m_pt.y; }
 		virtual void FlipZ() override { m_pt.z = -m_pt.z; }
 		virtual void Reverse() override { }
-		virtual void Transform(ct_t const& ct, bool bRightHanded) override {
+		virtual void Transform(ct_t const& ct, [[maybe_unused]] bool bRightHanded) override {
 			m_pt = ct(m_pt);
 		};
 		virtual bool UpdateBounds(rect_t& bounds) const override {

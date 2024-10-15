@@ -179,10 +179,10 @@ export namespace biscuit::shape {
 
 		virtual void PreDraw(xShape const&) override {}
 
-		virtual void MoveTo_Target(point_t const& pt) override {
+		virtual void MoveTo_Target(point_t const& ) override {
 			// Scanner Jump To
 		}
-		virtual void LineTo_Target(point_t const& pt) override {
+		virtual void LineTo_Target(point_t const& ) override {
 			// Scanner Write To
 		}
 	protected:
@@ -210,7 +210,7 @@ export namespace biscuit::shape {
 		}
 
 		// Primative, returns End Position.
-		virtual void MoveTo_Target(point_t const& pt) override {}
+		virtual void MoveTo_Target(point_t const& ) override {}
 		virtual void LineTo_Target(point_t const& pt) override {
 			cv::line(m_img, m_ptLast, pt, m_color, (int)m_line_width, m_line_type);
 			//cv::line(m_img, cv::Point(m_ptLast.x, m_ptLast.y), cv::Point(pt.x, pt.y), m_color, (int)m_line_width, m_line_type);

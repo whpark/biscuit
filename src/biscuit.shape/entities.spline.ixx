@@ -46,7 +46,8 @@ export namespace biscuit::shape {
 		double m_toleranceControlPoint{0.0000001};
 		double m_toleranceFitPoint{0.0000001};
 
-		BSC__SHAPE_BASE(xSpline, xShape, eSHAPE::spline, 1u, m_flags, m_ptNormal, m_vStart, m_vEnd, m_degree, m_knots, m_ptsControl, m_toleranceKnot, m_toleranceControlPoint, m_toleranceFitPoint);
+		BSC__SHAPE_BASE_DEFINITION(xSpline, xShape, eSHAPE::spline);
+		BSC__SHAPE_ARCHIVE_MEMBER(xSpline, xShape, 1u, m_flags, m_ptNormal, m_vStart, m_vEnd, m_degree, m_knots, m_ptsControl, m_toleranceKnot, m_toleranceControlPoint, m_toleranceFitPoint);
 
 		//virtual point_t PointAt(double t) const override {};
 		virtual std::optional<line_t> GetStartEndPoint() const override {
@@ -63,7 +64,7 @@ export namespace biscuit::shape {
 			std::ranges::reverse(m_ptsControl);
 			std::ranges::reverse(m_ptsFit);
 		}
-		virtual void Transform(ct_t const& ct, bool bRightHanded) override {
+		virtual void Transform(ct_t const& ct, [[maybe_unused]] bool bRightHanded) override {
 			m_ptNormal = ct(m_ptNormal);
 			m_vStart = ct(m_vStart);
 			m_vEnd = ct(m_vEnd);

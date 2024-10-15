@@ -47,7 +47,8 @@ export namespace biscuit::shape {
 		eALIGN_HORZ m_alignHorz{eALIGN_HORZ::left};
 		eALIGN_VERT m_alignVert{eALIGN_VERT::base_line};
 
-		BSC__SHAPE_BASE(xText, xShape, eSHAPE::text, 1u,
+		BSC__SHAPE_BASE_DEFINITION(xText, xShape, eSHAPE::text);
+		BSC__SHAPE_ARCHIVE_MEMBER(xText, xShape, 1u,
 			m_pt0, m_pt1, m_text, m_height, m_angle, m_widthScale,
 			m_oblique, m_textStyle, m_textgen, m_alignHorz, m_alignVert);
 
@@ -61,7 +62,7 @@ export namespace biscuit::shape {
 		virtual void FlipZ() override { m_pt0.z = -m_pt0.z; m_pt1.z = -m_pt1.z; }
 		virtual void Reverse() override {
 		}
-		virtual void Transform(ct_t const& ct, bool bRightHanded) override {
+		virtual void Transform(ct_t const& ct, [[maybe_unused]] bool bRightHanded) override {
 			m_pt0 = ct(m_pt0);
 			m_pt1 = ct(m_pt1);
 		}
@@ -117,7 +118,8 @@ export namespace biscuit::shape {
 			bottomRight
 		};
 
-		BSC__SHAPE_BASE(xMText, xText, eSHAPE::mtext, 1u, m_interlin);
+		BSC__SHAPE_BASE_DEFINITION(xMText, xText, eSHAPE::mtext);
+		BSC__SHAPE_ARCHIVE_MEMBER(xMText, xText, 1u, m_interlin);
 
 		virtual void Draw(ICanvas& canvas) const override {
 			xShape::Draw(canvas);

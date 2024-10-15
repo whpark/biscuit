@@ -39,7 +39,8 @@ export namespace biscuit::shape {
 		bool m_bLoop{};
 		std::vector<polypoint_t> m_pts;
 
-		BSC__SHAPE_BASE(xPolyline, xShape, eSHAPE::polyline, 1u, m_bLoop, m_pts);
+		BSC__SHAPE_BASE_DEFINITION(xPolyline, xShape, eSHAPE::polyline);
+		BSC__SHAPE_ARCHIVE_MEMBER(xPolyline, xShape, 1u, m_bLoop, m_pts);
 
 		//virtual point_t PointAt(double t) const override {};
 		virtual std::optional<line_t> GetStartEndPoint() const override {
@@ -152,7 +153,8 @@ export namespace biscuit::shape {
 	//-----------------------------------------------------------------------------------------------------------------------------
 	class xPolylineLW : public xPolyline {
 	public:
-		BSC__SHAPE_BASE(xPolylineLW, xPolyline, eSHAPE::lwpolyline, 1u);
+		BSC__SHAPE_BASE_DEFINITION(xPolylineLW, xPolyline, eSHAPE::lwpolyline);
+		BSC__SHAPE_ARCHIVE_MEMBER(xPolylineLW, xPolyline, 1u);
 
 		//virtual bool LoadFromCADJson(json_t& _j) override {
 		//	xShape::LoadFromCADJson(_j);

@@ -38,7 +38,8 @@ export namespace biscuit::shape {
 		point_t m_pt;
 
 	public:
-		BSC__SHAPE_BASE(xBlock, xLayer, eSHAPE::block, 1u, m_layer, m_pt);
+		BSC__SHAPE_BASE_DEFINITION(xBlock, xLayer, eSHAPE::block);
+		BSC__SHAPE_ARCHIVE_MEMBER(xBlock, xLayer, 1u, m_layer, m_pt);
 
 	};
 
