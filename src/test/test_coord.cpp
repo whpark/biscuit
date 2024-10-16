@@ -113,7 +113,10 @@ namespace test {
 		SECTION("4pt general") {
 			xCoordTrans2dP ct;
 			REQUIRE(ct.SetFrom4Pairs(pts0, pts1));
-			for (auto [p0, p1] : std::ranges::views::zip(pts0, pts1)) {
+			//for (auto [p0, p1] : std::ranges::views::zip(pts0, pts1)) {
+			for (size_t i{}; i < pts0.size(); ++i) {
+				auto const& p0 = pts0[i];
+				auto const& p1 = pts1[i];
 				REQUIRE(p1.GetDistance(ct(p0)) < eps);
 				REQUIRE(p1.GetTaxicabDistance(ct(p0)) < eps);
 			}
@@ -138,7 +141,10 @@ namespace test {
 		SECTION("4pt general") {
 			xCoordTrans3d ct;
 			REQUIRE(ct.SetFrom4Pairs(pts0, pts1));
-			for (auto [p0, p1] : std::ranges::views::zip(pts0, pts1)) {
+			//for (auto const& [p0, p1] : std::ranges::views::zip(pts0, pts1)) {
+			for (size_t i{}; i < pts0.size(); ++i) {
+				auto const& p0 = pts0[i];
+				auto const& p1 = pts1[i];
 				REQUIRE(p1.GetDistance(ct(p0)) < eps);
 				REQUIRE(p1.GetTaxicabDistance(ct(p0)) < eps);
 			}
