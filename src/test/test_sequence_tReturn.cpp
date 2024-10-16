@@ -82,6 +82,14 @@ namespace biscuit::seq::test {
 		co_return 0;
 	}
 
+	tcoro_t<int> Seq3(seq_t& seq) {
+		auto bOK = co_await seq.Wait([&, t0 = biscuit::seq::clock_t::now()] {return true;}, 100ms);
+		auto bOK2 = co_await seq.Wait([&, t0 = biscuit::seq::clock_t::now()] {return true;}, 100ms);
+		co_await seq.WaitFor(100ms);
+		co_return 0;
+	}
+
+
 	TEST_CASE("specify_return_type", ATTR) {
 		biscuit::seq::xSequenceTReturn driver;
 
