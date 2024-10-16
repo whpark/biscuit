@@ -251,7 +251,7 @@ export namespace biscuit {
 		#pragma warning(suppress: 4244)
 			return (std::strong_ordering)(svA.compare((strA_view_t&)svB));
 		}
-		if (lenA*sizeof(charA_t) <= lenB*sizeof(charB_t)) {
+		else if (lenA*sizeof(charA_t) <= lenB*sizeof(charB_t)) {
 			auto strA2 = ConvertString<charB_t>(svA).value_or(std::basic_string<charB_t>{});
 		#pragma warning(suppress: 4244)
 			return (std::strong_ordering)(strA2.compare(svB));
