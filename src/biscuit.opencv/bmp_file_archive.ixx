@@ -141,7 +141,7 @@ namespace biscuit {
 		}
 
 		if constexpr (nBPP == 16) {
-			UnPackSingleRow = [img_cols = img.cols](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
+			UnPackSingleRow = [img_cols = img.cols](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& ) {
 				//static_assert(sizeof(telement) == sizeof(uint16_t));
 				for (int x{}, xc{}; x < img_cols; x++, xc += sizeof(telement)) {
 					// todo: NOT SURE!
@@ -150,7 +150,7 @@ namespace biscuit {
 			};
 		}
 		if constexpr ( (nBPP == 24) or (nBPP == 32) ) {
-			UnPackSingleRow = [img_cols = img.cols](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
+			UnPackSingleRow = [img_cols = img.cols](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& ) {
 				for (int x{}, xc{}; x < img_cols; x++, xc += sizeof(telement)) {
 					if constexpr (sizeof(telement) >= sizeof(cv::Vec3b)) {
 						ptr[x][0] = line[xc + 0];
@@ -475,6 +475,272 @@ namespace biscuit {
 
 	}
 
+
+
+	template < bool bNoPaletteLookup, bool bBytePacking, typename telement = uint8, bool bLoopUnrolling = true, bool bMultiThreaded = true >
+	bool MatToBitmapFile(std::ostream& f, cv::Mat const& img, int nBPP, std::vector<telement> const& pal, callback_progress_t funcCallback) {
+
+		int width32 = (img.cols * nBPP + 31) / 32 * 4;
+		int pixel_per_byte = (8/nBPP);
+		int nColPixel = pixel_per_byte ? img.cols/ pixel_per_byte * pixel_per_byte : img.cols;
+
+		using Func_PackSingleRow = std::function<void(int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal)>;
+		Func_PackSingleRow PackSingleRow;
+
+		if constexpr (bBytePacking) {
+			if constexpr (bLoopUnrolling) {
+
+				switch (nBPP) {
+				case 1 :
+					PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte, nColPixel](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+						int x{};
+						for (; x < nColPixel; x += pixel_per_byte) {
+							int col = x / pixel_per_byte;
+							if constexpr (bNoPaletteLookup) {
+								line[col] = (ptr[x + 0] << 7) | (ptr[x + 1] << 6) | (ptr[x + 2] << 5) | (ptr[x + 3] << 4) | (ptr[x + 4] << 3) | (ptr[x + 5] << 2) | (ptr[x + 6] << 1) | (ptr[x + 7]);
+							}
+							else {
+								line[col] = (pal[ptr[x + 0]] << 7) | (pal[ptr[x + 1]] << 6) | (pal[ptr[x + 2]] << 5) | (pal[ptr[x + 3]] << 4) | (pal[ptr[x + 4]] << 3) | (pal[ptr[x + 5]] << 2) | (pal[ptr[x + 6]] << 1) | (pal[ptr[x + 7]]);
+							}
+						}
+						int col = x / pixel_per_byte;
+						if (col < line.size())
+							line[col] = 0;
+						for (int shift{ 8-nBPP }; x < img_cols; x++, shift--) {
+							if constexpr (bNoPaletteLookup) {
+								line[col] |= ptr[x] << shift;
+							}
+							else {
+								line[col] |= pal[ptr[x]] << shift;
+							}
+						}
+					};
+					break;
+				case 4 :
+					PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte, nColPixel](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+						int x{};
+						for (; x < nColPixel; x += pixel_per_byte) {
+							int col = x / pixel_per_byte;
+							if constexpr (bNoPaletteLookup) {
+								line[col] = (ptr[x + 0] << 4) | (ptr[x + 1] << 0);
+							}
+							else {
+								line[col] = (pal[ptr[x + 0]] << 4) | (pal[ptr[x + 1]] << 0);
+							}
+						}
+						int col = x / pixel_per_byte;
+						if (col < line.size())
+							line[col] = 0;
+						for (int shift{ 8-nBPP }; x < img_cols; x++, shift-=nBPP) {
+							if constexpr (bNoPaletteLookup) {
+								line[col] |= ptr[x] << shift;
+							}
+							else {
+								line[col] |= pal[ptr[x]] << shift;
+							}
+						}
+					};
+					break;
+				case 8 :
+					PackSingleRow = [img_cols = img.cols](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+						for (int x{}; x < img_cols; x++) {
+							if constexpr (bNoPaletteLookup) {
+								line[x] = ptr[x];
+							}
+							else {
+								line[x] = pal[ptr[x]];
+							}
+						}
+					};
+					break;
+				default :
+					return false;
+				}
+			}
+			else {
+				switch (nBPP) {
+				case 1 :
+				case 4 :
+					PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+						std::memset(line.data(), 0, line.size()*sizeof(line[0]));
+						for (int x{}; x < img_cols; x++) {
+							int col = x / pixel_per_byte;
+							int shift = 8 - (nBPP * ((x%pixel_per_byte)+1));
+							if constexpr (bNoPaletteLookup) {
+								line[col] |= ptr[x] << shift;
+							}
+							else {
+								line[col] |= pal[ptr[x]] << shift;
+							}
+						}
+					};
+					break;
+				case 8 :
+					PackSingleRow = [img_cols = img.cols](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+						for (int x{}; x < img_cols; x++) {
+							if constexpr (bNoPaletteLookup) {
+								line[x] = ptr[x];
+							}
+							else {
+								line[x] = pal[ptr[x]];
+							}
+						}
+					};
+					break;
+				default :
+					return false;
+				}
+			}
+		}	// if constexpr (bBytePacking)
+		else {
+			if (nBPP == 24) {
+				if (sizeof(telement) != 3)
+					return false;
+				PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+					telement* line3 = (telement*)line.data();
+					for (int x{}; x < img_cols; x++) {
+						if constexpr (bNoPaletteLookup) {
+							line3[x] = ptr[x];
+						}
+						else {
+							line3[x] = pal[ptr[x]];
+						}
+					}
+				};
+			}
+		}
+
+		if constexpr (bMultiThreaded) {
+			auto nCPUDetected = std::thread::hardware_concurrency();
+			auto nThread = std::min((uint)img.rows, (nCPUDetected <= 0) ? 2 : nCPUDetected);
+
+			struct BUFFER {
+				std::atomic<int> y{-1};
+				std::atomic<bool> bReady{false};
+				std::vector<uint8> line;
+				//std::set<int> idsThread;
+
+				BUFFER() : y{-1} {}
+			};
+			size_t sizeBuffer = nThread*2;
+			std::mutex mtxBuffer;
+			std::vector<BUFFER> buffers(sizeBuffer);
+			for (auto& buf : buffers)
+				buf.line.assign(width32, 0);
+
+			std::atomic<int> yCur, yWritten;
+			bool bWritten{};
+
+			auto GetBuffer = [img_rows = img.rows, &mtxBuffer, &buffers, &yCur, &yWritten](std::stop_token stop) -> BUFFER* {
+				if (yCur >= img_rows)
+					return nullptr;
+				std::unique_lock lock(mtxBuffer);
+				auto y = yCur.fetch_add(1);
+				if (y >= img_rows)
+					return nullptr;
+				auto& buf = buffers[y % buffers.size()];
+				int yOld = buf.y;
+				while (yOld >= 0) {
+					buf.y.wait(yOld);
+					if (stop.stop_requested())
+						return nullptr;
+					yOld = buf.y;
+				}
+				buf.y = y;
+				buf.y.notify_one();
+
+				return &buf;
+			};
+
+			auto PackBuffer = [&img, &buffers, &PackSingleRow, &pal, &yCur, &yWritten/*, &id*/, &GetBuffer](std::stop_token stop) {
+				do {
+					auto* pBuffer = GetBuffer(stop);
+					if (!pBuffer)
+						break;
+					auto& buf = *pBuffer;
+
+					PackSingleRow(buf.y, buf.line, img.ptr<telement>(buf.y), pal);
+
+					buf.bReady = true;
+					buf.bReady.notify_one();
+				} while(!stop.stop_requested());
+			};
+
+			auto Writer = [&f, &buffers, img_rows = img.rows, &yWritten, &bWritten, &funcCallback]() {
+				int iPercent{};
+				while (yWritten < img_rows) {
+					auto index = yWritten % buffers.size();
+					auto& buf = buffers[index];
+
+					while (yWritten != buf.y) {
+						buf.y.wait(-1);
+					}
+					while (!buf.bReady) {
+						buf.bReady.wait(false);
+					}
+
+					if (!f.write((char*)buf.line.data(), buf.line.size()))
+						return;
+
+					buf.bReady = false;
+					buf.y = -1;
+					buf.y.notify_one();
+
+					yWritten++;
+					yWritten.notify_one();
+
+					if (funcCallback) {
+						int iPercentNew = yWritten * 100 / img_rows;
+						if (iPercent != iPercentNew) {
+							iPercent = iPercentNew;
+							if (!funcCallback(iPercent, false, false))
+								return;
+						}
+					}
+				};
+				f.flush();
+				bWritten = (bool)f;
+			};
+
+			std::thread threadWriter(Writer);
+			std::vector<std::jthread> threads;
+			threads.reserve(nThread);
+			for (uint i{}; i < nThread; i++) {
+				threads.emplace_back(PackBuffer);
+			}
+
+			threadWriter.join();
+			if (!bWritten) {
+				for (auto& thread : threads)
+					thread.request_stop();
+				for (auto& buffer : buffers) {
+					buffer.y = -1;
+					buffer.y.notify_all();
+				}
+			}
+			return bWritten;
+		}
+		else {
+			int iPercent{};
+			std::vector<uint8> line((size_t)width32, 0);
+			for (int y{}; y < img.rows; y++) {
+				auto const* ptr = img.ptr<telement>(y);
+				PackSingleRow(y, line, ptr, pal);
+				f.write((char const*)line.data(), width32);
+
+				if (funcCallback) {
+					int iPercentNew = y * 100 / img.rows;
+					if (iPercent != iPercentNew) {
+						iPercent = iPercentNew;
+						if (!funcCallback(iPercent, false, false))
+							return false;
+					}
+				}
+			}
+			return true;
+		}
+	}
+
 }	// namespace internal
 
 export namespace biscuit {
@@ -699,6 +965,120 @@ export namespace biscuit {
 		return {};
 	}
 
+	bool SaveBitmapMat(
+		std::filesystem::path const& path,
+		cv::Mat const& img,
+		int nBPP,
+		sSize2i const& pelsPerMeter,
+		std::span<color_bgra_t const> palette = {},
+		bool bNoPaletteLookup = false,
+		bool bBottom2Top = false,
+		callback_progress_t funcCallback = nullptr)
+	{
+		bool bOK{};
+
+		// Trigger notifying it's over.
+		xFinalAction fa([&funcCallback, &bOK]{if (funcCallback) funcCallback(-1, true, !bOK);});
+
+		if (img.empty())
+			return false;
+
+		auto type = img.type();
+
+		int cx = img.cols;
+		int cy = img.rows;
+		//if ((cx >= 0xffff) or (cy >= 0xffff))
+		//	return false;
+		uint64_t lenFileExpect = sizeof(sBMPFileHeader) + sizeof(sBMPInfoHeader);
+		lenFileExpect += (nBPP <= 8) ? (uint64_t)cx * cy / (8/nBPP) : (uint64_t)cx*cy*(nBPP/8);
+		if (lenFileExpect >= 0xffff'fff0)
+			return false;
+		int pixel_size = (type == CV_8UC3) ? 3 : ((type == CV_8UC1) ? 1 : 0);
+		if (pixel_size <= 0)
+			return false;
+
+		sBMPInfoHeader header{};
+
+		header.size = sizeof(header);
+		header.width = cx;
+		header.height = bBottom2Top ? cy : -cy;
+		header.planes = 1;
+		header.compression = 0;//BI_RGB;
+		header.sizeImage = 0;//cx * cy * pixel_size;
+		header.XPelsPerMeter = pelsPerMeter.width;
+		header.YPelsPerMeter = pelsPerMeter.height;
+
+		cv::Mat img2 = img;
+		if (bBottom2Top)
+			cv::flip(img, img2, 0);
+
+		if (pixel_size == 4 or pixel_size == 3) {
+			std::ofstream f(path, std::ios_base::binary);
+			if (!f)
+				return false;
+
+			sBMPFileHeader fh;
+
+			auto width32 = AdjustAlign32(cx * 3);
+			fh.offsetData = sizeof(fh) + sizeof(header);
+			fh.sizeFile = fh.offsetData + width32 * cy;
+			header.nBPP = (uint16_t)nBPP;
+			header.nColorUsed = header.nColorImportant = 0;
+
+			f.write((char const*)&fh, sizeof(fh));
+			f.write((char const*)&header, sizeof(header));
+
+			if (pixel_size == 4) {
+				bOK = MatToBitmapFile<true, false, cv::Vec4b, bLoopUnrolling, bMultiThreaded>(f, img2, nBPP, {}, funcCallback);
+			}
+			else {
+				bOK = MatToBitmapFile<true, false, cv::Vec3b, bLoopUnrolling, bMultiThreaded>(f, img2, nBPP, {}, funcCallback);
+			}
+
+			return true;
+		}
+		else if (type == CV_8UC1) {
+			if ((nBPP != 1) and /*(nBPP != 2) and */(nBPP != 4) and (nBPP != 8)) {
+				return false;
+			}
+			if (palette.empty()) {
+				return false;
+			}
+
+			std::ofstream f(path, std::ios_base::binary);
+			if (!f)
+				return false;
+
+			sBMPFileHeader fh;
+
+			auto width32 = (cx * nBPP + 31) / 32 * 4;
+			fh.offsetData = (uint32_t) ( sizeof(fh) + sizeof(header) + palette.size()/*(0x01 << nBPP)*/ * sizeof(color_bgra_t) );
+			fh.sizeFile = fh.offsetData + width32 * cy;
+			header.nBPP = (uint16_t)nBPP;
+			header.nColorUsed = header.nColorImportant = (uint32_t)palette.size();
+
+			f.write((char const*)&fh, sizeof(fh));
+			f.write((char const*)&header, sizeof(header));
+
+			f.write((char const*)palette.data(), palette.size() * sizeof(palette[0]));
+
+			std::vector<uint8> pal((size_t)256, 0);
+			if (!bNoPaletteLookup) {
+				for (size_t i{}; i < palette.size(); i++) {
+					pal[palette[i].r] = (uint8)i;
+				}
+			}
+
+			if (bNoPaletteLookup)
+				bOK = MatToBitmapFile<true, true, uint8, bLoopUnrolling, bMultiThreaded>(f, img2, nBPP, pal, funcCallback);
+			else
+				bOK = MatToBitmapFile<false, true, uint8, bLoopUnrolling, bMultiThreaded>(f, img2, nBPP, pal, funcCallback);
+			return bOK;
+		}
+
+		return false;
+
+	}
 
 }
 

@@ -3,7 +3,7 @@
 #include "./config.h"
 
 #pragma warning(push)
-#pragma warning(disable: 5054)
+#pragma warning(disable: 4127 5054)
 
 #include <opencv2/opencv.hpp>
 

@@ -126,6 +126,7 @@ POP_ALIGN_AS()
 		if (is.read(pos + sizeof(sizeHeader), sizeHeader - sizeof(sizeHeader))) {
 			return header;
 		}
+		return {};
 	}
 	catch (...) {
 		return {};
