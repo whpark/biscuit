@@ -83,8 +83,12 @@ namespace biscuit::seq::test {
 	}
 
 	tcoro_t<int> Seq3(seq_t& seq) {
-		auto bOK = co_await seq.Wait([&, t0 = biscuit::seq::clock_t::now()] {return true;}, 100ms);
-		auto bOK2 = co_await seq.Wait([&, t0 = biscuit::seq::clock_t::now()] {return true;}, 100ms);
+		auto i0 = co_await seq.Wait([&, t0 = biscuit::seq::clock_t::now()] {return true;}, 100ms);
+		fmt::println("i0 = {}", i0);
+		auto i1 = co_await seq.Wait([&, t0 = biscuit::seq::clock_t::now()] {return true;}, 100ms);
+		fmt::println("i1 = {}", i1);
+		auto i2 = co_await seq.Wait([&, t0 = biscuit::seq::clock_t::now()] {return true;}, 100ms);
+		fmt::println("i2 = {}", i2);
 		co_await seq.WaitFor(100ms);
 		co_return 0;
 	}
@@ -97,6 +101,7 @@ namespace biscuit::seq::test {
 
 		std::future<std::string> f1 = driver.CreateChildSequence("SeqReturningString", &SeqReturningString);
 		std::future<int> f2 = driver.CreateChildSequence("SeqReturningInt", &SeqReturningInt);
+		std::future<int> f3 = driver.CreateChildSequence("SeqReturningInt3", &Seq3);
 
 		do {
 			auto t = driver.Dispatch();
