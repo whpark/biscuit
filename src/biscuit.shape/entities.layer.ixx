@@ -42,24 +42,6 @@ export namespace biscuit::shape {
 	public:
 		BSC__SHAPE_BASE_DEFINITION(xLayer, xShape, eSHAPE::layer);
 		BSC__SHAPE_ARCHIVE_MEMBER(xLayer, xShape, 1u, m_name, m_flags, m_bUse, m_shapes);
-		//virtual bool Compare(xShape const& B_) const override {
-		//	if (!base_t::Compare(B_))
-		//		return false;
-		//	this_t const& B = (this_t const&)B_;
-		//	if ((m_name != B.m_name)
-		//		or (m_bUse != B.m_bUse)
-		//		or (m_flags != B.m_flags)
-		//		)
-		//		return false;
-		//	if (m_shapes.size() != B.m_shapes.size())
-		//		return false;
-		//	if (!std::ranges::equal(m_shapes.Base(), B.m_shapes.Base(), [](auto const& a, auto const& b) { return a->Compare(*b); }))
-		//		return false;
-		//	return true;
-		//}
-
-		//virtual eSHAPE GetShapeType() const { return eSHAPE::layer; }
-		//virtual point_t PointAt(double t) const override { throw std::exception{GTL__FUNCSIG "not here."}; return point_t {}; }	// no PointAt();
 
 		virtual std::optional<line_t> GetStartEndPoint() const override {
 			if (m_shapes.empty())
