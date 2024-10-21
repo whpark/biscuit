@@ -194,6 +194,12 @@
     <ClCompile Include="bmp_file_header.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="utils.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="axis.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\vcpkg.json" />
