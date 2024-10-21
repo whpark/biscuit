@@ -62,7 +62,7 @@ export namespace biscuit::win {
 				return false;
 			DWORD_PTR result;
 			LPCTSTR strBuf = L"Environment";
-			SendMessageTimeoutW(HWND_BROADCAST, WM_SETTINGCHANGE, 0, (LPARAM)strBuf, SMTO_ABORTIFHUNG, timeout.count(), &result);
+			SendMessageTimeoutW(HWND_BROADCAST, WM_SETTINGCHANGE, 0, (LPARAM)strBuf, SMTO_ABORTIFHUNG, (UINT)timeout.count(), &result);
 			return true;
 		}
 
