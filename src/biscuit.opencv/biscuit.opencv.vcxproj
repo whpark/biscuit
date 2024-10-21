@@ -103,6 +103,8 @@
   <ItemGroup>
     <ClCompile Include="biscuit.opencv.ixx" />
     <ClCompile Include="bmp_file_archive.ixx" />
+    <ClCompile Include="mat_gl.ixx" />
+    <ClCompile Include="mat_operation.ixx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\biscuit\biscuit.vcxproj">

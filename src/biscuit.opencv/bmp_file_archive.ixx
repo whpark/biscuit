@@ -42,7 +42,7 @@ namespace biscuit {
 		int pixel_per_byte = (8/nBPP);
 		int nColPixel = pixel_per_byte ? img.cols/ pixel_per_byte * pixel_per_byte : img.cols;
 
-		using Func_UnPackSingleRow = std::function<void(int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette)>;
+		using Func_UnPackSingleRow = std::function<void(std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette)>;
 		Func_UnPackSingleRow UnPackSingleRow;
 
 		using Func_UnpackLine = std::function<void()>;
@@ -51,7 +51,7 @@ namespace biscuit {
 			if constexpr (nBPP == 1) {
 				if (palette.size() < 2)
 					return false;
-				UnPackSingleRow = [img_cols = img.cols, &nColPixel](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
+				UnPackSingleRow = [img_cols = img.cols, &nColPixel](std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
 					int x{}, col{};
 					for (; x < nColPixel; x += 8, col++) {
 						ptr[x + 0] = palette[(line[col] >> 7) & 0b0000'0001];
@@ -71,7 +71,7 @@ namespace biscuit {
 			else if constexpr (nBPP == 2) {
 				if (palette.size() < 4)
 					return false;
-				UnPackSingleRow = [img_cols = img.cols, &nColPixel](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
+				UnPackSingleRow = [img_cols = img.cols, &nColPixel](std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
 					int x{}, col{};
 					for (; x < nColPixel; x += 4, col++) {
 						ptr[x + 0] = palette[(line[col] >> 6) & 0b0000'0011];
@@ -87,7 +87,7 @@ namespace biscuit {
 			else if constexpr (nBPP == 4) {
 				if (palette.size() < 16)
 					return false;
-				UnPackSingleRow = [img_cols = img.cols, &nColPixel](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
+				UnPackSingleRow = [img_cols = img.cols, &nColPixel](std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
 					int x{}, col{};
 					for (; x < nColPixel; x += 2, col++) {
 						ptr[x + 0] = palette[(line[col] >> 4) & 0b0000'1111];
@@ -101,7 +101,7 @@ namespace biscuit {
 			else if constexpr (nBPP == 8) {
 				if (palette.size() < 256)
 					return false;
-				UnPackSingleRow = [img_cols = img.cols](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
+				UnPackSingleRow = [img_cols = img.cols](std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
 					for (int x{}; x < img_cols; x++)
 						ptr[x] = palette[line[x]];
 				};
@@ -118,7 +118,7 @@ namespace biscuit {
 
 			if constexpr ( (nBPP == 1) or (nBPP == 2) or (nBPP == 4) ) {
 				uint8 mask = (0x01 << nBPP) - 1;
-				UnPackSingleRow = [img_cols = img.cols, &nBPP, &pixel_per_byte, mask](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
+				UnPackSingleRow = [img_cols = img.cols, &nBPP, &pixel_per_byte, mask](std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
 					for (int x{}; x < img_cols; x++) {
 						int col = x / pixel_per_byte;
 						int shift = 8 - (nBPP * ((x%pixel_per_byte)+1));
@@ -127,7 +127,7 @@ namespace biscuit {
 				};
 			}
 			else if constexpr (nBPP == 8) {
-				UnPackSingleRow = [img_cols = img.cols](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
+				UnPackSingleRow = [img_cols = img.cols](std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& palette) {
 					for (int x{}; x < img_cols; x++) {
 						ptr[x] = palette[line[x]];
 					}
@@ -141,7 +141,7 @@ namespace biscuit {
 		}
 
 		if constexpr (nBPP == 16) {
-			UnPackSingleRow = [img_cols = img.cols](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& ) {
+			UnPackSingleRow = [img_cols = img.cols](std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& ) {
 				//static_assert(sizeof(telement) == sizeof(uint16_t));
 				for (int x{}, xc{}; x < img_cols; x++, xc += sizeof(telement)) {
 					// todo: NOT SURE!
@@ -150,7 +150,7 @@ namespace biscuit {
 			};
 		}
 		if constexpr ( (nBPP == 24) or (nBPP == 32) ) {
-			UnPackSingleRow = [img_cols = img.cols](int y, std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& ) {
+			UnPackSingleRow = [img_cols = img.cols](std::vector<uint8> const& line, telement* ptr, std::vector<telement> const& ) {
 				for (int x{}, xc{}; x < img_cols; x++, xc += sizeof(telement)) {
 					if constexpr (sizeof(telement) >= sizeof(cv::Vec3b)) {
 						ptr[x][0] = line[xc + 0];
@@ -233,7 +233,7 @@ namespace biscuit {
 						}
 					}
 
-					UnPackSingleRow(pBuf->y, pBuf->line, img.ptr<telement>(pBuf->y), palette);
+					UnPackSingleRow(pBuf->line, img.ptr<telement>(pBuf->y), palette);
 					pBuf->y = -1;
 					pBuf->y.notify_one();
 
@@ -263,7 +263,7 @@ namespace biscuit {
 					return false;
 				auto* ptr = img.ptr<telement>(y);
 
-				UnPackSingleRow(y, line, ptr, palette);
+				UnPackSingleRow(line, ptr, palette);
 
 				if (funcCallback) {
 					int iPercentNew = y * 100 / img.rows;
@@ -293,13 +293,13 @@ namespace biscuit {
 		int pixel_per_byte = (8/nBPP);
 		int nColPixel = pixel_per_byte ? img.cols/ pixel_per_byte * pixel_per_byte : img.cols;
 
-		using Func_UnPackSingleRow = std::function<void(int y, std::vector<uint8> const& line, telement* ptr)>;
+		using Func_UnPackSingleRow = std::function<void(std::vector<uint8> const& line, telement* ptr)>;
 		Func_UnPackSingleRow UnPackSingleRow;
 
 		using Func_UnpackLine = std::function<void()>;
 
 		if constexpr (nBPP == 1) {
-			UnPackSingleRow = [img_cols = img.cols, &nColPixel](int y, std::vector<uint8> const& line, telement* ptr) {
+			UnPackSingleRow = [img_cols = img.cols, &nColPixel](std::vector<uint8> const& line, telement* ptr) {
 				int x{}, col{};
 				for (; x < nColPixel; x += 8, col++) {
 					ptr[x + 0] = (line[col] >> 7) & 0b0000'0001;
@@ -318,7 +318,7 @@ namespace biscuit {
 			};
 		}
 		else if constexpr (nBPP == 2) {
-			UnPackSingleRow = [img_cols = img.cols, &nColPixel](int y, std::vector<uint8> const& line, telement* ptr) {
+			UnPackSingleRow = [img_cols = img.cols, &nColPixel](std::vector<uint8> const& line, telement* ptr) {
 				int x{}, col{};
 				for (; x < nColPixel; x += 4, col++) {
 					ptr[x + 0] = (line[col] >> 6) & 0b0000'0011;
@@ -333,7 +333,7 @@ namespace biscuit {
 			};
 		}
 		else if constexpr (nBPP == 4) {
-			UnPackSingleRow = [img_cols = img.cols, &nColPixel](int y, std::vector<uint8> const& line, telement* ptr) {
+			UnPackSingleRow = [img_cols = img.cols, &nColPixel](std::vector<uint8> const& line, telement* ptr) {
 				int x{}, col{};
 				for (; x < nColPixel; x += 2, col++) {
 					ptr[x + 0] = (line[col] >> 4) & 0b0000'1111;
@@ -346,7 +346,7 @@ namespace biscuit {
 			};
 		}
 		else if constexpr (nBPP == 8) {
-			UnPackSingleRow = [img_cols = img.cols](int y, std::vector<uint8> const& line, telement* ptr) {
+			UnPackSingleRow = [img_cols = img.cols](std::vector<uint8> const& line, telement* ptr) {
 				for (int x{}; x < img_cols; x++) {
 					ptr[x] = line[x];
 				}
@@ -360,7 +360,7 @@ namespace biscuit {
 		}
 
 		if constexpr (nBPP == 16) {
-			UnPackSingleRow = [img_cols = img.cols](int y, std::vector<uint8> const& line, telement* ptr) {
+			UnPackSingleRow = [img_cols = img.cols](std::vector<uint8> const& line, telement* ptr) {
 				//static_assert(sizeof(telement) == sizeof(uint16_t));
 				for (int x{}, xc{}; x < img_cols; x++, xc += sizeof(telement)) {
 					// todo: NOT SURE!
@@ -369,7 +369,7 @@ namespace biscuit {
 			};
 		}
 		if constexpr ( (nBPP == 24) or (nBPP == 32) ) {
-			UnPackSingleRow = [img_cols = img.cols](int y, std::vector<uint8> const& line, telement* ptr) {
+			UnPackSingleRow = [img_cols = img.cols](std::vector<uint8> const& line, telement* ptr) {
 				for (int x{}; x < img_cols; x++) {
 					int xc = x * sizeof(telement);
 					if constexpr (sizeof(telement) >= sizeof(cv::Vec3b)) {
@@ -452,7 +452,7 @@ namespace biscuit {
 					}
 				}
 
-				UnPackSingleRow(pBuf->y, pBuf->line, img.ptr<telement>(pBuf->y));
+				UnPackSingleRow(pBuf->line, img.ptr<telement>(pBuf->y));
 				pBuf->y = -1;
 				pBuf->y.notify_one();
 
@@ -484,7 +484,7 @@ namespace biscuit {
 		int pixel_per_byte = (8/nBPP);
 		int nColPixel = pixel_per_byte ? img.cols/ pixel_per_byte * pixel_per_byte : img.cols;
 
-		using Func_PackSingleRow = std::function<void(int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal)>;
+		using Func_PackSingleRow = std::function<void(std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal)>;
 		Func_PackSingleRow PackSingleRow;
 
 		if constexpr (bBytePacking) {
@@ -492,7 +492,7 @@ namespace biscuit {
 
 				switch (nBPP) {
 				case 1 :
-					PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte, nColPixel](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+					PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte, nColPixel](std::vector<uint8>& line, telement const* ptr, [[maybe_unused]] std::vector<telement> const& pal) {
 						int x{};
 						for (; x < nColPixel; x += pixel_per_byte) {
 							int col = x / pixel_per_byte;
@@ -517,7 +517,7 @@ namespace biscuit {
 					};
 					break;
 				case 4 :
-					PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte, nColPixel](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+					PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte, nColPixel](std::vector<uint8>& line, telement const* ptr, [[maybe_unused]] std::vector<telement> const& pal) {
 						int x{};
 						for (; x < nColPixel; x += pixel_per_byte) {
 							int col = x / pixel_per_byte;
@@ -542,7 +542,7 @@ namespace biscuit {
 					};
 					break;
 				case 8 :
-					PackSingleRow = [img_cols = img.cols](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+					PackSingleRow = [img_cols = img.cols](std::vector<uint8>& line, telement const* ptr, [[maybe_unused]] std::vector<telement> const& pal) {
 						for (int x{}; x < img_cols; x++) {
 							if constexpr (bNoPaletteLookup) {
 								line[x] = ptr[x];
@@ -561,7 +561,7 @@ namespace biscuit {
 				switch (nBPP) {
 				case 1 :
 				case 4 :
-					PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+					PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte](std::vector<uint8>& line, telement const* ptr, [[maybe_unused]] std::vector<telement> const& pal) {
 						std::memset(line.data(), 0, line.size()*sizeof(line[0]));
 						for (int x{}; x < img_cols; x++) {
 							int col = x / pixel_per_byte;
@@ -576,7 +576,7 @@ namespace biscuit {
 					};
 					break;
 				case 8 :
-					PackSingleRow = [img_cols = img.cols](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+					PackSingleRow = [img_cols = img.cols](std::vector<uint8>& line, telement const* ptr, [[maybe_unused]] std::vector<telement> const& pal) {
 						for (int x{}; x < img_cols; x++) {
 							if constexpr (bNoPaletteLookup) {
 								line[x] = ptr[x];
@@ -596,7 +596,7 @@ namespace biscuit {
 			if (nBPP == 24) {
 				if (sizeof(telement) != 3)
 					return false;
-				PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte](int y, std::vector<uint8>& line, telement const* ptr, std::vector<telement> const& pal) {
+				PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte](std::vector<uint8>& line, telement const* ptr, [[maybe_unused]] std::vector<telement> const& pal) {
 					telement* line3 = (telement*)line.data();
 					for (int x{}; x < img_cols; x++) {
 						if constexpr (bNoPaletteLookup) {
@@ -659,7 +659,7 @@ namespace biscuit {
 						break;
 					auto& buf = *pBuffer;
 
-					PackSingleRow(buf.y, buf.line, img.ptr<telement>(buf.y), pal);
+					PackSingleRow(buf.line, img.ptr<telement>(buf.y), pal);
 
 					buf.bReady = true;
 					buf.bReady.notify_one();

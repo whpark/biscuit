@@ -7,7 +7,7 @@
 - misc : miscellaneous
 
 ### dependencies
-- // boost https://www.boost.org/
+//- boost https://www.boost.org/
 - asio https://think-async.com/Asio/
 - catch2 https://github.com/catchorg/Catch2
 - cereal https://uscilab.github.io/cereal/
@@ -21,4 +21,6 @@
 - opencv https://opencv.org/
 - winreg https://github.com/GiovanniDicanio/WinReg
 - tinyspline https://github.com/msteinbeck/tinyspline
+- glew https://glew.sourceforge.net/
+- magic_enum https://github.com/Neargye/magic_enum
 

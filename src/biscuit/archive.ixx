@@ -63,6 +63,8 @@ export namespace biscuit {
 		constexpr static inline bool bLoading = bLOAD;
 		constexpr static inline eARCHIVE_BYTE_ORDERING byte_ordering = eBYTE_ORDERING;
 		constexpr static inline bool swap_byte_order = (byte_ordering == eARCHIVE_BYTE_ORDERING::network) && (std::endian::native == std::endian::little);
+		using is_saving = std::bool_constant<bStoring>;
+		using is_loading = std::bool_constant<bLoading>;
 
 	protected:
 		std::optional<tstream> m_streamInternal;
@@ -96,8 +98,8 @@ export namespace biscuit {
 		{ }
 
 	public:
-		constexpr static inline bool is_saving() { return bStoring; }
-		constexpr static inline bool is_loading() { return bLoading; }
+		//constexpr static inline bool is_saving() { return bStoring; }
+		//constexpr static inline bool is_loading() { return bLoading; }
 
 		/// @brief Set/Get Codepage.
 		eCODEPAGE SetCodepage(eCODEPAGE eCodepage) { return std::exchange(m_eCodepage, eCodepage); }

@@ -21,5 +21,11 @@
     <ClCompile Include="bmp_file_archive.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mat_operation.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mat_gl.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

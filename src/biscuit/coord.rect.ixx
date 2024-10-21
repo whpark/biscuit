@@ -108,7 +108,7 @@ export namespace biscuit {
 			return (pt0() <= B.pt0()) and (B.pt1() <= pt1());
 		}
 
-		// set rectangle from left, y, right, and bottom
+		// set rectangle from left, y, width, and height
 		void Set(T x = 0, T y = 0, T width = 0, T height = 0) requires (dim == 2) {
 			this->x = x; this->y = y; this->width = width; this->height = height;
 		}

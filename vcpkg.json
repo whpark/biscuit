@@ -27,6 +27,7 @@
         },
         "tinyspline",
         "winreg",
-        "magic-enum"
+        "magic-enum",
+        "glew"
     ]
 }

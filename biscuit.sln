@@ -18,6 +18,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.shape", "src\biscui
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.qt", "src\biscuit.qt\biscuit.qt.vcxproj", "{B3043D2A-40E0-480D-BE84-2B2B43F9C7E2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.opencv", "src\biscuit.opencv\biscuit.opencv.vcxproj", "{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -46,6 +48,10 @@ Global
 		{B3043D2A-40E0-480D-BE84-2B2B43F9C7E2}.Debug|x64.Build.0 = Debug|x64
 		{B3043D2A-40E0-480D-BE84-2B2B43F9C7E2}.Release|x64.ActiveCfg = Release|x64
 		{B3043D2A-40E0-480D-BE84-2B2B43F9C7E2}.Release|x64.Build.0 = Release|x64
+		{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}.Debug|x64.ActiveCfg = Debug|x64
+		{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}.Debug|x64.Build.0 = Debug|x64
+		{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}.Release|x64.ActiveCfg = Release|x64
+		{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
