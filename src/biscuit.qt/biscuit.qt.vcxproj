@@ -37,12 +37,12 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>6.7.2_msvc2019_64</QtInstall>
-    <QtModules>core</QtModules>
+    <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>6.7.2_msvc2019_64</QtInstall>
-    <QtModules>core</QtModules>
+    <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -126,10 +126,20 @@
     <ClCompile Include="biscuit.qt.ixx" />
     <ClCompile Include="MatBitmapArchive.ixx" />
     <ClCompile Include="ProgressDlg.cpp" />
+    <ClCompile Include="QCollapsibleGroupBox.cpp" />
+    <ClCompile Include="QColorButton.cpp" />
+    <ClCompile Include="QGlazeModel.cpp" />
+    <ClCompile Include="QPathCompleter.cpp" />
+    <ClCompile Include="QRoundButton.cpp" />
     <ClCompile Include="ui_data_exchange.ixx" />
     <ClCompile Include="utils.ixx" />
     <QtMoc Include="..\..\include\biscuit\qt\ProgressDlg.h" />
     <ClInclude Include="..\..\include\biscuit\qt\macro.h" />
+    <QtMoc Include="..\..\include\biscuit\qt\QCollapsibleGroupBox.h" />
+    <QtMoc Include="..\..\include\biscuit\qt\QColorButton.h" />
+    <QtMoc Include="..\..\include\biscuit\qt\QGlazeModel.h" />
+    <QtMoc Include="..\..\include\biscuit\qt\QPathCompleter.h" />
+    <QtMoc Include="..\..\include\biscuit\qt\QRoundButton.h" />
     <ClInclude Include="biscuit_qt.h" />
   </ItemGroup>
   <ItemGroup>

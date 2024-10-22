@@ -43,6 +43,21 @@
     <ClCompile Include="utils.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="QCollapsibleGroupBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QColorButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QGlazeModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QPathCompleter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QRoundButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ProgressDlg.ui">
@@ -51,6 +66,21 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\include\biscuit\qt\ProgressDlg.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\biscuit\qt\QCollapsibleGroupBox.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\biscuit\qt\QColorButton.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\biscuit\qt\QGlazeModel.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\biscuit\qt\QPathCompleter.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\biscuit\qt\QRoundButton.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
