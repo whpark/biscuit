@@ -39,7 +39,7 @@ export namespace biscuit::shape {
 		std::deque<sLineType> m_line_types;
 		//boost::ptr_deque<xBlock> blocks;
 		rect_t m_bounds;
-		std::list<xLayer> m_layers;
+		layers_t m_layers;
 		//TSmartPtrContainer<xLayer, TCloneablePtr, std::deque> m_layers;
 
 	public:

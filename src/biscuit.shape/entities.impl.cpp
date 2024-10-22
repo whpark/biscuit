@@ -233,6 +233,7 @@ namespace biscuit::shape {
 			{ eSHAPE::viewport,			"VIEWPORT"s },
 			{ eSHAPE::xline,			"XLINE"s },
 			{ eSHAPE::layer,			"LAYER"s },
+			{ eSHAPE::group,			"GROUP"s },
 			{ eSHAPE::drawing,			"DRAWING"s },
 		};
 

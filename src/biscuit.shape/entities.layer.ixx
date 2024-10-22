@@ -156,6 +156,8 @@ export namespace biscuit::shape {
 
 	};
 
+	using layers_t = std::list<xLayer>;
+
 
 }	// namespace biscuit::shape;
 

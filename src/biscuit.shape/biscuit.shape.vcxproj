@@ -66,7 +66,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;$(SolutionDir)src\dime\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <BuildStlModules>true</BuildStlModules>
@@ -88,7 +88,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;$(SolutionDir)src\dime\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <BuildStlModules>true</BuildStlModules>
@@ -111,12 +111,14 @@
     <ClCompile Include="biscuit.shape.ixx" />
     <ClCompile Include="canvas.ixx" />
     <ClCompile Include="color_table.ixx" />
+    <ClCompile Include="dxf_loader.ixx" />
     <ClCompile Include="entities.arc.ixx" />
     <ClCompile Include="entities.block.ixx" />
     <ClCompile Include="entities.circle.ixx" />
     <ClCompile Include="entities.dot.ixx" />
     <ClCompile Include="entities.drawing.ixx" />
     <ClCompile Include="entities.ellipse.ixx" />
+    <ClCompile Include="entities.group.ixx" />
     <ClCompile Include="entities.hatch.ixx" />
     <ClCompile Include="entities.insert.ixx" />
     <ClCompile Include="entities.ixx" />

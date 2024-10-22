@@ -91,6 +91,7 @@ export namespace biscuit::shape {
 		viewport,
 		xline,
 
+		group = 126,
 		layer = 127,
 		drawing = 128,
 

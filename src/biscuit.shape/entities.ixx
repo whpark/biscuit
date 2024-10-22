@@ -41,6 +41,7 @@
 
 export module biscuit.shape.entities;
 export import biscuit.shape.entities.layer;
+export import biscuit.shape.entities.group;
 export import biscuit.shape.entities.block;
 export import biscuit.shape.entities.dot;
 export import biscuit.shape.entities.circle;

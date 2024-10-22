@@ -72,6 +72,12 @@
     <ClCompile Include="entities.hatch.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dxf_loader.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.group.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shape_macro.h">

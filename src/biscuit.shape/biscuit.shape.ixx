@@ -41,4 +41,6 @@ export module biscuit.shape;
 export import biscuit.shape.color_table;
 export import biscuit.shape.shape;
 export import biscuit.shape.entities;
+export import biscuit.shape.canvas;
+export import biscuit.shape.dxf_loader;
 
