@@ -20,6 +20,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.qt", "src\biscuit.q
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.opencv", "src\biscuit.opencv\biscuit.opencv.vcxproj", "{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dime", "src\dime\src\dime.vcxproj", "{C00931D7-F0E9-4259-9610-54EA89A7EBB5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -52,6 +54,10 @@ Global
 		{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}.Debug|x64.Build.0 = Debug|x64
 		{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}.Release|x64.ActiveCfg = Release|x64
 		{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}.Release|x64.Build.0 = Release|x64
+		{C00931D7-F0E9-4259-9610-54EA89A7EBB5}.Debug|x64.ActiveCfg = Debug|x64
+		{C00931D7-F0E9-4259-9610-54EA89A7EBB5}.Debug|x64.Build.0 = Debug|x64
+		{C00931D7-F0E9-4259-9610-54EA89A7EBB5}.Release|x64.ActiveCfg = Release|x64
+		{C00931D7-F0E9-4259-9610-54EA89A7EBB5}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,6 +65,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F} = {219901BC-F3EB-477D-BD7A-2AAC6BF9B65D}
 		{730A3E73-F28D-435F-ADFD-DEF57F11F48F} = {3C2340D6-6EC4-43A0-B2BE-2FF17EB38CF2}
+		{C00931D7-F0E9-4259-9610-54EA89A7EBB5} = {3C2340D6-6EC4-43A0-B2BE-2FF17EB38CF2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5807FAB1-E483-4E4C-82EE-CE7C0B12AF8C}

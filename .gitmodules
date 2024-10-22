@@ -1,0 +1,3 @@
+[submodule "src/dime"]
+	path = src/dime
+	url = https://github.com/whpark/dime.git

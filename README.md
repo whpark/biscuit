@@ -24,4 +24,5 @@
 - glew https://glew.sourceforge.net/
 - magic_enum https://github.com/Neargye/magic_enum
 - qt https://www.qt.io/
+- dime https://github.com/coin3d/dime
 - 
