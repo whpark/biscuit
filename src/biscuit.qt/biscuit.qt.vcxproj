@@ -96,7 +96,7 @@
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>_WINDOWS;_LIB;BSC__QT_BUILD_STATIC;BSC__QT_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
@@ -109,7 +109,7 @@
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>_WINDOWS;_LIB;BSC__QT_BUILD_STATIC;BSC__QT_EXPORTS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -126,13 +126,16 @@
     <ClCompile Include="biscuit.qt.ixx" />
     <ClCompile Include="MatBitmapArchive.ixx" />
     <ClCompile Include="ProgressDlg.cpp" />
-    <ClCompile Include="qt.utils.ixx" />
+    <ClCompile Include="ui_data_exchange.ixx" />
+    <ClCompile Include="utils.ixx" />
     <QtMoc Include="..\..\include\biscuit\qt\ProgressDlg.h" />
     <ClInclude Include="..\..\include\biscuit\qt\macro.h" />
     <ClInclude Include="biscuit_qt.h" />
-    <ClCompile Include="biscuit_qt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\biscuit.opencv\biscuit.opencv.vcxproj">
+      <Project>{226ac92e-a608-4afe-81c8-4f7c0f4c2f08}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\biscuit\biscuit.vcxproj">
       <Project>{4fc2059e-06a9-4b82-861d-ed3cb583303f}</Project>
     </ProjectReference>

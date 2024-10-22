@@ -23,12 +23,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="biscuit_qt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClInclude Include="biscuit_qt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClCompile Include="ui_data_exchange.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MatBitmapArchive.ixx">
@@ -40,7 +40,7 @@
     <ClCompile Include="biscuit.qt.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="qt.utils.ixx">
+    <ClCompile Include="utils.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
