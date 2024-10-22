@@ -149,7 +149,7 @@ export namespace biscuit {
 
 	//-----------------------------------------------------------------------------
 
-	bool CheckGPU(bool bUse) {
+	bool CheckGPU([[maybe_unused]] bool bUse) {
 	#ifdef HAVE_CUDA
 		if (s_bGPUChecked)
 			return s_bUseGPU;
@@ -275,12 +275,12 @@ export namespace biscuit {
 		double dMinMax{};
 	};
 	std::optional<sMatchTemplateResult> MatchTemplate(cv::Mat const& img, cv::Mat const& imgTempl, double threshold, cv::TemplateMatchModes method = cv::TemplateMatchModes::TM_CCOEFF_NORMED, double dScale = 0.0, int eScaleInterpolation = cv::InterpolationFlags::INTER_LINEAR) try {
-		double dMin, dMax;
+		double dMin{}, dMax{};
 		cv::Point ptMin, ptMax;
-		bool bSuccess{};
 		sMatchTemplateResult result;
 
-		#ifdef HAVE_CUDA
+	#ifdef HAVE_CUDA
+		bool bSuccessGPU{};
 		if (s_bUseGPU) {
 			try {
 				cv::cuda::GpuMat imgG;
@@ -296,15 +296,15 @@ export namespace biscuit {
 				cv::cuda::GpuMat matResult;
 				GetCudaTemplateMatching(imgG.type(), method).match(imgG, imgGTempl, matResult);
 				cv::cuda::minMaxLoc(matResult, &dMin, &dMax, &ptMin, &ptMax);
-				bSuccess = true;
+				bSuccessGPU = true;
 			}
 			catch (...) {
 				//TRACE((GTL__FUNCSIG " - Error\n").c_str());
 			}
 		}
-		#endif
-
-		if (!bSuccess) {
+		if (!bSuccessGPU)
+	#endif
+		{
 			cv::Mat matResult;
 			cv::Mat imgG(img), imgGTempl(imgTempl);
 			if (dScale != 0.0) {
@@ -359,6 +359,10 @@ export namespace biscuit {
 			result.ptBest.x = result.ptBest.x / dScale + imgTempl.cols/2;
 			result.ptBest.y = result.ptBest.y / dScale + imgTempl.rows/2;
 		}
+
+		if (result.dRate < threshold)
+			return {};
+		return result;
 
 	} catch (...) {
 		return {};

@@ -12,7 +12,7 @@
 //#include "biscuit/dependencies_simdutf.h"
 //#include "biscuit/dependencies_units.h"
 
-#if !defined(BISCUIT_EXPORTS)
+#if !defined(BSC__EXPORTS)
 #	pragma comment(lib, "biscuit.lib")
 #endif
 

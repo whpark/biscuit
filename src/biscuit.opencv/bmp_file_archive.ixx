@@ -594,7 +594,7 @@ namespace biscuit {
 		}	// if constexpr (bBytePacking)
 		else {
 			if (nBPP == 24) {
-				if (sizeof(telement) != 3)
+				if constexpr (sizeof(telement) != 3)
 					return false;
 				PackSingleRow = [img_cols = img.cols, nBPP, pixel_per_byte](std::vector<uint8>& line, telement const* ptr, [[maybe_unused]] std::vector<telement> const& pal) {
 					telement* line3 = (telement*)line.data();

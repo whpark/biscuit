@@ -1,7 +1,7 @@
 #pragma once
 
-#if defined(_USRDLL) && defined(BISCUIT_EXPORTS)
-#	define BISCUIT_EXPORT_DLL __declspec(dllexport)
+#if defined(_USRDLL) && defined(BSC__EXPORTS)
+#	define BSC__EXPORT_DLL __declspec(dllexport)
 #else
-#	define BISCUIT_EXPORT_DLL
+#	define BSC__EXPORT_DLL
 #endif

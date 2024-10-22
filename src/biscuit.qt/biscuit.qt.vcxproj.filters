@@ -23,13 +23,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="biscuit.qt_global.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClCompile Include="biscuit_qt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClInclude Include="biscuit_qt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MatBitmapArchive.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="biscuit.qt.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qt.utils.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="ProgressDlg.ui">
+      <Filter>Source Files</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="..\..\include\biscuit\qt\ProgressDlg.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\biscuit\qt\macro.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

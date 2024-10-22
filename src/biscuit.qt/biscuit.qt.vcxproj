@@ -95,7 +95,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_WINDOWS;_LIB;BISCUIT_QT_LIB;BUILD_STATIC;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;_LIB;BSC__QT_BUILD_STATIC;BSC__QT_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
@@ -108,7 +108,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_WINDOWS;_LIB;BISCUIT_QT_LIB;BUILD_STATIC;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;_LIB;BSC__QT_BUILD_STATIC;BSC__QT_EXPORTS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
@@ -123,7 +123,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="biscuit.qt_global.h" />
+    <ClCompile Include="biscuit.qt.ixx" />
+    <ClCompile Include="MatBitmapArchive.ixx" />
+    <ClCompile Include="ProgressDlg.cpp" />
+    <ClCompile Include="qt.utils.ixx" />
+    <QtMoc Include="..\..\include\biscuit\qt\ProgressDlg.h" />
+    <ClInclude Include="..\..\include\biscuit\qt\macro.h" />
     <ClInclude Include="biscuit_qt.h" />
     <ClCompile Include="biscuit_qt.cpp" />
   </ItemGroup>
@@ -131,6 +136,9 @@
     <ProjectReference Include="..\biscuit\biscuit.vcxproj">
       <Project>{4fc2059e-06a9-4b82-861d-ed3cb583303f}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="ProgressDlg.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
