@@ -23,4 +23,5 @@
 - tinyspline https://github.com/msteinbeck/tinyspline
 - glew https://glew.sourceforge.net/
 - magic_enum https://github.com/Neargye/magic_enum
-
+- qt https://www.qt.io/
+- 
