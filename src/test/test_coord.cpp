@@ -65,8 +65,8 @@ namespace test {
 			REQUIRE(ct == ct2);
 		}
 		SECTION("2") {
-			REQUIRE(ct.Scale() == 1);
-			ct.SetScale(3, sPoint2d(10, 10));
+			REQUIRE(ct.Scale2d() == 1);
+			ct.SetScale2d(3, sPoint2d(10, 10));
 			REQUIRE(ct(sPoint2d(10, 10)) == sPoint2d(10, 10));
 			REQUIRE(ct(sPoint2d(11, 10)) == sPoint2d(13, 10));
 			REQUIRE(ct(sPoint2d(10, 11)) == sPoint2d(10, 13));

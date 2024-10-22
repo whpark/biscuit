@@ -23,6 +23,9 @@ import std;
 import biscuit;
 
 export namespace biscuit::shape {
+	// =============================================================================================================================
+	// 3d READY but NOT all implemented in 3d. scaling is implemented in 2d only
+	// =============================================================================================================================
 
 	//using char_t = wchar_t;
 	//using string_t = std::wstring;

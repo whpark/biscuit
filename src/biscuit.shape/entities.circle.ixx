@@ -51,7 +51,7 @@ export namespace biscuit::shape {
 			m_angle_length = -m_angle_length;
 		}
 		virtual void Transform(ct_t const& ct, bool bRightHanded) override {
-			m_ptCenter = ct(m_ptCenter); m_radius = ct.Trans(m_radius);
+			m_ptCenter = ct(m_ptCenter); m_radius *= ct.Scale2d();
 			if (!bRightHanded)
 				m_angle_length = -m_angle_length;
 		}

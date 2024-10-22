@@ -62,7 +62,7 @@ export namespace biscuit::shape {
 		virtual void FlipZ() override { base_t::FlipZ(); m_angle_first_axis = 180._deg - m_angle_first_axis; }
 		virtual void Transform(ct_t const& ct, bool bRightHanded) override {
 			base_t::Transform(ct, bRightHanded);
-			m_radiusH = ct.Trans(m_radiusH);
+			m_radiusH *= ct.Scale2d();
 			if (!bRightHanded)
 				m_angle_first_axis = -m_angle_first_axis;
 		}

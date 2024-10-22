@@ -71,8 +71,8 @@ export namespace biscuit {
 
 		BSC__NODISCARD constexpr inline auto& pt0()					{ return  *reinterpret_cast<coord_point_t*>(this); }
 		BSC__NODISCARD constexpr inline auto const& pt0() const		{ return  *reinterpret_cast<coord_point_t const*>(this); }
-		BSC__NODISCARD constexpr inline auto& pt1()					{ return *(reinterpret_cast<coord_size_t*>(this)+1); }
-		BSC__NODISCARD constexpr inline auto const& pt1() const		{ return *(reinterpret_cast<coord_size_t const*>(this)+1); }
+		BSC__NODISCARD constexpr inline auto& pt1()					{ return *(reinterpret_cast<coord_point_t*>(this)+1); }
+		BSC__NODISCARD constexpr inline auto const& pt1() const		{ return *(reinterpret_cast<coord_point_t const*>(this)+1); }
 
 		BSC__NODISCARD constexpr inline auto pt() const				{ return pt0(); }
 		BSC__NODISCARD constexpr inline auto size() const			{ return pt1() - pt0(); }

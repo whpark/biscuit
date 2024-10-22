@@ -19,6 +19,8 @@
 #include "biscuit/dependencies_cereal.h"
 #include "biscuit/dependencies_opencv.h"
 
+#include "tinysplinecxx.h"
+
 export module biscuit.shape.canvas;
 import std;
 import biscuit;
@@ -265,145 +267,91 @@ export namespace biscuit::shape {
 		}
 	};
 
-
-
-	////===============================================================================================================================
-	//// ICanvas : Interface of Canvas
-	//class AFX_EXT_CLASS_QSHAPE ICanvas {
-	//protected:
-	//	std::unique_ptr<IQDevice> m_rDevice;
-
-	//protected:
-	//	COLORREF m_cr;
-	//	QSCoordTrans m_ct;
-	//	double m_dErrorTolerance;
-	//	point_t m_ptLast;
-
-	////protected:
-	////	COLORREF m_crArrow = RGB(255, 255, 255);
-	////	bool m_bShowDirection = false;
-	////	bool m_bShowOrder = false;
-	////	int m_iOrder = 0;
-	////	int m_iArrowSize = 5;
-	////	int m_iArrowWidth = 1;
-
-	//public:
-	//	ICanvas() {
-	//	}
-	//	virtual ~ICanvas() {}
-	//	ICanvas(const ICanvas& ) = default;
-
-	//	virtual bool CreateCanvas(const QSRect& rectSource, const QSRect& rectTarget, bool bKeepAspectRatio = true);
-	//	virtual void PreDraw() {
-	//		//m_iOrder = 0;
-	//		memset(m_ptLast.val, 0xff, sizeof(m_ptLast.val));	// not zero. set INVALID_VALUE
-	//	}
-
-	//	//void ShowDirection(bool bShow = true, bool bShowOrder = true, COLORREF crArrow = RGB(255, 0, 0), int iArrowSize = 16, int iArrowWidth = 1) {
-	//	//	m_bShowDirection = bShow;
-	//	//	m_bShowOrder = bShowOrder;
-	//	//	m_crArrow = crArrow;
-	//	//	m_iArrowSize = iArrowSize;
-	//	//	m_iOrder = 0;
-	//	//	m_iArrowWidth = iArrowWidth;
-	//	//}
-	//	//bool StopDrawingDirection();
-	//	//bool ResumeDrawingDirection();
-	//	//bool IsDirectionVisible() const { return m_bShowDirection; }
-
-	//public:
-	//	virtual void SetColor(COLORREF cr) { m_cr = cr; }
-
-	//	// Primative
-	//	void MoveTo(const point_t& pt);
-	//	void LineTo(const point_t& pt, bool bShowDirection = FALSE);
-
-	//	virtual void Draw();
-	//	//virtual void Dot(const point_t& pt, DWORD dwDuration = 0 /* in usec */);
-	//	//virtual void Line(const QSLine& pts, bool bLoop = FALSE);
-	//	//virtual void PolyLine(const QSLine& pts, const std::vector<double>& dBulges, bool bLoop);
-	//	virtual void Spline(const QSLine& pts, const std::vector<double>& dKnots, bool bLoop);
-	//	virtual void Arc(const point_t& ptCenter, double dRadius, double dT0, double dTLength);
-	//	virtual void Ellipse(const point_t& ptCenter, double dRadius1, double dRadius2, double dTFirstAxis, double dT0, double dTLength);
-
-	//	//-----------------------
-	//	// Hatch :
-	//	//
-	//	//	linePolygon : 시작과 끝점이 다를 경우, 첫번째 점과 마지막점을 연결하게 됨. 점의 갯수가 최소한 3개 이상 있어야 함.
-	//	//
-	//	//	eHatching :	SH_NONE
-	//	//				SH_L2R
-	//	//				SH_T2B
-	//	//				SH_LT2RB
-	//	//				SH_LB2RT
-	//	virtual void Hatch(const TList<QSLine>& lines, DWORD eHatching, double dHatching); 
-
-	//	//-----------------------
-	//	// Text :
-	//	//	pt : 기준 점
-	//	//
-	//	//	dwAlign :	DT_TOP
-	//	//				DT_LEFT
-	//	//				DT_CENTER
-	//	//				DT_RIGHT
-	//	//				DT_VCENTER
-	//	//				DT_BOTTOM
-	//	//
-	//	//	lf : 크기는 무시됨. (기본 72 point(720) 으로 만들어야 함)
-	//	//
-	//	virtual void Text(LPCWSTR pszText, const point_t& pt, DWORD dwAlign /*DT_...*/, double dHeight, double dLineSpacingFactor, const LOGFONT& lf, DWORD eHatching, double dHatching);
-	//};
-
-	////-----------------------------------------------------------------------------
-	//// CCanvasLineExtractor
-	//class AFX_EXT_CLASS_QSHAPE CQCanvasLineExtractor : public ICanvas {
-	//public:
-	//	QSLines& m_lines;
-	//
-	//public:
-	//	CQCanvasLineExtractor(QSLines& lines) : m_lines(lines) {
-	//	}
-	//	virtual ~CQCanvasLineExtractor() {}
-	//
-	//public:
-	//	virtual void MoveToImpl(const point_t& pt) {
-	//		if (m_lines.empty() || !m_lines.back().empty())
-	//			m_lines.push_back(QSLine());
-	//	}
-	//	virtual void LineToImpl(const point_t& pt) {
-	//		if (m_lines.empty())
-	//			m_lines.push_back(QSLine());
-	//
-	//		QSLine& line = m_lines.back();
-	//		if (!line.size())
-	//			line.push_back(m_ct(m_ptLast));
-	//		line.push_back(m_ct(pt));
-	//	}
-	//};
-
-	////-----------------------------------------------------------------------------
-	//// xCanvasMat
-	//class CCanvaMat : public ICanvas {
-	//public:
-	//	cv::Size m_sizeEffective;
-	//	cv::Mat m_mat;
-	//protected:
-	//	cv::Scalar m_crBGR;
-
-	//public:
-	//	CCanvaMat() {
-	//	}
-	//	CCanvaMat(const CCanvaMat& B) = delete;
-	//	virtual ~CCanvaMat() {}
-
-	//	virtual bool CreateCanvas(const xRect2i& rectSource, const xRect2i& rectTarget, bool bKeepAspectRatio = true);
-	//};
-
-	//-----------------------------------------------------------------------------
-	//
-	//GTL__API std::vector<point_t> AddLaserOffsetToLine(std::span<point_t const> pts, double dThickness, bool bLoop);
-
-
-//#pragma warning(pop)
 }	// namespace biscuit::shape
+
+namespace biscuit::shape {
+	void Canvas_Spline(ICanvas& canvas, int degree, std::span<point_t const> pts, std::span<double const> knots, bool bLoop) {
+		if (pts.size() < 2)
+			return;
+
+		if (auto rectClipping = canvas.GetClippingRect()) {
+			// todo: has bugs.
+			auto rc = *rectClipping;
+			rc.Inflate(rc.Width(), rc.Height());
+			bool bIn{false};
+			for (auto const& pt : pts) {
+				if (rc.Contains(sPoint2d(pt))) {
+					bIn = true;
+					break;
+				}
+			}
+			if (!bIn)
+				return;
+		}
+
+		double len{};
+		for (size_t i{1}; i < pts.size(); i++) {
+			len += pts[i].GetDistance(pts[i-1]);
+		}
+
+		double scale = canvas.m_ct.Scale2d();
+		double step = canvas.m_target_interpolation_inverval / len / scale;
+		//double step = 0.001;
+
+		constexpr static int const dim = 2;
+		tinyspline::BSpline bspline(pts.size(), dim, degree);
+		std::vector<tinyspline::real> points((pts.size()+bLoop)*dim);
+		auto* pos = points.data();
+		if constexpr (dim == 2) {
+			for (size_t i{}; i < pts.size(); i++) {
+				*pos++ += pts[i].x;
+				*pos++ += pts[i].y;
+			}
+			//if (bLoop) {
+			//	*pos++ += pts[0].x;
+			//	*pos++ += pts[0].y;
+			//}
+		} else if constexpr (dim == 3) {
+			for (size_t i{}; i < pts.size(); i++) {
+				*pos++ += pts[i].x;
+				*pos++ += pts[i].y;
+				*pos++ += pts[i].z;
+			}
+			//if (bLoop) {
+			//	*pos++ += pts[0].x;
+			//	*pos++ += pts[0].y;
+			//	*pos++ += pts[0].z;
+			//}
+		} else {
+			// todo : error.
+			return;
+		}
+		bspline.setControlPoints(points);
+		//std::vector<double> knotsv{knots.begin(), knots.end()};
+		//bspline.setKnots(knotsv);
+
+		//auto cr = dynamic_cast<xCanvasMat&>(canvas).m_color;
+		//dynamic_cast<xCanvasMat&>(canvas).m_color = cv::Scalar(0, 0, 255);
+		//canvas.MoveTo(pts.front());
+		//for (auto const& pt : pts) {
+		//	canvas.LineTo(pt);
+		//}
+		//dynamic_cast<xCanvasMat&>(canvas).m_color = cr;
+
+		auto ResultToPoint = [](auto const& result) {
+			return point_t{ result[0], result[1], result.size() >= 3 ? result[2] : 0.0 };
+		};
+		auto pt0 = bspline.eval(0.0).result();
+		point_t pt = ResultToPoint(pt0);
+		canvas.MoveTo(pt);
+		for (double t{ step }; t < 1.0; t += step) {
+			auto pt1 = ResultToPoint(bspline.eval(t).result());
+			canvas.LineTo(pt1);
+		}
+		auto ptL = ResultToPoint(bspline.eval(1.0).result());
+		canvas.LineTo(ptL);
+
+	}
+
+}
 

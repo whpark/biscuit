@@ -59,19 +59,25 @@ export namespace biscuit {
 		/// @brief Transform
 		/// @return sPoint3d for point, length for length
 		template < typename tpoint >
-			requires (concepts::coord::generic_point<tpoint> or concepts::arithmetic<tpoint>)
+			requires (concepts::coord::generic_point<tpoint>)
 		BSC__NODISCARD auto operator () (tpoint const& pt) const {
 			if constexpr (concepts::coord::has_ipoint3<tpoint>)			return (tpoint)Trans(pt.x(), pt.y(), pt.z());
 			else if constexpr (concepts::coord::has_ipoint2<tpoint>)	return (tpoint)Trans(pt.x(), pt.y());
 			else if constexpr (concepts::coord::has_point3<tpoint>)		return (tpoint)Trans(pt.x, pt.y, pt.z);
 			else if constexpr (concepts::coord::has_point2<tpoint>)		return (tpoint)Trans(pt.x, pt.y);
-			else if constexpr (concepts::arithmetic<tpoint>)			return Trans(pt);
+			else
+				static_assert(false);
 		}
 
-		BSC__NODISCARD virtual double Trans(double l) const {
+		BSC__NODISCARD virtual double Scale2d() const {
+			static double const sqrt_1_2 = 1.0 / std::sqrt(2.0);
+			auto rate = Trans(1., 1.).GetDistance() * sqrt_1_2;
+			return rate;
+		}
+		BSC__NODISCARD virtual double Scale3d() const {
 			static double const sqrt_1_3 = 1.0 / std::sqrt(3.0);
 			auto rate = Trans(1., 1., 1.).GetDistance() * sqrt_1_3;
-			return rate * l;
+			return rate;
 		}
 		BSC__NODISCARD virtual sPoint2d Trans(double x, double y) const { return Trans(x, y, 0.0); }
 		BSC__NODISCARD virtual sPoint3d Trans(double x, double y, double z) const = 0;
@@ -140,6 +146,20 @@ export namespace biscuit {
 			return tr;
 		}
 
+		BSC__NODISCARD virtual double Scale2d() const {
+			double scale{ 1.0 };
+			for (auto const& ct : m_chain) {
+				scale *= ct->Scale2d();
+			}
+			return scale;
+		}
+		BSC__NODISCARD virtual double Scale3d() const {
+			double scale{ 1.0 };
+			for (auto const& ct : m_chain) {
+				scale *= ct->Scale3d();
+			}
+			return scale;
+		}
 		BSC__NODISCARD sPoint3d Trans(double x, double y, double z) const override {
 			sPoint3d pt(x, y, z);
 			for (auto iter = m_chain.rbegin(); iter != m_chain.rend(); iter++) {
@@ -205,18 +225,56 @@ export namespace biscuit {
 			return std::move(tr);
 		}
 
-		BSC__NODISCARD virtual double Trans(double l) const {
-			if constexpr (dim == 2) {
-				static double const sqrt_1_2 = 1.0 / std::sqrt(2.0);
-				auto rate = Trans(1., 1., 0.).GetDistance() * sqrt_1_2;
-				return rate * l;
-			}
-			else if constexpr (dim == 3) {
-				static double const sqrt_1_3 = 1.0 / std::sqrt(3.0);
-				auto rate = Trans(1., 1., 1.).GetDistance() * sqrt_1_3;
-				return rate * l;
-			}
+		BSC__NODISCARD virtual double Scale2d() const {
+			return std::sqrt(std::abs(m_transform.matrix().topLeftCorner<2, 2>().determinant()));
 		}
+		BSC__NODISCARD virtual double Scale3d() const {
+			constexpr auto d = std::min(2, dim);
+			return std::sqrt(std::abs(m_transform.matrix().topLeftCorner<d, d>().determinant()));
+		}
+		double SetScale2d(double scale) {
+			double s = Scale2d();
+			if (s == 0.0)
+				return 0.0;
+			double rate = scale / s;
+			m_transform.matrix().topLeftCorner<2, 2>() *= rate;
+			return rate;
+		}
+		double SetScale3d(double scale) requires (dim >= 3) {
+			double s = Scale3d();
+			if (s == 0.0)
+				return 0.0;
+			double rate = scale / s;
+			m_transform.matrix().topLeftCorner<3, 3>() *= rate;
+			return rate;
+		}
+
+		double SetScale2d(double scale, point_t const& origin) {
+			vector_t offset = m_transform * origin.vec();
+			double s = Scale2d();
+			if (s == 0.0)
+				return 0.0;
+			double rate = scale / s;
+			m_transform.matrix().topLeftCorner<2, 2>() *= rate;
+			AdjustOffset(origin, point_t(offset));
+			return rate;
+		}
+		double SetScale3d(double scale, point_t const& origin) requires (dim >= 3) {
+			vector_t offset = m_transform * origin.vec();
+			double s = Scale3d();
+			if (s == 0.0)
+				return 0.0;
+			double rate = scale / s;
+			m_transform.matrix().topLeftCorner<3, 3>() *= rate;
+			AdjustOffset(origin, point_t(offset));
+			return rate;
+		}
+
+		double ScaleLinearPart(double rate) {
+			m_transform.matrix().topLeftCorner<dim, dim>() *= rate;
+			return rate;
+		}
+
 		BSC__NODISCARD virtual sPoint2d Trans(double x, double y) const {
 			if constexpr (dim == 2) {
 				if constexpr (m_transform.HDim == 3) {
@@ -376,31 +434,6 @@ export namespace biscuit {
 
 
 		//-------------------------------------------------------------------------
-		double Scale() const {
-			return std::sqrt(std::abs(m_transform.matrix().topLeftCorner<dim, dim>().determinant()));
-		}
-		double SetScale(double scale) {
-			double s = Scale();
-			if (s == 0.0)
-				return 0.0;
-			double rate = scale / s;
-			m_transform.matrix().topLeftCorner<dim, dim>() *= rate;
-			return rate;
-		}
-		double SetScale(double scale, point_t const& origin) {
-			vector_t offset = m_transform * origin.vec();
-			double s = Scale();
-			if (s == 0.0)
-				return 0.0;
-			double rate = scale / s;
-			m_transform.matrix().topLeftCorner<dim, dim>() *= rate;
-			AdjustOffset(origin, point_t(offset));
-			return rate;
-		}
-		double ScaleAffinePart(double rate) {
-			m_transform.matrix().topLeftCorner<dim, dim>() *= rate;
-			return rate;
-		}
 
 		void AdjustOffset(point_t const& origin, point_t const& offset) {
 			auto pt = m_transform * origin.vec();
