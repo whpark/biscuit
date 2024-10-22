@@ -750,6 +750,23 @@ export namespace biscuit {
 		cv::Mat img;
 		sSize2i pelsPerMeter;
 		bitmap_palette_t palette;
+
+		xBitmapMat() = default;
+		xBitmapMat(xBitmapMat const& b) { *this = b; }
+		xBitmapMat(xBitmapMat&& b) noexcept { *this = std::move(b); }
+		xBitmapMat& operator = (xBitmapMat const& b) {
+			img = b.img.clone();
+			pelsPerMeter = b.pelsPerMeter;
+			palette = b.palette;
+			return *this;
+		}
+		xBitmapMat& operator = (xBitmapMat&& b) noexcept {
+			img = b.img;
+			b.img.release();
+			pelsPerMeter = b.pelsPerMeter;
+			palette = std::move(b.palette);
+			return *this;
+		}
 	};
 
 	std::optional<xBitmapMat> LoadBitmapMat(std::istream& is, callback_progress_t funcCallback = {}) {

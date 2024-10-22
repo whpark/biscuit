@@ -77,7 +77,7 @@ export namespace biscuit::qt {
 		dlgProgress.m_message = std::format(L"Loading : {}", path.wstring());
 
 		dlgProgress.m_rThreadWorker = std::make_unique<std::jthread>([&result, &path, &dlgProgress]() {
-			if (auto r = biscuit::LoadBitmapPixelArray(path, dlgProgress.GetCallback())) result = std::move(r);
+			if (auto r = biscuit::LoadBitmapPixelArray(path, dlgProgress.GetCallback())) result = std::move(*r);
 		});
 
 		auto ok = dlgProgress.exec();

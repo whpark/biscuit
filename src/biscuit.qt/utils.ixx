@@ -17,8 +17,9 @@ using namespace biscuit::literals;
 namespace concepts = biscuit::concepts;
 
 namespace biscuit::qt {
+
 	std::string const s_strKeyWindowPosition { "WindowPositions"s };
-	struct sWindowPosOption{
+	struct sWindowPosOption {
 		bool bVisible{true};
 		bool bMaximized{};
 		bool bMinimized{};
@@ -41,19 +42,20 @@ namespace biscuit::qt {
 			//	wnd.showMinimized();
 		}
 	};
-
 }
 
 export namespace biscuit::qt {
 
 	using string_view_t = std::u16string_view;
 
-	//auto ToCoord(QPoint pt) { return sPoint2i(pt.x(), pt.y()); }
-	//auto ToCoord(QPointF pt) { return sPoint2d(pt.x(), pt.y()); }
-	//auto ToCoord(QSize s) { return sSize2i(s.width(), s.height()); }
-	//auto ToCoord(QSizeF s) { return sSize2d(s.width(), s.height()); }
-	//auto ToCoord(QRect rect) { return sRect2i(rect.left(), rect.top(), rect.right(), rect.bottom()); }
-	//auto ToCoord(QRectF rect) { return sRect2d(rect.left(), rect.top(), rect.right(), rect.bottom()); }
+	auto ToCoord(QPoint pt) { return sPoint2i(pt.x(), pt.y()); }
+	auto ToCoord(QPointF pt) { return sPoint2d(pt.x(), pt.y()); }
+	auto ToCoord(QSize s) { return sSize2i(s.width(), s.height()); }
+	auto ToCoord(QSizeF s) { return sSize2d(s.width(), s.height()); }
+	auto ToCoordRect(QRect rect) { return sRect2i(rect.left(), rect.top(), rect.right(), rect.bottom()); }
+	auto ToCoordRect(QRectF rect) { return sRect2d(rect.left(), rect.top(), rect.right(), rect.bottom()); }
+	auto ToCoordBounds(QRect rect) { return sBounds2i(rect.left(), rect.top(), rect.right(), rect.bottom()); }
+	auto ToCoordBounds(QRectF rect) { return sBounds2d(rect.left(), rect.top(), rect.right(), rect.bottom()); }
 
 	auto ToQCoord(sPoint2i pt) { return QPoint (pt.x, pt.y); }
 	auto ToQCoord(sPoint2d pt) { return QPointF(pt.x, pt.y); }
@@ -210,7 +212,6 @@ export namespace biscuit::qt {
 		return QImage::Format_Invalid;
 	}
 
-
 	//=============================================================================================================================
 	// Window Position
 	bool SaveWindowPosition(QSettings& reg, std::string const& strWindowName, QWidget* wnd) {
@@ -220,13 +221,20 @@ export namespace biscuit::qt {
 		// option (Maximized, Minimized, ...)
 		sWindowPosOption option;
 		option << *wnd;
+	#if 1
 		std::string str;
 		glz::write_json(option, str);
 		reg.setValue(std::format("{}/{}_misc", s_strKeyWindowPosition, strWindowName), ToQString(str));
+	#else
+		reg.setValue(std::format("{}/{}/Visible", s_strKeyWindowPosition, strWindowName), option.bVisible);
+		reg.setValue(std::format("{}/{}/Maximized", s_strKeyWindowPosition, strWindowName), option.bMaximized);
+		reg.setValue(std::format("{}/{}/Minimized", s_strKeyWindowPosition, strWindowName), option.bMinimized);
+	#endif
 
 		if (!option.bMaximized and !option.bMinimized) {
 			// position
-			sBounds2d rc = sRect2d(wnd->geometry());
+			auto rc = ToCoordBounds(wnd->geometry());
+
 			reg.setValue(std::format("{}/{}_rect", s_strKeyWindowPosition, strWindowName), ToQString(rc.ToString<char16_t>()));
 		}
 
@@ -238,11 +246,18 @@ export namespace biscuit::qt {
 			return false;
 
 		// options
-		auto misc = reg.value(std::format("{}/{}_misc", s_strKeyWindowPosition, strWindowName), "").toString().toStdString();
 		sWindowPosOption option;
+	#if 1
+		auto misc = reg.value(std::format("{}/{}_misc", s_strKeyWindowPosition, strWindowName), "").toString().toStdString();
 		if (auto err = glz::read_json(option, misc); !err) {
 			option >> *wnd;
 		}
+	#else
+		option.bVisible = reg.value(std::format("{}/{}/Visible", s_strKeyWindowPosition, strWindowName)).toBool();
+		option.bMaximized = reg.value(std::format("{}/{}/Maximized", s_strKeyWindowPosition, strWindowName)).toBool();
+		option.bMinimized = reg.value(std::format("{}/{}/Minimized", s_strKeyWindowPosition, strWindowName)).toBool();
+		option >> *wnd;
+	#endif
 
 		if (!option.bMaximized and !option.bMaximized) {
 			auto str = reg.value(std::format("{}/{}_rect", s_strKeyWindowPosition, strWindowName), "0,0,0,0").toString();
@@ -297,7 +312,6 @@ export namespace biscuit::qt {
 
 		return true;
 	}
-
 
 }	// namespace biscuit::qt
 
