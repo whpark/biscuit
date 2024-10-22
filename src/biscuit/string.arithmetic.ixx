@@ -87,7 +87,9 @@ export namespace biscuit {
 			return ToNumber<tvalue>(u8A(sv), base, separator);
 		}
 		else {
-			return ToNumber<tvalue>(ConvertString<char>(sv), base, separator);
+			if (auto r = ConvertString<char>(sv))
+				return ToNumber<tvalue>(*r, base, separator);
+			return {};
 		}
 	}
 

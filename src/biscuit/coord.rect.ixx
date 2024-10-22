@@ -206,8 +206,8 @@ export namespace biscuit {
 		//	return *this;
 		//}
 
-		this_t& operator &= (this_t const& b) { return Intersect(); }
-		this_t& operator |= (this_t const& b) { return Union(); }
+		this_t& operator &= (this_t const& b) { return Intersect(b); }
+		this_t& operator |= (this_t const& b) { return Union(b); }
 
 		constexpr this_t operator & (this_t const& b) { return this_t(*this) &= b; }
 		constexpr this_t operator | (this_t const& b) { return this_t(*this) |= b; }
