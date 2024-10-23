@@ -142,11 +142,15 @@ export namespace biscuit {
 			return !(*this == other);
 		}
 		bool operator < (this_t const& other) const {
-			return base_t::operator <(other);
+			return base_t::operator <((base_t const&)other);
 		}
 		bool operator > (this_t const& other) const {
-			return base_t::operator >(other);
+			return base_t::operator >((base_t const&)other);
 		}
+
+		//// for cereal, - base class is public. so, no need to declare this.
+		//template < typename tarchive >
+		//void serialize(tarchive& ar) { ar((base_t&)*this); }
 
 		// Concurrent Operation (Thread Safe operation)
 		constexpr auto& push_front(TSmartPtr<T>&& r) requires has_push_pop_front<base_t> {

@@ -56,7 +56,7 @@ export namespace biscuit {
 				}
 			}
 		};
-		using map_t = TContainerMap<std::vector, string_t, this_t, sCompareString>;
+		using map_t = TContainerMap<string_t, this_t, std::vector, sCompareString>;
 		using section_t = this_t;
 
 		static constexpr inline bool bCaseSensitive = bCASE_SENSITIVE;

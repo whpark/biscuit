@@ -22,7 +22,7 @@ namespace concepts = biscuit::concepts;
 
 export namespace biscuit {
 
-	template <template <typename ...TArg> typename TContainer, class TKey, class T, class TKeyEq = std::equal_to<TKey>, class TAlloc = std::allocator<std::pair<TKey, T>> >
+	template <class TKey, class T, template <typename ...TArg> typename TContainer = std::vector, class TKeyEq = std::equal_to<TKey>, class TAlloc = std::allocator<std::pair<TKey, T>> >
 	class TContainerMap : protected TContainer<std::pair<TKey, T>, TAlloc> {
 	public:
 		using this_t = TContainerMap;
@@ -33,6 +33,10 @@ export namespace biscuit {
 		using base_t::operator =;
 
 		auto operator <=> (this_t const&) const noexcept = default;
+
+		// for cereal
+		template < typename tarchive >
+		void serialize(tarchive& ar) { ar((base_t&)*this); }
 
 	public:
 		base_t& base() noexcept { return *this; }
