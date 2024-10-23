@@ -25,10 +25,11 @@
 export module biscuit.shape.entities.drawing;
 import std;
 import biscuit;
-import biscuit.shape.shape;
-import biscuit.shape.canvas;
+import biscuit.shape_basic;
+import biscuit.shape.entities.shape;
 import biscuit.shape.entities.layer;
 import biscuit.shape.entities.block;
+import biscuit.shape.canvas;
 
 export namespace biscuit::shape {
 
@@ -50,48 +51,48 @@ export namespace biscuit::shape {
 		virtual std::optional<line_t> GetStartEndPoint() const override {
 			if (m_layers.empty())
 				return {};
-			auto r0 = m_layers.front().GetStartEndPoint();
+			auto r0 = m_layers.front().second.GetStartEndPoint();
 			if (!r0)
 				return {};
-			auto r1 = m_layers.back().GetStartEndPoint();
+			auto r1 = m_layers.back().second.GetStartEndPoint();
 			if (!r1)
 				return {};
 			return line_t{ r0->pt0, r1->pt1 };
 		}
-		virtual void FlipX() override { for (auto& layer : m_layers) layer.FlipX(); }
-		virtual void FlipY() override { for (auto& layer : m_layers) layer.FlipY(); }
-		virtual void FlipZ() override { for (auto& layer : m_layers) layer.FlipZ(); }
+		virtual void FlipX() override { for (auto& [name, layer] : m_layers) layer.FlipX(); }
+		virtual void FlipY() override { for (auto& [name, layer] : m_layers) layer.FlipY(); }
+		virtual void FlipZ() override { for (auto& [name, layer] : m_layers) layer.FlipZ(); }
 		virtual void Reverse() override {
 			std::ranges::reverse(m_layers);
-			for (auto& layer : m_layers) {
+			for (auto& [name, layer] : m_layers) {
 				layer.Reverse();
 			}
 		}
 		virtual void Transform(ct_t const& ct, bool bRightHanded) override {
-			for (auto& layer : m_layers)
+			for (auto& [name, layer] : m_layers)
 				layer.Transform(ct, bRightHanded);
 		}
 		virtual bool UpdateBounds(rect_t& rect) const override {
 			bool r{};
-			for (auto& layer : m_layers)
+			for (auto& [name, layer] : m_layers)
 				r |= layer.UpdateBounds(rect);
 			return r;
 		}
 		virtual void Draw(ICanvas& canvas) const override {
 			xShape::Draw(canvas);
-			for (auto& layer : m_layers) {
+			for (auto& [name, layer] : m_layers) {
 				layer.Draw(canvas);
 			}
 		}
 		virtual bool DrawROI(ICanvas& canvas, rect_t const& rectROI) const override {
 			bool result{};
-			for (auto& layer : m_layers) {
+			for (auto& [name, layer] : m_layers) {
 				result |= layer.DrawROI(canvas, rectROI);
 			}
 			return result;
 		}
 		//virtual void PrintOut(std::wostream& os) const override {
-		//	for (auto& layer : m_layers) {
+		//	for (auto& [name, layer] : m_layers) {
 		//		layer.PrintOut(os);
 		//	}
 		//}
@@ -128,14 +129,16 @@ export namespace biscuit::shape {
 		}
 	#endif
 		xLayer& Layer(string_t const& name) {
-			if (auto iter = std::find_if(m_layers.begin(), m_layers.end(), [&name](xLayer const& layer) -> bool { return name == layer.m_name; }); iter != m_layers.end())
-				return *iter;
-			return m_layers.front();
+			return m_layers[name];
+			//if (auto iter = std::ranges::find_if(m_layers, [&name](xLayer const& layer) -> bool { return name == layer.m_name; }); iter != m_layers.end())
+			//	return *iter;
+			//throws std::runtime_error(BSC__FUNCSIG "not found.");
 		}
 		xLayer const& Layer(string_t const& name) const {
-			if (auto iter = std::find_if(m_layers.begin(), m_layers.end(), [&name](xLayer const& layer) -> bool { return name == layer.m_name; }); iter != m_layers.end())
-				return *iter;
-			return m_layers.front();
+			return m_layers[name];
+			//if (auto iter = std::ranges::find_if(m_layers, [&name](xLayer const& layer) -> bool { return name == layer.m_name; }); iter != m_layers.end())
+			//	return *iter;
+			//throws std::runtime_error(BSC__FUNCSIG "not found.");
 		}
 
 		bool AddEntity(std::unique_ptr<xShape> rShape, std::map<string_t, xLayer*> const& mapLayers, std::map<string_t, xBlock*> const& mapBlocks, rect_t& bounds);

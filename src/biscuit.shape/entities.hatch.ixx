@@ -25,8 +25,10 @@
 export module biscuit.shape.entities.hatch;
 import std;
 import biscuit;
-import biscuit.shape.shape;
+import biscuit.shape_basic;
+import biscuit.shape.entities.shape;
 import biscuit.shape.entities.polyline;
+import biscuit.shape.canvas;
 
 export namespace biscuit::shape {
 

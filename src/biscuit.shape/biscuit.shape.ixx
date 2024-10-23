@@ -22,24 +22,14 @@
 			CShapeLine		-> xLine
 			CShapePolyLine	-> xPolyline
 			...
-
-		Container :
-
-			TList -> boost::ptr_deque
-
-		Point / Line : x, y, z 3차원으로 변경
-
-			typedef xSize3d					size2d_t;
-			typedef xPoint3d				point_t;
-			typedef xRect3d					rect_t;
-			typedef std::vector<xLine>		s_lines;
+		Point / Line : x, y, z (supports 3d, but coded in 2d)
 
 */
 ///////////////////////////////////////////////////////////////////////////////
 
 export module biscuit.shape;
+export import biscuit.shape_basic;
 export import biscuit.shape.color_table;
-export import biscuit.shape.shape;
 export import biscuit.shape.entities;
 export import biscuit.shape.canvas;
 export import biscuit.shape.dxf_loader;

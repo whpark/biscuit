@@ -14,7 +14,7 @@
 export module biscuit.shape.color_table;
 import std;
 import biscuit;
-import biscuit.shape.shape;
+import biscuit.shape_basic;
 
 export namespace biscuit::shape {
 

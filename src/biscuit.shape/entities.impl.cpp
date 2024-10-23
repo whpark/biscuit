@@ -12,9 +12,9 @@ module biscuit.shape.entities;
 import std;
 import biscuit;
 import biscuit.shape.color_table;
-import biscuit.shape.shape;
-import biscuit.shape.canvas;
+import biscuit.shape_basic;
 import biscuit.shape.entities;
+import biscuit.shape.canvas;
 
 using namespace std::literals;
 

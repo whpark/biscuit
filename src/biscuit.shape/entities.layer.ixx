@@ -25,10 +25,13 @@
 export module biscuit.shape.entities.layer;
 import std;
 import biscuit;
-import biscuit.shape.shape;
+import biscuit.shape_basic;
+import biscuit.shape.entities.shape;
+import biscuit.shape.canvas;
 
 export namespace biscuit::shape {
 
+	//=============================================================================================================================
 	class xLayer : public xShape {
 	public:
 		string_t m_name;
@@ -108,7 +111,7 @@ export namespace biscuit::shape {
 			m_strLineType.clear();
 			m_flags = {};
 			m_bUse = true;
-			m_name.clear();
+			//m_name.clear();
 		}
 
 		virtual void Sort_Loop();
@@ -156,10 +159,8 @@ export namespace biscuit::shape {
 
 	};
 
-	using layers_t = std::list<xLayer>;
-
+	//using layers_t = std::list<xLayer>;
+	using layers_t = TContainerMap<std::string, xLayer, std::deque>;
 
 }	// namespace biscuit::shape;
-
-BSC__SHAPE_EXPORT_ARCHIVE_REGISTER(biscuit::shape::xLayer);
 

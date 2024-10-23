@@ -25,11 +25,12 @@
 export module biscuit.shape.entities.polyline;
 import std;
 import biscuit;
-import biscuit.shape.shape;
-import biscuit.shape.canvas;
+import biscuit.shape_basic;
+import biscuit.shape.entities.shape;
 import biscuit.shape.entities.circle;
 import biscuit.shape.entities.arc;
 import biscuit.shape.entities.line;
+import biscuit.shape.canvas;
 
 export namespace biscuit::shape {
 

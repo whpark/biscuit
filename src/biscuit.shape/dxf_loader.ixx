@@ -9,19 +9,15 @@ export module biscuit.shape.dxf_loader;
 import std;
 import biscuit;
 import biscuit.shape.color_table;
-import biscuit.shape.shape;
+import biscuit.shape_basic;
 import biscuit.shape.entities;
 
 export namespace biscuit::shape {
 
 	class xDXFProgressThread;
 	class IDXFLoader {
-	private:
-		static const color_t s_dxfColors[256];
-
 	public:
-		IDXFLoader();
-		virtual ~IDXFLoader();
+		virtual ~IDXFLoader() {}
 
 	protected:
 		bool m_bShowProgress;
@@ -37,8 +33,7 @@ export namespace biscuit::shape {
 
 	class xDXFLoaderDime : public IDXFLoader {
 	public:
-		xDXFLoaderDime();
-		virtual ~xDXFLoaderDime();
+		virtual ~xDXFLoaderDime() {}
 
 	public:
 		virtual sShapeResult Load(std::filesystem::path const& path, callback_progress_t funcCallback = nullptr);
@@ -48,14 +43,15 @@ export namespace biscuit::shape {
 		color_t GetColor(dimeLayer const* pLayer);
 
 	protected:
-		std::list<xGroup> m_blocks;
+		TContainerMap<std::string, xGroup, std::deque> m_blocks;
+		//std::pair<std::string, xGroup*> m_currentBlock;
 		xGroup* m_pCurrentBlock{};
 
 		static bool dimeCallbackFunc(dimeState const* const, dimeEntity *, void *);
 		bool dimeCallbackFunc(layers_t& layers, dimeState const* const, dimeEntity *);
 	protected:
-		int m_nItem;
-		int m_iItemPos;
+		int m_nItem{};
+		int m_iItemPos{};
 		static int dimePosCallbackFunc(float, void *);
 		int dimePosCallbackFunc(float rate);
 
@@ -64,3 +60,6 @@ export namespace biscuit::shape {
 
 }	// namespace biscuit::shape
 
+namespace biscuit::shape {
+
+}

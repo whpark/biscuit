@@ -26,8 +26,9 @@ export module biscuit.shape.entities.block;
 import std;
 import biscuit;
 import biscuit.shape.canvas;
-import biscuit.shape.shape;
+import biscuit.shape.entities.shape;
 import biscuit.shape.entities.layer;
+import biscuit.shape_basic;
 
 export namespace biscuit::shape {
 

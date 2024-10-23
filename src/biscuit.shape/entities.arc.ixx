@@ -25,9 +25,10 @@
 export module biscuit.shape.entities.arc;
 import std;
 import biscuit;
-import biscuit.shape.shape;
-import biscuit.shape.canvas;
+import biscuit.shape_basic;
+import biscuit.shape.entities.shape;
 import biscuit.shape.entities.circle;
+import biscuit.shape.canvas;
 
 export namespace biscuit::shape {
 

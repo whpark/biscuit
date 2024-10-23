@@ -24,7 +24,9 @@
 export module biscuit.shape.canvas;
 import std;
 import biscuit;
-import biscuit.shape.shape;
+import biscuit.shape_basic;
+import biscuit.shape.entities.shape;
+//import biscuit.shape.entities;
 
 export namespace biscuit::shape {
 //#pragma warning(push)

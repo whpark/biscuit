@@ -40,6 +40,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 export module biscuit.shape.entities;
+export import biscuit.shape.entities.shape;
 export import biscuit.shape.entities.layer;
 export import biscuit.shape.entities.group;
 export import biscuit.shape.entities.block;

@@ -25,7 +25,8 @@
 export module biscuit.shape.entities.insert;
 import std;
 import biscuit;
-import biscuit.shape.shape;
+import biscuit.shape_basic;
+import biscuit.shape.entities.shape;
 
 export namespace biscuit::shape {
 

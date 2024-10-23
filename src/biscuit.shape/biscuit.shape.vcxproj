@@ -106,6 +106,9 @@
     <ProjectReference Include="..\biscuit\biscuit.vcxproj">
       <Project>{4fc2059e-06a9-4b82-861d-ed3cb583303f}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\dime\src\dime.vcxproj">
+      <Project>{c00931d7-f0e9-4259-9610-54ea89a7ebb5}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="biscuit.shape.ixx" />
@@ -126,9 +129,10 @@
     <ClCompile Include="entities.layer.ixx" />
     <ClCompile Include="entities.line.ixx" />
     <ClCompile Include="entities.polyline.ixx" />
+    <ClCompile Include="entities.shape.ixx" />
     <ClCompile Include="entities.spline.ixx" />
     <ClCompile Include="entities.text.ixx" />
-    <ClCompile Include="shape.ixx" />
+    <ClCompile Include="shape_basic.ixx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shape_macro.h" />

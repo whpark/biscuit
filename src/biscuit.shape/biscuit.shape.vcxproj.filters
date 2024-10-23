@@ -21,7 +21,7 @@
     <ClCompile Include="entities.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="shape.ixx">
+    <ClCompile Include="shape_basic.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="entities.impl.cpp">
@@ -76,6 +76,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="entities.group.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.shape.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
