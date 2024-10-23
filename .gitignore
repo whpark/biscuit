@@ -10,3 +10,4 @@
 [dD]ebug/
 [rR]elease/
 vcpkg_installed/
+*.TMP
