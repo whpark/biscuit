@@ -76,11 +76,11 @@ export namespace biscuit {
 		using base_t::clear;
 		using base_t::swap;
 
-		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} = key2; })
+		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} == key2; })
 		auto& operator[](TKey2 const& key) {
 			return find(key)->second;
 		}
-		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} = key2; })
+		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} == key2; })
 		auto& operator[](TKey2 const& key) const {
 			if (auto iter = find(key); iter != end()) {
 				return iter->second;
@@ -88,12 +88,12 @@ export namespace biscuit {
 			throw std::out_of_range("TDequeMap::operator[]");
 		}
 
-		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} = key2; })
+		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} == key2; })
 		auto find(TKey2 const& key) const {
 			return std::find_if(begin(), end(),
 				[&key](auto const& pair) { return TKeyEq{}(pair.first, key); });
 		}
-		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} = key2; })
+		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} == key2; })
 		auto find(TKey2 const& key) {
 			if (auto iter = std::find_if(begin(), end(),
 				[&key](auto const& pair) { return TKeyEq{}(pair.first, key); });
@@ -106,7 +106,7 @@ export namespace biscuit {
 			return --iter;
 		}
 
-		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} = key2; })
+		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} == key2; })
 		void insert(TKey2 const& key, T&& value) {
 			if (auto it = find(key); it != end()) {
 				// Key already exists, update the value
@@ -115,7 +115,7 @@ export namespace biscuit {
 				base_t::emplace_back(key, std::move(value));
 			}
 		}
-		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} = key2; })
+		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} == key2; })
 		void insert(TKey2 const& key, T const& value) {
 			if (auto it = find(key); it != end()) {
 				// Key already exists, update the value
@@ -125,7 +125,7 @@ export namespace biscuit {
 			}
 		}
 
-		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} = key2; })
+		template < typename TKey2 > requires (requires(TKey2 key2) { TKey{} == key2; })
 		bool erase(TKey2 const& key) {
 			if (auto it = find(key); it != end()) {
 				base_t::erase(it);
