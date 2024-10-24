@@ -18,7 +18,7 @@ import biscuit.shape_basic;
 
 export namespace biscuit::shape {
 
-	constexpr std::array<color_t, 256> const s_colorTable {{
+	constexpr std::array<color_t, 256> const s_tblColor {{
 		ColorRGBA( (uint8_t)(255*0),        (uint8_t)(255*0),        (uint8_t)(255*0) ),                        // unused
 		ColorRGBA( (uint8_t)(255*1),        (uint8_t)(255*0),        (uint8_t)(255*0) ),                        // 1
 		ColorRGBA( (uint8_t)(255*1),        (uint8_t)(255*1),        (uint8_t)(255*0) ),        
@@ -280,8 +280,8 @@ export namespace biscuit::shape {
 	uint8_t GetApproxColorIndex(color_t cr) {
 		uint32_t dwMinError = (uint32_t)-1;
 		uint8_t iCR = 0;
-		for (size_t i = 0; i < s_colorTable.size(); i++) {
-			auto cr2 = s_colorTable[i];
+		for (size_t i = 0; i < s_tblColor.size(); i++) {
+			auto cr2 = s_tblColor[i];
 			uint32_t dwError = Square((int)cr.r-(int)cr2.r) + Square((int)cr.g-(int)cr2.g) + Square((int)cr.b-(int)cr2.b);
 			if (!dwError)
 				return i;

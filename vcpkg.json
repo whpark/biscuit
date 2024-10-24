@@ -21,8 +21,7 @@
                 "dnn",
                 "freetype",
                 "ipp",
-                "opengl",
-                "python"
+                "opengl"
             ]
         },
         "tinyspline",

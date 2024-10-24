@@ -542,8 +542,8 @@ namespace biscuit::shape {
 						rShape->m_color = pLayer->m_color;
 					}
 					if (rShape->m_color.Value() == (uint32_t)-1) {
-						if ( (crIndex > 0) and (crIndex < s_colorTable.size()) )
-							rShape->m_color = s_colorTable[crIndex];
+						if ( (crIndex > 0) and (crIndex < s_tblColor.size()) )
+							rShape->m_color = s_tblColor[crIndex];
 					}
 				}
 
