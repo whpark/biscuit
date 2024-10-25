@@ -2,18 +2,17 @@ module;
 
 // 2024-10-22. biscuit. from mocha
 
-#include <dime/config.h>
-#include <dime/dime.h>
-
 export module biscuit.shape.dxf_loader;
 import std;
 import biscuit;
 import biscuit.shape.color_table;
 import biscuit.shape_basic;
 import biscuit.shape.entities;
+import dime.biscuit;
 
 using namespace std::literals;
 
+#if 0
 export namespace biscuit::shape {
 
 	class xDXFProgressThread;
@@ -54,7 +53,6 @@ export namespace biscuit::shape {
 
 
 }	// namespace biscuit::shape
-
 namespace biscuit::shape {
 
 	point_t operator * (const dimeMatrix& m, point_t const& pt) {
@@ -756,4 +754,5 @@ namespace biscuit::shape {
 	}
 
 }
+#endif
 

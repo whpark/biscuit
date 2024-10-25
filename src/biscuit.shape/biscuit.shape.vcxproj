@@ -106,6 +106,9 @@
     <ProjectReference Include="..\biscuit\biscuit.vcxproj">
       <Project>{4fc2059e-06a9-4b82-861d-ed3cb583303f}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\dime\dime.biscuit\dime.biscuit.vcxproj">
+      <Project>{7d9b457a-742c-4ff7-a3e6-92fedd86b2a1}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="biscuit.shape.ixx" />

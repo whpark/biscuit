@@ -189,7 +189,7 @@ namespace biscuit::shape {
 	}
 	bool xShape::DrawROI(ICanvas& canvas, rect_t const& roi) const {
 		rect_t bounds;
-		bounds.SetRectEmptyForMinMax2d();
+		bounds.SetEmptyForMinMax2d();
 		UpdateBounds(bounds);
 		if (!bounds.Intersect(roi).IsNormalized())
 			return false;

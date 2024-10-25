@@ -99,12 +99,26 @@ export namespace biscuit {
 
 		auto operator <=> (this_t const&) const = default;
 
-		void SetRectEmptyForMinMax2d() {
+		void SetEmptyForMinMax2d() {
 			this->l =  std::numeric_limits<value_t>::max();
 			this->t =  std::numeric_limits<value_t>::max();
 			this->r = -std::numeric_limits<value_t>::max();
 			this->b = -std::numeric_limits<value_t>::max();
 		}
+		void SetEmptyForMinMax3d() requires (dim >= 3) {
+			SetEmptyForMinMax2d();
+			this->f =   std::numeric_limits<value_t>::max();
+			this->bk = -std::numeric_limits<value_t>::max();
+		}
+		void SetEmptyForMinMax() {
+			if constexpr (dim >= 3) {
+				SetEmptyForMinMax3d();
+			}
+			else {
+				SetEmptyForMinMax2d();
+			}
+		}
+
 		//=========================================================================================================================
 		//--------------------------------------------------------------------------------------------------------------------------
 		// get member as array

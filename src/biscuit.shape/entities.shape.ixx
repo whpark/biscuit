@@ -101,7 +101,7 @@ export namespace biscuit::shape {
 		virtual bool UpdateBounds(rect_t&) const = 0;
 		virtual rect_t GetBounds() const {
 			rect_t bounds;
-			bounds.SetRectEmptyForMinMax2d();
+			bounds.SetEmptyForMinMax2d();
 			UpdateBounds(bounds);
 			return bounds;
 		}
