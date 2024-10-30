@@ -38,7 +38,7 @@ export namespace biscuit {
 		TCloneablePtr(this_t const& other) : base_t(other ? cloner(*other) : nullptr) {}
 
 		TCloneablePtr& operator = (std::unique_ptr<T>&& other) { base_t::operator = (std::move(other)); return *this; }
-		TCloneablePtr& operator = (std::unique_ptr<T> const other) { base_t::operator = (cloner(*other)); return *this; }
+		TCloneablePtr& operator = (std::unique_ptr<T> const& other) { base_t::operator = (cloner(*other)); return *this; }
 		TCloneablePtr& operator = (this_t&& other) { base_t::operator = (std::move(other)); return *this; }
 		TCloneablePtr& operator = (this_t const& other) { base_t::operator = (cloner(*other)); return *this; }
 
