@@ -5,13 +5,22 @@ import std;
 import biscuit.aliases;
 import biscuit.concepts;
 
-namespace biscuit {
+export namespace biscuit {
 
-	export template < /*concepts::cloneable */typename T >
+	template < typename T >
+	struct TCloner {
+		std::unique_ptr<T> operator () (T const& self) const { return self.clone(); }
+	};
+	template < typename T >
+	struct TStaticCloner {
+		std::unique_ptr<T> operator () (T const& self) const { return std::make_unique<T>(self); }
+	};
+
+	template < /*concepts::cloneable */typename T, class CLONER = TCloner<T> >
 	class TCloneablePtr : public std::unique_ptr<T> {
 	public:
 		using base_t = std::unique_ptr<T>;
-		using this_t = TCloneablePtr<T>;
+		using this_t = TCloneablePtr;
 
 		using base_t::base_t;
 		//TCloneablePtr(this_t&& other) : base_t(std::move(other)) {}
@@ -20,34 +29,65 @@ namespace biscuit {
 		using base_t::operator ->;
 		using base_t::operator bool;
 
+		static inline CLONER cloner;
+
 		TCloneablePtr(std::unique_ptr<T>&& other) : base_t(std::move(other)) {}
 		TCloneablePtr(this_t&& other) : base_t(std::move(other)) {}
 		// copy constructor
-		TCloneablePtr(std::unique_ptr<T> const& other) : base_t(other ? std::move(other->clone()) : nullptr) {}
-		TCloneablePtr(this_t const& other) : base_t(other ? std::move(other->clone()) : nullptr) {}
+		TCloneablePtr(std::unique_ptr<T> const& other) : base_t(other ? cloner(*other) : nullptr) {}
+		TCloneablePtr(this_t const& other) : base_t(other ? cloner(*other) : nullptr) {}
 
 		TCloneablePtr& operator = (std::unique_ptr<T>&& other) { base_t::operator = (std::move(other)); return *this; }
+		TCloneablePtr& operator = (std::unique_ptr<T> const other) { base_t::operator = (cloner(*other)); return *this; }
 		TCloneablePtr& operator = (this_t&& other) { base_t::operator = (std::move(other)); return *this; }
-		// copy operator
-		TCloneablePtr& operator = (this_t const& other) { *this = other ? std::move(other->clone()) : nullptr; return*this;}
+		TCloneablePtr& operator = (this_t const& other) { base_t::operator = (cloner(*other)); return *this; }
 
-		bool operator == (this_t const& other) const {
-			bool bEmpty = !*this;
-			bool bEmptyOther = !other;
-			if (bEmpty and bEmptyOther) return true;
-			else if (bEmpty or bEmptyOther) return false;
-			return **this == *other;
+		template < typename U, class CLONER2 >
+		TCloneablePtr& operator = (TCloneablePtr<U, CLONER2>&& other) {
+			this->reset(other.release());
+			return*this;
 		}
-		bool operator != (this_t const& other) const { return !(*this == other); }
-		bool operator < (this_t const& other) const {
-			bool bEmpty = !*this;
-			bool bEmptyOther = !other;
-			if (bEmpty and bEmptyOther) return false;
-			else if (bEmpty) return true;
-			else if (bEmptyOther) return false;
-			return **this < *other;
+		template < typename U, class CLONER2 >
+		TCloneablePtr& operator = (TCloneablePtr<U, CLONER2> const& other) {
+			static CLONER2 cloner2;
+			this->reset(other ? cloner2(*other).release() : nullptr);
+			return*this;
 		}
-		bool operator > (this_t const& other) const { return other < *this; }
 	};
+
+	template < typename T1, typename T2, typename ... targs, typename ... targs2 >
+	bool operator == (TCloneablePtr<T1, targs...> const& a, TCloneablePtr<T2, targs2...> const& b) {
+		bool bEmptyA = !a;
+		bool bEmptyB = !b;
+		if (bEmptyA and bEmptyB) return true;
+		else if (bEmptyA or bEmptyB) return false;
+		return *a == *b;
+	}
+	template < typename T1, typename T2, typename ... targs, typename ... targs2 >
+	bool operator != (TCloneablePtr<T1, targs...> const& a, TCloneablePtr<T2, targs2...> const& b) {
+		return !(a == b);
+	}
+	template < typename T1, typename T2, typename ... targs, typename ... targs2 >
+	bool operator < (TCloneablePtr<T1, targs...> const& a, TCloneablePtr<T2, targs2...> const& b) {
+		bool bEmptyA = !a;
+		bool bEmptyB = !b;
+		if (bEmptyA and bEmptyB) return false;
+		else if (bEmptyA) return true;
+		else if (bEmptyB) return false;
+		return *a < *b;
+	}
+	template < typename T1, typename T2, typename ... targs, typename ... targs2 >
+	bool operator > (TCloneablePtr<T1, targs...> const& a, TCloneablePtr<T2, targs2...> const& b) {
+		return b < a;
+	}
+	template < typename T1, typename T2, typename ... targs, typename ... targs2 >
+	bool operator <= (TCloneablePtr<T1, targs...> const& a, TCloneablePtr<T2, targs2...> const& b) {
+		return a == b or a < b;
+	}
+	template < typename T1, typename T2, typename ... targs, typename ... targs2 >
+	bool operator >= (TCloneablePtr<T1, targs...> const& a, TCloneablePtr<T2, targs2...> const& b) {
+		return b <= a;
+	}
+
 }
 
