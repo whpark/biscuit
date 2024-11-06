@@ -593,7 +593,7 @@ export namespace biscuit::coord {
 		BSC__NODISCARD rad_t GetAngleZX() const requires (bPoint and dim >= 3)	{ return rad_t(std::atan2(this->x, this->z)); }
 
 		BSC__NODISCARD this_t GetNormalized() const requires (bPoint) { return *this / GetDistance(); }	// Length == 1.0
-		bool Normalize() requires (bPoint) { *this /= GetDistance(); return base_t::IsAllValid(); }
+		bool Normalize() requires (bPoint) { *this /= GetDistance(); return IsAllValid(); }
 
 		BSC__NODISCARD this_t GetNormalVectorXY() const requires (bPoint)				{ return {this->y, -this->x}; }			// Perpendicular(Normal) Vector (XY-Plan)
 		BSC__NODISCARD this_t GetNormalVectorYZ() const requires (bPoint and dim >= 3)	{ return {{}, this->z, -this->y}; }		// Perpendicular(Normal) Vector (YZ-Plan)
