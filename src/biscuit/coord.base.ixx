@@ -617,8 +617,7 @@ export namespace biscuit::coord {
 		//}
 
 		BSC__NODISCARD this_t Cross(this_t const& B) const requires (bPoint and dim >= 3) {
-			using base_t::x, base_t::y, base_t::z;
-			return {y*B.z - z*B.y, z*B.x - x*B.z, x*B.y - y*B.x};
+			return {this->y*B.z - this->z*B.y, this->z*B.x - this->x*B.z, this->x*B.y - this->y*B.x};
 		}
 		BSC__NODISCARD value_t CrossZ(this_t const& B) const requires (bPoint) {
 			return this->x*B.y - this->y*B.x;
