@@ -15,13 +15,13 @@ export namespace biscuit {
 	//-----------------------------------------------------------------------------------------------------------------------------
 	/// @brief string to int/double ...
 	/// @return 
-	template < concepts::arithmetic tvalue >
-	BSC__NODISCARD tvalue ToNumber(std::string_view sv, int base = 10, char separator = 0, std::from_chars_result* result = nullptr) {
-		if (sv.size() > BSC_RSIZE_MAX)
+	template < concepts::arithmetic tvalue, concepts::tstring_like tstring >
+	BSC__NODISCARD tvalue ToNumber(tstring const& sv, int base = 10, char separator = 0, std::from_chars_result* result = nullptr) {
+		if (std::size(sv) > BSC_RSIZE_MAX)
 			return 0;
 		tvalue value{};
-		auto* b = sv.data();
-		auto* e = sv.data() + sv.size();
+		auto* b = std::data(sv);
+		auto* e = std::data(sv) + std::size(sv);
 
 		thread_local static std::string body;
 
