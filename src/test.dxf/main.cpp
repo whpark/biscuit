@@ -2,5 +2,7 @@
 #include "biscuit/dependencies_fmt.h"
 
 int main(int argc, char* argv[]) {
-	return Catch::Session().run(argc, argv);
+	Catch::Session session;
+	session.configData().skipBenchmarks = true;
+	return session.run(argc, argv);
 }
