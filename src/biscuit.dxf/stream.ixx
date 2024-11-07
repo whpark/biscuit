@@ -1,6 +1,6 @@
 module;
 
-export module biscuit.dxf:archive;
+export module biscuit.dxf:stream;
 import std;
 import biscuit;
 

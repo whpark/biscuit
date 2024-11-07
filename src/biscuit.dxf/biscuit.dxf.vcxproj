@@ -103,9 +103,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="archive.cpp" />
-    <ClCompile Include="archive.ixx" />
+    <ClCompile Include="stream.cpp" />
+    <ClCompile Include="stream.ixx" />
     <ClCompile Include="0.biscuit.dxf.ixx" />
+    <ClCompile Include="sections.ixx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\biscuit\biscuit.vcxproj">

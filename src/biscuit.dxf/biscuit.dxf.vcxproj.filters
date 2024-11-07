@@ -18,10 +18,13 @@
     <ClCompile Include="0.biscuit.dxf.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="archive.ixx">
+    <ClCompile Include="stream.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="archive.cpp">
+    <ClCompile Include="stream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sections.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
