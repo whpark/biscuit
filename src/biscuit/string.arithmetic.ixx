@@ -26,12 +26,12 @@ export namespace biscuit {
 		thread_local static std::string body;
 
 		// skip leading spaces
-		while (b < e and std::isspace(*b)) b++;
+		while (b < e and std::iswspace(*b)) b++;
 
 		// skip '+' sign
 		if (b < e and (*b == '+')) {
 			b++;
-			while (b < e and std::isspace(*b)) b++;
+			while (b < e and std::iswspace(*b)) b++;
 		}
 
 		// base prefix
