@@ -1,13 +1,57 @@
 module;
 
-module biscuit.dxf:stream;
+export module biscuit.dxf:group;
 import std;
 import biscuit;
 
 using namespace std::literals;
 using namespace biscuit::literals;
 
-namespace biscuit::dxf {
+export namespace biscuit::dxf {
+
+	//=============================================================================================================================
+	// group
+	using binary_t = std::vector<uint8>;
+	using string_t = std::string;
+	using group_code_t = int16;
+	using group_value_t = std::variant<bool, int16, int32, int64, double, string_t, binary_t>;
+	enum class eGROUP_VALUE : int8 { none = -1, boolean = 0, i16, i32, i64, dbl, str, hex_data };
+
+	constexpr group_code_t const g_iMaxGroupCode = 1071;
+
+	constexpr struct alignas(32) sGroup {	// alignas(32) - hoping for better cache performance (don't know if it works)
+	public:
+		group_code_t iGroupCode{};
+		group_value_t value;
+
+		bool operator == (sGroup const&) const = default;
+		bool operator != (sGroup const&) const = default;
+
+		template < std::convertible_to<group_value_t> T >
+		std::optional<T> GetValue() const {
+			constexpr static auto index = group_value_t{T{}}.index();
+			if (value.index() != index)
+				return std::nullopt;
+			return std::get<T>(value);
+		}
+		std::optional<int> GetInt() const {
+			std::optional<int> result;
+			std::visit([&result]<typename T>(T const& v) {
+				if constexpr (std::is_same_v<T, int64>) {
+					//static_assert(false);
+					if (v >= std::numeric_limits<int>::min() and v <= std::numeric_limits<int>::max()) {
+						result = (int)v;
+					}
+				}
+				else if constexpr (std::is_integral_v<T>)
+					result = (int)v;
+			}, value);
+			return result;
+		}
+
+		eGROUP_VALUE GetValueTypeFromGroupCode() const { return GetValueTypeFromGroupCode(iGroupCode); }
+		static eGROUP_VALUE GetValueTypeFromGroupCode(group_code_t iGroupCode);
+	};
 
 	//=============================================================================================================================
 	//	source - https://images.autodesk.com/adsk/files/autocad_2012_pdf_dxf-reference_enu.pdf
@@ -58,11 +102,11 @@ namespace biscuit::dxf {
 	//		     1071		32-bit integer value
 	//=============================================================================================================================
 
-	eRECORD_VALUE sRecord::GetRecordTypeFromGroupCode(group_code_t iGroupCode) {
+	eGROUP_VALUE sGroup::GetValueTypeFromGroupCode(group_code_t iGroupCode) {
 		constexpr static auto const s_mapGroupCodeToType = [] {
-			std::array<eRECORD_VALUE, g_iMaxGroupCode+1> map{};
+			std::array<eGROUP_VALUE, g_iMaxGroupCode+1> map{};
 			for (group_code_t code{}; code < map.size(); code++) {
-				using enum eRECORD_VALUE;
+				using enum eGROUP_VALUE;
 				if (false) ;
 				else if (code >=   0 and code <=    9) map[code] = str;				//	String (with the introduction of extended symbol names in AutoCAD 2000,
 				else if (code >=  10 and code <=   39) map[code] = dbl;				//	Double precision 3D point value
@@ -109,10 +153,9 @@ namespace biscuit::dxf {
 		}();
 
 		if (iGroupCode < 0 or iGroupCode >= s_mapGroupCodeToType.size())
-			return eRECORD_VALUE::none;
+			return eGROUP_VALUE::none;
 		return s_mapGroupCodeToType[iGroupCode];
 	}
-
 
 }	// namespace biscuit::dxf
 

@@ -103,7 +103,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="stream.cpp" />
+    <ClCompile Include="group.ixx" />
     <ClCompile Include="stream.ixx" />
     <ClCompile Include="0.biscuit.dxf.ixx" />
     <ClCompile Include="sections.ixx" />

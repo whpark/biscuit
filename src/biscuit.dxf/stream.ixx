@@ -3,39 +3,21 @@ module;
 export module biscuit.dxf:stream;
 import std;
 import biscuit;
+import :group;
 
 using namespace std::literals;
 using namespace biscuit::literals;
 
 export namespace biscuit::dxf {
 
-
-	//=============================================================================================================================
-	// record
-	enum class eDXF_FILE_TYPE { ascii, binary, binary_preR14 };
-	using binary_t = std::vector<uint8>;
-	using string_t = std::string;
-	using group_code_t = int16;
-	using record_value_t = std::variant<bool, int16, int32, int64, double, string_t, binary_t>;
-	enum class eRECORD_VALUE : int8 { none = -1, boolean = 0, i16, i32, i64, dbl, str, hex_data };
-
-	constexpr group_code_t const g_iMaxGroupCode = 1071;
-
-	struct alignas(32) sRecord {	// alignas(32) - hoping for better cache performance (don't know if it works)
-	public:
-		group_code_t iGroupCode{};
-		record_value_t value;
-
-		eRECORD_VALUE GetRecordTypeFromGroupCode() const { return GetRecordTypeFromGroupCode(iGroupCode); }
-		static eRECORD_VALUE GetRecordTypeFromGroupCode(group_code_t iGroupCode);
-	};
-
 	//=============================================================================================================================
 	// dxf archive
+	enum class eDXF_FILE_TYPE { ascii, binary, binary_preR14 };
+
 	template < eDXF_FILE_TYPE eDXFFileType_ = eDXF_FILE_TYPE::ascii >
-	class TDXFRecordIStream {
+	class TDXFGroupIStream {
 	public:
-		using this_t = TDXFRecordIStream;
+		using this_t = TDXFGroupIStream;
 		constexpr static eDXF_FILE_TYPE eDXFFileType = eDXFFileType_;
 
 	public:
@@ -43,53 +25,53 @@ export namespace biscuit::dxf {
 	public:
 		std::istream& stream;
 
-		TDXFRecordIStream(std::istream& stream) : stream(stream) {}
+		TDXFGroupIStream(std::istream& stream) : stream(stream) {}
 
-		std::expected<std::vector<sRecord>, std::string> ReadRecords() {
-			std::vector<sRecord> records;
-			// guess records count
+		std::expected<std::vector<sGroup>, std::string> ReadGroups() {
+			std::vector<sGroup> groups;
+			// guess groups count
 			auto cur = stream.tellg();
 			stream.seekg(0, std::ios::end);
 			auto end = stream.tellg();
 			stream.seekg(cur);
-			constexpr static size_t const approx_size_per_record = eDXFFileType == eDXF_FILE_TYPE::ascii ? 16 : 8;
-			auto approxLines = (end - cur) / approx_size_per_record;
+			constexpr static size_t const approx_size_per_group = eDXFFileType == eDXF_FILE_TYPE::ascii ? 16 : 8;
+			auto approxLines = (end - cur) / approx_size_per_group;
 			if (approxLines > 64)
-				records.reserve(approxLines);
-			// read records
-			for (auto record = ReadRecord(); record and record->value.index() != std::variant_npos; record = ReadRecord()) {
-				records.push_back(std::move(*record));
+				groups.reserve(approxLines);
+			// read groups
+			for (auto group = ReadGroup(); group and group->value.index() != std::variant_npos; group = ReadGroup()) {
+				groups.push_back(std::move(*group));
 
 				// check EOF
-				if (auto const& r = records.back();
+				if (auto const& r = groups.back();
 					r.iGroupCode == 0
-					and r.value.index() == std::to_underlying(eRECORD_VALUE::str)
+					and r.value.index() == std::to_underlying(eGROUP_VALUE::str)
 					and std::get<string_t>(r.value) == "EOF"s) {
-					return records;
+					return groups;
 				}
 			}
 			// check
-			return std::unexpected("ReadRecords: unexpected record"s);
+			return std::unexpected("ReadGroups: unexpected group"s);
 		}
 
-		std::optional<sRecord> ReadRecord() {
-			sRecord record;
+		std::optional<sGroup> ReadGroup() {
+			sGroup group;
 			if (auto code = ReadGroupCode())
-				record.iGroupCode = *code;
+				group.iGroupCode = *code;
 			else
 				return std::nullopt;
-			switch (record.GetRecordTypeFromGroupCode()) {
-				using enum eRECORD_VALUE;
-			case boolean:	if (auto v = ReadItem<bool>())		record.value = *v; else return std::nullopt; break;
-			case i16:		if (auto v= ReadItem<int16>())		record.value = *v; else return std::nullopt; break;
-			case i32:		if (auto v= ReadItem<int32>())		record.value = *v; else return std::nullopt; break;
-			case i64:		if (auto v= ReadItem<int64>())		record.value = *v; else return std::nullopt; break;
-			case dbl:		if (auto v= ReadItem<double>())		record.value = *v; else return std::nullopt; break;
-			case str:		if (auto v= ReadItem<string_t>())	record.value = std::move(*v); else return std::nullopt; break;
-			case hex_data:	if (auto v= ReadItem<binary_t>())	record.value = std::move(*v); else return std::nullopt; break;
+			switch (group.GetValueTypeFromGroupCode()) {
+				using enum eGROUP_VALUE;
+			case boolean:	if (auto v = ReadItem<bool>())		group.value = *v; else return std::nullopt; break;
+			case i16:		if (auto v= ReadItem<int16>())		group.value = *v; else return std::nullopt; break;
+			case i32:		if (auto v= ReadItem<int32>())		group.value = *v; else return std::nullopt; break;
+			case i64:		if (auto v= ReadItem<int64>())		group.value = *v; else return std::nullopt; break;
+			case dbl:		if (auto v= ReadItem<double>())		group.value = *v; else return std::nullopt; break;
+			case str:		if (auto v= ReadItem<string_t>())	group.value = std::move(*v); else return std::nullopt; break;
+			case hex_data:	if (auto v= ReadItem<binary_t>())	group.value = std::move(*v); else return std::nullopt; break;
 			default: std::println("stream pos: {}", (int64_t)stream.tellg()); return std::nullopt;
 			}
-			return record;
+			return group;
 		}
 
 		std::optional<group_code_t> ReadGroupCode() {
@@ -113,7 +95,7 @@ export namespace biscuit::dxf {
 	protected:
 
 		template < typename T >
-			requires std::convertible_to<T, record_value_t>
+			requires std::convertible_to<T, group_value_t>
 		std::optional<T> ReadItem() {
 			T value{};
 			if constexpr (eDXFFileType == eDXF_FILE_TYPE::ascii) {
@@ -190,7 +172,7 @@ export namespace biscuit::dxf {
 	};
 
 	//-----------------------------------------------------------------------------------------------------------------------------
-	std::expected<std::vector<sRecord>, std::string> ReadRecords(std::istream& stream) {
+	std::expected<std::vector<sGroup>, std::string> ReadGroups(std::istream& stream) {
 		auto pos0 = stream.tellg();
 		// file type
 		{
@@ -201,15 +183,15 @@ export namespace biscuit::dxf {
 				if (std::equal(sign.begin(), sign.end(), buf.begin())) {
 					group_code_t code{};
 					if (!stream.read(reinterpret_cast<char*>(&code), sizeof(code)))
-						return std::unexpected("ReadRecords: failed to read first group code"s);
+						return std::unexpected("ReadGroups: failed to read first group code"s);
 					stream.seekg(-(std::streamsize)sizeof(code), std::ios_base::cur);
 					if (code == 0) {
-						TDXFRecordIStream<eDXF_FILE_TYPE::binary> reader(stream);
-						return reader.ReadRecords();
+						TDXFGroupIStream<eDXF_FILE_TYPE::binary> reader(stream);
+						return reader.ReadGroups();
 					}
 					else {
-						TDXFRecordIStream<eDXF_FILE_TYPE::binary_preR14> reader(stream);
-						return reader.ReadRecords();
+						TDXFGroupIStream<eDXF_FILE_TYPE::binary_preR14> reader(stream);
+						return reader.ReadGroups();
 					}
 				}
 				else {
@@ -222,44 +204,44 @@ export namespace biscuit::dxf {
 		}
 
 		// ascii;
-		TDXFRecordIStream<eDXF_FILE_TYPE::ascii> reader(stream);
-		return reader.ReadRecords();
+		TDXFGroupIStream<eDXF_FILE_TYPE::ascii> reader(stream);
+		return reader.ReadGroups();
 	}
 
-	std::expected<std::vector<sRecord>, std::string> ReadRecords(std::filesystem::path const& path) {
+	std::expected<std::vector<sGroup>, std::string> ReadGroups(std::filesystem::path const& path) {
 		std::ifstream stream(path, std::ios_base::binary);
 		if (!stream)
-			return std::unexpected("ReadRecords: failed to open file"s);
-		return ReadRecords(stream);
+			return std::unexpected("ReadGroups: failed to open file"s);
+		return ReadGroups(stream);
 	}
 
 
 	//================================================================================================================================
 	// dxf archive (out) 
 	template < eDXF_FILE_TYPE eDXFFileType_ = eDXF_FILE_TYPE::ascii >
-	class TDXFRecordOStream {
+	class TDXFGroupOStream {
 	public:
-		using this_t = TDXFRecordOStream;
+		using this_t = TDXFGroupOStream;
 		constexpr static eDXF_FILE_TYPE eDXFFileType = eDXFFileType_;
 
 	public:
 		std::ostream& stream;
 
-		TDXFRecordOStream(std::ostream& stream) : stream(stream) {}
+		TDXFGroupOStream(std::ostream& stream) : stream(stream) {}
 
-		bool WriteRecords(std::vector<sRecord> const& records) {
-			for (auto const& record : records) {
-				if (!WriteRecord(record))
+		bool WriteGroups(std::vector<sGroup> const& groups) {
+			for (auto const& group : groups) {
+				if (!WriteGroup(group))
 					return false;
 			}
 			return true;
 		}
 
-		bool WriteRecord(sRecord const& record) {
-			if (!WriteGroupCode(record.iGroupCode))
+		bool WriteGroup(sGroup const& group) {
+			if (!WriteGroupCode(group.iGroupCode))
 				return false;
 			bool bResult{};
-			std::visit([&](auto const& v) { bResult = WriteItem(v); }, record.value);
+			std::visit([&](auto const& v) { bResult = WriteItem(v); }, group.value);
 			return bResult;
 		}
 
@@ -284,7 +266,7 @@ export namespace biscuit::dxf {
 
 	protected:
 		template < typename T >
-			requires std::convertible_to<T, record_value_t>
+			requires std::convertible_to<T, group_value_t>
 		bool WriteItem(T const& value) {
 			if constexpr (eDXFFileType == eDXF_FILE_TYPE::ascii) {
 				std::string str;

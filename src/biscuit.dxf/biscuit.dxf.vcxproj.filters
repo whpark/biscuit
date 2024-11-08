@@ -21,10 +21,10 @@
     <ClCompile Include="stream.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stream.cpp">
+    <ClCompile Include="sections.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sections.ixx">
+    <ClCompile Include="group.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -15,31 +15,39 @@ TEST_CASE("Test biscuit.dxf") {
 	}
 
 	std::vector<std::filesystem::path> paths = {
-		//L"/DXF/sample_ascii.dxf"s,
-		L"/DXF/sample_bin_r12.dxf"s,
-		L"/DXF/sample_bin_2010.dxf"s,
+		L"/DXF/sample_ascii.dxf"s,
+		//L"/DXF/sample_bin_r12.dxf"s,
+		//L"/DXF/sample_bin_2010.dxf"s,
 	};
 
 	for (auto const& path : paths) {
-		if (auto records = biscuit::dxf::ReadRecords(path)) {
-			auto path_out = path;
-			path_out.replace_extension(".txt");
-			std::ofstream out(path_out, std::ios::binary);
-			for (auto const& r : records.value()) {
-				std::visit([&](auto const& v) {
-					if constexpr (std::is_floating_point_v<std::remove_cvref_t<decltype(v)>>) {
-						fmt::println(out, "{}:{:f}", r.iGroupCode, v);
-					}
-					else {
-						fmt::println(out, "{}:{}", r.iGroupCode, v);
-					}
-				}, r.value);
+		biscuit::dxf::xDXF dxf;
+		if (!dxf.ReadDXF(path)) {
+			fmt::print("ReadDXF: failed to read {}\n", path);
+			continue;
+		}
+		auto const& groups = dxf.GetGroups();
+		auto path_out = path;
+		path_out.replace_extension(".txt");
+		std::ofstream out(path_out, std::ios::binary);
+
+		// variables
+		for (auto const& [key, groups] : dxf.m_mapVariables) {
+			fmt::println(out, "key:{}", key);
+			for (auto const& group : groups) {
+				fmt::println(out, "\t{}:{}", group.iGroupCode, group.value);
 			}
 		}
-		else {
-			fmt::print("ReadRecords: failed to read {}\n", path);
-		}
-
+		//for (auto const& group : groups) {
+		//	std::visit([&](auto const& v) {
+		//		if constexpr (std::is_floating_point_v<std::remove_cvref_t<decltype(v)>>) {
+		//			fmt::println(out, "{}:{:f}", group.iGroupCode, v);
+		//		}
+		//		else {
+		//			fmt::println(out, "{}:{}", group.iGroupCode, v);
+		//		}
+		//	}, group.value);
+		//}
 	}
 
 }
