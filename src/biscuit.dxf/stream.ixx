@@ -27,6 +27,7 @@ export namespace biscuit::dxf {
 
 		TDXFGroupIStream(std::istream& stream) : stream(stream) {}
 
+		template < bool bSkipComments = true >
 		std::expected<std::vector<sGroup>, std::string> ReadGroups() {
 			std::vector<sGroup> groups;
 			// guess groups count
@@ -40,15 +41,15 @@ export namespace biscuit::dxf {
 				groups.reserve(approxLines);
 			// read groups
 			for (auto group = ReadGroup(); group and group->value.index() != std::variant_npos; group = ReadGroup()) {
+				if constexpr (bSkipComments) {
+					if (group->iGroupCode == 999) continue;
+				}
 				groups.push_back(std::move(*group));
 
 				// check EOF
-				if (auto const& r = groups.back();
-					r.iGroupCode == 0
-					and r.value.index() == std::to_underlying(eGROUP_VALUE::str)
-					and std::get<string_t>(r.value) == "EOF"s) {
+				static sGroup const groupEOF{ 0, "EOF"s };
+				if (groups.back() == groupEOF)
 					return groups;
-				}
 			}
 			// check
 			return std::unexpected("ReadGroups: unexpected group"s);

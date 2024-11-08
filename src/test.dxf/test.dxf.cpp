@@ -38,6 +38,13 @@ TEST_CASE("Test biscuit.dxf") {
 				fmt::println(out, "\t{}:{}", group.iGroupCode, group.value);
 			}
 		}
+
+		// classes
+		for (auto const& c : dxf.m_classes) {
+			fmt::println(out, "class:{}", c.name);
+			fmt::println(out, "\tstrCppClassName:{}", c.strCppClassName);
+			fmt::println(out, "\tstrAppName:{}", c.strAppName);
+		}
 		//for (auto const& group : groups) {
 		//	std::visit([&](auto const& v) {
 		//		if constexpr (std::is_floating_point_v<std::remove_cvref_t<decltype(v)>>) {

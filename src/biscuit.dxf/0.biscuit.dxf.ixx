@@ -16,6 +16,7 @@ export namespace biscuit::dxf {
 	class xDXF {
 	public:
 		variable_map_t m_mapVariables;
+		std::vector<sClass> m_classes;
 	protected:
 		std::vector<sGroup> m_groups;
 
@@ -37,11 +38,22 @@ export namespace biscuit::dxf {
 				if (r == groupEOF)
 					break;
 
+				// Header
 				static sGroup const groupHeader[]{ {0, "SECTION"s}, {2, "HEADER"s}, };
 				if (std::ranges::starts_with(std::span(iter, end), groupHeader)) {
 					iter += std::size(groupHeader);
 					if (auto map = ReadHeadSection(iter, end))
 						m_mapVariables = std::move(*map);
+					else
+						return false;
+				}
+
+				// Classes
+				static sGroup const groupClasses[]{ {0, "SECTION"s}, {2, "CLASSES"s}, };
+				if (std::ranges::starts_with(std::span(iter, end), groupClasses)) {
+					iter += std::size(groupClasses);
+					if (auto c = ReadClassesSection(iter, end))
+						m_classes = std::move(*c);
 					else
 						return false;
 				}

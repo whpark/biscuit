@@ -49,6 +49,15 @@ export namespace biscuit::dxf {
 			return result;
 		}
 
+		template < typename T >
+		bool Get(T& value) const {
+			if (auto v = GetValue<T>()) {
+				value = *v;
+				return true;
+			}
+			return false;
+		}
+
 		eGROUP_VALUE GetValueTypeFromGroupCode() const { return GetValueTypeFromGroupCode(iGroupCode); }
 		static eGROUP_VALUE GetValueTypeFromGroupCode(group_code_t iGroupCode);
 	};
