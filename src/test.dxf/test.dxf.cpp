@@ -1,6 +1,7 @@
 #include <catch.hpp>
 
 #include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_glaze.h"
 
 import std;
 import biscuit;
@@ -19,6 +20,9 @@ TEST_CASE("Test biscuit.dxf") {
 		//L"/DXF/sample_bin_r12.dxf"s,
 		//L"/DXF/sample_bin_2010.dxf"s,
 	};
+
+	//biscuit::dxf::sClass s;
+	//auto str = glz::write_json(s);
 
 	for (auto const& path : paths) {
 		biscuit::dxf::xDXF dxf;

@@ -2,6 +2,7 @@ module;
 
 #include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_glaze.h"
+#include <boost/pfr.hpp>
 
 export module biscuit.dxf:sections;
 import std;
@@ -16,13 +17,18 @@ export namespace biscuit::dxf {
 
 	using variable_map_t = std::map<string_t, std::vector<sGroup>>;
 
-	template < typename tStruct, typename tType >
-	struct THandler {
-		group_code_t const iGroupCode;
-		tType tStruct::* const member;
-		constexpr THandler(group_code_t iGroupCode, tType tStruct::* member) : iGroupCode(iGroupCode), member(member) {}
-		//THandler() : member(MEMBER) {}
-	};
+
+	// for each does NOT stop after the first match. It continues to the end. (some overhead)
+
+	template < size_t ... I, class Func >
+	constexpr void ForEachImpl(Func&& func, std::integer_sequence<size_t, I...>) {
+		(func.template operator()<I>(), ...);
+	}
+
+	template < size_t N, class Func >
+	constexpr void ForEach(Func&& func) {
+		ForEachImpl(std::move(func), std::make_integer_sequence<size_t, N/2>{});
+	}
 
 	struct sClass {
 		string_t name;
@@ -35,12 +41,16 @@ export namespace biscuit::dxf {
 
 		//static std::map<group_code_t, sHandler> s_mapHandlers;
 		//THandler<10, sClass, string_t, &sClass::name> a;
-		constexpr static inline auto const handlers = std::make_tuple( THandler{1, &sClass::name}, THandler{2, &sClass::strCppClassName} );
-
-		void Func() {
-			THandler a(1, &sClass::name);
-			//this->*a.member = "name"s;
-		}
+		//constexpr static inline auto const handlers = std::make_tuple( THandler{THandlerIndex<1>{}, &sClass::name}, THandler{THandlerIndex<2>{}, &sClass::strCppClassName});
+		constexpr static inline auto const handlers = std::make_tuple(
+			1, &sClass::name,
+			2, &sClass::strCppClassName,
+			3, &sClass::strAppName,
+			90, &sClass::flags,
+			91, &sClass::count,
+			280, &sClass::proxy,
+			281, &sClass::entity
+		);
 	};
 
 
@@ -77,19 +87,27 @@ export namespace biscuit::dxf {
 	template < typename tIter >
 	std::optional<sClass> ReadClass(tIter& iter, tIter const& end) {
 		sClass c;
-		c.Func();	// temp
 		for (iter++; iter != end; iter++) {
 			auto const& r = *iter;
 			if (r.iGroupCode == 0)
 				break;
-			switch (r.iGroupCode) {
-			case 1: if (!r.Get(c.name)) return {};				break;
-			case 2: if (!r.Get(c.strCppClassName)) return {};	break;
-			case 3: if (!r.Get(c.strAppName)) return {};		break;
-			case 90:if (!r.Get(c.flags)) return {};				break;
-			case 91:if (!r.Get(c.count)) return {};				break;
-			//default: c.groups.push_back(r);						break;
-			}
+			bool bFound = false;
+			// for each does NOT stop after the first match. It continues to the end. (some overhead)
+			ForEach<std::tuple_size_v<decltype(sClass::handlers)>>([&]<int I>{
+				constexpr int code = std::get<I*2>(c.handlers);
+				constexpr auto offset_ptr = std::get<I*2+1>(c.handlers);
+				if (r.iGroupCode == code) {
+					if constexpr (std::is_invocable_v<std::remove_cvref_t<decltype(offset_ptr)>>) {
+
+					}
+					else {
+						bFound = true;
+						r.Get(c.*offset_ptr);
+					}
+				}
+			});
+			if (!bFound)
+				return std::nullopt;
 		}
 		return c;
 	}

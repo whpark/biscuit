@@ -7,7 +7,7 @@
 - misc : miscellaneous
 
 ### dependencies
-//- boost https://www.boost.org/
+- boost https://www.boost.org/
 - asio https://think-async.com/Asio/
 - catch2 https://github.com/catchorg/Catch2
 - cereal https://uscilab.github.io/cereal/
