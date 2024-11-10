@@ -20,8 +20,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.qt", "src\biscuit.q
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.opencv", "src\biscuit.opencv\biscuit.opencv.vcxproj", "{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dime.biscuit", "src\dime\dime.biscuit\dime.biscuit.vcxproj", "{7D9B457A-742C-4FF7-A3E6-92FEDD86B2A1}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.dxf", "src\biscuit.dxf\biscuit.dxf.vcxproj", "{64A0630C-44F4-4098-ABCB-DFA302F5C9AE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test.dxf", "src\test.dxf\test.dxf.vcxproj", "{02921489-D5FF-4011-A31A-66677131BCC4}"
@@ -58,10 +56,6 @@ Global
 		{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}.Debug|x64.Build.0 = Debug|x64
 		{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}.Release|x64.ActiveCfg = Release|x64
 		{226AC92E-A608-4AFE-81C8-4F7C0F4C2F08}.Release|x64.Build.0 = Release|x64
-		{7D9B457A-742C-4FF7-A3E6-92FEDD86B2A1}.Debug|x64.ActiveCfg = Debug|x64
-		{7D9B457A-742C-4FF7-A3E6-92FEDD86B2A1}.Debug|x64.Build.0 = Debug|x64
-		{7D9B457A-742C-4FF7-A3E6-92FEDD86B2A1}.Release|x64.ActiveCfg = Release|x64
-		{7D9B457A-742C-4FF7-A3E6-92FEDD86B2A1}.Release|x64.Build.0 = Release|x64
 		{64A0630C-44F4-4098-ABCB-DFA302F5C9AE}.Debug|x64.ActiveCfg = Debug|x64
 		{64A0630C-44F4-4098-ABCB-DFA302F5C9AE}.Debug|x64.Build.0 = Debug|x64
 		{64A0630C-44F4-4098-ABCB-DFA302F5C9AE}.Release|x64.ActiveCfg = Release|x64
@@ -77,7 +71,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F} = {219901BC-F3EB-477D-BD7A-2AAC6BF9B65D}
 		{730A3E73-F28D-435F-ADFD-DEF57F11F48F} = {3C2340D6-6EC4-43A0-B2BE-2FF17EB38CF2}
-		{7D9B457A-742C-4FF7-A3E6-92FEDD86B2A1} = {3C2340D6-6EC4-43A0-B2BE-2FF17EB38CF2}
 		{02921489-D5FF-4011-A31A-66677131BCC4} = {219901BC-F3EB-477D-BD7A-2AAC6BF9B65D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
