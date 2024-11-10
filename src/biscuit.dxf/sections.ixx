@@ -18,6 +18,9 @@ export namespace biscuit::dxf {
 	using variable_map_t = std::map<string_t, std::vector<sGroup>>;
 
 
+	template < typename T > 
+	struct TGroupHandler;
+
 	template < size_t N, size_t ... I, class Func >
 	constexpr bool ForEachImpl(Func&& func, std::integer_sequence<size_t, I...>) {
 		if constexpr (sizeof...(I) == 0) 
@@ -43,13 +46,13 @@ export namespace biscuit::dxf {
 		int32 count{};
 		int16 proxy{};	// 1 = entity is a proxy object
 		int16 entity{};	// 1 = entity is an entity
+	};
 
-		bool Setter(sGroup const& c) { c.Get(name); name += "**********"; return true; }
-		//static std::map<group_code_t, sHandler> s_mapHandlers;
-		//THandler<10, sClass, string_t, &sClass::name> a;
-		//constexpr static inline auto const handlers = std::make_tuple( THandler{THandlerIndex<1>{}, &sClass::name}, THandler{THandlerIndex<2>{}, &sClass::strCppClassName});
+	template <>
+	struct TGroupHandler<sClass> {
 		constexpr static inline auto const handlers = std::make_tuple(
-			//1, &sClass::Setter,
+			1, [](sClass& self) -> auto& { return self.name; },
+			1, [](sClass& self, sGroup const& g)->bool{ return g.Get(self.name); },
 			1, &sClass::name,
 			2, &sClass::strCppClassName,
 			3, &sClass::strAppName,
@@ -91,25 +94,29 @@ export namespace biscuit::dxf {
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------
-	template < typename tIter >
-	std::optional<sClass> ReadClass(tIter& iter, tIter const& end) {
-		sClass c;
+	template < typename tItem, typename tIter >
+	std::optional<tItem> ReadItem(tIter& iter, tIter const& end) {
+		tItem item;
 		for (iter++; iter != end; iter++) {
 			auto const& r = *iter;
 			if (r.iGroupCode == 0)
 				break;
-			//bool bFound = ForEach<1>([&]<int I>{
-			bool bFound = ForEach<std::tuple_size_v<decltype(sClass::handlers)>/2>([&]<int I>{
-				constexpr int code = std::get<I*2>(c.handlers);
-				constexpr auto const offset_ptr = std::get<I*2+1>(c.handlers);
+			constexpr static auto const handlers = TGroupHandler<tItem>::handlers;
+			constexpr static auto nTupleSize = std::tuple_size_v<decltype(handlers)>/2;
+			bool bFound = ForEach<nTupleSize>([&]<int I>{
+				constexpr int code = std::get<I*2>(handlers);
+				constexpr auto const offset_ptr = std::get<I*2+1>(handlers);
 				if (r.iGroupCode == code) {
-					if constexpr (std::is_invocable_v<decltype(offset_ptr)>) {
-						if (c.*offset_ptr(r))
-							return true;
-					}
-					else {
-						r.Get(c.*offset_ptr);
+					if constexpr (std::is_member_object_pointer_v<decltype(offset_ptr)>) {
+						r.Get(item.*offset_ptr);
 						return true;
+					}
+					else if constexpr (std::invocable<decltype(offset_ptr), tItem&>) {
+						r.Get(offset_ptr(item, 0));
+					}
+					else if constexpr (std::invocable<decltype(offset_ptr), tItem&, sGroup const&>) {
+						if (offset_ptr(item, 0, r))
+							return true;
 					}
 				}
 				return false;
@@ -117,7 +124,7 @@ export namespace biscuit::dxf {
 			if (!bFound)
 				return std::nullopt;
 		}
-		return c;
+		return item;
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -134,8 +141,10 @@ export namespace biscuit::dxf {
 			if (r.iGroupCode != 0)
 				return std::nullopt;
 			if (auto str = r.GetValue<string_t>()) {
-				if (auto c = ReadClass(iter, end))
+				if (auto c = ReadItem<sClass>(iter, end))
 					classes.push_back(std::move(*c));
+				else
+					break;
 			}
 			else
 				return std::nullopt;
