@@ -54,7 +54,7 @@ TEST_CASE("Test biscuit.dxf") {
 		for (auto const& t : dxf.m_tables) {
 			fmt::println(out, "table:{}", t.table_type);
 			fmt::println(out, "\thandle:{}", t.handle);
-			fmt::println(out, "\tac:{}", t.ac);
+			fmt::println(out, "\tclass:{}", t.class_name);
 			fmt::println(out, "\tmax_entries:{}", t.max_entries);
 		}
 

@@ -2,8 +2,8 @@ module;
 
 export module biscuit.dxf;
 export import :group;
-export import :stream;
-export import :sections;
+import :stream;
+import :sections;
 
 
 import std;
@@ -15,9 +15,7 @@ export namespace biscuit::dxf {
 
 	class xDXF : public xSectionHead, public xSectionClasses, public xSectionTables {
 	public:
-		//variable_map_t m_mapVariables;
-		//classes_t m_classes;
-		//tables_t m_tables;
+		using this_t = xDXF;
 	protected:
 		std::vector<sGroup> m_groups;
 
@@ -33,8 +31,13 @@ export namespace biscuit::dxf {
 
 			// TopMost. Read SECTIONs
 			auto& groups = m_groups;
-			for (auto iter = groups.begin(), end = groups.end(); iter != end; iter++) {
+			using iter_t = std::remove_cvref_t<decltype(groups)>::const_iterator;
 
+			TContainerMap<std::string, std::function<bool(this_t& self, iter_t& iter, iter_t const& end)>, std::deque> mapReader;
+			mapReader["HEADER"]		= [](this_t& self, iter_t& iter, iter_t const& end) { return ReadSection(static_cast<xSectionHead&>(self), iter, end); };
+			mapReader["CLASSES"]	= [](this_t& self, iter_t& iter, iter_t const& end) { return ReadSection(static_cast<xSectionClasses&>(self), iter, end); };
+			mapReader["TABLES"]		= [](this_t& self, iter_t& iter, iter_t const& end) { return ReadSection(static_cast<xSectionTables&>(self), iter, end); };
+			for (auto iter = groups.begin(), end = groups.end(); iter != end; iter++) {
 				// Read Section Mark
 				{
 					auto const& r = *iter;
@@ -50,29 +53,21 @@ export namespace biscuit::dxf {
 
 				// Read Section Content
 				auto const& group = *iter;
-
-				bool bRead = false;
-				// Header
-				static sGroup const groupHeader{2, "HEADER"s};
-				if ( (group == groupHeader) and TReadSection(static_cast<xSectionHead&>(*this), iter, end))
-					continue;
-
-				// Classes
-				static sGroup const groupClasses{2, "CLASSES"s};
-				if ((group == groupClasses) and TReadSection(static_cast<xSectionClasses&>(*this), iter, end))
-					continue;
-
-				// Tables
-				static sGroup const groupTables{2, "TABLES"s};
-				if ((group == groupTables) and TReadSection(static_cast<xSectionTables&>(*this), iter, end))
-					continue;
-
-				return true;
+				auto section = group.GetValue<string_t>();
+				if (group.iGroupCode != 2 or !section)
+					return false;
+				if (auto p = mapReader.find(*section); p != mapReader.end()) {
+					auto& reader = p->second;
+					if (!reader or !reader(*this, iter, end))
+						return false;
+					mapReader.erase(p);
+				}
 
 			}
-			return true;
+			return mapReader.empty();
 		}
 
 	};
 
 }
+

@@ -19,12 +19,8 @@ export namespace biscuit::dxf {
 	template < typename T >
 	struct TGroupHandler;
 
-	//-----------------------------------------------------------------------------------------------------------------------------
 	template < typename TSection, typename TIter >
-	using func_read_section_t = std::function<bool(TSection&, TIter&, TIter const&)>;
-
-	template < typename TSection, typename TIter >
-	bool TReadSection(TSection& section, TIter& iter, TIter const& end) {
+	bool ReadSection(TSection& section, TIter& iter, TIter const& end) {
 		static sGroup const groupEndSection{ 0, "ENDSEC"s};
 		if (!section.InitSection())
 			return false;
@@ -41,7 +37,7 @@ export namespace biscuit::dxf {
 	}
 
 	template < typename TItem >
-	bool TReadItemSingleMember(TItem& item, sGroup const& group) {
+	bool ReadItemSingleMember(TItem& item, sGroup const& group) {
 		constexpr static auto const handlers = TGroupHandler<TItem>::handlers;
 		constexpr static auto nTupleSize = std::tuple_size_v<decltype(handlers)>/2;
 		return ForEachIntSeq<nTupleSize>([&]<int I>{
@@ -62,19 +58,6 @@ export namespace biscuit::dxf {
 			}
 		});
 	}
-	//template < typename TItem, typename TIter >
-	//std::optional<TItem> TReadItem(TIter& iter, TIter const& end) {
-	//	TItem item;
-	//	for (iter++; iter != end; iter++) {
-	//		if (group.iGroupCode == 0) {
-	//			iter--;
-	//			return std::nullopt;
-	//		}
-	//		if (!TReadItemSingleMember(item, *iter))
-	//			return std::nullopt;
-	//	}
-	//	return item;
-	//}
 
 	//=============================================================================================================================
 	// Header section
@@ -103,7 +86,7 @@ export namespace biscuit::dxf {
 			for (iter++; iter != end; iter++) {
 				auto const& item = *iter;
 				if ((item.iGroupCode == 0) or (item.iGroupCode == 9)) {
-					iter--;
+					iter--;	// current item is NOT an EndCondition.
 					break;
 				}
 				sub.push_back(item);
@@ -160,10 +143,10 @@ export namespace biscuit::dxf {
 			auto& aClass = m_classes.back();
 			for (iter++; iter != end; iter++) {
 				if (iter->iGroupCode == 0) {
-					iter--;
+					iter--;	// current item is NOT an EndCondition.
 					return true;
 				}
-				if (!TReadItemSingleMember(aClass, *iter))
+				if (!ReadItemSingleMember(aClass, *iter))
 					return false;
 			}
 			return true;
@@ -175,7 +158,7 @@ export namespace biscuit::dxf {
 	public:
 		string_t table_type;
 		int32 handle{};
-		string_t ac;
+		string_t class_name;
 		int16 max_entries{};
 	};
 	template <>
@@ -183,7 +166,7 @@ export namespace biscuit::dxf {
 		constexpr static inline auto const handlers = std::make_tuple(
 			2, &xTable::table_type,
 			5, &xTable::handle,
-			100, &xTable::ac,
+			100, &xTable::class_name,
 			70, &xTable::max_entries
 		);
 	};
@@ -215,7 +198,7 @@ export namespace biscuit::dxf {
 				if (*iter == groupTableEnd) {
 					return true;
 				}
-				if (TReadItemSingleMember(m_tables.back(), *iter)) {
+				if (ReadItemSingleMember(m_tables.back(), *iter)) {
 				}
 				else {
 
@@ -224,22 +207,6 @@ export namespace biscuit::dxf {
 			return false;
 		}
 	};
-
-	//std::optional<tables_t> ReadTablesSection(TIter& iter, TIter const& end) {
-	//	tables_t tables;
-	//	while (iter != end) {
-	//		auto const& r = *iter;
-	//		if (r == groupEndSection) {
-	//			iter++;
-	//			break;
-	//		}
-	//		if (r.iGroupCode != 0)
-	//			return std::nullopt;
-
-	//	}
-	//	return std::move(tables);
-	//}
-
 
 }	// namespace biscuit::dxf
 
