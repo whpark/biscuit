@@ -51,26 +51,20 @@ export namespace biscuit::dxf {
 				// Read Section Content
 				auto const& group = *iter;
 
-				auto CheckAndReadSection = [&](sGroup const& groupSection, auto& section, auto& iter, auto const& end) -> bool {
-					if (group != groupSection)
-						return false;
-					return TReadSection(section, iter, end);
-				};
-
 				bool bRead = false;
 				// Header
 				static sGroup const groupHeader{2, "HEADER"s};
-				if (CheckAndReadSection(groupHeader, static_cast<xSectionHead&>(*this), iter, end))
+				if ( (group == groupHeader) and TReadSection(static_cast<xSectionHead&>(*this), iter, end))
 					continue;
 
 				// Classes
 				static sGroup const groupClasses{2, "CLASSES"s};
-				if (CheckAndReadSection(groupClasses, static_cast<xSectionClasses&>(*this), iter, end))
+				if ((group == groupClasses) and TReadSection(static_cast<xSectionClasses&>(*this), iter, end))
 					continue;
 
 				// Tables
 				static sGroup const groupTables{2, "TABLES"s};
-				if (CheckAndReadSection(groupTables, static_cast<xSectionTables&>(*this), iter, end))
+				if ((group == groupTables) and TReadSection(static_cast<xSectionTables&>(*this), iter, end))
 					continue;
 
 				return true;

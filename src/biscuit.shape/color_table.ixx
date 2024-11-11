@@ -283,11 +283,13 @@ export namespace biscuit::shape {
 		for (size_t i = 0; i < s_tblColor.size(); i++) {
 			auto cr2 = s_tblColor[i];
 			uint32_t dwError = Square((int)cr.r-(int)cr2.r) + Square((int)cr.g-(int)cr2.g) + Square((int)cr.b-(int)cr2.b);
-			if (!dwError)
-				return i;
+			if (!dwError) {
+				iCR = (uint8_t)i;
+				return iCR;
+			}
 			if (dwMinError > dwError) {
 				dwMinError = dwError;
-				iCR = i;
+				iCR = (uint8_t)i;
 			}
 		}
 		return iCR;

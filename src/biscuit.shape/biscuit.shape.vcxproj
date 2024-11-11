@@ -60,7 +60,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;_LIB;BSC__SHAPE_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -80,7 +80,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -105,9 +105,6 @@
   <ItemGroup>
     <ProjectReference Include="..\biscuit\biscuit.vcxproj">
       <Project>{4fc2059e-06a9-4b82-861d-ed3cb583303f}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\dime\dime.biscuit\dime.biscuit.vcxproj">
-      <Project>{7d9b457a-742c-4ff7-a3e6-92fedd86b2a1}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

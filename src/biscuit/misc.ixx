@@ -190,7 +190,8 @@ export namespace biscuit {
 				return true;
 			if constexpr (sizeof...(I) > 1)
 				return ForEachIntSeq<N>(std::move(func), std::make_integer_sequence<size_t, sizeof...(I)-1>{});
-			return false;
+			else
+				return false;
 		}
 	}
 	template < size_t N, class Func >
