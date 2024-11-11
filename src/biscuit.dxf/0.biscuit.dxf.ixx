@@ -13,10 +13,11 @@ using namespace biscuit::literals;
 
 export namespace biscuit::dxf {
 
-	class xDXF {
+	class xDXF : public xSectionHead, public xSectionClasses, public xSectionTables {
 	public:
-		variable_map_t m_mapVariables;
-		std::vector<sClass> m_classes;
+		//variable_map_t m_mapVariables;
+		//classes_t m_classes;
+		//tables_t m_tables;
 	protected:
 		std::vector<sGroup> m_groups;
 
@@ -30,34 +31,49 @@ export namespace biscuit::dxf {
 			else
 				return false;
 
+			// TopMost. Read SECTIONs
 			auto& groups = m_groups;
 			for (auto iter = groups.begin(), end = groups.end(); iter != end; iter++) {
-				auto const& r = *iter;
 
-				static sGroup const groupEOF{ 0, "EOF"s };
-				if (r == groupEOF)
-					break;
-
-				// Header
-				static sGroup const groupHeader[]{ {0, "SECTION"s}, {2, "HEADER"s}, };
-				if (std::ranges::starts_with(std::span(iter, end), groupHeader)) {
-					iter += std::size(groupHeader);
-					if (auto map = ReadHeadSection(iter, end))
-						m_mapVariables = std::move(*map);
-					else
+				// Read Section Mark
+				{
+					auto const& r = *iter;
+						static sGroup const groupEOF{ 0, "EOF"s };
+					if (r == groupEOF)
+						break;
+					static sGroup const groupSectionStart{ 0, "SECTION"s };
+					if (r != groupSectionStart)
 						return false;
+					if (++iter == end)
+						break;
 				}
+
+				// Read Section Content
+				auto const& group = *iter;
+
+				auto CheckAndReadSection = [&](sGroup const& groupSection, auto& section, auto& iter, auto const& end) -> bool {
+					if (group != groupSection)
+						return false;
+					return TReadSection(section, iter, end);
+				};
+
+				bool bRead = false;
+				// Header
+				static sGroup const groupHeader{2, "HEADER"s};
+				if (CheckAndReadSection(groupHeader, static_cast<xSectionHead&>(*this), iter, end))
+					continue;
 
 				// Classes
-				static sGroup const groupClasses[]{ {0, "SECTION"s}, {2, "CLASSES"s}, };
-				if (std::ranges::starts_with(std::span(iter, end), groupClasses)) {
-					iter += std::size(groupClasses);
-					if (auto c = ReadClassesSection(iter, end))
-						m_classes = std::move(*c);
-					else
-						return false;
-				}
+				static sGroup const groupClasses{2, "CLASSES"s};
+				if (CheckAndReadSection(groupClasses, static_cast<xSectionClasses&>(*this), iter, end))
+					continue;
 
+				// Tables
+				static sGroup const groupTables{2, "TABLES"s};
+				if (CheckAndReadSection(groupTables, static_cast<xSectionTables&>(*this), iter, end))
+					continue;
+
+				return true;
 
 			}
 			return true;
@@ -66,4 +82,3 @@ export namespace biscuit::dxf {
 	};
 
 }
-

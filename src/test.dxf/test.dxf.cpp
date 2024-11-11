@@ -46,9 +46,18 @@ TEST_CASE("Test biscuit.dxf") {
 		// classes
 		for (auto const& c : dxf.m_classes) {
 			fmt::println(out, "class:{}", c.name);
-			fmt::println(out, "\tstrCppClassName:{}", c.strCppClassName);
-			fmt::println(out, "\tstrAppName:{}", c.strAppName);
+			fmt::println(out, "\tcpp_class_name:{}", c.cpp_class_name);
+			fmt::println(out, "\tapp_name:{}", c.app_name);
 		}
+
+		// tables
+		for (auto const& t : dxf.m_tables) {
+			fmt::println(out, "table:{}", t.table_type);
+			fmt::println(out, "\thandle:{}", t.handle);
+			fmt::println(out, "\tac:{}", t.ac);
+			fmt::println(out, "\tmax_entries:{}", t.max_entries);
+		}
+
 		//for (auto const& group : groups) {
 		//	std::visit([&](auto const& v) {
 		//		if constexpr (std::is_floating_point_v<std::remove_cvref_t<decltype(v)>>) {

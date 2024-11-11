@@ -180,5 +180,24 @@ export namespace biscuit {
 
 	}
 
+
+	namespace detail {
+		template < size_t N, size_t ... I, class Func >
+		constexpr bool ForEachIntSeq(Func&& func, std::integer_sequence<size_t, I...>) {
+			if constexpr (sizeof...(I) == 0) 
+				return false;
+			if (func.template operator()<N-(sizeof...(I))>())
+				return true;
+			if constexpr (sizeof...(I) > 1)
+				return ForEachIntSeq<N>(std::move(func), std::make_integer_sequence<size_t, sizeof...(I)-1>{});
+			return false;
+		}
+	}
+	template < size_t N, class Func >
+	constexpr bool ForEachIntSeq(Func&& func) {
+		return ::biscuit::detail::ForEachIntSeq<N>(std::move(func), std::make_integer_sequence<size_t, N>{});
+	}
+
+
 }	// namespac biscuit
 

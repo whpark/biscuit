@@ -19,7 +19,7 @@ export namespace biscuit::dxf {
 
 	constexpr group_code_t const g_iMaxGroupCode = 1071;
 
-	constexpr struct alignas(32) sGroup {	// alignas(32) - hoping for better cache performance (don't know if it works)
+	struct alignas(32) sGroup {	// alignas(32) - hoping for better cache performance (don't know if it works)
 	public:
 		group_code_t iGroupCode{};
 		group_value_t value;
@@ -51,7 +51,13 @@ export namespace biscuit::dxf {
 
 		template < typename T >
 		bool Get(T& value) const {
-			if (auto v = GetValue<T>()) {
+			if constexpr ( std::is_integral_v<T> and sizeof(T) > sizeof(bool) and sizeof(T) < sizeof(int64) ) {
+				if (auto v = GetInt()) {
+					value = *v;
+					return true;
+				}
+			}
+			else if (auto v = GetValue<T>()) {
 				value = *v;
 				return true;
 			}
@@ -61,6 +67,8 @@ export namespace biscuit::dxf {
 		eGROUP_VALUE GetValueTypeFromGroupCode() const { return GetValueTypeFromGroupCode(iGroupCode); }
 		static eGROUP_VALUE GetValueTypeFromGroupCode(group_code_t iGroupCode);
 	};
+
+
 
 	//=============================================================================================================================
 	//	source - https://images.autodesk.com/adsk/files/autocad_2012_pdf_dxf-reference_enu.pdf

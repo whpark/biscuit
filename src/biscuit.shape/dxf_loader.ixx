@@ -8,7 +8,6 @@ import biscuit;
 import biscuit.shape.color_table;
 import biscuit.shape_basic;
 import biscuit.shape.entities;
-import dime.biscuit;
 
 using namespace std::literals;
 
