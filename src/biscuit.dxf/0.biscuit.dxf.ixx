@@ -13,7 +13,15 @@ using namespace biscuit::literals;
 
 export namespace biscuit::dxf {
 
-	class xDXF : public xSectionHead, public xSectionClasses, public xSectionTables {
+	class xDXF :
+		public xSectionHead,
+		public xSectionClasses,
+		public xSectionTables,
+		public xSectionBlocks,
+		public xSectionEntities,
+		public xSectionObjects,
+		public xSectionThumbnailImage
+	{
 	public:
 		using this_t = xDXF;
 	protected:
@@ -34,9 +42,21 @@ export namespace biscuit::dxf {
 			using iter_t = std::remove_cvref_t<decltype(groups)>::const_iterator;
 
 			TContainerMap<std::string, std::function<bool(this_t& self, iter_t& iter, iter_t const& end)>, std::deque> mapReader;
-			mapReader["HEADER"]		= [](this_t& self, iter_t& iter, iter_t const& end) { return ReadSection(static_cast<xSectionHead&>(self), iter, end); };
-			mapReader["CLASSES"]	= [](this_t& self, iter_t& iter, iter_t const& end) { return ReadSection(static_cast<xSectionClasses&>(self), iter, end); };
-			mapReader["TABLES"]		= [](this_t& self, iter_t& iter, iter_t const& end) { return ReadSection(static_cast<xSectionTables&>(self), iter, end); };
+			mapReader["HEADER"]			= [](this_t& self, iter_t& iter, iter_t const& end) {
+				return ReadSection(static_cast<xSectionHead&>(self), iter, end); };
+			mapReader["CLASSES"]		= [](this_t& self, iter_t& iter, iter_t const& end) {
+				return ReadSection(static_cast<xSectionClasses&>(self), iter, end); };
+			mapReader["TABLES"]			= [](this_t& self, iter_t& iter, iter_t const& end) {
+				return ReadSection(static_cast<xSectionTables&>(self), iter, end); };
+			mapReader["BLOCKS"]			= [](this_t& self, iter_t& iter, iter_t const& end) {
+				return ReadSection(static_cast<xSectionBlocks&>(self), iter, end); };
+			mapReader["ENTITIES"]		= [](this_t& self, iter_t& iter, iter_t const& end) {
+				return ReadSection(static_cast<xSectionEntities&>(self), iter, end); };
+			mapReader["OBJECTS"]		= [](this_t& self, iter_t& iter, iter_t const& end) {
+				return ReadSection(static_cast<xSectionObjects&>(self), iter, end); };
+			//mapReader["THUMBNAILIMAGE"] = [](this_t& self, iter_t& iter, iter_t const& end) {
+			//	return ReadSection(static_cast<xSectionThumbnailImage&>(self), iter, end); };
+
 			for (auto iter = groups.begin(), end = groups.end(); iter != end; iter++) {
 				// Read Section Mark
 				{
@@ -62,9 +82,8 @@ export namespace biscuit::dxf {
 						return false;
 					mapReader.erase(p);
 				}
-
 			}
-			return mapReader.empty();
+			return mapReader.find("ENTITIES") == mapReader.end();	// at least, ENTITIES section must be read.
 		}
 
 	};

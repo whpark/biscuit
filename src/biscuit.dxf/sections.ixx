@@ -1,14 +1,14 @@
 module;
 
 #include "biscuit/dependencies_fmt.h"
-#include "biscuit/dependencies_glaze.h"
-#include <boost/pfr.hpp>
+#include "biscuit/dependencies_eigen.h"
 
 export module biscuit.dxf:sections;
 import std;
 import biscuit;
 import :group;
 import :stream;
+import :entities;
 
 using namespace std::literals;
 using namespace biscuit::literals;
@@ -16,8 +16,6 @@ using namespace biscuit::literals;
 export namespace biscuit::dxf {
 
 	//=============================================================================================================================
-	template < typename T >
-	struct TGroupHandler;
 
 	template < typename TSection, typename TIter >
 	bool ReadSection(TSection& section, TIter& iter, TIter const& end) {
@@ -34,29 +32,6 @@ export namespace biscuit::dxf {
 				return false;
 		}
 		return false;
-	}
-
-	template < typename TItem >
-	bool ReadItemSingleMember(TItem& item, sGroup const& group) {
-		constexpr static auto const handlers = TGroupHandler<TItem>::handlers;
-		constexpr static auto nTupleSize = std::tuple_size_v<decltype(handlers)>/2;
-		return ForEachIntSeq<nTupleSize>([&]<int I>{
-			constexpr int code = std::get<I*2>(handlers);
-			constexpr auto const offset_ptr = std::get<I*2+1>(handlers);
-			if (group.iGroupCode != code)
-				return false;
-			if constexpr (std::is_member_object_pointer_v<decltype(offset_ptr)>) {
-				group.Get(item.*offset_ptr);
-				return true;
-			}
-			else if constexpr (std::invocable<decltype(offset_ptr), TItem&>) {
-				group.Get(offset_ptr(item, 0));
-				return true;
-			}
-			else if constexpr (std::invocable<decltype(offset_ptr), TItem&, sGroup const&>) {
-				return offset_ptr(item, 0, group);
-			}
-		});
 	}
 
 	//=============================================================================================================================
@@ -160,6 +135,7 @@ export namespace biscuit::dxf {
 		int32 handle{};
 		string_t class_name;
 		int16 max_entries{};
+		int16 flags{};
 	};
 	template <>
 	struct TGroupHandler<xTable> {
@@ -201,12 +177,175 @@ export namespace biscuit::dxf {
 				if (ReadItemSingleMember(m_tables.back(), *iter)) {
 				}
 				else {
+					// todo:
 
 				}
 			}
 			return false;
 		}
 	};
+
+	//=============================================================================================================================
+	class xBlock {
+	public:
+		int32 handle{};
+		//string_t entity;	// fixed value : AcDbEntity
+		string_t layer;
+		//string_t sign;		// fixed value : AcDbBlockBegin
+		string_t name;
+		int16 flags{};
+		Eigen::Vector3d ptBase;
+		string_t name2;
+		string_t xref_path;
+	};
+	template <>
+	struct TGroupHandler<xBlock> {
+		constexpr static inline auto const handlers = std::make_tuple(
+			5, &xBlock::handle,
+			//100, &xBlock::entity,
+			8, &xBlock::layer,
+			//100, &xBlock::sign,
+			2, &xBlock::name,
+			70, &xBlock::flags,
+			10, [](auto& self) -> decltype(auto) { return self.ptBase.x(); },
+			20, [](auto& self) -> decltype(auto) { return self.ptBase.y(); },
+			30, [](auto& self) -> decltype(auto) { return self.ptBase.z(); },
+			3, & xBlock::name2,
+			1, & xBlock::xref_path
+		);
+	};
+	class xSectionBlocks {
+	public:
+		using this_t = xSectionBlocks;
+		std::vector<xBlock> m_blocks;
+		binary_t hExit;
+
+	public:
+		bool InitSection() {
+			m_blocks.clear();
+			return true;
+		}
+
+		template < typename TIter >
+		bool ReadSectionItem(TIter& iter, TIter const& end) {
+			auto const& r = *iter;
+			static sGroup const groupBlock{ 0, "BLOCK"s };
+			if (r != groupBlock)
+				return false;
+
+			m_blocks.emplace_back();
+			for (iter++; iter != end; iter++) {
+				//static sGroup const groupBlockEnd{ 0, "ENDBLK"s };
+				static sGroup const groupBlockEnd{ 100, "AcDbBlockEnd"s };
+				if (*iter == groupBlockEnd) {
+					return true;
+				}
+				if (ReadItemSingleMember(m_blocks.back(), *iter)) {
+				}
+				else {
+					// todo:
+				}
+			}
+			return false;
+		}
+	};
+
+	//=============================================================================================================================
+	class xSectionEntities {
+	public:
+		using this_t = xSectionEntities;
+		entities_t m_entities;
+
+	public:
+		bool InitSection() {
+			m_entities.clear();
+			return true;
+		}
+
+		template < typename TIter >
+		bool ReadSectionItem(TIter& iter, TIter const& end) {
+			auto const& r = *iter;
+			auto const* entity_name = std::get_if<string_t>(&r.value);
+			if (!entity_name or r.iGroupCode != 0)
+				return false;
+			if (auto entity = xEntity::CreateEntity(*entity_name))
+				m_entities.push_back(std::move(entity));
+			else
+				return false;
+
+			auto& entity = *m_entities.back();
+			for (iter++; iter != end; iter++) {
+				static sGroup const groupEntityEnd{ 0, "ENDSEC"s };
+				if (*iter == groupEntityEnd) {
+					return true;
+				}
+				if (iter->iGroupCode == 0) {
+					iter--;	// current item is NOT an EndCondition.
+					return true;
+				}
+				if (ReadItemSingleMember(entity, *iter)) {
+				}
+				else {
+					// todo:
+					if (entity.GetEntityType() == eENTITY::unknown) {
+						if (xUnknownEntity* pUnknown = dynamic_cast<xUnknownEntity*>(&entity)) {
+							pUnknown->groups.push_back(*iter);
+						}
+					}
+				}
+			}
+			return true;
+		}
+	};
+
+
+	//=============================================================================================================================
+	class xSectionObjects {
+	public:
+
+	public:
+		bool InitSection() {
+			return true;
+		}
+
+		template < typename TIter >
+		bool ReadSectionItem(TIter& iter, TIter const& end) {
+			auto const& r = *iter;
+			static const sGroup groupObject{ 0, "OBJECTS"s };
+			if (r != groupObject)
+				return false;
+			for (iter++; iter != end; iter++) {
+				static sGroup const groupObjectEnd{ 0, "ENDSEC"s };
+				if (*iter == groupObjectEnd) {
+					return true;
+				}
+			}
+			return false;
+		}
+	};
+
+	//=============================================================================================================================
+	class xSectionThumbnailImage {
+	public:
+		bool InitSection() {
+			return true;
+		}
+		template < typename TIter >
+		bool ReadSectionItem(TIter& iter, TIter const& end) {
+			auto const& r = *iter;
+			static const sGroup groupThumbnailImage{ 0, "THUMBNAILIMAGE"s };
+			if (r != groupThumbnailImage)
+				return false;
+			for (iter++; iter != end; iter++) {
+				static sGroup const groupThumbnailImageEnd{ 0, "ENDSEC"s };
+				if (*iter == groupThumbnailImageEnd) {
+					return true;
+				}
+			}
+			return false;
+		}
+	};
+
 
 }	// namespace biscuit::dxf
 

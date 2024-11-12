@@ -68,8 +68,6 @@ export namespace biscuit::dxf {
 		static eGROUP_VALUE GetValueTypeFromGroupCode(group_code_t iGroupCode);
 	};
 
-
-
 	//=============================================================================================================================
 	//	source - https://images.autodesk.com/adsk/files/autocad_2012_pdf_dxf-reference_enu.pdf
 	//
@@ -172,6 +170,44 @@ export namespace biscuit::dxf {
 		if (iGroupCode < 0 or iGroupCode >= s_mapGroupCodeToType.size())
 			return eGROUP_VALUE::none;
 		return s_mapGroupCodeToType[iGroupCode];
+	}
+
+
+	//=============================================================================================================================
+	template < typename T >
+	struct TGroupHandler;
+	//-----------------------------------------------------------------------------------------------------------------------------
+	template < typename TItem >
+	bool ReadItemSingleMember(TItem& item, sGroup const& group) {
+		constexpr static auto const handlers = TGroupHandler<TItem>::handlers;
+		constexpr static auto nTupleSize = std::tuple_size_v<decltype(handlers)>/2;
+		if constexpr (requires (TItem v) { v.base(); }) {
+			if (ReadItemSingleMember(item.base(), group))
+				return true;
+		}
+		return ForEachIntSeq<nTupleSize>([&]<int I>{
+			constexpr int code = std::get<I*2>(handlers);
+			constexpr auto const offset_ptr = std::get<I*2+1>(handlers);
+			if (group.iGroupCode != code)
+				return false;
+			if constexpr (std::is_member_object_pointer_v<decltype(offset_ptr)>) {
+				if constexpr (std::is_enum_v<std::remove_cvref_t<decltype(item.*offset_ptr)>>) {
+					using underlying_t = std::underlying_type_t<std::remove_cvref_t<decltype(item.*offset_ptr)>>;
+					group.Get((underlying_t&)(item.*offset_ptr));
+				}
+				else {
+					group.Get(item.*offset_ptr);
+				}
+				return true;
+			}
+			else if constexpr (std::invocable<decltype(offset_ptr), TItem&, sGroup const&>) {
+				return offset_ptr(item, group);
+			}
+			else if constexpr (std::invocable<decltype(offset_ptr), TItem&>) {
+				group.Get(offset_ptr(item));
+				return true;
+			}
+		});
 	}
 
 }	// namespace biscuit::dxf
