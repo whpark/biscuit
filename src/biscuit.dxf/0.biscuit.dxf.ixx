@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 export module biscuit.dxf;
 export import :group;
@@ -54,10 +54,10 @@ export namespace biscuit::dxf {
 				return ReadSection(static_cast<xSectionEntities&>(self), iter, end); };
 			mapReader["OBJECTS"]		= [](this_t& self, iter_t& iter, iter_t const& end) {
 				return ReadSection(static_cast<xSectionObjects&>(self), iter, end); };
-			//mapReader["THUMBNAILIMAGE"] = [](this_t& self, iter_t& iter, iter_t const& end) {
-			//	return ReadSection(static_cast<xSectionThumbnailImage&>(self), iter, end); };
+			mapReader["THUMBNAILIMAGE"] = [](this_t& self, iter_t& iter, iter_t const& end) {
+				return ReadSection(static_cast<xSectionThumbnailImage&>(self), iter, end); };
 
-			for (auto iter = groups.begin(), end = groups.end(); iter != end; iter++) {
+			for (auto iter = groups.cbegin(), end = groups.cend(); iter != end; iter++) {
 				// Read Section Mark
 				{
 					auto const& r = *iter;
@@ -83,7 +83,7 @@ export namespace biscuit::dxf {
 					mapReader.erase(p);
 				}
 			}
-			return mapReader.find("ENTITIES") == mapReader.end();	// at least, ENTITIES section must be read.
+			return mapReader.size() <= 1;
 		}
 
 	};

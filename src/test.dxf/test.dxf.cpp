@@ -1,4 +1,4 @@
-#include <catch.hpp>
+﻿#include <catch.hpp>
 
 #include "biscuit/dependencies_fmt.h"
 //#include "biscuit/dependencies_glaze.h"
@@ -27,9 +27,10 @@ TEST_CASE("Test biscuit.dxf") {
 	for (auto const& path : paths) {
 		biscuit::dxf::xDXF dxf;
 		if (!dxf.ReadDXF(path)) {
-			fmt::print("ReadDXF: failed to read {}\n", path);
+			fmt::println("ReadDXF: failed to read {}", path);
 			continue;
 		}
+		fmt::println("DXF({}) Read", path);
 		auto const& groups = dxf.GetGroups();
 		auto path_out = path;
 		path_out.replace_extension(".txt");

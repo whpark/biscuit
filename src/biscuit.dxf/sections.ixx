@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 #include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_eigen.h"
@@ -218,7 +218,8 @@ export namespace biscuit::dxf {
 	public:
 		using this_t = xSectionBlocks;
 		std::vector<xBlock> m_blocks;
-		binary_t hExit;
+	//protected:
+	//	binary_t hExit;
 
 	public:
 		bool InitSection() {
@@ -275,12 +276,8 @@ export namespace biscuit::dxf {
 
 			auto& entity = *m_entities.back();
 			for (iter++; iter != end; iter++) {
-				static sGroup const groupEntityEnd{ 0, "ENDSEC"s };
-				if (*iter == groupEntityEnd) {
-					return true;
-				}
 				if (iter->iGroupCode == 0) {
-					iter--;	// current item is NOT an EndCondition.
+					iter--;	// current item is for next sequence.
 					return true;
 				}
 				if (ReadItemSingleMember(entity, *iter)) {
@@ -298,7 +295,6 @@ export namespace biscuit::dxf {
 		}
 	};
 
-
 	//=============================================================================================================================
 	class xSectionObjects {
 	public:
@@ -311,12 +307,13 @@ export namespace biscuit::dxf {
 		template < typename TIter >
 		bool ReadSectionItem(TIter& iter, TIter const& end) {
 			auto const& r = *iter;
-			static const sGroup groupObject{ 0, "OBJECTS"s };
-			if (r != groupObject)
-				return false;
+			//static const sGroup groupObject{ 0, "OBJECTS"s };
+			//if (r != groupObject)
+			//	return false;
 			for (iter++; iter != end; iter++) {
 				static sGroup const groupObjectEnd{ 0, "ENDSEC"s };
 				if (*iter == groupObjectEnd) {
+					iter--;	// current item is for next sequence.
 					return true;
 				}
 			}
@@ -332,20 +329,20 @@ export namespace biscuit::dxf {
 		}
 		template < typename TIter >
 		bool ReadSectionItem(TIter& iter, TIter const& end) {
-			auto const& r = *iter;
-			static const sGroup groupThumbnailImage{ 0, "THUMBNAILIMAGE"s };
-			if (r != groupThumbnailImage)
-				return false;
+			//auto const& r = *iter;
+			//static const sGroup groupThumbnailImage{ 0, "THUMBNAILIMAGE"s };
+			//if (r != groupThumbnailImage)
+			//	return false;
 			for (iter++; iter != end; iter++) {
 				static sGroup const groupThumbnailImageEnd{ 0, "ENDSEC"s };
 				if (*iter == groupThumbnailImageEnd) {
+					iter--;	// current item is for next sequence.
 					return true;
 				}
 			}
 			return false;
 		}
 	};
-
 
 }	// namespace biscuit::dxf
 
