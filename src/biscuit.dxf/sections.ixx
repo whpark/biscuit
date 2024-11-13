@@ -280,14 +280,15 @@ export namespace biscuit::dxf {
 					iter--;	// current item is for next sequence.
 					return true;
 				}
-				if (ReadItemSingleMember(entity, *iter)) {
-				}
-				else {
+				if (!ReadItemSingleMember(entity, *iter)) {
 					// todo:
 					if (entity.GetEntityType() == eENTITY::unknown) {
 						if (xUnknownEntity* pUnknown = dynamic_cast<xUnknownEntity*>(&entity)) {
 							pUnknown->groups.push_back(*iter);
 						}
+					}
+					else {
+						return false;
 					}
 				}
 			}
