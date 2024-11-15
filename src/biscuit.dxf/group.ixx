@@ -75,12 +75,8 @@ export namespace biscuit::dxf {
 			return false;
 		}
 
-		eGROUP_VALUE_TYPE GetValueTypeFromGroupCode() const { return GetValueTypeEnum(iGroupCode); }
-		static eGROUP_VALUE_TYPE GetValueTypeEnum(group_code_t iGroupCode);
-	};
-
-	namespace detail {
-		constexpr eGROUP_VALUE_TYPE GetValueTypeEnum(group_code_t code) {
+		constexpr static eGROUP_VALUE_TYPE GET_VALUE_TYPE_ENUM(group_code_t code) {
+			//static_assert(std::is_constant_evaluated());
 			using enum eGROUP_VALUE_TYPE;									
 																			//================================================================================================
 																			//	source - https://images.autodesk.com/adsk/files/autocad_2012_pdf_dxf-reference_enu.pdf
@@ -132,25 +128,26 @@ export namespace biscuit::dxf {
 			else if (                code == 1071) return i32;				//	     1071	| 32-bit integer value
 			else return none;												//================================================================================================
 		}
-	}
 
-	eGROUP_VALUE_TYPE sGroup::GetValueTypeEnum(group_code_t iGroupCode) {
-		constinit static auto const s_mapGroupCodeToType = [] {
-			std::array<eGROUP_VALUE_TYPE, g_iMaxGroupCode+1> map{};
-			for (group_code_t code{}; code < map.size(); code++) {
-				map[code] = detail::GetValueTypeEnum(code);
-			}
-			return map;
-		}();
+		eGROUP_VALUE_TYPE GetValueTypeEnumByCode() const { return GetValueTypeEnum(iGroupCode); }
+		static eGROUP_VALUE_TYPE GetValueTypeEnum(group_code_t iGroupCode) {
+			constinit static auto const s_mapGroupCodeToType = [] {
+				std::array<eGROUP_VALUE_TYPE, g_iMaxGroupCode+1> map{};
+				for (group_code_t code{}; code < map.size(); code++) {
+					map[code] = GET_VALUE_TYPE_ENUM(code);
+				}
+				return map;
+			}();
 
-		if (iGroupCode < 0 or iGroupCode >= s_mapGroupCodeToType.size())
-			return eGROUP_VALUE_TYPE::none;
-		return s_mapGroupCodeToType[iGroupCode];
-	}
+			if (iGroupCode < 0 or iGroupCode >= s_mapGroupCodeToType.size())
+				return eGROUP_VALUE_TYPE::none;
+			return s_mapGroupCodeToType[iGroupCode];
+		}
+	};
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	template < group_code_t code >
-	using TGroupValueTypeByCode = TGroupValueTypeByEnum<detail::GetValueTypeEnum(code)>;
+	using TGroupValueTypeByCode = TGroupValueTypeByEnum<sGroup::GET_VALUE_TYPE_ENUM(code)>;
 
 
 	//=============================================================================================================================

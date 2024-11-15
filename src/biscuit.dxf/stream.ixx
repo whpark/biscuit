@@ -61,7 +61,7 @@ export namespace biscuit::dxf {
 				group.iGroupCode = *code;
 			else
 				return std::nullopt;
-			switch (group.GetValueTypeFromGroupCode()) {
+			switch (group.GetValueTypeEnumByCode()) {
 				using enum eGROUP_VALUE_TYPE;
 			case boolean:	if (auto v = ReadItem<bool>())		group.value = *v; else return std::nullopt; break;
 			case i16:		if (auto v = ReadItem<int16>())		group.value = *v; else return std::nullopt; break;
