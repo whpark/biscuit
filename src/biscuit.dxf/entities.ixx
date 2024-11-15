@@ -87,23 +87,29 @@ export namespace biscuit::dxf {
 		using this_t = xEntity;
 
 	public:
-		int32 handle{};					// 5:handle
-		std::vector<sGroup> app_data;	// 102:{application_name ... 102:}
-		binary_t hReactor;				// 102:{ACD_REACTORS 330:value 102:}
-		binary_t hOwner;				// 102:{ACAD_XDICTIONARY 330:owner_handle 102:}
-		binary_t hOwnerBlock;			// 330:owner_block_handle
-										// 100:AcDbEntity (SubclassMarker)
-		eSPACE space{};					// 67:space. 0 for model, 1 for paper
-		string_t layout_tab_name;		// 410:layout_tab_name
-		string_t layer;					// 8:layer
-		string_t line_type_name;		// 6:line_type_name
-		binary_t ptrMaterial;			// 347:material_pointer
-		eCOLOR color{ 256 };			// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
-		int16 line_weight{};			// 370: Stored and moved around as a 16-bit integer (?)
-		double line_type_scale{1.0};	// 48: optional
-		TGroupValueTypeByCode<60> hidden{0};				// 60: 0: visible, 1: invisible
-		int32 size_graphics_data{};		// 92:
-		binary_t graphics_data{};		// 310:
+		code_to_value_t<102> handle{};
+		std::vector<sGroup> app_data;						// 102:{application_name ... 102:}
+		code_to_value_t<330> hReactor;				// 102:{ACD_REACTORS 330:value 102:}
+		code_to_value_t<330> hOwner;					// 102:{ACAD_XDICTIONARY 330:owner_handle 102:}
+		code_to_value_t<330> hOwnerBlock;
+		code_to_value_t<100> marker;					// 100:AcDbEntity (SubclassMarker)
+		code_to_value_t< 67, eSPACE> space{};		// 0 for model, 1 for paper
+		code_to_value_t<410> layout_tab_name;
+		code_to_value_t<  8> layer;
+		code_to_value_t<  6> line_type_name;
+		code_to_value_t<347> ptrMaterial;
+		code_to_value_t< 62, eCOLOR> color{ 256 };	// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
+		code_to_value_t<370> line_weight{};			// 370: Stored and moved around as a 16-bit integer (?)
+		code_to_value_t< 48> line_type_scale{1.0};	// 48: optional
+		code_to_value_t< 60> hidden{0};				// 60: 0: visible, 1: invisible
+		code_to_value_t< 92> size_graphics_data{};
+		code_to_value_t<310> graphics_data{};
+		code_to_value_t<420> color24{};				// 420: 24-bit color value - lowest 8 bits are blue, next 8 are green, highest 8 are red
+		code_to_value_t<430> color_name;
+		code_to_value_t<440> transparency{};
+		code_to_value_t<390> ptr_plot_style_object{};
+		code_to_value_t<284> shadow_mode{};			// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
+
 
 		point_t extrusion{0., 0., 1.};
 		double thickness{};

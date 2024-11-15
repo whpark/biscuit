@@ -17,17 +17,6 @@ export namespace biscuit::dxf {
 	using group_value_t = std::variant<bool, int16, int32, int64, double, string_t, binary_t>;
 	enum class eGROUP_VALUE_TYPE : int8 { none = -1, boolean = 0, i16, i32, i64, dbl, str, hex_data };
 
-	template < eGROUP_VALUE_TYPE code >
-	using TGroupValueTypeByEnum = 
-		std::conditional_t<code == eGROUP_VALUE_TYPE::boolean, bool,
-		std::conditional_t<code == eGROUP_VALUE_TYPE::i16, int16,
-		std::conditional_t<code == eGROUP_VALUE_TYPE::i32, int32,
-		std::conditional_t<code == eGROUP_VALUE_TYPE::i64, int64,
-		std::conditional_t<code == eGROUP_VALUE_TYPE::dbl, double,
-		std::conditional_t<code == eGROUP_VALUE_TYPE::str, string_t,
-		std::conditional_t<code == eGROUP_VALUE_TYPE::hex_data, binary_t, void>
-		>>>>>>;
-
 	constexpr group_code_t const g_iMaxGroupCode = 1071;
 
 	struct alignas(32) sGroup {	// alignas(32) - hoping for better cache performance (don't know if it works)
@@ -146,8 +135,31 @@ export namespace biscuit::dxf {
 	};
 
 	//-----------------------------------------------------------------------------------------------------------------------------
-	template < group_code_t code >
-	using TGroupValueTypeByCode = TGroupValueTypeByEnum<sGroup::GET_VALUE_TYPE_ENUM(code)>;
+	namespace detail {
+
+		template < eGROUP_VALUE_TYPE e, typename TUserDefined = void >
+		struct TGroupValueTypeByEnum {
+			using implicit_value_type =
+				std::conditional_t<e == eGROUP_VALUE_TYPE::boolean, bool,
+				std::conditional_t<e == eGROUP_VALUE_TYPE::i16, int16,
+				std::conditional_t<e == eGROUP_VALUE_TYPE::i32, int32,
+				std::conditional_t<e == eGROUP_VALUE_TYPE::i64, int64,
+				std::conditional_t<e == eGROUP_VALUE_TYPE::dbl, double,
+				std::conditional_t<e == eGROUP_VALUE_TYPE::str, string_t,
+				std::conditional_t<e == eGROUP_VALUE_TYPE::hex_data, binary_t, void>
+				>>>>>>;
+
+			using value_type = std::conditional_t<std::is_same_v<TUserDefined, void>, implicit_value_type, TUserDefined>;
+
+			static_assert(sizeof(value_type) == sizeof(implicit_value_type));
+		};
+	}
+
+	template < eGROUP_VALUE_TYPE e, typename TUserDefined = void >
+	using enum_to_value_t = typename detail::TGroupValueTypeByEnum<e, TUserDefined>::value_type;
+
+	template < group_code_t code, typename TUserDefined = void >
+	using code_to_value_t = enum_to_value_t<sGroup::GET_VALUE_TYPE_ENUM(code), TUserDefined>;
 
 
 	//=============================================================================================================================
