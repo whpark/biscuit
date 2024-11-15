@@ -88,11 +88,11 @@ export namespace biscuit::dxf {
 
 	public:
 		code_to_value_t<102> handle{};
-		std::vector<sGroup> app_data;						// 102:{application_name ... 102:}
+		std::vector<sGroup> app_data;				// 102:{application_name ... 102:}
 		code_to_value_t<330> hReactor;				// 102:{ACD_REACTORS 330:value 102:}
-		code_to_value_t<330> hOwner;					// 102:{ACAD_XDICTIONARY 330:owner_handle 102:}
+		code_to_value_t<330> hOwner;				// 102:{ACAD_XDICTIONARY 330:owner_handle 102:}
 		code_to_value_t<330> hOwnerBlock;
-		code_to_value_t<100> marker;					// 100:AcDbEntity (SubclassMarker)
+		code_to_value_t<100> marker;				// 100:AcDbEntity (SubclassMarker)
 		code_to_value_t< 67, eSPACE> space{};		// 0 for model, 1 for paper
 		code_to_value_t<410> layout_tab_name;
 		code_to_value_t<  8> layer;
