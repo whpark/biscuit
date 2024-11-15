@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 export module biscuit.dxf:stream;
 import std;
@@ -62,14 +62,14 @@ export namespace biscuit::dxf {
 			else
 				return std::nullopt;
 			switch (group.GetValueTypeFromGroupCode()) {
-				using enum eGROUP_VALUE;
+				using enum eGROUP_VALUE_TYPE;
 			case boolean:	if (auto v = ReadItem<bool>())		group.value = *v; else return std::nullopt; break;
-			case i16:		if (auto v= ReadItem<int16>())		group.value = *v; else return std::nullopt; break;
-			case i32:		if (auto v= ReadItem<int32>())		group.value = *v; else return std::nullopt; break;
-			case i64:		if (auto v= ReadItem<int64>())		group.value = *v; else return std::nullopt; break;
-			case dbl:		if (auto v= ReadItem<double>())		group.value = *v; else return std::nullopt; break;
-			case str:		if (auto v= ReadItem<string_t>())	group.value = std::move(*v); else return std::nullopt; break;
-			case hex_data:	if (auto v= ReadItem<binary_t>())	group.value = std::move(*v); else return std::nullopt; break;
+			case i16:		if (auto v = ReadItem<int16>())		group.value = *v; else return std::nullopt; break;
+			case i32:		if (auto v = ReadItem<int32>())		group.value = *v; else return std::nullopt; break;
+			case i64:		if (auto v = ReadItem<int64>())		group.value = *v; else return std::nullopt; break;
+			case dbl:		if (auto v = ReadItem<double>())	group.value = *v; else return std::nullopt; break;
+			case str:		if (auto v = ReadItem<string_t>())	group.value = std::move(*v); else return std::nullopt; break;
+			case hex_data:	if (auto v = ReadItem<binary_t>())	group.value = std::move(*v); else return std::nullopt; break;
 			default: std::println("stream pos: {}", (int64_t)stream.tellg()); return std::nullopt;
 			}
 			return group;

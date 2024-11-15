@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 #include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_eigen.h"
@@ -99,7 +99,11 @@ export namespace biscuit::dxf {
 		string_t line_type_name;		// 6:line_type_name
 		binary_t ptrMaterial;			// 347:material_pointer
 		eCOLOR color{ 256 };			// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
-
+		int16 line_weight{};			// 370: Stored and moved around as a 16-bit integer (?)
+		double line_type_scale{1.0};	// 48: optional
+		TGroupValueTypeByCode<60> hidden{0};				// 60: 0: visible, 1: invisible
+		int32 size_graphics_data{};		// 92:
+		binary_t graphics_data{};		// 310:
 
 		point_t extrusion{0., 0., 1.};
 		double thickness{};
