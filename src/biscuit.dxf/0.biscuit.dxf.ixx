@@ -25,7 +25,7 @@ export namespace biscuit::dxf {
 	public:
 		using this_t = xDXF;
 	protected:
-		std::vector<sGroup> m_groups;
+		groups_t m_groups;
 
 	public:
 		auto const& GetGroups() const { return m_groups; }
@@ -39,22 +39,21 @@ export namespace biscuit::dxf {
 
 			// TopMost. Read SECTIONs
 			auto& groups = m_groups;
-			using iter_t = std::remove_cvref_t<decltype(groups)>::const_iterator;
 
-			TContainerMap<std::string, std::function<bool(this_t& self, iter_t& iter, iter_t const& end)>, std::deque> mapReader;
-			mapReader["HEADER"]			= [](this_t& self, iter_t& iter, iter_t const& end) {
+			TContainerMap<std::string, std::function<bool(this_t& self, group_iter_t& iter, group_iter_t const& end)>, std::deque> mapReader;
+			mapReader["HEADER"]			= [](this_t& self, group_iter_t& iter, group_iter_t const& end) {
 				return ReadSection(static_cast<xSectionHead&>(self), iter, end); };
-			mapReader["CLASSES"]		= [](this_t& self, iter_t& iter, iter_t const& end) {
+			mapReader["CLASSES"]		= [](this_t& self, group_iter_t& iter, group_iter_t const& end) {
 				return ReadSection(static_cast<xSectionClasses&>(self), iter, end); };
-			mapReader["TABLES"]			= [](this_t& self, iter_t& iter, iter_t const& end) {
+			mapReader["TABLES"]			= [](this_t& self, group_iter_t& iter, group_iter_t const& end) {
 				return ReadSection(static_cast<xSectionTables&>(self), iter, end); };
-			mapReader["BLOCKS"]			= [](this_t& self, iter_t& iter, iter_t const& end) {
+			mapReader["BLOCKS"]			= [](this_t& self, group_iter_t& iter, group_iter_t const& end) {
 				return ReadSection(static_cast<xSectionBlocks&>(self), iter, end); };
-			mapReader["ENTITIES"]		= [](this_t& self, iter_t& iter, iter_t const& end) {
+			mapReader["ENTITIES"]		= [](this_t& self, group_iter_t& iter, group_iter_t const& end) {
 				return ReadSection(static_cast<xSectionEntities&>(self), iter, end); };
-			mapReader["OBJECTS"]		= [](this_t& self, iter_t& iter, iter_t const& end) {
+			mapReader["OBJECTS"]		= [](this_t& self, group_iter_t& iter, group_iter_t const& end) {
 				return ReadSection(static_cast<xSectionObjects&>(self), iter, end); };
-			mapReader["THUMBNAILIMAGE"] = [](this_t& self, iter_t& iter, iter_t const& end) {
+			mapReader["THUMBNAILIMAGE"] = [](this_t& self, group_iter_t& iter, group_iter_t const& end) {
 				return ReadSection(static_cast<xSectionThumbnailImage&>(self), iter, end); };
 
 			for (auto iter = groups.cbegin(), end = groups.cend(); iter != end; iter++) {

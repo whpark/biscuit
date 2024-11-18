@@ -17,8 +17,8 @@ export namespace biscuit::dxf {
 
 	//=============================================================================================================================
 
-	template < typename TSection, typename TIter >
-	bool ReadSection(TSection& section, TIter& iter, TIter const& end) {
+	template < typename TSection >
+	bool ReadSection(TSection& section, group_iter_t& iter, group_iter_t const& end) {
 		static sGroup const groupEndSection{ 0, "ENDSEC"s};
 		if (!section.InitSection())
 			return false;
@@ -49,8 +49,8 @@ export namespace biscuit::dxf {
 			return true;
 		}
 
-		template < typename TIter >
-		bool ReadSectionItem(TIter& iter, TIter const& end) {
+		//template < typename group_iter_t >
+		bool ReadSectionItem(group_iter_t& iter, group_iter_t const& end) {
 			auto const& r = *iter;
 			if (r.iGroupCode != 9)
 				return false;
@@ -87,7 +87,7 @@ export namespace biscuit::dxf {
 	struct TGroupHandler<sClass> {
 		constexpr static inline auto const handlers = std::make_tuple(
 			//1, [](sClass& self) -> auto& { return self.name; },
-			//1, [](sClass& self, sGroup const& g)->bool{ return g.Get(self.name); },
+			//1, [](sClass& self, sGroup const& g)->bool{ return g.GetValue(self.name); },
 			1, &sClass::name,
 			2, &sClass::cpp_class_name,
 			3, &sClass::app_name,
@@ -108,8 +108,8 @@ export namespace biscuit::dxf {
 			m_classes.clear();
 			return true;
 		}
-		template < typename TIter >
-		bool ReadSectionItem(TIter& iter, TIter const& end) {
+		//template < typename group_iter_t >
+		bool ReadSectionItem(group_iter_t& iter, group_iter_t const& end) {
 			auto const& r = *iter;
 			static const sGroup groupClass{ 0, "CLASS"s };
 			if (r != groupClass)
@@ -160,8 +160,8 @@ export namespace biscuit::dxf {
 			m_tables.clear();
 			return true;
 		}
-		template < typename TIter >
-		bool ReadSectionItem(TIter& iter, TIter const& end) {
+		//template < typename group_iter_t >
+		bool ReadSectionItem(group_iter_t& iter, group_iter_t const& end) {
 			auto const& r = *iter;
 			static const sGroup groupTable{ 0, "TABLE"s };
 			if (r != groupTable)
@@ -227,8 +227,8 @@ export namespace biscuit::dxf {
 			return true;
 		}
 
-		template < typename TIter >
-		bool ReadSectionItem(TIter& iter, TIter const& end) {
+		//template < typename group_iter_t >
+		bool ReadSectionItem(group_iter_t& iter, group_iter_t const& end) {
 			auto const& r = *iter;
 			static sGroup const groupBlock{ 0, "BLOCK"s };
 			if (r != groupBlock)
@@ -263,8 +263,8 @@ export namespace biscuit::dxf {
 			return true;
 		}
 
-		template < typename TIter >
-		bool ReadSectionItem(TIter& iter, TIter const& end) {
+		//template < typename group_iter_t >
+		bool ReadSectionItem(group_iter_t& iter, group_iter_t const& end) {
 			auto const& r = *iter;
 			auto const* entity_name = std::get_if<string_t>(&r.value);
 			if (!entity_name or r.iGroupCode != 0)
@@ -275,24 +275,7 @@ export namespace biscuit::dxf {
 				return false;
 
 			auto& entity = *m_entities.back();
-			for (iter++; iter != end; iter++) {
-				if (iter->iGroupCode == 0) {
-					iter--;	// current item is for next sequence.
-					return true;
-				}
-				if (!ReadItemSingleMember(entity, *iter)) {
-					// todo:
-					if (entity.GetEntityType() == eENTITY::unknown) {
-						if (xUnknownEntity* pUnknown = dynamic_cast<xUnknownEntity*>(&entity)) {
-							pUnknown->groups.push_back(*iter);
-						}
-					}
-					else {
-						return false;
-					}
-				}
-			}
-			return true;
+			return entity.Read(iter, end);
 		}
 	};
 
@@ -305,8 +288,8 @@ export namespace biscuit::dxf {
 			return true;
 		}
 
-		template < typename TIter >
-		bool ReadSectionItem(TIter& iter, TIter const& end) {
+		//template < typename group_iter_t >
+		bool ReadSectionItem(group_iter_t& iter, group_iter_t const& end) {
 			auto const& r = *iter;
 			//static const sGroup groupObject{ 0, "OBJECTS"s };
 			//if (r != groupObject)
@@ -328,8 +311,8 @@ export namespace biscuit::dxf {
 		bool InitSection() {
 			return true;
 		}
-		template < typename TIter >
-		bool ReadSectionItem(TIter& iter, TIter const& end) {
+		//template < typename group_iter_t >
+		bool ReadSectionItem(group_iter_t& iter, group_iter_t const& end) {
 			//auto const& r = *iter;
 			//static const sGroup groupThumbnailImage{ 0, "THUMBNAILIMAGE"s };
 			//if (r != groupThumbnailImage)

@@ -13,6 +13,7 @@ export namespace biscuit::dxf {
 	// group
 	using binary_t = std::vector<uint8>;
 	using string_t = std::string;
+	using string_view_t = std::string_view;
 	using group_code_t = int16;
 	using group_value_t = std::variant<bool, int16, int32, int64, double, string_t, binary_t>;
 	enum class eGROUP_VALUE_TYPE : int8 { none = -1, boolean = 0, i16, i32, i64, dbl, str, hex_data };
@@ -50,7 +51,7 @@ export namespace biscuit::dxf {
 		}
 
 		template < typename T >
-		bool Get(T& value) const {
+		bool GetValue(T& value) const {
 			if constexpr ( std::is_integral_v<T> and sizeof(T) > sizeof(bool) and sizeof(T) < sizeof(int64) ) {
 				if (auto v = GetInt()) {
 					value = *v;
@@ -134,6 +135,9 @@ export namespace biscuit::dxf {
 		}
 	};
 
+	using groups_t = std::vector<sGroup>;
+	using group_iter_t = groups_t::const_iterator;
+
 	//-----------------------------------------------------------------------------------------------------------------------------
 	namespace detail {
 
@@ -167,25 +171,30 @@ export namespace biscuit::dxf {
 	struct TGroupHandler;
 	//-----------------------------------------------------------------------------------------------------------------------------
 	template < typename TItem >
-	bool ReadItemSingleMember(TItem& item, sGroup const& group) {
-		constexpr static auto const handlers = TGroupHandler<TItem>::handlers;
-		constexpr static auto nTupleSize = std::tuple_size_v<decltype(handlers)>/2;
+	bool ReadItemSingleMember(TItem& item, sGroup const& group, size_t& index) {
 		if constexpr (requires (TItem v) { v.base(); }) {
-			if (ReadItemSingleMember(item.base(), group))
+			if (ReadItemSingleMember<TItem::base_t>(item.base(), group, index))
 				return true;
 		}
+		constexpr static size_t nTupleSize = std::tuple_size_v<decltype(TGroupHandler<TItem>::handlers)>/2;
 		return ForEachIntSeq<nTupleSize>([&]<int I>{
-			constexpr int code = std::get<I*2>(handlers);
-			constexpr auto const offset_ptr = std::get<I*2+1>(handlers);
+			constexpr int code = std::get<I*2>(TGroupHandler<TItem>::handlers);
+			constexpr auto const offset_ptr = std::get<I*2+1>(TGroupHandler<TItem>::handlers);
 			if (group.iGroupCode != code)
 				return false;
+
+			if (index > 0) {
+				index--;
+				return false;
+			}
+
 			if constexpr (std::is_member_object_pointer_v<decltype(offset_ptr)>) {
 				if constexpr (std::is_enum_v<std::remove_cvref_t<decltype(item.*offset_ptr)>>) {
 					using underlying_t = std::underlying_type_t<std::remove_cvref_t<decltype(item.*offset_ptr)>>;
-					group.Get((underlying_t&)(item.*offset_ptr));
+					group.GetValue((underlying_t&)(item.*offset_ptr));
 				}
 				else {
-					group.Get(item.*offset_ptr);
+					group.GetValue(item.*offset_ptr);
 				}
 				return true;
 			}
@@ -193,10 +202,23 @@ export namespace biscuit::dxf {
 				return offset_ptr(item, group);
 			}
 			else if constexpr (std::invocable<decltype(offset_ptr), TItem&>) {
-				group.Get(offset_ptr(item));
+				using value_t = std::invoke_result_t<decltype(offset_ptr), TItem&>;
+				if constexpr (std::is_enum_v<value_t>) {
+					using underlying_t = std::underlying_type_t<value_t>;
+					group.GetValue((underlying_t&)offset_ptr(item));
+				}
+				else {
+					group.GetValue(offset_ptr(item));
+				}
 				return true;
 			}
 		});
+	}
+	//-----------------------------------------------------------------------------------------------------------------------------
+	template < typename TItem >
+	bool ReadItemSingleMember(TItem& item, sGroup const& group) {
+		size_t index{};
+		return ReadItemSingleMember(item, group, index);
 	}
 
 }	// namespace biscuit::dxf

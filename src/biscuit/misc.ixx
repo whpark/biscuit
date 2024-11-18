@@ -186,12 +186,14 @@ export namespace biscuit {
 		constexpr bool ForEachIntSeq(Func&& func, std::integer_sequence<size_t, I...>) {
 			if constexpr (sizeof...(I) == 0) 
 				return false;
-			if (func.template operator()<N-(sizeof...(I))>())
-				return true;
-			if constexpr (sizeof...(I) > 1)
-				return ForEachIntSeq<N>(std::move(func), std::make_integer_sequence<size_t, sizeof...(I)-1>{});
-			else
-				return false;
+			else { 
+				if (func.template operator()<N-(sizeof...(I))>())
+					return true;
+				if constexpr (sizeof...(I) > 1)
+					return ForEachIntSeq<N>(std::move(func), std::make_integer_sequence<size_t, sizeof...(I)-1>{});
+				else
+					return false;
+			}
 		}
 	}
 	template < size_t N, class Func >

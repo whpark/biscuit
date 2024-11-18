@@ -21,24 +21,25 @@ export namespace biscuit::dxf {
 		constexpr static eDXF_FILE_TYPE eDXFFileType = eDXFFileType_;
 
 	public:
-		static std::vector<int> s_mapGroupCodeToType;
-	public:
 		std::istream& stream;
 
 		TDXFGroupIStream(std::istream& stream) : stream(stream) {}
 
 		template < bool bSkipComments = true >
-		std::expected<std::vector<sGroup>, std::string> ReadGroups() {
-			std::vector<sGroup> groups;
-			// guess groups count
-			auto cur = stream.tellg();
-			stream.seekg(0, std::ios::end);
-			auto end = stream.tellg();
-			stream.seekg(cur);
-			constexpr static size_t const approx_size_per_group = eDXFFileType == eDXF_FILE_TYPE::ascii ? 16 : 8;
-			auto approxLines = (end - cur) / approx_size_per_group;
-			if (approxLines > 64)
-				groups.reserve(approxLines);
+		std::expected<groups_t, std::string> ReadGroups() {
+			groups_t groups;
+			// reserve memory
+			if constexpr (requires (groups_t lst) { lst.reserve(0); }) {
+				// guess groups count
+				auto cur = stream.tellg();
+				stream.seekg(0, std::ios::end);
+				auto end = stream.tellg();
+				stream.seekg(cur);
+				constexpr static size_t const approx_size_per_group = eDXFFileType == eDXF_FILE_TYPE::ascii ? 16 : 8;
+				auto approxLines = (end - cur) / approx_size_per_group;
+				if (approxLines > 64)
+					groups.reserve(approxLines);
+			}
 			// read groups
 			for (auto group = ReadGroup(); group and group->value.index() != std::variant_npos; group = ReadGroup()) {
 				if constexpr (bSkipComments) {
@@ -173,7 +174,7 @@ export namespace biscuit::dxf {
 	};
 
 	//-----------------------------------------------------------------------------------------------------------------------------
-	std::expected<std::vector<sGroup>, std::string> ReadGroups(std::istream& stream) {
+	std::expected<groups_t, std::string> ReadGroups(std::istream& stream) {
 		auto pos0 = stream.tellg();
 		// file type
 		{
@@ -209,7 +210,7 @@ export namespace biscuit::dxf {
 		return reader.ReadGroups();
 	}
 
-	std::expected<std::vector<sGroup>, std::string> ReadGroups(std::filesystem::path const& path) {
+	std::expected<groups_t, std::string> ReadGroups(std::filesystem::path const& path) {
 		std::ifstream stream(path, std::ios_base::binary);
 		if (!stream)
 			return std::unexpected("ReadGroups: failed to open file"s);
@@ -230,7 +231,7 @@ export namespace biscuit::dxf {
 
 		TDXFGroupOStream(std::ostream& stream) : stream(stream) {}
 
-		bool WriteGroups(std::vector<sGroup> const& groups) {
+		bool WriteGroups(groups_t const& groups) {
 			for (auto const& group : groups) {
 				if (!WriteGroup(group))
 					return false;

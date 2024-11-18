@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
@@ -11,7 +11,7 @@ export namespace biscuit {
 
 	//-----------------------------------------------------------------------------
 	/// @brief color_rgba_t
-	struct color_rgba_t {
+	struct alignas(4) color_rgba_t {
 		using this_t = color_rgba_t;
 
 		uint8_t r, g, b, a;
@@ -39,7 +39,7 @@ export namespace biscuit {
 
 	//-----------------------------------------------------------------------------
 	/// @brief color_bgra_t
-	struct color_bgra_t {
+	struct alignas(4) color_bgra_t {
 		using this_t = color_bgra_t;
 
 		uint8_t b, g, r, a;
@@ -67,7 +67,7 @@ export namespace biscuit {
 
 	//-----------------------------------------------------------------------------
 	/// @brief color_abgr_t
-	struct color_abgr_t {
+	struct alignas(4) color_abgr_t {
 		using this_t = color_abgr_t;
 
 		uint8_t a, b, g, r;
