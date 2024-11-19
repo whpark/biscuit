@@ -26,8 +26,17 @@ TEST_CASE("Test biscuit.dxf") {
 
 	for (auto const& path : paths) {
 		biscuit::dxf::xDXF dxf;
-		if (!dxf.ReadDXF(path)) {
-			fmt::println("ReadDXF: failed to read {}", path);
+		auto ok = dxf.ReadDXF(path);
+		{
+			auto path_out = path;
+			path_out.replace_extension(".values.txt");
+			std::ofstream out(path_out, std::ios::binary);
+			for (auto const& group : dxf.GetGroups()) {
+				fmt::println(out, "{:>4}:{}", group.eCode, group.value);
+			}
+		}
+		if (!ok) {
+			fmt::println("!!! ReadDXF: failed to read {}", path);
 			continue;
 		}
 		fmt::println("DXF({}) Read", path);
@@ -40,7 +49,8 @@ TEST_CASE("Test biscuit.dxf") {
 		for (auto const& [key, groups] : dxf.m_mapVariables) {
 			fmt::println(out, "key:{}", key);
 			for (auto const& group : groups) {
-				fmt::println(out, "\t{}:{}", group.iGroupCode, group.value);
+				fmt::println(out, "\t{}:{}", group.eCode, group.value);
+				fmt::println(out, "\t{}", group);
 			}
 		}
 
@@ -62,10 +72,10 @@ TEST_CASE("Test biscuit.dxf") {
 		//for (auto const& group : groups) {
 		//	std::visit([&](auto const& v) {
 		//		if constexpr (std::is_floating_point_v<std::remove_cvref_t<decltype(v)>>) {
-		//			fmt::println(out, "{}:{:f}", group.iGroupCode, v);
+		//			fmt::println(out, "{}:{:f}", group.eCode, v);
 		//		}
 		//		else {
-		//			fmt::println(out, "{}:{}", group.iGroupCode, v);
+		//			fmt::println(out, "{}:{}", group.eCode, v);
 		//		}
 		//	}, group.value);
 		//}

@@ -1,5 +1,7 @@
 ﻿module;
 
+#include "biscuit/dependencies_fmt.h"
+
 export module biscuit.dxf;
 export import :group;
 import :stream;
@@ -73,12 +75,18 @@ export namespace biscuit::dxf {
 				// Read Section Content
 				auto const& group = *iter;
 				auto section = group.GetValue<string_t>();
-				if (group.iGroupCode != 2 or !section)
+				if (group.eCode != 2 or !section) {
+					auto pos = iter - groups.cbegin()+1;
+					fmt::println("ReadDXF: invalid section name, pos: {}(rec:{}), group: {}", 2*pos, pos, *iter);
 					return false;
+				}
 				if (auto p = mapReader.find(*section); p != mapReader.end()) {
 					auto& reader = p->second;
-					if (!reader or !reader(*this, iter, end))
+					if (!reader or !reader(*this, iter, end)) {
+						auto pos = iter - groups.cbegin()+1;
+						fmt::println("ReadDXF Section - Error, pos: {}(rec:{}), group: {}", 2*pos, pos, *iter);
 						return false;
+					}
 					mapReader.erase(p);
 				}
 			}

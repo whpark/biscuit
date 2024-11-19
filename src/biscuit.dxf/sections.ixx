@@ -52,7 +52,7 @@ export namespace biscuit::dxf {
 		//template < typename group_iter_t >
 		bool ReadSectionItem(group_iter_t& iter, group_iter_t const& end) {
 			auto const& r = *iter;
-			if (r.iGroupCode != 9)
+			if (r.eCode != 9)
 				return false;
 			auto str = r.GetValue<string_t>();
 			if (!str)
@@ -60,7 +60,7 @@ export namespace biscuit::dxf {
 			auto& sub = m_mapVariables[*str];
 			for (iter++; iter != end; iter++) {
 				auto const& item = *iter;
-				if ((item.iGroupCode == 0) or (item.iGroupCode == 9)) {
+				if ((item.eCode == 0) or (item.eCode == 9)) {
 					iter--;	// current item is NOT an EndCondition.
 					break;
 				}
@@ -117,7 +117,7 @@ export namespace biscuit::dxf {
 			m_classes.emplace_back();
 			auto& aClass = m_classes.back();
 			for (iter++; iter != end; iter++) {
-				if (iter->iGroupCode == 0) {
+				if (iter->eCode == 0) {
 					iter--;	// current item is NOT an EndCondition.
 					return true;
 				}
@@ -267,7 +267,7 @@ export namespace biscuit::dxf {
 		bool ReadSectionItem(group_iter_t& iter, group_iter_t const& end) {
 			auto const& r = *iter;
 			auto const* entity_name = std::get_if<string_t>(&r.value);
-			if (!entity_name or r.iGroupCode != 0)
+			if (!entity_name or r.eCode != 0)
 				return false;
 			if (auto entity = xEntity::CreateEntity(*entity_name))
 				m_entities.push_back(std::move(entity));

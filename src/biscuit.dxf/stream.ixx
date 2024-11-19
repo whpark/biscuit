@@ -1,5 +1,7 @@
 ﻿module;
 
+#include "biscuit/dependencies_fmt.h"
+
 export module biscuit.dxf:stream;
 import std;
 import biscuit;
@@ -43,7 +45,7 @@ export namespace biscuit::dxf {
 			// read groups
 			for (auto group = ReadGroup(); group and group->value.index() != std::variant_npos; group = ReadGroup()) {
 				if constexpr (bSkipComments) {
-					if (group->iGroupCode == 999) continue;
+					if (group->eCode == 999) continue;
 				}
 				groups.push_back(std::move(*group));
 
@@ -59,19 +61,19 @@ export namespace biscuit::dxf {
 		std::optional<sGroup> ReadGroup() {
 			sGroup group;
 			if (auto code = ReadGroupCode())
-				group.iGroupCode = *code;
+				group.eCode = code->eCode;
 			else
 				return std::nullopt;
 			switch (group.GetValueTypeEnumByCode()) {
-				using enum eGROUP_VALUE_TYPE;
+				using enum sGroup::eVALUE_TYPE;
 			case boolean:	if (auto v = ReadItem<bool>())		group.value = *v; else return std::nullopt; break;
 			case i16:		if (auto v = ReadItem<int16>())		group.value = *v; else return std::nullopt; break;
 			case i32:		if (auto v = ReadItem<int32>())		group.value = *v; else return std::nullopt; break;
 			case i64:		if (auto v = ReadItem<int64>())		group.value = *v; else return std::nullopt; break;
 			case dbl:		if (auto v = ReadItem<double>())	group.value = *v; else return std::nullopt; break;
 			case str:		if (auto v = ReadItem<string_t>())	group.value = std::move(*v); else return std::nullopt; break;
-			case hex_data:	if (auto v = ReadItem<binary_t>())	group.value = std::move(*v); else return std::nullopt; break;
-			default: std::println("stream pos: {}", (int64_t)stream.tellg()); return std::nullopt;
+			case hex_str:	if (auto v = ReadItem<binary_t>())	group.value = std::move(*v); else return std::nullopt; break;
+			default: fmt::println("stream pos: {}", (int64_t)stream.tellg()); return std::nullopt;
 			}
 			return group;
 		}
@@ -90,14 +92,14 @@ export namespace biscuit::dxf {
 				return (group_code_t)code8;
 			}
 			else {
-				return ReadItem<group_code_t>();
+				return ReadItem<group_code_t::value_t>();
 			}
 		}
 
 	protected:
 
 		template < typename T >
-			requires std::convertible_to<T, group_value_t>
+			requires std::convertible_to<T, group_value_t> or std::convertible_to<T, std::optional<group_value_t>>
 		std::optional<T> ReadItem() {
 			T value{};
 			if constexpr (eDXFFileType == eDXF_FILE_TYPE::ascii) {
@@ -152,7 +154,7 @@ export namespace biscuit::dxf {
 		binary_t HexStringToBinary(string_t const& str) {
 			binary_t value;
 			value.reserve(str.size()/2);
-			// input : hex_data: abcdef123456789
+			// input : hex_str: abcdef123456789
 			for (auto sv = biscuit::TrimView(std::string_view(str)); !sv.empty(); ) {
 				auto c = sv.front();
 				if (!std::isxdigit(c)) {
@@ -240,7 +242,7 @@ export namespace biscuit::dxf {
 		}
 
 		bool WriteGroup(sGroup const& group) {
-			if (!WriteGroupCode(group.iGroupCode))
+			if (!WriteGroupCode(group.eCode))
 				return false;
 			bool bResult{};
 			std::visit([&](auto const& v) { bResult = WriteItem(v); }, group.value);
@@ -249,7 +251,7 @@ export namespace biscuit::dxf {
 
 		bool WriteGroupCode(group_code_t code) {
 			if constexpr (eDXFFileType == eDXF_FILE_TYPE::ascii) {
-				auto str = std::format("{:3d}\r\n", code);
+				auto str = fmt::format("{:3d}\r\n", code);
 				return stream.write(str.data(), str.size());
 			}
 			else if constexpr (eDXFFileType == eDXF_FILE_TYPE::binary) {
@@ -272,16 +274,16 @@ export namespace biscuit::dxf {
 		bool WriteItem(T const& value) {
 			if constexpr (eDXFFileType == eDXF_FILE_TYPE::ascii) {
 				std::string str;
-				if constexpr (std::is_same_v<T, bool>) { str = std::format("{:9d}\r\n", (int)(value ? 1 : 0)); }
-				else if constexpr (std::is_same_v<T, int16>) { str = std::format("{:6d}\r\n", value); }
-				else if constexpr (std::is_same_v<T, int32>) { str = std::format("{:9d}\r\n", value); }
-				else if constexpr (std::is_same_v<T, int64>) { str = std::format("{}\r\n", value); }
-				else if constexpr (std::is_same_v<T, double>) { str = std::format("{:f}\r\n", value); }
-				else if constexpr (std::is_same_v<T, string_t>) { str = std::format("{}\r\n", value); }
+				if constexpr (std::is_same_v<T, bool>) { str = fmt::format("{:9d}\r\n", (int)(value ? 1 : 0)); }
+				else if constexpr (std::is_same_v<T, int16>) { str = fmt::format("{:6d}\r\n", value); }
+				else if constexpr (std::is_same_v<T, int32>) { str = fmt::format("{:9d}\r\n", value); }
+				else if constexpr (std::is_same_v<T, int64>) { str = fmt::format("{}\r\n", value); }
+				else if constexpr (std::is_same_v<T, double>) { str = fmt::format("{:f}\r\n", value); }
+				else if constexpr (std::is_same_v<T, string_t>) { str = fmt::format("{}\r\n", value); }
 				else if constexpr (std::is_same_v<T, binary_t>) {
 					str.reserve(value.size()*2 + 2);
 					for (auto v : value)
-						str += std::format("{:02X}", v);
+						str += fmt::format("{:02X}", v);
 					str += "\r\n";
 				}
 				else {
@@ -314,7 +316,7 @@ export namespace biscuit::dxf {
 					string_t str;
 					str.reserve(value.size()*2 + 2);
 					for (auto v : value)
-						str += std::format("{:02X}", v);
+						str += fmt::format("{:02X}", v);
 					WriteItem(str);
 				}
 				else {
