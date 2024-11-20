@@ -30,6 +30,9 @@
     <ClCompile Include="entities.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="entities_subclass.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="macro.h">
