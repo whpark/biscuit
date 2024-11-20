@@ -87,10 +87,9 @@ export namespace biscuit::dxf {
 				else
 					return false;
 				if (sv.starts_with("ACAD_REACTORS")) {
-					iter++;
-					if (iter == end or (iter->eCode != 330) or !iter->GetValue(entity.hReactor))
+					if (++iter == end or (iter->eCode != 330) or !iter->GetValue(entity.hReactor))
 						return false;
-					if (iter == end)
+					if (*++iter != groupEnd)
 						return false;
 				}
 				else if (sv.starts_with("ACAD_XDICTIONARY")) {
@@ -101,9 +100,7 @@ export namespace biscuit::dxf {
 				}
 				else {
 					entity.app_name = sv;
-					for (iter++; iter != end; iter++) {
-						if (*iter == groupEnd)
-							break;
+					for (iter++; iter != end and *iter != groupEnd; iter++) {
 						entity.app_data.push_back(*iter);
 					}
 					if (iter == end)
@@ -112,9 +109,14 @@ export namespace biscuit::dxf {
 				continue;
 			}
 			size_t index = mapGroupCodeToIndex[iter->eCode]++;
-			if (!ReadItemSingleMember<TEntity>(entity, *iter, index)
-				and !entity.ReadPrivate(iter, end)
-				and !entity.ReadExtra(iter, end)
+			if (
+				(
+						!ReadItemSingleMember<TEntity>(entity, *iter, index)
+					and !entity.ReadPrivate(iter, end)
+					and !entity.ReadExtraData(iter, end)
+				)
+				or
+					(iter->eCode == 0)	// !!! ATTDEF has 0 group code.
 				)
 			{
 				if (iter->eCode == 0) {
@@ -132,32 +134,32 @@ export namespace biscuit::dxf {
 	public:
 		using root_t = xEntity;
 		using this_t = xEntity;
-
+		using string_t = std::string;
 	public:
 		groups_t extra_data;
 		code_to_value_t<  5> handle{};
-		string_t app_name;							// 102:{application_name ... 102:}
+		string_t app_name;								// 102:{application_name ... 102:}
 		std::vector<sGroup> app_data;
-		binary_t hReactor;							// 102:{ACD_REACTORS 330:value 102:}
-		binary_t hOwner;							// 102:{ACAD_XDICTIONARY 330:owner_handle 102:}
+		binary_t hReactor;								// 102:{ACD_REACTORS 330:value 102:}
+		binary_t hOwner;								// 102:{ACAD_XDICTIONARY 330:owner_handle 102:}
 		code_to_value_t<330> hOwnerBlock;
-		code_to_value_t<100> marker;				// 100:AcDbEntity (SubclassMarker)
-		code_to_value_t< 67, eSPACE> space{};		// 0 for model, 1 for paper
+		code_to_value_t<100> marker;					// 100:AcDbEntity (SubclassMarker)
+		code_to_value_t< 67, eSPACE> space{};			// 0 for model, 1 for paper
 		code_to_value_t<410> layout_tab_name;
 		code_to_value_t<  8> layer;
 		code_to_value_t<  6> line_type_name;
 		code_to_value_t<347> ptrMaterial;
-		code_to_value_t< 62, eCOLOR> color{ 256 };	// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
-		code_to_value_t<370> line_weight{};			// 370: Stored and moved around as a 16-bit integer (?)
+		code_to_value_t< 62, eCOLOR> color{ 256 };		// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
+		code_to_value_t<370> line_weight{};				// 370: Stored and moved around as a 16-bit integer (?)
 		code_to_value_t< 48> line_type_scale{ 1.0 };	// 48: optional
 		code_to_value_t< 60> hidden{ 0 };				// 60: 0: visible, 1: invisible
 		code_to_value_t< 92> size_graphics_data{};
 		code_to_value_t<310> graphics_data{};
-		code_to_value_t<420, color_bgra_t> color24{};				// 420: 24-bit color value - lowest 8 bits are blue, next 8 are green, highest 8 are red
+		code_to_value_t<420, color_bgra_t> color24{};	// 420: 24-bit color value - lowest 8 bits are blue, next 8 are green, highest 8 are red
 		code_to_value_t<430> color_name;
 		code_to_value_t<440> transparency{};
 		code_to_value_t<390> ptr_plot_style_object{};
-		code_to_value_t<284> shadow_mode{};			// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
+		code_to_value_t<284> shadow_mode{};				// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
 
 		//point_t extrusion{0., 0., 1.};
 		//code_to_value_t< 39> thickness{};
@@ -184,7 +186,7 @@ export namespace biscuit::dxf {
 
 		virtual bool Read(group_iter_t& iter, group_iter_t const& end) { return false; }
 		virtual bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) { return false; }
-		bool ReadExtra(group_iter_t& iter, group_iter_t const& end) {
+		bool ReadExtraData(group_iter_t& iter, group_iter_t const& end) {
 			if (iter == end)
 				return false;
 			if (iter->eCode < sGroup::extra)
@@ -204,32 +206,32 @@ export namespace biscuit::dxf {
 		}
 		bool ProcessExtraData(group_iter_t& iter, group_iter_t const& end) {
 			if (*iter == sGroup(1000, "ACAD")) {
-				iter++;
-				if (iter == end)
-					return false;
-				auto mark = *iter;
-				if (iter->eCode == 1000 and iter->GetValue<std::string>().value_or(""s).ends_with("BEGIN")) {
+				for (iter++; iter != end; iter++) {
 					groups_t groupsRe;
-					for (iter++; iter != end and iter+1 != end; iter++) {
-						if (auto code = iter->GetValue<int16>(); code and *code != 0) {
-							groupsRe.emplace_back(*code, (++iter)->value);
+					if (iter->eCode == 1000 and iter->GetValue<std::string>().value_or(""s).ends_with("BEGIN")) {
+						for (iter++; iter != end and iter+1 != end; iter++) {
+							if (iter->eCode == 1000 and iter->GetValue<std::string>().value_or(""s).ends_with("END")) {
+								break;
+							}
+							if (auto code = iter->GetValue<int16>(); code and *code != 0) {
+								groupsRe.emplace_back(*code, (++iter)->value);
+							}
 						}
 					}
-					if (iter == end)
-						return false;
-				}
 
-				if (*iter == sGroup(1002, "{")) {
-					iter++;
-					if (iter == end)
-						return false;
-					while (*iter != sGroup(1002, "}")) {
-						if (iter == end)
-							return false;
-						iter++;
+					if (*iter == sGroup(1002, "{")) {
+						for (iter++; iter != end and *iter != sGroup(1002, "}"); iter++) {
+							if (auto code = iter->GetValue<int16>(); code and *code != 0 and iter+1 != end) {
+								groupsRe.emplace_back(*code, (++iter)->value);
+							}
+						}
 					}
-					iter++;
+
+					if (auto iter = groupsRe.cbegin(); iter != groupsRe.cend()) {
+						Read(iter, groupsRe.cend());
+					}
 				}
+				return true;
 			}
 			return false;
 		}
@@ -288,8 +290,10 @@ export namespace biscuit::dxf {
 	//============================================================================================================================
 	class xUnknownEntity : public xEntity {
 	public:
+		string_t m_name;
 		std::vector<sGroup> groups;
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::unknown, "UNKNOWN", xUnknownEntity, xEntity);
+		xUnknownEntity(string_t name) : m_name(std::move(name)) {}
 
 		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) override {
 			groups.push_back(*iter);
@@ -782,7 +786,7 @@ export namespace biscuit::dxf {
 	std::unique_ptr<xEntity> xEntity::CreateEntity(string_t const& name) {
 		if (auto iter = m_mapEntityFactory.find(name); iter != m_mapEntityFactory.end() and iter->second)
 			return iter->second();
-		return std::make_unique<xUnknownEntity>();
+		return std::make_unique<xUnknownEntity>(name);
 	}
 
 }

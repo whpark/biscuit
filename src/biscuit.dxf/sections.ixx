@@ -30,6 +30,8 @@ export namespace biscuit::dxf {
 			}
 			if (!section.ReadSectionItem(iter, end))
 				return false;
+			if (iter == end)
+				return false;
 		}
 		return false;
 	}

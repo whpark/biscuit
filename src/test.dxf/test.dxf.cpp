@@ -1,5 +1,6 @@
 ﻿#include <catch.hpp>
 
+#include <magic_enum.hpp>
 #include "biscuit/dependencies_fmt.h"
 //#include "biscuit/dependencies_glaze.h"
 
@@ -32,7 +33,14 @@ TEST_CASE("Test biscuit.dxf") {
 			path_out.replace_extension(".values.txt");
 			std::ofstream out(path_out, std::ios::binary);
 			for (auto const& group : dxf.GetGroups()) {
-				fmt::println(out, "{:>4}:{}", group.eCode, group.value);
+				std::visit([&](auto const& v) {
+					if constexpr (std::is_floating_point_v<std::remove_cvref_t<decltype(v)>>) {
+						fmt::println(out, "{:>4}:{}", group.eCode, biscuit::ToChars(v));
+					}
+					else {
+						fmt::println(out, "{:>4}:{}", group.eCode, v);
+					}
+				}, group.value);
 			}
 		}
 		if (!ok) {
@@ -69,16 +77,16 @@ TEST_CASE("Test biscuit.dxf") {
 			fmt::println(out, "\tmax_entries:{}", t.max_entries);
 		}
 
-		//for (auto const& group : groups) {
-		//	std::visit([&](auto const& v) {
-		//		if constexpr (std::is_floating_point_v<std::remove_cvref_t<decltype(v)>>) {
-		//			fmt::println(out, "{}:{:f}", group.eCode, v);
-		//		}
-		//		else {
-		//			fmt::println(out, "{}:{}", group.eCode, v);
-		//		}
-		//	}, group.value);
-		//}
+		// entities
+		for (auto const& e : dxf.m_entities) {
+			fmt::println(out, "entity:{}", magic_enum::enum_name(e->GetEntityType()));
+			if (e->GetEntityType() == biscuit::dxf::eENTITY::unknown) {
+				if (auto* entity = dynamic_cast<biscuit::dxf::xUnknownEntity*>(e.get()))
+					fmt::println(out, "\tname:{}", entity->m_name);
+			}
+			fmt::println(out, "\tlayer:{}", e->layer);
+		}
+
 	}
 
 }

@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 #include "biscuit/macro.h"
 
@@ -145,4 +145,14 @@ export namespace biscuit {
 		return AddThousandComma<wchar_t, interval>(std::to_wstring(value), separator);
 	}
 
+	template < concepts::arithmetic tvalue, typename ... targs >
+	constexpr std::string ToChars(tvalue value, targs&& ... args) {
+		char buf[64];
+		std::to_chars_result r = std::to_chars(buf, buf+sizeof(buf), value, std::forward<targs>(args)...);
+		if (r.ec != std::errc{})
+			return std::format("{}", value);
+		return std::string(buf, r.ptr);
+	}
+
 }
+
