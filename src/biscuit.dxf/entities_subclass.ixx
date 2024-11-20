@@ -94,61 +94,63 @@ export namespace biscuit::dxf::subclass {
 
 	using point_t = Eigen::Vector3d;
 
-	template < typename TSubclass >
-	bool ReadEntitySubclass(TSubclass& subclass, group_iter_t& iter, group_iter_t const& end) {
-		TContainerMap<group_code_t, int> mapGroupCodeToIndex; // for duplicated group number
-		for (iter++; iter != end; iter++) {
-			if (iter->eCode == eGROUP_CODE::subclass or iter->eCode == eGROUP_CODE::entity) {
-				iter--;
-				return true;
-			}
+	//template < typename TSubclass >
+	//bool ReadEntitySubclass(TSubclass& subclass, group_iter_t& iter, group_iter_t const& end) {
+	//	TContainerMap<group_code_t, int> mapGroupCodeToIndex; // for duplicated group number
+	//	for (iter++; iter != end; iter++) {
+	//		if (iter->eCode == group_code_t::subclass or iter->eCode == group_code_t::entity) {
+	//			iter--;
+	//			return true;
+	//		}
 
-			size_t index = mapGroupCodeToIndex[iter->eCode]++;
-			if (!ReadItemSingleMember<TSubclass>(subclass, *iter, index)
-				and !subclass.ReadPrivate(iter, end))
-			{
-				if (iter->eCode == 0) {
-					iter--;	// current item is for next sequence.
-					return true;
-				}
-				return false;
-			}
-		}
-		return true;
-	}
+	//		// primary handler
+	//		size_t index = mapGroupCodeToIndex[iter->eCode]++;
+	//		if (ReadItemSingleMember<TSubclass>(subclass, *iter, index))
+	//			continue;
+
+	//		// secondary handler ex, ExtendedData (GroupCode 1001)
+	//		if constexpr (requires(TSubclass v) { v.ReadPrivate(iter, end); }) {
+	//			if (subclass.ReadPrivate(iter, end))
+	//				continue;
+	//		}
+
+	//		if (iter->eCode == group_code_t::entity) {
+	//			iter--;	// current item is for next sequence.
+	//			return true;
+	//		}
+	//		return false;
+	//	}
+	//	return true;
+	//}
 
 	//-------------------------------------------------------------------------
-	struct sSubclassEntity {
+	struct sEntity {
 	public:
-		using this_t = sSubclassEntity;
+		using this_t = sEntity;
 	public:
 		code_to_value_t<  5> handle{};
-		string_t app_name;							// 102:{application_name ... 102:}
-		std::vector<sGroup> app_data;
-		binary_t hReactor;							// 102:{ACD_REACTORS 330:value 102:}
-		binary_t hOwner;							// 102:{ACAD_XDICTIONARY 330:owner_handle 102:}
 		code_to_value_t<330> hOwnerBlock;
-		code_to_value_t<100> marker;				// 100:AcDbEntity (SubclassMarker)
-		code_to_value_t< 67, eSPACE> space{};		// 0 for model, 1 for paper
+		code_to_value_t<100> marker;					// 100:AcDbEntity (SubclassMarker)
+		code_to_value_t< 67, eSPACE> space{};			// 0 for model, 1 for paper
 		code_to_value_t<410> layout_tab_name;
 		code_to_value_t<  8> layer;
 		code_to_value_t<  6> line_type_name;
 		code_to_value_t<347> ptrMaterial;
-		code_to_value_t< 62, eCOLOR> color{ 256 };	// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
-		code_to_value_t<370> line_weight{};			// 370: Stored and moved around as a 16-bit integer (?)
+		code_to_value_t< 62, eCOLOR> color{ 256 };		// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
+		code_to_value_t<370> line_weight{};				// 370: Stored and moved around as a 16-bit integer (?)
 		code_to_value_t< 48> line_type_scale{ 1.0 };	// 48: optional
 		code_to_value_t< 60> hidden{ 0 };				// 60: 0: visible, 1: invisible
 		code_to_value_t< 92> size_graphics_data{};
 		code_to_value_t<310> graphics_data{};
-		code_to_value_t<420, color_bgra_t> color24{};				// 420: 24-bit color value - lowest 8 bits are blue, next 8 are green, highest 8 are red
+		code_to_value_t<420, color_bgra_t> color24{};	// 420: 24-bit color value - lowest 8 bits are blue, next 8 are green, highest 8 are red
 		code_to_value_t<430> color_name;
 		code_to_value_t<440> transparency{};
 		code_to_value_t<390> ptr_plot_style_object{};
-		code_to_value_t<284> shadow_mode{};			// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
+		code_to_value_t<284> shadow_mode{};				// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
 
 		//point_t extrusion{0., 0., 1.};
 		//code_to_value_t< 39> thickness{};
-		constexpr static inline auto handlers = std::make_tuple(
+		constexpr static inline auto group_members = std::make_tuple(
 			5, &this_t::handle,
 			330, &this_t::hOwnerBlock,
 			100, &this_t::marker,

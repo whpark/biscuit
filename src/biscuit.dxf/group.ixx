@@ -16,8 +16,9 @@ export namespace biscuit::dxf {
 		enum : value_t {
 			entity = 0,
 			subclass = 100,
+			control = 102,
 
-			extra = 1000,
+			extended = 1000,
 			last = 1072,
 		};
 		value_t eCode;

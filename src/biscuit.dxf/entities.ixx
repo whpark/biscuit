@@ -72,123 +72,70 @@ export namespace biscuit::dxf::entities {
 
 	using point_t = Eigen::Vector3d;
 
-	template < typename TEntity >
+	template < typename TEntity, bool bSubclass = false >
 	bool ReadEntity(TEntity& entity, group_iter_t& iter, group_iter_t const& end) {
 		TContainerMap<group_code_t, int> mapGroupCodeToIndex; // for duplicated group number
 		for (iter++; iter != end; iter++) {
-			static sGroup const groupEnd{ 102, "}"s };
-			if (iter->eCode == 102) {
-				string_t str = iter->GetValue<string_t>().value_or(""s);
-				string_view_t sv(str);
-				sv = TrimView(sv);
-				if (sv.starts_with("{")) {
-					sv.remove_prefix(1);
-					sv = TrimView(sv);
-				}
-				else
-					return false;
-				if (sv.starts_with("ACAD_REACTORS")) {
-					if (++iter == end or (iter->eCode != 330) or !iter->GetValue(entity.hReactor))
-						return false;
-					if (*++iter != groupEnd)
-						return false;
-				}
-				else if (sv.starts_with("ACAD_XDICTIONARY")) {
-					if (++iter == end or (iter->eCode != 360) or !iter->GetValue(entity.hOwner))
-						return false;
-					if (*++iter != groupEnd)
-						return false;
-				}
-				else {
-					entity.app_name = sv;
-					for (iter++; iter != end and *iter != groupEnd; iter++) {
-						entity.app_data.push_back(*iter);
-					}
-					if (iter == end)
-						return false;
-				}
-				continue;
+			if constexpr (bSubclass) {
+				if (iter->eCode == group_code_t::subclass) { iter--; return true; }
 			}
+			if (iter->eCode == group_code_t::entity) { iter--; return true; }
+
+			if constexpr (requires (TEntity v) { v.ReadControlData(iter, end); }) {
+				if (entity.ReadControlData(iter, end))
+					continue;
+				if (iter == end)
+					return false;
+			}
+
 			size_t index = mapGroupCodeToIndex[iter->eCode]++;
-			if (
-				(
-						!ReadItemSingleMember<TEntity>(entity, *iter, index)
-					and !entity.ReadPrivate(iter, end)
-					and !entity.ReadExtraData(iter, end)
-				)
-				or
-					(iter->eCode == 0)	// !!! ATTDEF has 0 group code.
-				)
-			{
-				if (iter->eCode == 0) {
+			if (/*iter != end and*/ ReadItemSingleMember<TEntity>(entity, *iter, index))
+				continue;
+
+			if constexpr (requires(TEntity v) { v.ReadPrivate(iter, end); }) {
+				if (iter != end and entity.ReadPrivate(iter, end))
+					continue;
+				if constexpr (bSubclass) {
+					if (iter->eCode == group_code_t::subclass) { iter--; return true; }
+				}
+				if (iter != end and iter->eCode == group_code_t::entity) {
 					iter--;	// current item is for next sequence.
 					return true;
 				}
-				return false;
+			}
+
+			if constexpr (requires(TEntity v) { v.ReadExtendedData(iter, end); }) {
+				if (iter != end and entity.ReadExtendedData(iter, end))
+					continue;
+				if constexpr (bSubclass) {
+					if (iter->eCode == group_code_t::subclass) { iter--; return true; }
+				}
+				if (iter != end and iter->eCode == group_code_t::entity) {	// !!! ATTDEF has 0 group code.
+					iter--;	// current item is for next sequence.
+					return true;
+				}
 			}
 		}
 		return true;
 	}
 
 	//-------------------------------------------------------------------------
-	class xEntity {
+	class xEntity : public subclass::sEntity {
 	public:
 		using root_t = xEntity;
 		using this_t = xEntity;
 		using string_t = std::string;
 	public:
-		groups_t extra_data;
-		code_to_value_t<  5> handle{};
+		groups_t extended_data;
 		string_t app_name;								// 102:{application_name ... 102:}
 		std::vector<sGroup> app_data;
 		binary_t hReactor;								// 102:{ACD_REACTORS 330:value 102:}
 		binary_t hOwner;								// 102:{ACAD_XDICTIONARY 330:owner_handle 102:}
-		code_to_value_t<330> hOwnerBlock;
-		code_to_value_t<100> marker;					// 100:AcDbEntity (SubclassMarker)
-		code_to_value_t< 67, eSPACE> space{};			// 0 for model, 1 for paper
-		code_to_value_t<410> layout_tab_name;
-		code_to_value_t<  8> layer;
-		code_to_value_t<  6> line_type_name;
-		code_to_value_t<347> ptrMaterial;
-		code_to_value_t< 62, eCOLOR> color{ 256 };		// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
-		code_to_value_t<370> line_weight{};				// 370: Stored and moved around as a 16-bit integer (?)
-		code_to_value_t< 48> line_type_scale{ 1.0 };	// 48: optional
-		code_to_value_t< 60> hidden{ 0 };				// 60: 0: visible, 1: invisible
-		code_to_value_t< 92> size_graphics_data{};
-		code_to_value_t<310> graphics_data{};
-		code_to_value_t<420, color_bgra_t> color24{};	// 420: 24-bit color value - lowest 8 bits are blue, next 8 are green, highest 8 are red
-		code_to_value_t<430> color_name;
-		code_to_value_t<440> transparency{};
-		code_to_value_t<390> ptr_plot_style_object{};
-		code_to_value_t<284> shadow_mode{};				// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
 
 		//point_t extrusion{0., 0., 1.};
 		//code_to_value_t< 39> thickness{};
 		constexpr static inline auto group_members = std::make_tuple(
-			5, &xEntity::handle,
-			330, &xEntity::hOwnerBlock,
-			100, &xEntity::marker,
-			67, &xEntity::space,
-			410, &xEntity::layout_tab_name,
-			8, &xEntity::layer,
-			6, &xEntity::line_type_name,
-			347, &xEntity::ptrMaterial,
-			62, &xEntity::color,
-			370, &xEntity::line_weight,
-			48, &xEntity::line_type_scale,
-			60, &xEntity::hidden,
-			92, &xEntity::size_graphics_data,
-			310, &xEntity::graphics_data,
-			420, BSC__LAMBDA_MEMBER_VALUE(color24.Value()),
-			430, &xEntity::color_name,
-			440, &xEntity::transparency,
-			390, &xEntity::ptr_plot_style_object,
-			284, &xEntity::shadow_mode
-
-			//39, &xEntity::thickness,
-			//210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x()),
-			//220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y()),
-			//230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z())
+			0
 		);
 
 	public:
@@ -211,27 +158,65 @@ export namespace biscuit::dxf::entities {
 		}
 		virtual eENTITY GetEntityType() const { return eENTITY::none; }
 
-		virtual bool Read(group_iter_t& iter, group_iter_t const& end) { return false; }
-		virtual bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) { return false; }
-		bool ReadExtraData(group_iter_t& iter, group_iter_t const& end) {
+		virtual bool Read(group_iter_t& iter, group_iter_t const& end) = 0;
+		virtual bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) {
+			return ReadEntity<subclass::sEntity, true>(*this, iter, end);
+		}
+
+		virtual bool ReadControlData(group_iter_t& iter, group_iter_t const& end) {
+			if (iter->eCode != group_code_t::control)
+				return false;
+			constexpr static sGroup const groupEnd{ 102, "}"s };
+			string_t str = iter->GetValue<string_t>().value_or(""s);
+			string_view_t sv(str);
+			sv = TrimView(sv);
+			if (sv.starts_with("{")) {
+				sv.remove_prefix(1);
+				sv = TrimView(sv);
+			}
+			else
+				return false;
+			if (sv.starts_with("ACAD_REACTORS")) {
+				if (++iter == end or (iter->eCode != 330) or !iter->GetValue(hReactor))
+					return false;
+				if (*++iter != groupEnd)
+					return false;
+			}
+			else if (sv.starts_with("ACAD_XDICTIONARY")) {
+				if (++iter == end or (iter->eCode != 360) or !iter->GetValue(hOwner))
+					return false;
+				if (*++iter != groupEnd)
+					return false;
+			}
+			else {
+				app_name = sv;
+				for (iter++; iter != end and *iter != groupEnd; iter++) {
+					app_data.push_back(*iter);
+				}
+				if (iter == end)
+					return false;
+			}
+			return true;
+		}
+		virtual bool ReadExtendedData(group_iter_t& iter, group_iter_t const& end) {
 			if (iter == end)
 				return false;
-			if (iter->eCode < sGroup::extra)
+			if (iter->eCode < sGroup::extended)
 				return false;
 
-			auto iExtraData = extra_data.size();
+			auto iExtendedData = extended_data.size();
 			for (; iter != end; iter++) {
-				if (iter->eCode < sGroup::extra) {
+				if (iter->eCode < sGroup::extended) {
 					iter--;
 					break;
 				}
-				extra_data.push_back(*iter);
+				extended_data.push_back(*iter);
 			}
-			auto iter2 = extra_data.cbegin() + iExtraData;
-			ProcessExtraData(iter2, extra_data.cend());
+			auto iter2 = extended_data.cbegin() + iExtendedData;
+			ProcessExtendedData(iter2, extended_data.cend());
 			return true;
 		}
-		bool ProcessExtraData(group_iter_t& iter, group_iter_t const& end) {
+		bool ProcessExtendedData(group_iter_t& iter, group_iter_t const& end) {
 			if (*iter == sGroup(1000, "ACAD")) {
 				for (iter++; iter != end; iter++) {
 					groups_t groupsRe;
