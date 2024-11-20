@@ -57,8 +57,14 @@ TEST_CASE("Test biscuit.dxf") {
 		for (auto const& [key, groups] : dxf.m_mapVariables) {
 			fmt::println(out, "key:{}", key);
 			for (auto const& group : groups) {
-				fmt::println(out, "\t{}:{}", group.eCode, group.value);
-				fmt::println(out, "\t{}", group);
+				std::visit([&](auto const& v) {
+					if constexpr (std::is_floating_point_v<std::remove_cvref_t<decltype(v)>>) {
+						fmt::println(out, "{:>4}:{}", group.eCode, biscuit::ToChars(v));
+					}
+					else {
+						fmt::println(out, "{:>4}:{}", group.eCode, v);
+					}
+				}, group.value);
 			}
 		}
 
@@ -80,8 +86,8 @@ TEST_CASE("Test biscuit.dxf") {
 		// entities
 		for (auto const& e : dxf.m_entities) {
 			fmt::println(out, "entity:{}", magic_enum::enum_name(e->GetEntityType()));
-			if (e->GetEntityType() == biscuit::dxf::eENTITY::unknown) {
-				if (auto* entity = dynamic_cast<biscuit::dxf::xUnknownEntity*>(e.get()))
+			if (e->GetEntityType() == biscuit::dxf::entities::eENTITY::unknown) {
+				if (auto* entity = dynamic_cast<biscuit::dxf::entities::xUnknown*>(e.get()))
 					fmt::println(out, "\tname:{}", entity->m_name);
 			}
 			fmt::println(out, "\tlayer:{}", e->layer);
@@ -99,7 +105,7 @@ TEST_CASE("benchmark") {
 	std::vector<int> map;
 	map.assign(map_size, 0);
 	for (auto v : std::ranges::views::iota(0uz, map_size))
-		map[v] = v/10;
+		map[v] = (int)v/10;
 
 	BENCHMARK("dividing") {
 		int64_t r {};

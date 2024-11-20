@@ -267,19 +267,16 @@ export namespace biscuit::dxf {
 
 
 	//=============================================================================================================================
-	template < typename T >
-	struct TGroupHandler;
-	//-----------------------------------------------------------------------------------------------------------------------------
 	template < typename TItem >
 	bool ReadItemSingleMember(TItem& item, sGroup const& group, size_t& index) {
 		if constexpr (requires (TItem v) { v.base(); }) {
 			if (ReadItemSingleMember<TItem::base_t>(item.base(), group, index))
 				return true;
 		}
-		constexpr static size_t nTupleSize = std::tuple_size_v<decltype(TGroupHandler<TItem>::handlers)>/2;
+		constexpr static size_t nTupleSize = std::tuple_size_v<decltype(TItem::group_members)>/2;
 		return ForEachIntSeq<nTupleSize>([&]<int I>{
-			constexpr int code = std::get<I*2>(TGroupHandler<TItem>::handlers);
-			constexpr auto const offset_ptr = std::get<I*2+1>(TGroupHandler<TItem>::handlers);
+			constexpr int code = std::get<I*2>(TItem::group_members);
+			constexpr auto const offset_ptr = std::get<I*2+1>(TItem::group_members);
 			if (group.eCode != code)
 				return false;
 

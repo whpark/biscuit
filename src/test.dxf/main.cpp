@@ -1,4 +1,4 @@
-#include <catch.hpp>
+﻿#include <catch.hpp>
 #include "biscuit/dependencies_fmt.h"
 
 int main(int argc, char* argv[]) {

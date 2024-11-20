@@ -82,12 +82,8 @@ export namespace biscuit::dxf {
 		int32 count{};
 		int16 proxy{};
 		int16 entity{};
-	};
-	using classes_t = std::vector<sClass>;
 
-	template <>
-	struct TGroupHandler<sClass> {
-		constexpr static inline auto const handlers = std::make_tuple(
+		constexpr static inline auto const group_members = std::make_tuple(
 			//1, [](sClass& self) -> auto& { return self.name; },
 			//1, [](sClass& self, sGroup const& g)->bool{ return g.GetValue(self.name); },
 			1, &sClass::name,
@@ -99,6 +95,8 @@ export namespace biscuit::dxf {
 			281, &sClass::entity
 		);
 	};
+	using classes_t = std::vector<sClass>;
+
 	//-----------------------------------------------------------------------------------------------------------------------------
 	class xSectionClasses {
 	public:
@@ -138,10 +136,8 @@ export namespace biscuit::dxf {
 		string_t class_name;
 		int16 max_entries{};
 		int16 flags{};
-	};
-	template <>
-	struct TGroupHandler<xTable> {
-		constexpr static inline auto const handlers = std::make_tuple(
+
+		constexpr static inline auto const group_members = std::make_tuple(
 			2, &xTable::table_type,
 			5, &xTable::handle,
 			100, &xTable::class_name,
@@ -199,10 +195,8 @@ export namespace biscuit::dxf {
 		Eigen::Vector3d ptBase;
 		string_t name2;
 		string_t xref_path;
-	};
-	template <>
-	struct TGroupHandler<xBlock> {
-		constexpr static inline auto const handlers = std::make_tuple(
+
+		constexpr static inline auto const group_members = std::make_tuple(
 			5, &xBlock::handle,
 			//100, &xBlock::entity,
 			8, &xBlock::layer,
@@ -257,7 +251,7 @@ export namespace biscuit::dxf {
 	class xSectionEntities {
 	public:
 		using this_t = xSectionEntities;
-		entities_t m_entities;
+		entities::entities_t m_entities;
 
 	public:
 		bool InitSection() {
@@ -271,7 +265,7 @@ export namespace biscuit::dxf {
 			auto const* entity_name = std::get_if<string_t>(&r.value);
 			if (!entity_name or r.eCode != 0)
 				return false;
-			if (auto entity = xEntity::CreateEntity(*entity_name))
+			if (auto entity = entities::xEntity::CreateEntity(*entity_name))
 				m_entities.push_back(std::move(entity));
 			else
 				return false;
