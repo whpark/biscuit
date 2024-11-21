@@ -89,7 +89,6 @@ using namespace std::literals;
 namespace concepts = biscuit::concepts;
 
 export namespace biscuit {
-#pragma pack(push, 8)
 
 	template < concepts::string_elem tchar_to, concepts::string_elem tchar_from, size_t initial_dst_buf_size = 1024 >
 	class Ticonv {
@@ -316,5 +315,4 @@ export namespace biscuit {
 		}
 	};
 
-#pragma pack(pop)
 }

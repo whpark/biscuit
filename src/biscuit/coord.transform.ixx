@@ -33,7 +33,6 @@ import biscuit.coord.point;
 namespace concepts = biscuit::concepts;
 
 export namespace biscuit {
-#pragma pack(push, 8)
 
 	//-----------------------------------------------------------------------------
 	// interface CoordTrans;
@@ -470,5 +469,4 @@ export namespace biscuit {
 	//template TCoordTransDim<3>;
 	using xCoordTrans3d = TCoordTransMat<3>;
 
-#pragma pack(pop)
 }	// namespace biscuit
