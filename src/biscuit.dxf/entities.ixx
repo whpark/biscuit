@@ -166,7 +166,7 @@ export namespace biscuit::dxf::entities {
 		virtual bool ReadControlData(group_iter_t& iter, group_iter_t const& end) {
 			if (iter->eCode != group_code_t::control)
 				return false;
-			constexpr static sGroup const groupEnd{ 102, "}"s };
+			static sGroup const groupEnd{ 102, "}"s };
 			string_t str = iter->GetValue<string_t>().value_or(""s);
 			string_view_t sv(str);
 			sv = TrimView(sv);
