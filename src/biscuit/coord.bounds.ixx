@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
@@ -88,7 +88,27 @@ export namespace biscuit {
 		TBounds(concepts::coord::generic_point auto const& pt0, concepts::coord::generic_point auto const& pt1) { this->pt0() = pt0; this->pt1() = pt1; }
 		TBounds(concepts::coord::generic_point auto const& pt,  concepts::coord::generic_size auto const& size) { this->pt0() = pt, this->pt1() = pt+size; }
 		TBounds(concepts::coord::generic_size auto const& size) { this->pt0() = coord_point_t{}; this->pt1() = pt+size; }
+		template < typename tvalue2, bool bROUND2 >
+			requires (!std::is_same_v<tvalue2, tvalue>)
+		TBounds(TBounds<tvalue2, dim, bROUND2> const& bounds) {
+			*this = bounds;
+		}
 		TBounds(coord_rect_t const& rect) { this->pt0() = rect; this->pt1() = rect.pt1(); }
+
+		template < typename tvalue2, bool bROUND2 >
+			requires (!std::is_same_v<tvalue2, tvalue>)
+		TBounds& operator = (TBounds<tvalue2, dim, bROUND2> const& bounds) {
+			if constexpr (bROUND and std::is_integral_v<tvalue> and std::is_floating_point_v<tvalue2>) {
+				this->pt0() = Round(bounds.pt0());
+				this->pt1() = Round(bounds.pt1());
+			}
+			else {
+				this->pt0() = bounds.pt0();
+				this->pt1() = bounds.pt1();
+			}
+			return *this;
+		}
+
 
 		TBounds& operator = (this_t const&) = default;
 		TBounds& operator = (this_t&&) = default;
