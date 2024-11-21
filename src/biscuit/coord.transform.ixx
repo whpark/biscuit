@@ -56,7 +56,7 @@ export namespace biscuit {
 		virtual std::unique_ptr<ICoordTrans> GetInverse() const = 0;
 
 		/// @brief Transform
-		/// @return sPoint3d for point, length for length
+		/// @return xPoint3d for point, length for length
 		template < typename tpoint >
 			requires (concepts::coord::generic_point<tpoint>)
 		BSC__NODISCARD auto operator () (tpoint const& pt) const {
@@ -78,8 +78,8 @@ export namespace biscuit {
 			auto rate = Trans(1., 1., 1.).GetDistance() * sqrt_1_3;
 			return rate;
 		}
-		BSC__NODISCARD virtual sPoint2d Trans(double x, double y) const { return Trans(x, y, 0.0); }
-		BSC__NODISCARD virtual sPoint3d Trans(double x, double y, double z) const = 0;
+		BSC__NODISCARD virtual xPoint2d Trans(double x, double y) const { return Trans(x, y, 0.0); }
+		BSC__NODISCARD virtual xPoint3d Trans(double x, double y, double z) const = 0;
 		BSC__NODISCARD virtual bool IsRightHanded() const = 0;
 	};
 	static_assert(concepts::cloneable<ICoordTrans>);
@@ -159,8 +159,8 @@ export namespace biscuit {
 			}
 			return scale;
 		}
-		BSC__NODISCARD sPoint3d Trans(double x, double y, double z) const override {
-			sPoint3d pt(x, y, z);
+		BSC__NODISCARD xPoint3d Trans(double x, double y, double z) const override {
+			xPoint3d pt(x, y, z);
 			for (auto iter = m_chain.rbegin(); iter != m_chain.rend(); iter++) {
 				pt = (*iter)->Trans(pt.x, pt.y, pt.z);
 			}
@@ -274,7 +274,7 @@ export namespace biscuit {
 			return rate;
 		}
 
-		BSC__NODISCARD virtual sPoint2d Trans(double x, double y) const {
+		BSC__NODISCARD virtual xPoint2d Trans(double x, double y) const {
 			if constexpr (dim == 2) {
 				if constexpr (m_transform.HDim == 3) {
 					auto pt = m_transform * Eigen::Vector<double, 3>(x, y, 1.0);
@@ -291,7 +291,7 @@ export namespace biscuit {
 			}
 			else static_assert(false);
 		}
-		BSC__NODISCARD virtual sPoint3d Trans(double x, double y, double z) const {
+		BSC__NODISCARD virtual xPoint3d Trans(double x, double y, double z) const {
 			if constexpr (dim == 2) {
 				if constexpr (m_transform.HDim == 3) {
 					auto p = m_transform * Eigen::Vector<double, 3>(x, y, 1.0);

@@ -108,16 +108,16 @@ export namespace biscuit::shape {
 
 		static xArc GetFromBulge(double bulge, point_t const& pt0, point_t const& pt1) {
 			xArc arc;
-			sPoint2d vecPerpendicular(-(pt0.y-pt1.y), (pt0.x-pt1.x));
+			xPoint2d vecPerpendicular(-(pt0.y-pt1.y), (pt0.x-pt1.x));
 			// Normalize
 			{
 				double d = vecPerpendicular.GetDistance();
 				vecPerpendicular.x /= d;
 				vecPerpendicular.y /= d;
 			}
-			sPoint2d ptCenterOfLine((pt0.x+pt1.x)/2., (pt0.y+pt1.y)/2.);
+			xPoint2d ptCenterOfLine((pt0.x+pt1.x)/2., (pt0.y+pt1.y)/2.);
 			double l = pt1.GetDistance(pt0)/2.;
-			sPoint2d ptBulge;
+			xPoint2d ptBulge;
 			ptBulge.x = ptCenterOfLine.x + vecPerpendicular.x * (bulge * l);
 			ptBulge.y = ptCenterOfLine.y + vecPerpendicular.y * (bulge * l);
 			double h = ptBulge.GetDistance(ptCenterOfLine);

@@ -32,9 +32,9 @@ export namespace biscuit::shape {
 	//using string_t = std::wstring;
 	using char_t = char;	// UTF-8
 	using string_t = std::basic_string<char_t>;
-	using point_t = sPoint3d;
-	//using rect_t = sRect3d;
-	using rect_t = sBounds3d;
+	using point_t = xPoint3d;
+	//using rect_t = xRect3d;
+	using rect_t = xBounds3d;
 	using ct_t = xCoordTrans3d;
 	struct line_t { point_t pt0, pt1; };
 
@@ -143,7 +143,7 @@ export namespace biscuit::shape {
 		}
 	};
 
-	bool CohenSutherlandLineClip(sBounds2d roi, sBounds2d& pt0, sBounds2d& pt1);
+	bool CohenSutherlandLineClip(xBounds2d roi, xBounds2d& pt0, xBounds2d& pt1);
 
 }
 

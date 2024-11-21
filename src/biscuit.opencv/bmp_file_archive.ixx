@@ -748,7 +748,7 @@ export namespace biscuit {
 	class xBitmapMat {
 	public:
 		cv::Mat img;
-		sSize2i pelsPerMeter;
+		xSize2i pelsPerMeter;
 		bitmap_palette_t palette;
 
 		xBitmapMat() = default;
@@ -986,7 +986,7 @@ export namespace biscuit {
 		std::filesystem::path const& path,
 		cv::Mat const& img,
 		int nBPP,
-		sSize2i const& pelsPerMeter,
+		xSize2i const& pelsPerMeter,
 		std::span<color_bgra_t const> palette = {},
 		bool bNoPaletteLookup = false,
 		bool bBottom2Top = false,

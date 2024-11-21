@@ -387,26 +387,26 @@ export namespace biscuit {
 
 	};
 
-	using sBounds2i = TBounds<int, 2, false>;
-	using sBounds3i = TBounds<int, 3, false>;
-	using sBounds2d = TBounds<double, 2, false>;
-	using sBounds3d = TBounds<double, 3, false>;
-	using sBounds2ri = TBounds<int, 2, true>;
-	using sBounds3ri = TBounds<int, 3, true>;
-	using sBounds2rd = TBounds<double, 2, true>;
-	using sBounds3rd = TBounds<double, 3, true>;
+	using xBounds2i = TBounds<int, 2, false>;
+	using xBounds3i = TBounds<int, 3, false>;
+	using xBounds2d = TBounds<double, 2, false>;
+	using xBounds3d = TBounds<double, 3, false>;
+	using xBounds2ri = TBounds<int, 2, true>;
+	using xBounds3ri = TBounds<int, 3, true>;
+	using xBounds2rd = TBounds<double, 2, true>;
+	using xBounds3rd = TBounds<double, 3, true>;
 
-	static_assert(requires(sBounds2d ) { sBounds2d{1.0, 2.0, 3.0, 4.0}; });
-	static_assert(requires(sBounds3d ) { sBounds3d{1.0, 2.0, 3.0, 4.0, 5, 6}; });
-	static_assert(sizeof(sBounds2d) == sizeof(double)*2*2);
-	static_assert(sizeof(sBounds3d) == sizeof(double)*3*2);
-	static_assert(std::is_trivially_copyable_v<sBounds2d>);
-	//static_assert(concepts::coord::has_point2<sRect2i>);
-	//static_assert(concepts::coord::has_size2<sRect2i>);
-	//static_assert(concepts::coord::has_rect2<sRect2i>);
-	//static_assert(!concepts::coord::is_point2<sRect2i>);
-	//static_assert(!concepts::coord::is_size2<sRect2i>);
-	//static_assert(concepts::coord::is_rect2<sRect2i>);
+	static_assert(requires(xBounds2d ) { xBounds2d{1.0, 2.0, 3.0, 4.0}; });
+	static_assert(requires(xBounds3d ) { xBounds3d{1.0, 2.0, 3.0, 4.0, 5, 6}; });
+	static_assert(sizeof(xBounds2d) == sizeof(double)*2*2);
+	static_assert(sizeof(xBounds3d) == sizeof(double)*3*2);
+	static_assert(std::is_trivially_copyable_v<xBounds2d>);
+	//static_assert(concepts::coord::has_point2<xRect2i>);
+	//static_assert(concepts::coord::has_size2<xRect2i>);
+	//static_assert(concepts::coord::has_rect2<xRect2i>);
+	//static_assert(!concepts::coord::is_point2<xRect2i>);
+	//static_assert(!concepts::coord::is_size2<xRect2i>);
+	//static_assert(concepts::coord::is_rect2<xRect2i>);
 
 
 }

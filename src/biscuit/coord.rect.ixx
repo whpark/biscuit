@@ -221,25 +221,25 @@ export namespace biscuit {
 
 	};
 
-	using sRect2i = TRect<int, 2, false>;
-	using sRect3i = TRect<int, 3, false>;
-	using sRect2d = TRect<double, 2, false>;
-	using sRect3d = TRect<double, 3, false>;
-	using sRect2ri = TRect<int, 2, true>;
-	using sRect3ri = TRect<int, 3, true>;
-	using sRect2rd = TRect<double, 2, true>;
-	using sRect3rd = TRect<double, 3, true>;
+	using xRect2i = TRect<int, 2, false>;
+	using xRect3i = TRect<int, 3, false>;
+	using xRect2d = TRect<double, 2, false>;
+	using xRect3d = TRect<double, 3, false>;
+	using xRect2ri = TRect<int, 2, true>;
+	using xRect3ri = TRect<int, 3, true>;
+	using xRect2rd = TRect<double, 2, true>;
+	using xRect3rd = TRect<double, 3, true>;
 
-	static_assert(requires(sRect2d ) { sRect2d{1.0, 2.0, 3.0, 4.0}; });
-	static_assert(requires(sRect3d ) { sRect3d{1.0, 2.0, 3.0, 4.0, 5, 6}; });
-	static_assert(sizeof(sRect2d) == sizeof(double)*2*2);
-	static_assert(sizeof(sRect3d) == sizeof(double)*3*2);
-	static_assert(std::is_trivially_copyable_v<sRect2d>);
-	static_assert(concepts::coord::has_point2<sRect2i>);
-	static_assert(concepts::coord::has_size2<sRect2i>);
-	static_assert(concepts::coord::has_rect2<sRect2i>);
-	static_assert(!concepts::coord::is_point2<sRect2i>);
-	static_assert(!concepts::coord::is_size2<sRect2i>);
-	static_assert(concepts::coord::is_rect2<sRect2i>);
+	static_assert(requires(xRect2d ) { xRect2d{1.0, 2.0, 3.0, 4.0}; });
+	static_assert(requires(xRect3d ) { xRect3d{1.0, 2.0, 3.0, 4.0, 5, 6}; });
+	static_assert(sizeof(xRect2d) == sizeof(double)*2*2);
+	static_assert(sizeof(xRect3d) == sizeof(double)*3*2);
+	static_assert(std::is_trivially_copyable_v<xRect2d>);
+	static_assert(concepts::coord::has_point2<xRect2i>);
+	static_assert(concepts::coord::has_size2<xRect2i>);
+	static_assert(concepts::coord::has_rect2<xRect2i>);
+	static_assert(!concepts::coord::is_point2<xRect2i>);
+	static_assert(!concepts::coord::is_size2<xRect2i>);
+	static_assert(concepts::coord::is_rect2<xRect2i>);
 
 }

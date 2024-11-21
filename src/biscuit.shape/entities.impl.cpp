@@ -64,7 +64,7 @@ namespace biscuit::shape {
 
 namespace biscuit::shape {
 
-	bool CohenSutherlandLineClip(sBounds2d roi, sPoint2d& pt0, sPoint2d& pt1) {
+	bool CohenSutherlandLineClip(xBounds2d roi, xPoint2d& pt0, xPoint2d& pt1) {
 		if ( (roi.Width() <= 0) or (roi.Height() <= 0) )
 			return false;
 

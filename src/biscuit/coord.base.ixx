@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4201)
@@ -153,7 +153,8 @@ export namespace biscuit::coord {
 	//	requires (concepts::is_one_of<typename ttarget::coord_type_t, mPoint_t, mSize_t, mRect_t>)
 	template < template < typename, int> typename ttarget, typename tvalue, int DIM, bool bROUND >
 		requires (concepts::is_one_of<typename ttarget<tvalue, DIM>::coord_type_t, mPoint_t, mSize_t, mRect_t>)
-	struct /*alignas(alignof(Eigen::Vector<tvalue, DIM>)) */TCoordBase : ttarget<tvalue, DIM> {
+	class /*alignas(alignof(Eigen::Vector<tvalue, DIM>)) */TCoordBase : public ttarget<tvalue, DIM> {
+	public:
 		using base_t = ttarget<tvalue, DIM>;
 		using coord_type_t = base_t::coord_type_t;
 		using array_t = base_t::array_t;

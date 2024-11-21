@@ -124,12 +124,12 @@ export namespace biscuit {
 
 	//-----------------------------------------------------------------------------
 	// Put Outlined Text at Center aligned
-	void putTextCenterAligned(cv::InputOutputArray img, std::string const& str, sPoint2i org,
+	void putTextCenterAligned(cv::InputOutputArray img, std::string const& str, xPoint2i org,
 		int fontFace, double fontScale, cv::Scalar color,
 		int thickness = 1, int lineType = 8,
 		bool bottomLeftOrigin = false, bool bOutline = true)
 	{
-		sSize2i size{ cv::getTextSize(str, fontFace, fontScale, thickness, nullptr) };
+		xSize2i size{ cv::getTextSize(str, fontFace, fontScale, thickness, nullptr) };
 
 		if (bOutline) {
 			cv::Scalar crBkgnd;
@@ -137,10 +137,10 @@ export namespace biscuit {
 			//if (crBkgnd == Scalar(0, 0, 0))
 			//	crBkgnd = Scalar(1, 1, 1);
 			int iShift = std::max(1, thickness / 2);
-			cv::putText(img, str, org - size / 2 + sPoint2i(0, iShift), fontFace, fontScale, crBkgnd, thickness, lineType, bottomLeftOrigin);
-			cv::putText(img, str, org - size / 2 + sPoint2i(iShift, 0), fontFace, fontScale, crBkgnd, thickness, lineType, bottomLeftOrigin);
-			cv::putText(img, str, org - size / 2 + sPoint2i(-iShift, 0), fontFace, fontScale, crBkgnd, thickness, lineType, bottomLeftOrigin);
-			cv::putText(img, str, org - size / 2 + sPoint2i(0, -iShift), fontFace, fontScale, crBkgnd, thickness, lineType, bottomLeftOrigin);
+			cv::putText(img, str, org - size / 2 + xPoint2i(0, iShift), fontFace, fontScale, crBkgnd, thickness, lineType, bottomLeftOrigin);
+			cv::putText(img, str, org - size / 2 + xPoint2i(iShift, 0), fontFace, fontScale, crBkgnd, thickness, lineType, bottomLeftOrigin);
+			cv::putText(img, str, org - size / 2 + xPoint2i(-iShift, 0), fontFace, fontScale, crBkgnd, thickness, lineType, bottomLeftOrigin);
+			cv::putText(img, str, org - size / 2 + xPoint2i(0, -iShift), fontFace, fontScale, crBkgnd, thickness, lineType, bottomLeftOrigin);
 		}
 
 		cv::putText(img, str, org - size / 2, fontFace, fontScale, color, thickness, lineType, bottomLeftOrigin);
@@ -270,7 +270,7 @@ export namespace biscuit {
 	//	int eInterpolationMagnify = cv::InterpolationFlags::INTER_LINEAR;
 	//};
 	struct sMatchTemplateResult {
-		sPoint2d ptBest;
+		xPoint2d ptBest;
 		double dRate{};
 		double dMinMax{};
 	};
@@ -372,7 +372,7 @@ export namespace biscuit {
 	template < typename TRECT >
 	bool CalcViewPosition(cv::Size const& sizeView, TRECT const& rectView, TRECT& rectImage/* out */, TRECT& rectDst/* out */)	// image size -> display rect and source rect
 	{
-		if (rectView.IsRectEmpty()) {
+		if (rectView.IxRectEmpty()) {
 			rectImage.SetRectEmpty();
 			rectDst.SetRectEmpty();
 			return false;

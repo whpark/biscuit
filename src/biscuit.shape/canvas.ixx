@@ -128,7 +128,7 @@ export namespace biscuit::shape {
 				constexpr static auto m2pi = std::numbers::pi*2;
 				double c = radius * units::math::cos(t);
 				double s = radius * units::math::sin(t);
-				sPoint2d pt(ptCenter.x + c, ptCenter.y+s);
+				xPoint2d pt(ptCenter.x + c, ptCenter.y+s);
 				LineTo(pt);
 			}
 		}
@@ -156,7 +156,7 @@ export namespace biscuit::shape {
 		virtual void Text(xMText const& /*text*/) {
 		}
 
-		virtual std::optional<sBounds2d> GetClippingRect() {
+		virtual std::optional<xBounds2d> GetClippingRect() {
 			return std::nullopt;
 		}
 
@@ -229,10 +229,10 @@ export namespace biscuit::shape {
 		//virtual void LineRelTo(const point_t& pt, bool bShowDirection = false) { LineTo(m_ptLast + pt, bShowDirection); }
 		//virtual void ArcRelTo(const point_t& ptCenter, deg_t dTLength) { ArcTo(m_ptLast + ptCenter, dTLength); }
 	
-		std::optional<sBounds2d> GetClippingRect() override {
-			sBounds2d rc;
-			rc.pt0() = m_ctI(sPoint2d(0.0, 0.0));
-			rc.pt1() = m_ctI(sPoint2d(m_img.cols, m_img.rows));
+		std::optional<xBounds2d> GetClippingRect() override {
+			xBounds2d rc;
+			rc.pt0() = m_ctI(xPoint2d(0.0, 0.0));
+			rc.pt1() = m_ctI(xPoint2d(m_img.cols, m_img.rows));
 			rc.Normalize();
 			return rc;
 		}
@@ -260,7 +260,7 @@ export namespace biscuit::shape {
 		virtual void Arc(point_t const& ptCenter, double radius, deg_t t0, deg_t tLength) override {
 			if constexpr (round_down_arc) {
 				point_t ptC = Trans(ptCenter);
-				sPoint3i ptCi((int)ptC.x, (int)ptC.y, (int)ptC.z);	// RoundDrop
+				xPoint3i ptCi((int)ptC.x, (int)ptC.y, (int)ptC.z);	// RoundDrop
 				ptC = TransI(ptCi);
 				ICanvas::Arc(ptC, radius, t0, tLength);
 			} else {
@@ -282,7 +282,7 @@ namespace biscuit::shape {
 			rc.Inflate(rc.Width(), rc.Height());
 			bool bIn{false};
 			for (auto const& pt : pts) {
-				if (rc.Contains(sPoint2d(pt))) {
+				if (rc.Contains(xPoint2d(pt))) {
 					bIn = true;
 					break;
 				}

@@ -35,7 +35,7 @@ export namespace biscuit {
 		return {};
 	}
 
-	bool PutMatAsTexture(GLuint textureID, cv::Mat const& img, int width, sRect2i const& rect) {
+	bool PutMatAsTexture(GLuint textureID, cv::Mat const& img, int width, xRect2i const& rect) {
 		if (!textureID or img.empty() or !img.isContinuous() /*or (img.step %4)*/)
 			return false;
 

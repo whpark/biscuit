@@ -48,23 +48,23 @@ export namespace biscuit::qt {
 
 	using string_view_t = std::u16string_view;
 
-	auto ToCoord(QPoint pt) { return sPoint2i(pt.x(), pt.y()); }
-	auto ToCoord(QPointF pt) { return sPoint2d(pt.x(), pt.y()); }
-	auto ToCoord(QSize s) { return sSize2i(s.width(), s.height()); }
-	auto ToCoord(QSizeF s) { return sSize2d(s.width(), s.height()); }
-	auto ToCoordRect(QRect rect) { return sRect2i(rect.left(), rect.top(), rect.right(), rect.bottom()); }
-	auto ToCoordRect(QRectF rect) { return sRect2d(rect.left(), rect.top(), rect.right(), rect.bottom()); }
-	auto ToCoordBounds(QRect rect) { return sBounds2i(rect.left(), rect.top(), rect.right(), rect.bottom()); }
-	auto ToCoordBounds(QRectF rect) { return sBounds2d(rect.left(), rect.top(), rect.right(), rect.bottom()); }
+	auto ToCoord(QPoint pt) { return xPoint2i(pt.x(), pt.y()); }
+	auto ToCoord(QPointF pt) { return xPoint2d(pt.x(), pt.y()); }
+	auto ToCoord(QSize s) { return xSize2i(s.width(), s.height()); }
+	auto ToCoord(QSizeF s) { return xSize2d(s.width(), s.height()); }
+	auto ToCoordRect(QRect rect) { return xRect2i(rect.left(), rect.top(), rect.right(), rect.bottom()); }
+	auto ToCoordRect(QRectF rect) { return xRect2d(rect.left(), rect.top(), rect.right(), rect.bottom()); }
+	auto ToCoordBounds(QRect rect) { return xBounds2i(rect.left(), rect.top(), rect.right(), rect.bottom()); }
+	auto ToCoordBounds(QRectF rect) { return xBounds2d(rect.left(), rect.top(), rect.right(), rect.bottom()); }
 
-	auto ToQCoord(sPoint2i pt) { return QPoint (pt.x, pt.y); }
-	auto ToQCoord(sPoint2d pt) { return QPointF(pt.x, pt.y); }
-	auto ToQCoord(sSize2i s) { return QSize (s.width, s.height); }
-	auto ToQCoord(sSize2d s) { return QSizeF(s.width, s.height); }
-	auto ToQCoord(sRect2i const& rect) { return QRect (rect.x, rect.y, rect.width, rect.height); }
-	auto ToQCoord(sRect2d const& rect) { return QRectF(rect.x, rect.y, rect.width, rect.height); }
-	auto ToQCoord(sBounds2i const& bounds) { return QRect (bounds.l, bounds.t, bounds.Width(), bounds.Height()); }
-	auto ToQCoord(sBounds2d const& bounds) { return QRectF(bounds.l, bounds.t, bounds.Width(), bounds.Height()); }
+	auto ToQCoord(xPoint2i pt) { return QPoint (pt.x, pt.y); }
+	auto ToQCoord(xPoint2d pt) { return QPointF(pt.x, pt.y); }
+	auto ToQCoord(xSize2i s) { return QSize (s.width, s.height); }
+	auto ToQCoord(xSize2d s) { return QSizeF(s.width, s.height); }
+	auto ToQCoord(xRect2i const& rect) { return QRect (rect.x, rect.y, rect.width, rect.height); }
+	auto ToQCoord(xRect2d const& rect) { return QRectF(rect.x, rect.y, rect.width, rect.height); }
+	auto ToQCoord(xBounds2i const& bounds) { return QRect (bounds.l, bounds.t, bounds.Width(), bounds.Height()); }
+	auto ToQCoord(xBounds2d const& bounds) { return QRectF(bounds.l, bounds.t, bounds.Width(), bounds.Height()); }
 
 	QPoint Floor(QPointF pt) {
 		return QPoint{ (int)pt.x(), (int)pt.y() };
@@ -261,16 +261,16 @@ export namespace biscuit::qt {
 
 		if (!option.bMaximized and !option.bMaximized) {
 			auto str = reg.value(std::format("{}/{}_rect", s_strKeyWindowPosition, strWindowName), "0,0,0,0").toString();
-			sBounds2i rc;
+			xBounds2i rc;
 			rc.FromString((string_view_t)str);
 
 			//// High DPI
 			//rc.pt0() = pWindow->FromDIP(wxPoint(rc.pt0()));
 			//rc.pt1() = pWindow->FromDIP(wxPoint(rc.pt1()));
-			std::vector<sPoint2i> pts{ {rc.l, rc.t}, {rc.l, rc.b}, {rc.r, rc.t}, {rc.r, rc.b} };
+			std::vector<xPoint2i> pts{ {rc.l, rc.t}, {rc.l, rc.b}, {rc.r, rc.t}, {rc.r, rc.b} };
 
 			// get display bounds
-			std::vector<sRect2i> bounds;
+			std::vector<xRect2i> bounds;
 			for (auto* screen: qApp->screens()) {
 				bounds.emplace_back(screen->geometry());
 			}
@@ -287,7 +287,7 @@ export namespace biscuit::qt {
 					break;
 			}
 
-			sBounds2i rectAdjusted;
+			xBounds2i rectAdjusted;
 			if (nPts >= 3) {
 				// if 3 more points are in the display rect, accept it.
 				rectAdjusted = rc;

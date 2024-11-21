@@ -21,10 +21,10 @@ namespace test {
 	using namespace biscuit;
 
 	struct sTestAlign {
-		sPoint2d pt;
-		sPoint2i pt2;
+		xPoint2d pt;
+		xPoint2i pt2;
 		char a;
-		sPoint2d pt3;
+		xPoint2d pt3;
 	};
 	static_assert(offsetof(sTestAlign, pt) == 0);
 	static_assert(offsetof(sTestAlign, pt2) == 16);
@@ -54,9 +54,9 @@ namespace test {
 
 	TEST_CASE("coord_trans", ATTR) {
 		xCoordTrans2d ct, ct2;
-		std::array<sPoint2d, 4> pts0{ { {0., 0.}, {1., 0.}, {0., 1.} } };
-		std::array<sPoint2d, 4> pts1{ { {0., 0.}, {1., 0.}, {0., 1.} } };
-		std::array<sPoint2d, 4> pts2{ { {0., 0.}, {0., 1.}, {1., 0.} } };
+		std::array<xPoint2d, 4> pts0{ { {0., 0.}, {1., 0.}, {0., 1.} } };
+		std::array<xPoint2d, 4> pts1{ { {0., 0.}, {1., 0.}, {0., 1.} } };
+		std::array<xPoint2d, 4> pts2{ { {0., 0.}, {0., 1.}, {1., 0.} } };
 
 		SECTION("1") {
 			ct.m_transform = Eigen::Rotation2D(biscuit::deg2rad(30));
@@ -66,11 +66,11 @@ namespace test {
 		}
 		SECTION("2") {
 			REQUIRE(ct.Scale2d() == 1);
-			ct.SetScale2d(3, sPoint2d(10, 10));
-			REQUIRE(ct(sPoint2d(10, 10)) == sPoint2d(10, 10));
-			REQUIRE(ct(sPoint2d(11, 10)) == sPoint2d(13, 10));
-			REQUIRE(ct(sPoint2d(10, 11)) == sPoint2d(10, 13));
-			REQUIRE(ct(sPoint2d(11, 11)) == sPoint2d(13, 13));
+			ct.SetScale2d(3, xPoint2d(10, 10));
+			REQUIRE(ct(xPoint2d(10, 10)) == xPoint2d(10, 10));
+			REQUIRE(ct(xPoint2d(11, 10)) == xPoint2d(13, 10));
+			REQUIRE(ct(xPoint2d(10, 11)) == xPoint2d(10, 13));
+			REQUIRE(ct(xPoint2d(11, 11)) == xPoint2d(13, 13));
 		}
 
 		SECTION("2pt") {
@@ -102,8 +102,8 @@ namespace test {
 
 	TEST_CASE("coord_trans_4pt 2d", ATTR) {
 		constexpr static double eps = 1.e-10;
-		std::array<sPoint2d, 4> pts0{ { {0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}} };
-		std::array<sPoint2d, 4> pts1{ { {0.0, 0.0}, {1.1, 0.0}, {0.1, 1.0}, {1.0, 1.1}} };
+		std::array<xPoint2d, 4> pts0{ { {0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}} };
+		std::array<xPoint2d, 4> pts1{ { {0.0, 0.0}, {1.1, 0.0}, {0.1, 1.0}, {1.0, 1.1}} };
 
 		SECTION("4pt identical") {
 			xCoordTrans2dP ct;
@@ -130,8 +130,8 @@ namespace test {
 
 	TEST_CASE("coord_trans_4pt - 3d", ATTR) {
 		constexpr static double eps = 1.e-10;
-		std::array<sPoint3d, 4> pts0{ { {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}} };
-		std::array<sPoint3d, 4> pts1{ { pts0[2], pts0[3], pts0[0], pts0[1] } };
+		std::array<xPoint3d, 4> pts0{ { {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}} };
+		std::array<xPoint3d, 4> pts1{ { pts0[2], pts0[3], pts0[0], pts0[1] } };
 
 		SECTION("4pt identical") {
 			xCoordTrans3d ct;
@@ -200,9 +200,9 @@ namespace test {
 
 	TEST_CASE("coord", ATTR) {
 
-		biscuit::sRect2i rect2i{0, 0, 1, 2};
-		biscuit::sPoint2i pt2i{100, 200};
-		biscuit::sSize2i size2i;
+		biscuit::xRect2i rect2i{0, 0, 1, 2};
+		biscuit::xPoint2i pt2i{100, 200};
+		biscuit::xSize2i size2i;
 		size2i = pt2i;
 
 		REQUIRE(size2i.width == 100);
@@ -234,71 +234,71 @@ namespace test {
 		REQUIRE(rect2i - 2 == -2 + rect2i);
 		REQUIRE(-rect2i + 2 == 2 - rect2i);
 
-		REQUIRE(sPoint2i{150, 260} <= sPoint2i{150, 260});
-		REQUIRE(!(sPoint2i{150, 260} < sPoint2i{150, 260}));
-		REQUIRE(!(sPoint2i{150, 260} > sPoint2i{150, 260}));
-		REQUIRE(!(sPoint2i{150, 260} != sPoint2i{150, 260}));
-		REQUIRE(sPoint2i{150, 260} == sPoint2i{150, 260});
+		REQUIRE(xPoint2i{150, 260} <= xPoint2i{150, 260});
+		REQUIRE(!(xPoint2i{150, 260} < xPoint2i{150, 260}));
+		REQUIRE(!(xPoint2i{150, 260} > xPoint2i{150, 260}));
+		REQUIRE(!(xPoint2i{150, 260} != xPoint2i{150, 260}));
+		REQUIRE(xPoint2i{150, 260} == xPoint2i{150, 260});
 
 		Point2i cvPt = rect2i;
 		Size2i cvSize = rect2i;
-		REQUIRE(biscuit::sPoint2i(cvPt) == rect2i.pt());
-		REQUIRE(biscuit::sSize2i(cvSize) == rect2i.size());
+		REQUIRE(biscuit::xPoint2i(cvPt) == rect2i.pt());
+		REQUIRE(biscuit::xSize2i(cvSize) == rect2i.size());
 
 		QPoint_<int> qPt = rect2i;
 		QSize_<int> qSize = rect2i;
-		REQUIRE(biscuit::sPoint2i(qPt) == rect2i.pt());
-		REQUIRE(biscuit::sSize2i(qSize) == rect2i.size());
+		REQUIRE(biscuit::xPoint2i(qPt) == rect2i.pt());
+		REQUIRE(biscuit::xSize2i(qSize) == rect2i.size());
 
-		biscuit::sPoint3d pt3d{ 0.0, 2.0, 3.0 };
+		biscuit::xPoint3d pt3d{ 0.0, 2.0, 3.0 };
 		auto angle = pt3d.GetAngleXY();
 		REQUIRE(angle == 90_deg);
 	}
 
 	TEST_CASE("coord.round", ATTR) {
-		sPoint3rd pt(1.5, 2.5, 3.5);
-		sPoint3i pti(pt);
-		REQUIRE(pti == sPoint3i(1, 2, 3));
-		sPoint3ri ptx(pt);
-		REQUIRE(ptx == sPoint3ri(2, 3, 4));
+		xPoint3rd pt(1.5, 2.5, 3.5);
+		xPoint3i pti(pt);
+		REQUIRE(pti == xPoint3i(1, 2, 3));
+		xPoint3ri ptx(pt);
+		REQUIRE(ptx == xPoint3ri(2, 3, 4));
 	}
 
 	TEST_CASE("coord.rect", ATTR) {
 
-		sRect2i rc2i(100, 200, 50, 60);
+		xRect2i rc2i(100, 200, 50, 60);
 
-		REQUIRE(rc2i.Contains(sPoint2i(100, 200)));
-		REQUIRE(!rc2i.Contains(sPoint2i(150, 260)));
-		REQUIRE(rc2i.Contains(sRect2i(100, 200, 50, 60)));
-		REQUIRE(!rc2i.Contains(sRect2i(100, 200, 51, 60)));
-		REQUIRE(!rc2i.Contains(sRect2i(100, 200, 50, 61)));
-		REQUIRE(!rc2i.Contains(sRect2i( 99, 200, 50, 60)));
-		REQUIRE(!rc2i.Contains(sRect2i(100, 199, 50, 60)));
-		REQUIRE(rc2i.Contains(sRect2i(110, 210, 0, 0)));
-		REQUIRE(rc2i.Contains(sRect2i(110, 210, 0, 0)));
-		REQUIRE(sRect2i(10, 30, 0, 0).IsEmpty());
-		REQUIRE(sRect2i(10, 30, 0, 0).IsEmpty());
-		REQUIRE(sRect2i().IsEmpty());
-		REQUIRE(sRect2i().IsNull());
+		REQUIRE(rc2i.Contains(xPoint2i(100, 200)));
+		REQUIRE(!rc2i.Contains(xPoint2i(150, 260)));
+		REQUIRE(rc2i.Contains(xRect2i(100, 200, 50, 60)));
+		REQUIRE(!rc2i.Contains(xRect2i(100, 200, 51, 60)));
+		REQUIRE(!rc2i.Contains(xRect2i(100, 200, 50, 61)));
+		REQUIRE(!rc2i.Contains(xRect2i( 99, 200, 50, 60)));
+		REQUIRE(!rc2i.Contains(xRect2i(100, 199, 50, 60)));
+		REQUIRE(rc2i.Contains(xRect2i(110, 210, 0, 0)));
+		REQUIRE(rc2i.Contains(xRect2i(110, 210, 0, 0)));
+		REQUIRE(xRect2i(10, 30, 0, 0).IsEmpty());
+		REQUIRE(xRect2i(10, 30, 0, 0).IsEmpty());
+		REQUIRE(xRect2i().IsEmpty());
+		REQUIRE(xRect2i().IsNull());
 	}
 
 	TEST_CASE("coord.from_to_string", ATTR) {
 
-		sRect2d rect{1., 2., 3., 4.};
+		xRect2d rect{1., 2., 3., 4.};
 		auto str = rect.ToString();
-		sRect2d rect2;
+		xRect2d rect2;
 		rect2.FromString(str);
 		REQUIRE(rect == rect2);
 
-		auto pt = sPoint2i{ 1, 2 };
+		auto pt = xPoint2i{ 1, 2 };
 		str = ToString(pt);
-		sPoint2i pt2;
+		xPoint2i pt2;
 		pt2.FromString(str);
 		REQUIRE(pt == pt2);
 
-		auto pt3 = sPoint3d{ 1., 2., 3. };
+		auto pt3 = xPoint3d{ 1., 2., 3. };
 		str = biscuit::ToString(pt3, "{:.3f}"sv);
-		sPoint3d pt4;
+		xPoint3d pt4;
 		pt4.FromString(str);
 		REQUIRE(pt3 == pt4);
 	}
@@ -326,7 +326,7 @@ namespace test {
 	TEST_CASE("coord.transform", ATTR) {
 		SECTION("compatibility") {
 			Eigen::Vector3d v(1, 2, 3);
-			sPoint3d pt(v);
+			xPoint3d pt(v);
 			pt = v;
 		}
 
@@ -335,9 +335,9 @@ namespace test {
 
 			ct.m_transform = Eigen::Translation2d(1, 2);
 
-			sPoint3d pt(1,2,3);
+			xPoint3d pt(1,2,3);
 			auto pt2 = ct(pt);
-			REQUIRE(pt2 == sPoint3d(2, 4, 3));
+			REQUIRE(pt2 == xPoint3d(2, 4, 3));
 
 		}
 
@@ -346,11 +346,11 @@ namespace test {
 
 			ct.m_transform = Eigen::Translation3d(1, 2, 3);
 
-			REQUIRE(ct(sPoint3d{1, 2, 3}) == sPoint3d(2, 4, 6));
-			REQUIRE(ct(sPoint2d{1, 2}) == sPoint2d(2, 4));
+			REQUIRE(ct(xPoint3d{1, 2, 3}) == xPoint3d(2, 4, 6));
+			REQUIRE(ct(xPoint2d{1, 2}) == xPoint2d(2, 4));
 
 			ct.AdjustOffset({}, {101, 102, 103});
-			REQUIRE(ct(sPoint3d{1, 2, 3}) == sPoint3d(102, 104, 106));
+			REQUIRE(ct(xPoint3d{1, 2, 3}) == xPoint3d(102, 104, 106));
 
 		}
 	}
@@ -359,17 +359,17 @@ namespace test {
 
 #if 0
 namespace bench {
-	struct sRect {
+	struct xRect {
 		int x, y, width, height;
 
-		auto operator <=> (sRect const&) const = default;
+		auto operator <=> (xRect const&) const = default;
 
 		inline void Normalize() {
 			if (width < 0) { x = x+width; width = -width; }
 			if (height < 0) { y = y+height; height = -height; }
 		}
 
-		sRect& IntersectSafe(sRect const& b) {
+		xRect& IntersectSafe(xRect const& b) {
 			auto pax0 = std::min(x, x+width);
 			auto pay0 = std::min(y, y+height);
 			auto pax1 = std::max(x, x+width);
@@ -388,7 +388,7 @@ namespace bench {
 			return *this;
 		}
 
-		sRect& Intersect(sRect const& b) {
+		xRect& Intersect(xRect const& b) {
 			width = std::min(x+width, b.x+b.width);
 			height = std::min(y+height, b.y+b.height);
 			x = std::max(x, b.x);
@@ -435,26 +435,26 @@ namespace bench {
 	};
 
 	TEST_CASE("coord.rect.bench") {
-		//sRect rc0 { 30, 40, -30, -40 };
-		//sRect rc1 { 20, 40, -10, -20 };
+		//xRect rc0 { 30, 40, -30, -40 };
+		//xRect rc1 { 20, 40, -10, -20 };
 		//xRect rc2 { 30, 40, 0, 0 };
 		//xRect rc3 { 20, 40, 10, 20 };
-		sRect rc0 { rand(), rand(), rand(), rand()};
-		sRect rc1 { rand(), rand(), rand(), rand()};
-		sRect rc2 { rand(), rand(), rand(), rand()};
-		sRect rc3 { rand(), rand(), rand(), rand()};
+		xRect rc0 { rand(), rand(), rand(), rand()};
+		xRect rc1 { rand(), rand(), rand(), rand()};
+		xRect rc2 { rand(), rand(), rand(), rand()};
+		xRect rc3 { rand(), rand(), rand(), rand()};
 
-		BENCHMARK("sRect::IntersectSafe") {
+		BENCHMARK("xRect::IntersectSafe") {
 			rc0.IntersectSafe(rc1);
 		};
 
-		BENCHMARK("sRect::Intersect") {
+		BENCHMARK("xRect::Intersect") {
 			rc0.Normalize();
 			rc1.Normalize();
 			rc0.Intersect(rc1);
 		};
 
-		BENCHMARK("sRect::Intersect2") {
+		BENCHMARK("xRect::Intersect2") {
 			rc0.Intersect(rc1);
 		};
 
