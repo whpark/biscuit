@@ -182,11 +182,239 @@ export namespace biscuit {
 	//-----------------------------------------------------------------------------
 	/// @brief class TCoordTransDim 
 	/// TARGET = scale * mat ( SOURCE - origin ) + offset
-	template < int DIM = 2, Eigen::TransformTraits TRANSFORM_MODE = Eigen::TransformTraits::AffineCompact >
-	class TCoordTransMat : public ICoordTrans {
+	template < int DIM = 2 >
+	class TCoordTransAffine : public ICoordTrans {
 		static_assert( DIM >= 2 and DIM <= 3 );
 	public:
-		using this_t = TCoordTransMat;
+		using this_t = TCoordTransAffine;
+		using base_t = ICoordTrans;
+		constexpr static auto const dim = DIM;
+		using mat_t = Eigen::Matrix<double, dim, dim, Eigen::RowMajor>;
+		using point_t = TPoint<double, dim, false>;
+		double m_scale{1.0};
+		mat_t m_mat{mat_t::Identity()};	// NO INITIALIZING
+		point_t m_origin{};
+		point_t m_offset{};
+
+	public:
+		BSC__NODISCARD virtual std::unique_ptr<ICoordTrans> clone() const { return std::make_unique<this_t>(*this); }
+
+		//friend class boost::serialization::access;
+		template < typename Archive >
+		friend void serialize(Archive &ar, std::uint32_t const version) {
+			auto size = m_mat.array().size() * sizeof(m_mat.data()[0]);
+			ar(cereal::BinaryData(m_mat.data(), size));
+		}
+
+	public:
+		using base_t::operator ();
+
+		bool operator == (this_t const& B) const {
+			return  m_scale == B.m_scale
+				and m_origin == B.m_origin
+				and m_offset == B.m_offset
+				and m_mat == B.m_mat;
+		}
+		bool operator != (this_t const& B) const = default;
+
+		//-------------------------------------------------------------------------
+		std::unique_ptr<ICoordTrans> GetInverse() const override {
+			std::unique_ptr<this_t> ctI(new this_t);
+
+			// scale
+			ctI->m_scale = 1./m_scale;
+			if (!std::isfinite(ctI->m_scale))
+				return {};
+
+			// Matrix
+			ctI->m_mat = m_mat.inverse();
+			if (!ctI->m_mat.allFinite())
+				return {};
+
+			// origin, offset
+			ctI->m_origin = m_offset;
+			ctI->m_offset = m_origin;
+
+			return ctI;
+		}
+
+		BSC__NODISCARD virtual xPoint2d Trans(double x, double y) const {
+			if constexpr (DIM == 2) {
+				return m_scale * (m_mat * (point_t{x, y} - m_origin).vec()) + m_offset;
+			}
+			else if constexpr (DIM == 3) {
+				return m_scale * (m_mat * (point_t{x, y, 0.} - m_origin).vec()) + m_offset;
+			}
+			else {
+				static_assert(false);
+			}
+		}
+		BSC__NODISCARD virtual xPoint3d Trans(double x, double y, double z) const {
+			if constexpr (DIM == 2) {
+				return m_scale * (m_mat * (point_t{x, y} - m_origin).vec()) + m_offset;
+			}
+			else if constexpr (DIM == 3) {
+				return m_scale * (m_mat * (point_t{x, y, z} - m_origin).vec()) + m_offset;
+			}
+			else {
+				static_assert(false);
+			}
+		}
+		BSC__NODISCARD virtual bool IsRightHanded() const {
+			return m_mat.determinant() >= 0;
+		}
+
+		//-------------------------------------------------------------------------
+		BSC__NODISCARD bool SetFrom2Pairs(std::span<point_t const> ptsSource, std::span<point_t const> ptsTarget, bool bCalcScale = true, double dMinDeterminant = 0.0, bool bRightHanded = true) 
+			requires (dim == 2)
+		{
+			//m_mat = mat_t::Identity();
+			//m_scale = 1.0;
+			//m_origin = m_offset = point_t{};
+			if ( (ptsSource.size() < 2) or (ptsTarget.size() < 2) )
+				return false;
+
+			std::array<point_t, 3> ptsS{ptsSource[0], ptsSource[1]}, ptsT{ptsTarget[0], ptsTarget[1]};
+			// 세번째 점은 각각, 0번 기준으로 1번을 90도 회전시킴
+			ptsS[2].x = -(ptsS[1].y-ptsS[0].y) + ptsS[0].x;
+			ptsS[2].y =  (ptsS[1].x-ptsS[0].x) + ptsS[0].y;
+			if (bRightHanded) {
+				ptsT[2].x = -(ptsT[1].y-ptsT[0].y) + ptsT[0].x;
+				ptsT[2].y =  (ptsT[1].x-ptsT[0].x) + ptsT[0].y;
+			}
+			else {
+				ptsT[2].x =  (ptsT[1].y-ptsT[0].y) + ptsT[0].x;
+				ptsT[2].y = -(ptsT[1].x-ptsT[0].x) + ptsT[0].y;
+			}
+
+			return SetFrom3Pairs(ptsS, ptsT, bCalcScale, dMinDeterminant);
+		}
+		BSC__NODISCARD bool SetFrom3Pairs(std::span<point_t const> ptsSource, std::span<point_t const> ptsTarget, bool bCalcScale = true, double dMinDeterminant = 0.0)
+			requires (dim == 2)
+		{
+			using mat_t = Eigen::Matrix2d;
+
+			//m_mat = mat_t::Identity();
+			//m_scale = 1.0;
+			//m_origin = m_offset = point_t{};
+			if ( (ptsSource.size() < 3) or (ptsTarget.size() < 3) )
+				return false;
+
+			auto v1s = ptsSource[1] - ptsSource[0];
+			auto v2s = ptsSource[2] - ptsSource[0];
+			auto v1t = ptsTarget[1] - ptsTarget[0];
+			auto v2t = ptsTarget[2] - ptsTarget[0];
+
+			mat_t matS;
+			matS << v1s.x, v2s.x, v1s.y, v2s.y;
+
+			// Check.
+			double d = matS.determinant();
+			if (std::abs(d) <= dMinDeterminant)
+				return false;
+
+			mat_t matT;
+			matT << v1t.x, v2t.x, v1t.y, v2t.y;
+
+			mat_t mat = matT * matS.inverse();
+
+			double scale = std::sqrt(std::abs(mat.determinant()));
+			mat /= scale;
+			m_scale = bCalcScale ? scale : 1.0;
+			m_mat = mat;
+			m_origin = ptsSource[0];
+			m_offset = ptsTarget[0];
+
+			return true;
+		}
+		BSC__NODISCARD bool SetFrom4Pairs(std::span<point_t const> ptsSource, std::span<point_t const> ptsTarget, bool bCalcScale = true, double dMinDeterminant = 0.0)
+			requires (dim == 3)
+		{
+			if ( (ptsSource.size() < 4) or (ptsTarget.size() < 4) )
+				return false;
+
+			auto& pts0 = ptsSource;
+			auto& pts1 = ptsTarget;
+			double dLenSource = pts0[0].Distance(pts0[1]);
+			double dLenTarget = pts1[0].Distance(pts1[1]);
+
+			if ( (dLenSource == 0.0) || (dLenTarget == 0.0) )
+				return false;
+
+			mat_t matS;
+			for (int i = 0; i < matS.cols; i++) {
+				matS(0, i) = pts0[i+1].x - pts0[0].x;
+				matS(1, i) = pts0[i+1].y - pts0[0].y;
+				matS(2, i) = pts0[i+1].z - pts0[0].z;
+			}
+			// Check.
+			double d = matS.determinant();
+			if (dMinDeterminant > 0 and std::abs(d) <= dMinDeterminant)
+				return false;
+
+			mat_t matT;
+			for (int i = 0; i < matT.cols; i++) {
+				matT(0, i) = pts1[i+1].x - pts1[0].x;
+				matT(1, i) = pts1[i+1].y - pts1[0].y;
+				matT(2, i) = pts1[i+1].z - pts1[0].z;
+			}
+
+			auto mat = matT * matS.inverse();
+			auto d = mat.determinant();
+			if (!std::isfinite(d))
+				return false;
+		}
+		void SetFromAngle2d(rad_t angle, point_t const& origin, point_t const& offset) {
+			m_scale = 1.0;
+			m_mat = Eigen::Rotation2D<double>(angle.value()).matrix();
+			m_origin = origin;
+			m_offset = offset;
+		}
+		static Eigen::Matrix3d GetRotatingMatrixXY(rad_t angle) {
+			Eigen::Matrix3d mat;
+			mat = Eigen::AngleAxisd(angle.value(), Eigen::Vector3d::UnitZ());
+			return mat;
+		}
+		static Eigen::Matrix3d GetRotatingMatrixYZ(rad_t angle) {
+			Eigen::Matrix3d mat;
+			mat = Eigen::AngleAxisd(angle.value(), Eigen::Vector3d::UnitX());
+			return mat;
+		}
+		static Eigen::Matrix3d GetRotatingMatrixZX(rad_t angle) {
+			Eigen::Matrix3d mat;
+			mat = Eigen::AngleAxisd(angle.value(), Eigen::Vector3d::UnitY());
+			return mat;
+		}
+
+
+		//-------------------------------------------------------------------------
+		void FlipLR(double x = 0.0) {
+			m_mat.row(0) *= -1;
+			m_offset.x += 2*x;
+		}
+		void FlipUD(double y = 0.0) {
+			m_mat.row(1) *= -1;
+			m_offset.y += 2*y;
+		}
+		void FlipFD(double z = 0.0) requires (dim >= 3) {
+			m_mat.row(2) *= -1;
+			m_offset.z += 2*z;
+		}
+
+		void FlipSourceX() { m_mat.col(0) *= -1; }
+		void FlipSourceY() { m_mat.col(1) *= -1; }
+		void FlipSourceZ() requires (dim >= 3) { m_mat.col(2) *= -1; }
+
+	};
+
+	//-----------------------------------------------------------------------------
+	/// @brief class TCoordTransDim 
+	/// TARGET = scale * mat ( SOURCE - origin ) + offset
+	template < int DIM = 2, Eigen::TransformTraits TRANSFORM_MODE = Eigen::TransformTraits::AffineCompact >
+	class TCoordTransEigen : public ICoordTrans {
+		static_assert( DIM >= 2 and DIM <= 3 );
+	public:
+		using this_t = TCoordTransEigen;
 		using base_t = ICoordTrans;
 		constexpr static auto const dim = DIM;
 		constexpr static auto const transform_mode = TRANSFORM_MODE;
@@ -463,10 +691,11 @@ export namespace biscuit {
 	};
 
 	//template TCoordTransDim<2>;
-	using xCoordTrans2d = TCoordTransMat<2, Eigen::TransformTraits::AffineCompact>;
-	using xCoordTrans2dP = TCoordTransMat<2, Eigen::TransformTraits::Projective>;
+	using xCoordTrans2d = TCoordTransAffine<2>;
+	using xCoordTrans2dP = TCoordTransEigen<2, Eigen::TransformTraits::Projective>;
 
 	//template TCoordTransDim<3>;
-	using xCoordTrans3d = TCoordTransMat<3>;
+	using xCoordTrans3d = TCoordTransAffine<3>;
+	using xCoordTrans3dP = TCoordTransEigen<3, Eigen::TransformTraits::Projective>;
 
 }	// namespace biscuit

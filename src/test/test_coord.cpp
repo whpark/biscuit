@@ -1,4 +1,4 @@
-#include <cstddef>
+﻿#include <cstddef>
 #include <catch.hpp>
 
 #include "biscuit/biscuit.h"
@@ -59,14 +59,15 @@ namespace test {
 		std::array<xPoint2d, 4> pts2{ { {0., 0.}, {0., 1.}, {1., 0.} } };
 
 		SECTION("1") {
-			ct.m_transform = Eigen::Rotation2D(biscuit::deg2rad(30));
+			ct.m_mat = Eigen::Rotation2D(biscuit::deg2rad(30)).matrix();
 			REQUIRE(ct != ct2);
 			ct2 = ct;
 			REQUIRE(ct == ct2);
 		}
 		SECTION("2") {
-			REQUIRE(ct.Scale2d() == 1);
-			ct.SetScale2d(3, xPoint2d(10, 10));
+			REQUIRE(ct.m_scale == 1);
+			ct.m_scale = 3.;
+			ct.m_origin = xPoint2d(10, 10);
 			REQUIRE(ct(xPoint2d(10, 10)) == xPoint2d(10, 10));
 			REQUIRE(ct(xPoint2d(11, 10)) == xPoint2d(13, 10));
 			REQUIRE(ct(xPoint2d(10, 11)) == xPoint2d(10, 13));
@@ -136,7 +137,7 @@ namespace test {
 		SECTION("4pt identical") {
 			xCoordTrans3d ct;
 			REQUIRE(ct.SetFrom4Pairs(pts0, pts0));	// Affine
-			REQUIRE(((ct.m_transform.matrix() - ct.m_transform.matrix().Identity()).cwiseAbs().array() < eps).all());
+			REQUIRE(((ct.m_mat - ct.m_mat.Identity()).cwiseAbs().array() < eps).all());
 		}
 		SECTION("4pt general") {
 			xCoordTrans3d ct;
@@ -333,7 +334,7 @@ namespace test {
 		SECTION("2d.affine") {
 			xCoordTrans2d ct;
 
-			ct.m_transform = Eigen::Translation2d(1, 2);
+			ct.m_offset = xPoint2d{1., 2.};
 
 			xPoint3d pt(1,2,3);
 			auto pt2 = ct(pt);
@@ -344,12 +345,12 @@ namespace test {
 		SECTION("3d.affine") {
 			xCoordTrans3d ct;
 
-			ct.m_transform = Eigen::Translation3d(1, 2, 3);
+			ct.m_offset = xPoint3d{1., 2., 3.};
 
 			REQUIRE(ct(xPoint3d{1, 2, 3}) == xPoint3d(2, 4, 6));
 			REQUIRE(ct(xPoint2d{1, 2}) == xPoint2d(2, 4));
 
-			ct.AdjustOffset({}, {101, 102, 103});
+			ct.m_offset = xPoint3d{101, 102, 103};
 			REQUIRE(ct(xPoint3d{1, 2, 3}) == xPoint3d(102, 104, 106));
 
 		}
