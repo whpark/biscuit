@@ -29,7 +29,7 @@ export namespace biscuit::qt {
 		std::filesystem::path const& path,
 		cv::Mat const& img,
 		int nBPP,
-		sSize2i const& pelsPerMeter,
+		xSize2i const& pelsPerMeter,
 		std::span<color_bgra_t const> palette = {},
 		bool bNoPaletteLookup = false,
 		bool bBottom2Top = false)

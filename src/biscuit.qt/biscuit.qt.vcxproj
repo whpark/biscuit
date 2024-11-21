@@ -37,12 +37,12 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>6.7.2_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;widgets;opengl;openglwidgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>6.7.2_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;widgets;opengl;openglwidgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -125,6 +125,9 @@
   <ItemGroup>
     <ClCompile Include="biscuit.qt.ixx" />
     <ClCompile Include="MatBitmapArchive.ixx" />
+    <ClCompile Include="MatView.cpp" />
+    <ClCompile Include="MatViewDlg.cpp" />
+    <ClCompile Include="MatViewSettingsDlg.cpp" />
     <ClCompile Include="ProgressDlg.cpp" />
     <ClCompile Include="QCollapsibleGroupBox.cpp" />
     <ClCompile Include="QColorButton.cpp" />
@@ -133,6 +136,10 @@
     <ClCompile Include="QRoundButton.cpp" />
     <ClCompile Include="ui_data_exchange.ixx" />
     <ClCompile Include="utils.ixx" />
+    <QtMoc Include="..\..\include\biscuit\qt\MatViewCanvas.h" />
+    <QtMoc Include="..\..\include\biscuit\qt\MatView.h" />
+    <QtMoc Include="..\..\include\biscuit\qt\MatViewDlg.h" />
+    <QtMoc Include="MatViewSettingsDlg.h" />
     <QtMoc Include="..\..\include\biscuit\qt\ProgressDlg.h" />
     <ClInclude Include="..\..\include\biscuit\qt\macro.h" />
     <QtMoc Include="..\..\include\biscuit\qt\QCollapsibleGroupBox.h" />
@@ -140,7 +147,6 @@
     <QtMoc Include="..\..\include\biscuit\qt\QGlazeModel.h" />
     <QtMoc Include="..\..\include\biscuit\qt\QPathCompleter.h" />
     <QtMoc Include="..\..\include\biscuit\qt\QRoundButton.h" />
-    <ClInclude Include="biscuit_qt.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\biscuit.opencv\biscuit.opencv.vcxproj">
@@ -151,6 +157,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="MatView.ui" />
+    <QtUic Include="MatViewDlg.ui" />
+    <QtUic Include="MatViewSettingsDlg.ui" />
     <QtUic Include="ProgressDlg.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

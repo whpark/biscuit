@@ -21,13 +21,19 @@
       <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
       <Extensions>ts</Extensions>
     </Filter>
+    <Filter Include="MatView">
+      <UniqueIdentifier>{20a7e182-14fe-4344-b5ab-122fcc55f7f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="biscuit_qt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClCompile Include="ui_data_exchange.ixx">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MatView.cpp">
+      <Filter>MatView</Filter>
+    </ClCompile>
+    <ClCompile Include="MatViewDlg.cpp">
+      <Filter>MatView</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -58,10 +64,22 @@
     <ClCompile Include="QRoundButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MatViewSettingsDlg.cpp">
+      <Filter>MatView</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ProgressDlg.ui">
       <Filter>Source Files</Filter>
+    </QtUic>
+    <QtUic Include="MatViewSettingsDlg.ui">
+      <Filter>MatView</Filter>
+    </QtUic>
+    <QtUic Include="MatViewDlg.ui">
+      <Filter>MatView</Filter>
+    </QtUic>
+    <QtUic Include="MatView.ui">
+      <Filter>MatView</Filter>
     </QtUic>
   </ItemGroup>
   <ItemGroup>
@@ -82,6 +100,18 @@
     </QtMoc>
     <QtMoc Include="..\..\include\biscuit\qt\QRoundButton.h">
       <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="MatViewSettingsDlg.h">
+      <Filter>MatView</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\biscuit\qt\MatViewDlg.h">
+      <Filter>MatView</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\biscuit\qt\MatView.h">
+      <Filter>MatView</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\biscuit\qt\MatViewCanvas.h">
+      <Filter>MatView</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

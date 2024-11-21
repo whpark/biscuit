@@ -24,7 +24,7 @@ namespace biscuit::qt {
 		bool bMaximized{};
 		bool bMinimized{};
 
-		GLZ_LOCAL_META(sWindowPosOption, bVisible, bMaximized, bMinimized);
+		//GLZ_LOCAL_META(sWindowPosOption, bVisible, bMaximized, bMinimized);
 
 		void operator << (QWidget& wnd) {
 			bVisible = wnd.isVisible();
