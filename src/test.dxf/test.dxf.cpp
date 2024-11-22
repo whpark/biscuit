@@ -1,6 +1,6 @@
 ﻿#include <catch.hpp>
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include "biscuit/dependencies_fmt.h"
 //#include "biscuit/dependencies_glaze.h"
 

@@ -183,7 +183,7 @@ namespace biscuit::qt {
 		xRect2i GetViewRect();
 		void InitializeGL(xMatViewCanvas* view);
 		void PaintGL(xMatViewCanvas* view);
-		bool PutMatAsTexture(GLuint textureID, cv::Mat const& img, int width, xRect2i const& rect, xRect2i const& rectClient);
+		bool PutMatAsTexture(GLuint textureID, cv::Mat const& img, int width, xBounds2i const& rect, xRect2i const& rectClient);
 
 	protected:
 		virtual void keyPressEvent(QKeyEvent *event) override;

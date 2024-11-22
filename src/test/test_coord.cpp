@@ -68,6 +68,7 @@ namespace test {
 			REQUIRE(ct.m_scale == 1);
 			ct.m_scale = 3.;
 			ct.m_origin = xPoint2d(10, 10);
+			ct.m_offset = xPoint2d(10, 10);
 			REQUIRE(ct(xPoint2d(10, 10)) == xPoint2d(10, 10));
 			REQUIRE(ct(xPoint2d(11, 10)) == xPoint2d(13, 10));
 			REQUIRE(ct(xPoint2d(10, 11)) == xPoint2d(10, 13));

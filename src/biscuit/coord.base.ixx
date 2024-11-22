@@ -280,7 +280,7 @@ export namespace biscuit::coord {
 			return r;
 		}
 		//--------------------------------------------------------------------------------------------------------------------------
-		BSC__NODISCARD auto operator <=> (this_t const&) const = default;
+		BSC__NODISCARD std::partial_ordering operator <=> (this_t const&) const = default;
 		BSC__NODISCARD auto operator <=> (value_t const& v) const { return *this <=> this_t::All(v); }
 
 		//=========================================================================================================================

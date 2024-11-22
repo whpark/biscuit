@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
@@ -35,7 +35,7 @@ export namespace biscuit {
 		return {};
 	}
 
-	bool PutMatAsTexture(GLuint textureID, cv::Mat const& img, int width, xRect2i const& rect) {
+	bool PutMatAsTexture(GLuint textureID, cv::Mat const& img, int width, xBounds2i const& rect) {
 		if (!textureID or img.empty() or !img.isContinuous() /*or (img.step %4)*/)
 			return false;
 
@@ -58,10 +58,10 @@ export namespace biscuit {
 		// patch
 		glBegin(GL_QUADS);
 		auto r = (float)width/img.cols;
-		glTexCoord2f(0.f, 0.f);	glVertex2i(rect.x,   rect.y);
-		glTexCoord2f(0.f, 1.f);	glVertex2i(rect.x,   rect.y+rect.height);
-		glTexCoord2f(r, 1.f);	glVertex2i(rect.x+rect.width,  rect.y+rect.height);
-		glTexCoord2f(r, 0.f);	glVertex2i(rect.x+rect.width,  rect.y);
+		glTexCoord2f(0.f, 0.f);	glVertex2i(rect.l,   rect.t);
+		glTexCoord2f(0.f, 1.f);	glVertex2i(rect.l,   rect.b);
+		glTexCoord2f(r, 1.f);	glVertex2i(rect.r,  rect.b);
+		glTexCoord2f(r, 0.f);	glVertex2i(rect.r,  rect.t);
 		glEnd();
 
 		return true;

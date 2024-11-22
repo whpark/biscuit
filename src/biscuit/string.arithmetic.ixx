@@ -138,11 +138,11 @@ export namespace biscuit {
 
 	template < concepts::arithmetic tvalue, int interval = 3 >
 	constexpr std::string AddThousandCommaA(tvalue value, char separator = ',') {
-		return AddThousandComma<char, interval>(std::to_string(value), separator);
+		return AddThousandComma<std::string, interval>(std::to_string(value), separator);
 	}
 	template < concepts::arithmetic tvalue, int interval = 3 >
 	constexpr std::wstring AddThousandCommaW(tvalue value, wchar_t separator = L',') {
-		return AddThousandComma<wchar_t, interval>(std::to_wstring(value), separator);
+		return AddThousandComma<std::wstring, interval>(std::to_wstring(value), separator);
 	}
 
 	template < concepts::arithmetic tvalue, typename ... targs >

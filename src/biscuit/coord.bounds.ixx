@@ -117,6 +117,58 @@ export namespace biscuit {
 		TBounds& operator = (concepts::coord::generic_size auto const& B) { pt1() = pt0() + B; return *this; }
 		TBounds& operator = (coord_rect_t const& rect) { this->pt0() = rect; this->pt1() = rect.pt1(); return *this; }
 
+		template < typename tcoord2 >
+			requires !std::is_same_v<tcoord2, this_t> and concepts::coord::generic_coord<tcoord2>
+		TBounds& operator = (tcoord2 const& b) {
+			if constexpr (requires (tcoord2 b) { b.l; b.r; b.t; b.b; }) {
+				if constexpr (bROUND and std::is_integral_v<value_t> and std::is_floating_point_v<std::remove_cvref_t<decltype(b.l)>>) {
+					this->l = Round<value_t>(b.l);
+					this->t = Round<value_t>(b.t);
+					this->r = Round<value_t>(b.r);
+					this->b = Round<value_t>(b.b);
+				}
+				else {
+					this->l = b.l;
+					this->t = b.t;
+					this->r = b.r;
+					this->b = b.b;
+				}
+			}
+			else if constexpr (requires (tcoord2 b) { b.left; b.right; b.top; b.bottom; }) {
+				if constexpr (bROUND and std::is_integral_v<value_t> and std::is_floating_point_v<std::remove_cvref_t<decltype(b.left)>>) {
+					this->l = Round<value_t>(b.left);
+					this->t = Round<value_t>(b.top);
+					this->r = Round<value_t>(b.right);
+					this->b = Round<value_t>(b.bottom);
+				}
+				else {
+					this->l = b.left;
+					this->t = b.top;
+					this->r = b.right;
+					this->b = b.bottom;
+				}
+			}
+			else {
+				static_assert(false);
+			}
+			return *this;
+		}
+
+		template < concepts::coord::generic_coord tcoord2 >
+		operator tcoord2() const {
+			tcoord2 r;
+			if constexpr (concepts::coord::is_rect2<tcoord2>) {
+				r.x = this->l;
+				r.y = this->t;
+				r.width = this->r - this->l;
+				r.height = this->b - this->t;
+			}
+			else {
+				static_assert(false);
+			}
+			return r;
+		}
+
 		auto operator <=> (this_t const&) const = default;
 
 		void SetEmptyForMinMax2d() {
@@ -288,7 +340,7 @@ export namespace biscuit {
 		/// @return true if pt is in *this
 		template < concepts::coord::is_point_ tpoint >
 		bool Contains(tpoint const& pt) const {
-			return pt0() <= pt and pt < pt1();
+			return pt0() <= pt and pt1() > pt;
 		}
 
 		/// @brief Valid for normalized bounds

@@ -1,10 +1,15 @@
 ﻿//#include "pch.h"
 
+#include <GL/glew.h>
+
 #include <QEvent>
+#include <QKeyEvent>
 #include <QScrollBar>
+#include <QMessageBox>
 #include <spdlog/stopwatch.h>
 
 #include "biscuit/dependencies_opencv.h"
+#include "biscuit/dependencies_fmt.h"
 #include "biscuit/qt/MatView.h"
 
 #include "MatViewSettingsDlg.h"
@@ -16,7 +21,6 @@ import biscuit;
 import biscuit.opencv;
 import biscuit.qt.utils;
 //import biscuit.qt.ui_data_exchange;
-
 
 namespace biscuit::qt {
 
@@ -445,7 +449,7 @@ namespace biscuit::qt {
 		auto rCT = m_ctScreenFromImage.GetInverse();
 		if (!rCT)
 			return false;
-		ct_t& ctS2I = *rCT;
+		auto& ctS2I = *rCT;
 		xRect2i rectClient{GetViewRect()};
 		double scale = ctS2I.Scale2d();
 
@@ -585,8 +589,8 @@ namespace biscuit::qt {
 	xRect2i xMatView::GetViewRect() {
 		if (!ui->view)
 			return {};
-		auto rect = ToCoord(ui->view->rect());
-		rect.MoveToXY(0, 0);
+		xRect2i rect = ToCoordRect(ui->view->rect());
+		rect.pt() = {};
 		for (auto r = devicePixelRatio(); auto& v : rect.arr())
 			v *= r;
 		return rect;
@@ -644,16 +648,19 @@ namespace biscuit::qt {
 			m_mouse.ptOffset0 = m_ctScreenFromImage.m_offset;
 		}
 		else if (event->button() == Qt::MouseButton::RightButton) {
+			auto ctI = m_ctScreenFromImage.GetInverse();
+			if (!ctI)
+				return;
 			if (m_mouse.bInSelectionMode) {
 				m_mouse.bInSelectionMode = false;
 				m_mouse.bRectSelected = true;
-				auto pt = m_ctScreenFromImage.TransI(ptView);
+				auto pt = (*ctI)(ptView);
 				m_mouse.ptSel1.x = std::clamp<int>(pt.x, 0, m_img.cols);
 				m_mouse.ptSel1.y = std::clamp<int>(pt.y, 0, m_img.rows);
 			} else {
 				m_mouse.bRectSelected = false;
 				m_mouse.bInSelectionMode = true;
-				auto pt = m_ctScreenFromImage.TransI(ptView);
+				auto pt = (*ctI)(ptView);
 				m_mouse.ptSel0.x = std::clamp<int>(pt.x, 0, m_img.cols);
 				m_mouse.ptSel0.y = std::clamp<int>(pt.y, 0, m_img.rows);
 				m_mouse.ptSel1 = m_mouse.ptSel0;
@@ -706,9 +713,11 @@ namespace biscuit::qt {
 			view->update();
 		}
 
+		auto ctI = m_ctScreenFromImage.GetInverse();
+
 		// Selection Mode
 		if (m_mouse.bInSelectionMode) {
-			auto pt = m_ctScreenFromImage.TransI(ptView);
+			auto pt = ctI ? (*ctI)(ptView) : ptView;
 			m_mouse.ptSel1.x = std::clamp<int>(pt.x, 0, m_img.cols);
 			m_mouse.ptSel1.y = std::clamp<int>(pt.y, 0, m_img.rows);
 			view->update();
@@ -716,7 +725,7 @@ namespace biscuit::qt {
 
 		// status
 		{
-			auto ptImage = gtl::Floor(m_ctScreenFromImage.TransI(xPoint2d(ptView)));
+			xPoint2i ptImage = biscuit::Floor((*ctI)(xPoint2d(ptView)));
 			std::wstring status;
 
 			// Current Position
@@ -739,7 +748,7 @@ namespace biscuit::qt {
 			// image value
 			{
 				int n = m_img.channels();
-				if (xRect2i(0, 0, m_img.cols, m_img.rows).PtInRect(ptImage)) {
+				if (xRect2i(0, 0, m_img.cols, m_img.rows).Contains(ptImage)) {
 					int depth = m_img.depth();
 					auto cr = GetMatValue(m_img.ptr(ptImage.y), depth, n, ptImage.y, ptImage.x);
 					auto strValue = std::format(L" [{:3}", cr[0]);
@@ -757,7 +766,7 @@ namespace biscuit::qt {
 
 			// Selection
 			if (m_mouse.bInSelectionMode or m_mouse.bRectSelected) {
-				gtl::xSize2i size = m_mouse.ptSel1 - m_mouse.ptSel0;
+				xSize2i size = m_mouse.ptSel1 - m_mouse.ptSel0;
 				status += fmt::format(L" (x{0} y{1} w{2} h{3})",
 					AddThousandCommaW((int)m_mouse.ptSel0.x), AddThousandCommaW((int)m_mouse.ptSel0.y),
 					AddThousandCommaW(std::abs(size.width)), AddThousandCommaW(std::abs(size.height)));
@@ -787,7 +796,7 @@ namespace biscuit::qt {
 		{
 			eZOOM cur = (eZOOM)index;
 			using enum eZOOM;
-			if (m_eZoom == cur and gtl::IsValueOneOf(m_eZoom, fit2window, one2one, mouse_wheel_locked, free))
+			if (m_eZoom == cur and IsOneOf(m_eZoom, fit2window, one2one, mouse_wheel_locked, free))
 				return;
 			m_eZoom = cur;
 		}
@@ -809,12 +818,15 @@ namespace biscuit::qt {
 		scale = std::clamp<double>(scale, dMinZoom, dMaxZoom);
 		if (m_bSkipSpinZoomEvent)
 			return;
-		if ( m_option.bZoomLock and gtl::IsValueNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
+		if ( m_option.bZoomLock and IsNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
 			return;
 		if (m_ctScreenFromImage.m_scale == scale)
 			return;
 		auto rect{GetViewRect()};
-		auto ptImage = m_ctScreenFromImage.TransI(rect.CenterPoint());
+		auto ctI = m_ctScreenFromImage.GetInverse();
+		if (!ctI)
+			return;
+		auto ptImage = (*ctI)(rect.CenterPoint());
 		m_ctScreenFromImage.m_scale = scale;
 		auto pt2 = m_ctScreenFromImage(ptImage);
 		m_ctScreenFromImage.m_offset += rect.CenterPoint() - m_ctScreenFromImage(ptImage);
@@ -824,19 +836,19 @@ namespace biscuit::qt {
 	}
 
 	void xMatView::OnBtnZoomIn_clicked() {
-		//if ( m_option.bZoomLock and gtl::IsValueNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
+		//if ( m_option.bZoomLock and IsNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
 		//	return;
 		ZoomInOut(100, GetViewRect().CenterPoint(), false);
 	}
 
 	void xMatView::OnBtnZoomOut_clicked() {
-		//if ( m_option.bZoomLock and gtl::IsValueNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
+		//if ( m_option.bZoomLock and IsNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
 		//	return;
 		ZoomInOut(-100, GetViewRect().CenterPoint(), false);
 	}
 
 	void xMatView::OnBtnZoomFit_clicked() {
-		//if ( m_option.bZoomLock and gtl::IsValueNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
+		//if ( m_option.bZoomLock and IsNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
 		//	return;
 		UpdateCT(true, eZOOM::fit2window);
 		UpdateScrollBars();
@@ -859,7 +871,7 @@ namespace biscuit::qt {
 			if (matHist.at<float>(i, 0) > 0) {
 				// add locale en_US.utf8
 				str += fmt::format(L"Value {} : ", i);
-				str += gtl::AddThousandComma<wchar_t>(std::format(L"{}", (int)matHist.at<float>(i, 0)));
+				str += fmt::format(std::locale("en_US.UTF-8"), L"{:L}", (int)matHist.at<float>(i, 0));
 				str += L"\n";
 			}
 		}
@@ -1033,15 +1045,15 @@ R"(
 
 	}
 
-	bool xMatView::PutMatAsTexture(GLuint textureID, cv::Mat const& img, int width, gtl::xRect2i const& rect, gtl::xRect2i const& rectClient) {
+	bool xMatView::PutMatAsTexture(GLuint textureID, cv::Mat const& img, int width, xBounds2i const& rect, xRect2i const& rectClient) {
 		if (!textureID or img.empty() or !img.isContinuous())
 			return false;
 
 		if (!m_gl.gl or !m_gl.shaderProgram or !m_gl.VAO or !m_gl.VBO) {
-			return gtl::PutMatAsTexture(textureID, img, width, rect);
+			return biscuit::PutMatAsTexture(textureID, img, width, rect);
 		}
 
-		if (rectClient.Width() <= 0 or rectClient.Height() <= 0)
+		if (rectClient.width <= 0 or rectClient.height <= 0)
 			return false;
 
 		glBindTexture(GL_TEXTURE_2D, textureID);
@@ -1066,7 +1078,7 @@ R"(
 		m_gl().glBindVertexArray(m_gl.VAO);
 		m_gl().glBindBuffer(GL_ARRAY_BUFFER, m_gl.VBO);
 
-		gtl::TRect2<float> rc((float)rect.left/rectClient.Width(), (float)rect.top/rectClient.Height(), (float)rect.right/rectClient.Width(), (float)rect.bottom/rectClient.Height());
+		TBounds<float, 2, false> rc((float)rect.l/rectClient.width, (float)rect.t/rectClient.height, (float)rect.r/rectClient.width, (float)rect.b/rectClient.height);
 		for (auto& v : rc.arr()) {
 			v = v*2 - 1;
 		}
@@ -1079,10 +1091,10 @@ R"(
 			//r, -1.0f,		rc.left, rc.top,
 			//r, 1.0f,		rc.left, rc.bottom,
 			//-r, 1.0f,		rc.right, rc.bottom,
-			rc.left, -rc.top, 	0, 0,
-			rc.right, -rc.top, 	r, 0,
-			rc.right, -rc.bottom, r, 1,
-			rc.left, -rc.bottom, 0, 1,
+			rc.l, -rc.t, 0, 0,
+			rc.r, -rc.t, r, 0,
+			rc.r, -rc.b, r, 1,
+			rc.l, -rc.b, 0, 1,
 		};
 
 		m_gl().glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -1106,7 +1118,6 @@ R"(
 
 		if (!view)
 			return;
-		using namespace gtl;
 
 		//================
 		// openGL
@@ -1115,7 +1126,7 @@ R"(
 		// Client Rect
 		xRect2i rectClient;
 		rectClient = GetViewRect();
-		xSize2i const sizeView = rectClient.GetSize();
+		xSize2i const sizeView = rectClient.size();
 		glViewport(0, 0, sizeView.width, sizeView.height);
 
 		glMatrixMode(GL_PROJECTION);     // Make a simple 2D projection on the entire window
@@ -1133,7 +1144,7 @@ R"(
 			return;
 		auto* surface = view->context()->surface();
 
-		gtl::xFinalAction faSwapBuffer{[&]{
+		xFinalAction faSwapBuffer{[&]{
 			//OutputDebugStringA("Flush\n");
 			glFlush();
 			context->swapBuffers(surface);
@@ -1146,39 +1157,42 @@ R"(
 		//// Show zoom Scale
 		//base_t::m_spinCtrlZoom->SetValue(m_ctScreenFromImage.m_scale);
 
-		if (rectClient.IxRectEmpty())
+		if (rectClient.IsEmpty())
 			return;
 
 		//==================
 		// Get Image - ROI
 		auto const& ct = m_ctScreenFromImage;
+		auto rctI = ct.GetInverse();
+		if (!rctI) return;
+		auto& ctI = *rctI;
 
 		// Position
-		xRect2i rectImage;
-		rectImage.pt0() = ct.TransInverse(xPoint2d(rectClient.pt0())).value_or(xPoint2d{});
-		rectImage.pt1() = ct.TransInverse(xPoint2d(rectClient.pt1())).value_or(xPoint2d{});
-		rectImage.NormalizeRect();
-		rectImage.InflateRect(1, 1);
-		rectImage &= xRect2i{ 0, 0, m_img.cols, m_img.rows };
-		if (rectImage.IxRectEmpty())
+		xBounds2i rectImage;
+		rectImage.pt0() = ctI(xPoint2d(rectClient.pt0()));
+		rectImage.pt1() = ctI(xPoint2d(rectClient.pt1()));
+		rectImage.Normalize();
+		rectImage.Inflate(1, 1);
+		rectImage &= xBounds2i{ 0, 0, m_img.cols, m_img.rows };
+		if (rectImage.IsEmpty())
 			return;
 		cv::Rect roi(rectImage);
-		xRect2i rectTarget;
+		xBounds2i rectTarget;
 		rectTarget.pt0() = ct(rectImage.pt0());
-		rectTarget.pt1() = ct.Trans(xPoint2d(rectImage.pt1()));
-		rectTarget.NormalizeRect();
-		if (rectTarget.right == rectTarget.left)
-			rectTarget.right = rectTarget.left+1;
-		if (rectTarget.bottom == rectTarget.top)
-			rectTarget.bottom = rectTarget.top+1;
-		if (!gtl::IsROI_Valid(roi, m_img.size()))
+		rectTarget.pt1() = ct(xPoint2d(rectImage.pt1()));
+		rectTarget.Normalize();
+		if (rectTarget.r == rectTarget.l)
+			rectTarget.r = rectTarget.l+1;
+		if (rectTarget.b == rectTarget.t)
+			rectTarget.b = rectTarget.t+1;
+		if (!IsROI_Valid(roi, m_img.size()))
 			return;
 
 		// img (roi)
 		cv::Rect rcTarget(cv::Point2i{}, cv::Size2i(rectTarget.Width(), rectTarget.Height()));
 		cv::Rect rcTargetC(rcTarget);	// 4 byte align
 		if (rcTarget.width*m_img.elemSize() % 4)
-			rcTargetC.width = gtl::AdjustAlign32(rcTargetC.width);
+			rcTargetC.width = AdjustAlign32(rcTargetC.width);
 		// check target image size
 		if ((uint64_t)rcTargetC.width * rcTargetC.height > 1ull *1024*1024*1024)
 			return;
@@ -1227,11 +1241,12 @@ R"(
 					roiP.y *= scaleP;
 					roiP.width *= scaleP;
 					roiP.height *= scaleP;
-					roiP = gtl::GetSafeROI(roiP, imgPyr.size());
+					roiP = GetSafeROI(roiP, imgPyr.size());
 					if (!roiP.empty()) {
 						//cv::resize(imgPyr(roiP), img(rcTarget), rcTarget.size(), 0., 0., eInterpolation);
 						cv::Mat imgSrc(imgPyr(roiP));
 						cv::Mat imgDest;
+					#ifdef HAVE_CUDA
 						if (IsGPUEnabled()) {
 							try {
 								cv::cuda::GpuMat dst;
@@ -1242,6 +1257,7 @@ R"(
 								//TRACE((GTL__FUNCSIG " - Error\n").c_str());
 							}
 						}
+					#endif
 						//#endif
 						if (imgDest.empty())
 							cv::resize(imgSrc, img(rcTarget), rcTarget.size(), 0., 0., eInterpolation);
@@ -1270,9 +1286,9 @@ R"(
 				m_img(roi).copyTo(img(rcTarget));
 			}
 		} catch (std::exception& e) {
-			OutputDebugStringA(std::format("cv::{}.......\n", e.what()).c_str());
+			//OutputDebugStringA(std::format("cv::{}.......\n", e.what()).c_str());
 		} catch (...) {
-			OutputDebugStringA("cv::.......\n");
+			//OutputDebugStringA("cv::.......\n");
 		}
 
 		if (!img.empty()) {
@@ -1294,10 +1310,10 @@ R"(
 			GLuint textures[2]{};
 			glGenTextures(std::size(textures), textures);
 			if (!textures[0]) {
-				OutputDebugStringA("glGenTextures failed\n");
+				//OutputDebugStringA("glGenTextures failed\n");
 				return;
 			}
-			gtl::xFinalAction finalAction([&] {
+			xFinalAction finalAction([&] {
 				glDisable(GL_TEXTURE_2D);
 				glDeleteTextures(std::size(textures), textures);
 			});
@@ -1311,12 +1327,12 @@ R"(
 
 			// Draw Selection Rect
 			if (m_mouse.bInSelectionMode or m_mouse.bRectSelected) {
-				xRect2i rect;
+				xBounds2i rect;
 				rect.pt0() = m_ctScreenFromImage(m_mouse.ptSel0);
 				rect.pt1() = m_ctScreenFromImage(m_mouse.ptSel1);
-				rect.NormalizeRect();
+				rect.Normalize();
 				rect &= rectClient;
-				if (!rect.IxRectEmpty()) {
+				if (!rect.IsEmpty()) {
 					cv::Mat rectangle(16, 16, CV_8UC4);
 					rectangle = cv::Scalar(255, 255, 127, 128);
 					PutMatAsTexture(textures[1], rectangle, rectangle.cols, rect, rectClient);
@@ -1326,4 +1342,4 @@ R"(
 
 	}
 
-} // namespace gtl::qt
+} // namespace biscuit::qt

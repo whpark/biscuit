@@ -240,10 +240,10 @@ export namespace biscuit {
 
 		BSC__NODISCARD virtual xPoint2d Trans(double x, double y) const {
 			if constexpr (DIM == 2) {
-				return m_scale * (m_mat * (point_t{x, y} - m_origin).vec()) + m_offset;
+				return xPoint2d(m_scale * (m_mat * (point_t{x, y} - m_origin).vec())) + m_offset;
 			}
 			else if constexpr (DIM == 3) {
-				return m_scale * (m_mat * (point_t{x, y, 0.} - m_origin).vec()) + m_offset;
+				return xPoint3d(m_scale * (m_mat * (point_t{x, y, 0.} - m_origin).vec())) + m_offset;
 			}
 			else {
 				static_assert(false);
@@ -251,10 +251,11 @@ export namespace biscuit {
 		}
 		BSC__NODISCARD virtual xPoint3d Trans(double x, double y, double z) const {
 			if constexpr (DIM == 2) {
-				return m_scale * (m_mat * (point_t{x, y} - m_origin).vec()) + m_offset;
+				auto pt = m_scale * (m_mat * (point_t{x, y} - m_origin).vec());
+				return xPoint3d(pt.x() + m_offset.x, pt.y() + m_offset.y , z);
 			}
 			else if constexpr (DIM == 3) {
-				return m_scale * (m_mat * (point_t{x, y, z} - m_origin).vec()) + m_offset;
+				return xPoint3d(m_scale * (m_mat * (point_t{x, y, z} - m_origin).vec())) + m_offset;
 			}
 			else {
 				static_assert(false);
@@ -335,14 +336,14 @@ export namespace biscuit {
 
 			auto& pts0 = ptsSource;
 			auto& pts1 = ptsTarget;
-			double dLenSource = pts0[0].Distance(pts0[1]);
-			double dLenTarget = pts1[0].Distance(pts1[1]);
+			double dLenSource = pts0[0].GetDistance(pts0[1]);
+			double dLenTarget = pts1[0].GetDistance(pts1[1]);
 
 			if ( (dLenSource == 0.0) || (dLenTarget == 0.0) )
 				return false;
 
 			mat_t matS;
-			for (int i = 0; i < matS.cols; i++) {
+			for (int i = 0; i < matS.cols(); i++) {
 				matS(0, i) = pts0[i+1].x - pts0[0].x;
 				matS(1, i) = pts0[i+1].y - pts0[0].y;
 				matS(2, i) = pts0[i+1].z - pts0[0].z;
@@ -353,16 +354,21 @@ export namespace biscuit {
 				return false;
 
 			mat_t matT;
-			for (int i = 0; i < matT.cols; i++) {
+			for (int i = 0; i < matT.cols(); i++) {
 				matT(0, i) = pts1[i+1].x - pts1[0].x;
 				matT(1, i) = pts1[i+1].y - pts1[0].y;
 				matT(2, i) = pts1[i+1].z - pts1[0].z;
 			}
 
 			auto mat = matT * matS.inverse();
-			auto d = mat.determinant();
-			if (!std::isfinite(d))
+			auto scale = mat.determinant();
+			if (!std::isfinite(scale))
 				return false;
+			m_scale = scale;
+			m_mat = mat;
+			m_origin = pts0[0];
+			m_offset = pts1[0];
+			return true;
 		}
 		void SetFromAngle2d(rad_t angle, point_t const& origin, point_t const& offset) {
 			m_scale = 1.0;

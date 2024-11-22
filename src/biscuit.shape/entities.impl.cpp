@@ -466,7 +466,7 @@ namespace biscuit::shape {
 				ct_t ct;
 				// todo : 순서 확인 (scale->rotate ? or rotate->scale ?)
 				if (pInsert->m_xscale != 1.0 or pInsert->m_yscale != 1.0 or pInsert->m_zscale != 1.0) {
-					ct.m_transform.matrix() = Eigen::Scaling(pInsert->m_xscale, pInsert->m_yscale, pInsert->m_zscale) * ct.m_transform.matrix();
+					ct.m_mat = Eigen::Scaling(pInsert->m_xscale, pInsert->m_yscale, pInsert->m_zscale) * ct.m_mat;
 				}
 				//if (pInsert->m_xscale != 1.0) {
 				//	ct.m_mat(0, 0) *= pInsert->m_xscale;
@@ -485,14 +485,11 @@ namespace biscuit::shape {
 				//}
 
 				if (pInsert->m_angle != 0.0_deg) {
-					ct.m_transform.matrix() = ct.GetRotatingMatrixXY(pInsert->m_angle) * ct.m_transform.matrix();
+					ct.m_mat = ct.GetRotatingMatrixXY(pInsert->m_angle) * ct.m_mat;
 				}
 
-				//ct.m_origin = pBlock->m_pt;
-				{
-					auto pt0 = ct(point_t{});
-					ct.AdjustOffset(pBlock->m_pt, pt0);
-				}
+				ct.m_origin = pBlock->m_pt;
+				ct.m_offset = ct(point_t{});
 
 				for (int y = 0; y < pInsert->m_nRow; y++) {
 					for (int x = 0; x < pInsert->m_nCol; x++) {
@@ -501,8 +498,8 @@ namespace biscuit::shape {
 						if (!rBlockNew)
 							continue;
 
-						ct.m_transform.translation().x() = x*pInsert->m_spacingCol + pInsert->m_pt.x;
-						ct.m_transform.translation().y() = y*pInsert->m_spacingRow + pInsert->m_pt.y;
+						ct.m_offset.x = x*pInsert->m_spacingCol + pInsert->m_pt.x;
+						ct.m_offset.y = y*pInsert->m_spacingRow + pInsert->m_pt.y;
 						bool const bIsRightHanded = ct.IsRightHanded();
 
 						for (auto const& rItem : rBlockNew->m_shapes) {

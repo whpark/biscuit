@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
@@ -40,7 +40,7 @@ export namespace biscuit {
 			this->pt() = pt;
 			this->size() = size;
 		}
-		TRect(coord_size_t size) {
+		explicit TRect(coord_size_t size) {
 			this->pt() = {};
 			this->size() = size;
 		}
@@ -99,7 +99,7 @@ export namespace biscuit {
 		/// @return true if pt is in *this
 		template < concepts::coord::is_point_ tpoint >
 		bool Contains(tpoint const& pt) const {
-			return (pt0() <= pt) and (pt < pt1());
+			return (pt0() <= pt) and (pt1() > pt);
 		}
 
 		/// @brief Valid for normalized rect

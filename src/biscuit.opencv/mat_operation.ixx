@@ -1,5 +1,6 @@
-module;
+﻿module;
 
+#include <FreeImage.h>
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
 #include "biscuit/dependencies_opencv.h"
@@ -444,6 +445,242 @@ export namespace biscuit {
 
 		return false;
 	}
+
+	bool CopyMatToXY(cv::Mat const& src, cv::Mat& dest, xPoint2i ptDestTopLeft, cv::Mat const* pMask = nullptr) {
+		if (src.type() != dest.type())
+			return false;
+		//if ((src.cols > dest.cols) or (src.rows > dest.rows))
+		//	return false;
+		cv::Rect rcROI(ptDestTopLeft.x, ptDestTopLeft.y, src.cols, src.rows);
+		cv::Rect rcSafeROI = GetSafeROI(rcROI, dest.size());
+		if (rcROI == rcSafeROI) {
+			if (pMask and pMask->size() == src.size())
+				src.copyTo(dest(rcSafeROI), *pMask);
+			else
+				src.copyTo(dest(rcSafeROI));
+			return true;
+		}
+		else {
+			if (rcSafeROI.empty())
+				return false;
+			cv::Rect rcSrc(0, 0, src.cols, src.rows);
+			if (rcROI.x < 0) {
+				rcSrc.width += rcROI.x;
+				rcSrc.x -= rcROI.x;
+				rcROI.width += rcROI.x;
+				rcROI.x = 0;
+			}
+			if (rcROI.y < 0) {
+				rcSrc.height += rcROI.y;
+				rcSrc.y -= rcROI.y;
+				rcROI.height += rcROI.y;
+				rcROI.y = 0;
+			}
+			if (rcROI.x + rcROI.width > dest.cols) {
+				rcSrc.width = rcROI.width = dest.cols - rcROI.x;
+			}
+			if (rcROI.y + rcROI.height > dest.rows) {
+				rcSrc.height = rcROI.height = dest.rows - rcROI.y;
+			}
+			if (IsROI_Valid(rcSrc, src.size())) {
+				if (pMask and pMask->size() == src.size())
+					src(rcSrc).copyTo(dest(rcROI), (*pMask)(rcSrc));
+				else
+					src(rcSrc).copyTo(dest(rcROI));
+			}
+			return true;
+		}
+	}
+
+	bool IsImageExtension(std::filesystem::path const& path) {
+		auto ext = ToLower(path.extension().string());
+		return IsOneOf(ext, ".bmp", ".jpg", ".jpeg", ".tiff", ".png", ".gif", ".jfif");
+	}
+
+	cv::Scalar GetMatValue(uchar const* ptr, int depth, int channel, int row, int col) {
+		//if ( mat.empty() or (row < 0) or (row >= mat.rows) or (col < 0) or (col >= mat.cols) )
+		//	return;
+
+		cv::Scalar v;
+		auto GetValue = [&]<typename T>(T&&){
+			for (int i = 0; i < channel; ++i)
+				v[i] = ((T*)ptr)[col * channel + i];
+		};
+		switch (depth) {
+		case CV_8U:		GetValue(uint8_t{}); break;
+		case CV_8S:		GetValue(int8_t{}); break;
+		case CV_16U:	GetValue(uint16_t{}); break;
+		case CV_16S:	GetValue(int16_t{}); break;
+		case CV_32S:	GetValue(int32_t{}); break;
+		case CV_32F:	GetValue(float{}); break;
+		case CV_64F:	GetValue(double{}); break;
+			//case CV_16F:	GetValue(uint16_t{}); break;
+		}
+
+		return v;
+	}
+
+	bool DrawPixelValue(cv::Mat& canvas, cv::Mat const& imgOriginal, cv::Rect roi, xCoordTrans2d const& ctCanvasFromImage, double const minTextHeight = 8) {
+		// Draw Grid / pixel value
+		if (ctCanvasFromImage.m_scale < 4)
+			return false;
+		cv::Scalar cr{127, 127, 127, 255};
+		// grid - horizontal
+		for (int y{roi.y}, y1{roi.y+roi.height}; y < y1; y++) {
+			auto pt0 = ctCanvasFromImage.Trans(roi.x, y);
+			auto pt1 = ctCanvasFromImage.Trans(roi.x+roi.width, y);
+			cv::line(canvas, pt0, pt1, cr);
+		}
+		// grid - vertical
+		for (int x{roi.x}, x1{roi.x+roi.width}; x < x1; x++) {
+			auto pt0 = ctCanvasFromImage.Trans(x, roi.y);
+			auto pt1 = ctCanvasFromImage.Trans(x, roi.y+roi.height);
+			cv::line(canvas, pt0, pt1, cr);
+		}
+
+		// Pixel Value
+		auto nChannel = imgOriginal.channels();
+		auto depth = imgOriginal.depth();
+
+		if ( ctCanvasFromImage.m_scale < ((nChannel+1.0)*minTextHeight) )
+			return false;
+		double heightFont = std::clamp(ctCanvasFromImage.m_scale/(nChannel+1.0), 1., 40.) / 40.;
+		//auto t0 = stdc::steady_clock::now();
+		for (int y{roi.y}, y1{roi.y+roi.height}; y < y1; y++) {
+			auto* ptr = imgOriginal.ptr(y);
+			int x1{roi.x+roi.width};
+			//#pragma omp parallel for --------- little improvement
+			for (int x{roi.x}; x < x1; x++) {
+				auto pt = ctCanvasFromImage.Trans(x, y);
+				//auto p = SkPoint::Make(pt.x, pt.y);
+				auto v = GetMatValue(ptr, depth, nChannel, y, x);
+				auto avg = (v[0] + v[1] + v[2]) / nChannel;
+				auto cr = (avg > 128) ? cv::Scalar{0, 0, 0, 255} : cv::Scalar{255, 255, 255, 255};
+				for (int ch{}; ch < nChannel; ch++) {
+					auto str = std::format("{:3}", v[ch]);
+					cv::putText(canvas, str, cv::Point(pt.x, pt.y+(ch+1)*heightFont*40), cv::FONT_HERSHEY_DUPLEX, heightFont, cr, 1, 8, false);
+				}
+			}
+		}
+		//auto t1 = stdc::steady_clock::now();
+		//auto dur = stdc::duration_cast<stdc::milliseconds>(t1-t0).count();
+		//OutputDebugString(std::format(L"{} ms\n", dur).c_str());
+
+		return true;
+
+	}
+
+	std::optional<cv::Mat> ConvertFI2Mat(FIBITMAP* src, bool bRGBtoBGR = true) {
+		int type{-1}, bpp{-1};
+		auto eImageType = FreeImage_GetImageType(src);
+		switch (eImageType) {
+		case FIT_UINT16:	type = CV_16UC1; break;
+		case FIT_INT16:		type = CV_16SC1; break;
+			//case FIT_UINT32:	type = CV_32SC1; break;
+		case FIT_INT32:		type = CV_32SC1; break;
+		case FIT_FLOAT:		type = CV_32FC1; break;
+		case FIT_DOUBLE:	type = CV_64FC1; break;
+		case FIT_COMPLEX:	type = CV_64FC2; break;
+		case FIT_RGB16:		type = CV_16UC3; break;
+		case FIT_RGBA16:	type = CV_16UC4; break;
+		case FIT_RGBF:		type = CV_32FC3; break;
+		case FIT_RGBAF:		type = CV_32FC4; break;
+		case FIT_BITMAP:
+			bpp = FreeImage_GetBPP(src);
+			switch (bpp) {
+			case 1:
+			case 2:	// probably there might not be 2bpp image
+			case 4:
+			case 8: type = CV_8UC1; break;	// To Be Determined
+			case 16: type = CV_16UC1; break;	// To Be Determined
+			case 24: type = CV_8UC3; break;
+			case 32: type = CV_8UC4; break;
+			}
+			break;
+		}
+		if (type < 0)
+			return {};
+
+		//auto* info = FreeImage_GetInfo(src);
+		//info->bmiHeader;
+
+		bool flip{true};
+		FIBITMAP* converted{};
+		FIBITMAP* fib = src;
+		if (eImageType == FIT_BITMAP) {	// Standard image type
+			// first check if grayscale image
+			if (bpp <= 16) {
+				bool bColor{};
+				bool bAlpha{};
+				// get palette
+				if (auto* palette = FreeImage_GetPalette(src)) {
+					for (auto nPalette = FreeImage_GetColorsUsed(src), i{ 0u }; i < nPalette; i++) {
+						if (auto c = palette[i]; c.rgbBlue != c.rgbGreen or c.rgbGreen != c.rgbRed) {	// todo: alpha channel?
+							bColor = true;
+							break;
+						}
+					}
+					for (auto nPalette = FreeImage_GetColorsUsed(src), i{ 0u }; i < nPalette; i++) {
+						if (auto c = palette[i]; c.rgbReserved) {	// todo: alpha channel?
+							bAlpha = true;
+							break;
+						}
+					}
+				}
+				if (bAlpha) {
+					converted = FreeImage_ConvertTo32Bits(src);
+					type = CV_8UC4;
+				} else if (bColor or (bpp == 16)) {
+					converted = FreeImage_ConvertTo24Bits(src);
+					type = CV_8UC3;
+				} else {
+					converted = FreeImage_ConvertToGreyscale(src);
+					type = CV_8UC1;
+				}
+				fib = converted;
+			}
+		}
+		else {
+			flip = true;	// don't know if image needs be flipped. so just flip it. :)
+		}
+
+		std::optional<biscuit::xFinalAction> faConverted;
+		if (converted) {
+			faConverted.emplace([converted]{FreeImage_Unload(converted);});
+		}
+
+		if (!fib)
+			return {};
+
+		auto data = FreeImage_GetBits(fib);
+		auto step = FreeImage_GetPitch(fib);
+		auto size = cv::Size2i(FreeImage_GetWidth(fib), FreeImage_GetHeight(fib));
+		if (!data or !step or size.empty())
+			return {};
+
+		cv::Mat img;
+		{
+			cv::Mat imgTemp = cv::Mat(size, type, data, step);	// !!! CAUTION no memory allocation.
+			if (flip)
+				cv::flip(imgTemp, img, 0);
+			else
+				imgTemp.copyTo(img);
+		}
+
+		int cvt = bRGBtoBGR ? [&]() -> int {
+			switch (img.channels()) {
+			case 3: return cv::COLOR_RGB2BGR;
+			case 4: return cv::COLOR_RGBA2BGRA;
+			}
+			return -1;
+		}() : -1;
+		if (cvt > 0)
+			cvtColor(img, img, cvt);
+
+		return std::move(img);
+
+	}
+
 
 }
 
