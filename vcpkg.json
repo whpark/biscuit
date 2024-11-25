@@ -1,18 +1,18 @@
 ﻿{
     "dependencies":
     [
-        "catch2",
-        "boost-pfr",
         "asio",
+        "boost-pfr",
+        "catch2",
         "cereal",
         "ctre",
-        "fmt",
-        "glaze",
         "eigen3",
+        "fmt",
+        "freeimage",
+        "glaze",
+        "glew",
         "libiconv",
-        "simdutf",
-        "spdlog",
-        "units",
+        "magic-enum",
         {
             "name": "opencv",
             "features":
@@ -25,10 +25,10 @@
                 "opengl"
             ]
         },
+        "simdutf",
+        "spdlog",
         "tinyspline",
-        "winreg",
-        "magic-enum",
-        "glew",
-        "freeimage"
+        "units",
+        "winreg"
     ]
 }

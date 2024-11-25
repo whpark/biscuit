@@ -1,4 +1,4 @@
-# biscuit
+﻿# biscuit
 
 ## A Helper Library for C++ projects (in module, C++23)
 - concepts
@@ -7,22 +7,23 @@
 - misc : miscellaneous
 
 ### dependencies
-- boost https://www.boost.org/
 - asio https://think-async.com/Asio/
+- boost https://www.boost.org/
 - catch2 https://github.com/catchorg/Catch2
 - cereal https://uscilab.github.io/cereal/
-- fmt https://fmt.dev
-- glaze https://github.com/stephenberry/glaze
+- ctre https://github.com/hanickadot/compile-time-regular-expressions
 - eigen https://eigen.tuxfamily.org/
+- fmt https://fmt.dev
+- freeimage https://freeimage.sourceforge.io/
+- glaze https://github.com/stephenberry/glaze
+- glew https://glew.sourceforge.net/
 - libiconv https://www.gnu.org/software/libiconv/
+- magic_enum https://github.com/Neargye/magic_enum
+- opencv https://opencv.org/
+- qt https://www.qt.io/
 - simdutf https://github.com/simdutf/simdutf
 - spdlog https://github.com/gabime/spdlog
-- units https://github.com/nholthaus/units
-- opencv https://opencv.org/
-- winreg https://github.com/GiovanniDicanio/WinReg
 - tinyspline https://github.com/msteinbeck/tinyspline
-- glew https://glew.sourceforge.net/
-- magic_enum https://github.com/Neargye/magic_enum
-- qt https://www.qt.io/
-- dime https://github.com/coin3d/dime
+- units https://github.com/nholthaus/units
+- winreg https://github.com/GiovanniDicanio/WinReg
 - 
