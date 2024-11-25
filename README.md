@@ -25,5 +25,6 @@
 - spdlog https://github.com/gabime/spdlog
 - tinyspline https://github.com/msteinbeck/tinyspline
 - units https://github.com/nholthaus/units
+- verdigris https://github.com/woboq/verdigris
 - winreg https://github.com/GiovanniDicanio/WinReg
 - 

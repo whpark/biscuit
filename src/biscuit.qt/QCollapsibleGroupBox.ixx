@@ -1,13 +1,60 @@
-﻿#include "biscuit/qt/QCollapsibleGroupBox.h"
+﻿module;
 
+#include "biscuit/config.h"
+#include "biscuit/macro.h"
+#include "verdigris/wobjectcpp.h"
+#include "verdigris/wobjectimpl.h"
+
+#include <QtWidgets/QGroupBox>
+#include <QPropertyAnimation>
+#include <QSequentialAnimationGroup>
+
+export module biscuit.qt.QCollapsibleGroupBox;
 import std;
 import biscuit;
-import biscuit.qt.utils;
 
 using namespace std::literals;
 
-namespace biscuit::qt {
-	QCollapsibleGroupBox::QCollapsibleGroupBox(QWidget* parent) : base_t(parent) {
+export namespace biscuit::qt {
+
+	class QCollapsibleGroupBox : public QGroupBox {
+		W_OBJECT(QCollapsibleGroupBox)
+
+	public:
+		using this_t = QCollapsibleGroupBox;
+		using base_t = QGroupBox;
+
+		int m_heightDeflated{20};
+		int m_heightInflated{};
+
+		bool m_bCollapsed{false};
+	protected:
+		int m_heightMin0{}, m_heightMax0{0xff'ffff};
+		QPropertyAnimation m_aniPropMaxHeightD, m_aniPropMaxHeight, m_aniPropMaxHeightFinal, m_aniPropMinHeightFinal;
+		QSequentialAnimationGroup m_animationsDeflate, m_animationsInflate;
+		std::chrono::milliseconds m_durAnimation{ 200 };
+	public:
+		explicit QCollapsibleGroupBox(QWidget *parent = nullptr);
+		explicit QCollapsibleGroupBox(const QString &title, QWidget *parent = nullptr);
+		~QCollapsibleGroupBox();
+	protected:
+		void Init();
+
+	public:
+		bool PrepareAnimation(std::chrono::milliseconds durAnimation = std::chrono::milliseconds(300));
+
+		bool Collapse(bool bCollapse, std::optional<std::chrono::milliseconds> durAnimation = std::nullopt);
+		bool IsCollapsed() const;
+		void Collapsed()
+			W_SIGNAL(Collapsed);
+
+	public:
+		W_PROPERTY(bool, collapsed MEMBER m_bCollapsed NOTIFY Collapsed);
+	};
+
+	W_OBJECT_IMPL(QCollapsibleGroupBox)
+
+		QCollapsibleGroupBox::QCollapsibleGroupBox(QWidget* parent) : base_t(parent) {
 		Init();
 	}
 	QCollapsibleGroupBox::QCollapsibleGroupBox(const QString& title, QWidget* parent) : base_t(title, parent) {
@@ -150,4 +197,5 @@ namespace biscuit::qt {
 		return m_bCollapsed;
 	}
 
-} // namespace biscuit::qt
+}	// namespace biscuit::qt
+

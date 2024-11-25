@@ -12,13 +12,14 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "biscuit/dependencies_opencv.h"
-#include "biscuit/qt/ProgressDlg.h"
+//#include "biscuit/qt/ProgressDlg.h"
 
 export module biscuit.qt.MatBitmapArchive;
 import std;
 import biscuit;
 import biscuit.opencv;
 import biscuit.qt.utils;
+import biscuit.qt.ProgressDlg;
 
 using namespace std::literals;
 using namespace biscuit::literals;

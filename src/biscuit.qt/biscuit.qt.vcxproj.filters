@@ -35,12 +35,24 @@
     <ClCompile Include="MatViewDlg.cpp">
       <Filter>MatView</Filter>
     </ClCompile>
+    <ClCompile Include="QPathCompleter.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QRoundButton.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QColorButton.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QCollapsibleGroupBox.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MatBitmapArchive.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProgressDlg.cpp">
+    <ClCompile Include="ProgressDlg.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="biscuit.qt.ixx">
@@ -49,19 +61,7 @@
     <ClCompile Include="utils.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="QCollapsibleGroupBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="QColorButton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="QGlazeModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="QPathCompleter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="QRoundButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MatViewSettingsDlg.cpp">
@@ -83,22 +83,7 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="..\..\include\biscuit\qt\ProgressDlg.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\include\biscuit\qt\QCollapsibleGroupBox.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\include\biscuit\qt\QColorButton.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="..\..\include\biscuit\qt\QGlazeModel.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\include\biscuit\qt\QPathCompleter.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\include\biscuit\qt\QRoundButton.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="MatViewSettingsDlg.h">

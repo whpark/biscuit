@@ -1,6 +1,13 @@
-﻿#include "ui_ProgressDlg.h"
-#include "biscuit/qt/ProgressDlg.h"
+﻿module;
 
+#include "ui_ProgressDlg.h"
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QPushButton>
+#include <QTimer>
+#include "verdigris/wobjectcpp.h"
+#include "verdigris/wobjectimpl.h"
+
+export module biscuit.qt.ProgressDlg;
 import std;
 import biscuit;
 import biscuit.opencv;
@@ -8,7 +15,60 @@ import biscuit.qt.utils;
 
 using namespace std::literals;
 
+QT_BEGIN_NAMESPACE
+namespace Ui {
+	class ProgressDlgClass;
+} // namespace Ui
+QT_END_NAMESPACE
+
+export namespace biscuit::qt {
+	class xProgressDlg  : public QDialog {
+		W_OBJECT(xProgressDlg)
+			//Q_OBJECT
+	public:
+		using this_t = xProgressDlg;
+		using base_t = QDialog;
+
+	public:
+		std::wstring m_title;
+		std::wstring m_message;
+		std::chrono::system_clock::time_point m_tStart;
+		int m_iPercent{};
+		bool m_bUserAbort{};
+		bool m_bDone{};
+		bool m_bError{};
+
+		std::unique_ptr<std::jthread> m_rThreadWorker;
+
+	protected:
+		QTimer m_timerUI;
+		callback_progress_t m_callback;
+
+	public:
+		xProgressDlg(QWidget *parent);
+		~xProgressDlg();
+
+		void Init();
+		bool UpdateProgress(int iPercent, bool bDone, bool bError) {
+			m_iPercent = iPercent;
+			m_bDone = bDone;
+			m_bError = bError;
+			return !m_bUserAbort;
+		}
+		callback_progress_t GetCallback() const { return m_callback; }
+
+	protected:
+		void OnTimer_UpdateUI();
+		void OnButton(QAbstractButton *button);
+
+	private:
+		std::unique_ptr<Ui::ProgressDlgClass> ui;
+	};
+}
+
 namespace biscuit::qt {
+
+	W_OBJECT_IMPL(xProgressDlg)
 
 	xProgressDlg::xProgressDlg(QWidget* parent) : QDialog(parent) {
 		ui = std::make_unique<Ui::ProgressDlgClass>();

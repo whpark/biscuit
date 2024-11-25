@@ -1,7 +1,8 @@
-module;
+﻿module;
 
 #include <QtCore>
 #include <QtGui/QtGui>
+#include <QApplication>
 #include <QtWidgets/QtWidgets>
 
 #include "biscuit/dependencies_opencv.h"

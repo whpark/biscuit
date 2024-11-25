@@ -128,25 +128,20 @@
     <ClCompile Include="MatView.cpp" />
     <ClCompile Include="MatViewDlg.cpp" />
     <ClCompile Include="MatViewSettingsDlg.cpp" />
-    <ClCompile Include="ProgressDlg.cpp" />
-    <ClCompile Include="QCollapsibleGroupBox.cpp" />
-    <ClCompile Include="QColorButton.cpp" />
+    <ClCompile Include="ProgressDlg.ixx" />
+    <ClCompile Include="QCollapsibleGroupBox.ixx" />
+    <ClCompile Include="QColorButton.ixx" />
     <ClCompile Include="QGlazeModel.cpp" />
-    <ClCompile Include="QPathCompleter.cpp" />
-    <ClCompile Include="QRoundButton.cpp" />
+    <ClCompile Include="QPathCompleter.ixx" />
+    <ClCompile Include="QRoundButton.ixx" />
     <ClCompile Include="ui_data_exchange.ixx" />
     <ClCompile Include="utils.ixx" />
     <QtMoc Include="..\..\include\biscuit\qt\MatViewCanvas.h" />
     <QtMoc Include="..\..\include\biscuit\qt\MatView.h" />
     <QtMoc Include="..\..\include\biscuit\qt\MatViewDlg.h" />
     <QtMoc Include="MatViewSettingsDlg.h" />
-    <QtMoc Include="..\..\include\biscuit\qt\ProgressDlg.h" />
     <ClInclude Include="..\..\include\biscuit\qt\macro.h" />
-    <QtMoc Include="..\..\include\biscuit\qt\QCollapsibleGroupBox.h" />
-    <QtMoc Include="..\..\include\biscuit\qt\QColorButton.h" />
     <QtMoc Include="..\..\include\biscuit\qt\QGlazeModel.h" />
-    <QtMoc Include="..\..\include\biscuit\qt\QPathCompleter.h" />
-    <QtMoc Include="..\..\include\biscuit\qt\QRoundButton.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\biscuit.opencv\biscuit.opencv.vcxproj">
