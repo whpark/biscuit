@@ -2,4 +2,6 @@
 
 namespace biscuit::qt {
 
+	W_OBJECT_IMPL(QGlazeModel);
+
 }  // namespace biscuit::qt

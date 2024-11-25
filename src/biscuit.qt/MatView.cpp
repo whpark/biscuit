@@ -12,17 +12,25 @@
 #include "biscuit/dependencies_fmt.h"
 #include "biscuit/qt/MatView.h"
 
-#include "MatViewSettingsDlg.h"
+//#include "MatViewSettingsDlg.h"
 #include "biscuit/qt/MatView.h"
 #include "ui_MatView.h"
+
+#include "verdigris/wobjectimpl.h"
 
 import std;
 import biscuit;
 import biscuit.opencv;
 import biscuit.qt.utils;
+import biscuit.qt.ui_data_exchange;
+import biscuit.qt.MatViewSettingsDlg;
+
 //import biscuit.qt.ui_data_exchange;
 
 namespace biscuit::qt {
+
+	W_OBJECT_IMPL(xMatView);
+	W_OBJECT_IMPL(xMatViewCanvas);
 
 	static double const dZoomLevels[] = {
 		1./8192, 1./4096, 1./2048, 1./1024,

@@ -60,6 +60,9 @@
     <ClInclude Include="..\..\include\biscuit\dependencies_opencv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\biscuit\glaze_helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -168,9 +171,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="smart_ptr_container.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="glaze_helper.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sequence.base.ixx">

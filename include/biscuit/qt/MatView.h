@@ -11,6 +11,8 @@
 
 #include "MatViewCanvas.h"
 
+#include "verdigris/wobjectcpp.h"
+
 import std;
 import biscuit;
 import biscuit.opencv;
@@ -23,7 +25,7 @@ namespace biscuit::qt {
 	using namespace std::literals;
 
 	class BSC__QT_CLASS xMatView : public QWidget {
-		Q_OBJECT
+		W_OBJECT(xMatView);
 
 	public:
 		using this_t = xMatView;

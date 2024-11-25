@@ -32,9 +32,6 @@
     <ClCompile Include="MatView.cpp">
       <Filter>MatView</Filter>
     </ClCompile>
-    <ClCompile Include="MatViewDlg.cpp">
-      <Filter>MatView</Filter>
-    </ClCompile>
     <ClCompile Include="QPathCompleter.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -44,8 +41,14 @@
     <ClCompile Include="QColorButton.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MatViewSettingsDlg.ixx">
+      <Filter>MatView</Filter>
+    </ClCompile>
     <ClCompile Include="QCollapsibleGroupBox.ixx">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MatViewDlg.ixx">
+      <Filter>MatView</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -64,9 +67,6 @@
     <ClCompile Include="QGlazeModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MatViewSettingsDlg.cpp">
-      <Filter>MatView</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ProgressDlg.ui">
@@ -83,25 +83,17 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="..\..\include\biscuit\qt\QGlazeModel.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="MatViewSettingsDlg.h">
-      <Filter>MatView</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\include\biscuit\qt\MatViewDlg.h">
-      <Filter>MatView</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\include\biscuit\qt\MatView.h">
-      <Filter>MatView</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\include\biscuit\qt\MatViewCanvas.h">
-      <Filter>MatView</Filter>
-    </QtMoc>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\include\biscuit\qt\macro.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\biscuit\qt\QGlazeModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\biscuit\qt\MatView.h">
+      <Filter>MatView</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\biscuit\qt\MatViewCanvas.h">
+      <Filter>MatView</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

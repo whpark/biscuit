@@ -1,8 +1,14 @@
-﻿//#include "pch.h"
+﻿module;
+
 #include <QDialog>
 #include <QColorDialog>
+#include "ui_MatViewSettingsDlg.h"
 
-#include "MatViewSettingsDlg.h"
+#include "biscuit/qt/MatView.h"
+#include "verdigris/wobjectcpp.h"
+#include "verdigris/wobjectimpl.h"
+
+export module biscuit.qt.MatViewSettingsDlg;
 
 import std;
 import biscuit;
@@ -11,7 +17,33 @@ import biscuit.qt.ui_data_exchange;
 
 using namespace std::literals;
 
-namespace biscuit::qt {
+export namespace biscuit::qt {
+
+	class xMatViewSettingsDlg : public QDialog {
+		W_OBJECT(xMatViewSettingsDlg)
+
+	public:
+		using this_t = xMatViewSettingsDlg;
+		using base_t = QDialog;
+
+		xMatView::S_OPTION m_option;
+
+	public:
+		xMatViewSettingsDlg(xMatView::S_OPTION option, QWidget* parent = nullptr);
+		~xMatViewSettingsDlg() {}
+
+		bool UpdateData(bool bSaveAndValidate = true);
+
+	protected:
+		void OnOK();
+		void OnCancel();
+		void OnBackgroundColor();
+
+	private:
+		Ui::MatViewSettingsDlgClass ui;
+	};
+
+	W_OBJECT_IMPL(xMatViewSettingsDlg);
 
 	xMatViewSettingsDlg::xMatViewSettingsDlg(xMatView::S_OPTION option, QWidget* parent) : QDialog(parent), m_option(option) {
 		ui.setupUi(this);
@@ -72,4 +104,4 @@ namespace biscuit::qt {
 		}
 	}
 
-} // namespace biscuit::qt
+}	// namespace biscuit::qt

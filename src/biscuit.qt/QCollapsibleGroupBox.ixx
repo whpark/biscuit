@@ -5,6 +5,7 @@
 #include "verdigris/wobjectcpp.h"
 #include "verdigris/wobjectimpl.h"
 
+
 #include <QtWidgets/QGroupBox>
 #include <QPropertyAnimation>
 #include <QSequentialAnimationGroup>
@@ -27,8 +28,8 @@ export namespace biscuit::qt {
 		int m_heightDeflated{20};
 		int m_heightInflated{};
 
-		bool m_bCollapsed{false};
 	protected:
+		bool m_bCollapsed{false};
 		int m_heightMin0{}, m_heightMax0{0xff'ffff};
 		QPropertyAnimation m_aniPropMaxHeightD, m_aniPropMaxHeight, m_aniPropMaxHeightFinal, m_aniPropMinHeightFinal;
 		QSequentialAnimationGroup m_animationsDeflate, m_animationsInflate;
@@ -43,18 +44,21 @@ export namespace biscuit::qt {
 	public:
 		bool PrepareAnimation(std::chrono::milliseconds durAnimation = std::chrono::milliseconds(300));
 
-		bool Collapse(bool bCollapse, std::optional<std::chrono::milliseconds> durAnimation = std::nullopt);
+		bool DelayedCollapse(bool bCollapse, std::optional<std::chrono::milliseconds> durAnimation);
+		bool Collapse(bool bCollapse) { return DelayedCollapse(bCollapse, std::nullopt); }
 		bool IsCollapsed() const;
 		void Collapsed()
 			W_SIGNAL(Collapsed);
 
 	public:
-		W_PROPERTY(bool, collapsed MEMBER m_bCollapsed NOTIFY Collapsed);
+		//W_PROPERTY(bool, collapsed, &this_t::IsCollapsed, &this_t::Collapse, W_Notify, &this_t::Collapsed);
+		//W_PROPERTY(bool, collapsed, &this_t::m_bCollapsed, W_Notify, &this_t::Collapsed);
+		W_PROPERTY(bool, collapsed READ IsCollapsed WRITE Collapse NOTIFY Collapsed);
 	};
 
-	W_OBJECT_IMPL(QCollapsibleGroupBox)
+	W_OBJECT_IMPL(QCollapsibleGroupBox);
 
-		QCollapsibleGroupBox::QCollapsibleGroupBox(QWidget* parent) : base_t(parent) {
+	QCollapsibleGroupBox::QCollapsibleGroupBox(QWidget* parent) : base_t(parent) {
 		Init();
 	}
 	QCollapsibleGroupBox::QCollapsibleGroupBox(const QString& title, QWidget* parent) : base_t(title, parent) {
@@ -107,7 +111,7 @@ export namespace biscuit::qt {
 		return true;
 	}
 
-	bool QCollapsibleGroupBox::Collapse(bool bCollapse, std::optional<std::chrono::milliseconds> durAnimation) {
+	bool QCollapsibleGroupBox::DelayedCollapse(bool bCollapse, std::optional<std::chrono::milliseconds> durAnimation) {
 		auto dur = durAnimation.value_or(m_durAnimation).count();
 		bool bNoAnimation = (dur <= 0);
 		if (bNoAnimation) {

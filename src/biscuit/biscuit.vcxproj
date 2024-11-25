@@ -126,6 +126,7 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
     <ClInclude Include="..\..\include\biscuit\dependencies_simdutf.h" />
     <ClInclude Include="..\..\include\biscuit\dependencies_spdlog.h" />
     <ClInclude Include="..\..\include\biscuit\dependencies_units.h" />
+    <ClInclude Include="..\..\include\biscuit\glaze_helper.h" />
     <ClInclude Include="..\..\include\biscuit\macro.h" />
     <ClInclude Include="framework.h" />
   </ItemGroup>
@@ -164,7 +165,6 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
     <ClCompile Include="misc.ixx" />
     <ClCompile Include="mutex.ixx" />
     <ClCompile Include="rand.ixx" />
-    <ClCompile Include="glaze_helper.ixx" />
     <ClCompile Include="sequence.base.ixx" />
     <ClCompile Include="sequence.coroutine_handle.ixx" />
     <ClCompile Include="sequence.ixx" />

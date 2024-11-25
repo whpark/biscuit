@@ -2,12 +2,13 @@
 
 #include <QOpenGLWidget>
 #include "biscuit/qt/macro.h"
+#include "verdigris/wobjectcpp.h"
 
 namespace biscuit::qt {
 
 	class BSC__QT_CLASS xMatViewCanvas : public QOpenGLWidget {
 		friend class xMatView;
-		Q_OBJECT
+		W_OBJECT(xMatViewCanvas)
 
 	public:
 		using this_t = xMatViewCanvas;
