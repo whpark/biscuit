@@ -77,7 +77,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <BuildStlModules>true</BuildStlModules>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -86,7 +86,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <BuildStlModules>true</BuildStlModules>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>

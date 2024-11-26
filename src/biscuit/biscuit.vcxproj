@@ -68,7 +68,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BuildStlModules>true</BuildStlModules>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -95,7 +95,7 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BuildStlModules>true</BuildStlModules>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>

@@ -69,7 +69,7 @@
       <BuildStlModules>true</BuildStlModules>
       <WarningLevel>Level3</WarningLevel>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -90,7 +90,7 @@
       <BuildStlModules>true</BuildStlModules>
       <WarningLevel>Level3</WarningLevel>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
