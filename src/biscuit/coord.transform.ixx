@@ -23,6 +23,8 @@
 
 export module biscuit.coord.transform;
 import std;
+import Eigen;
+import units;
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.memory;
@@ -251,7 +253,11 @@ export namespace biscuit {
 		}
 		BSC__NODISCARD virtual xPoint3d Trans(double x, double y, double z) const {
 			if constexpr (DIM == 2) {
-				auto pt = m_scale * (m_mat * (point_t{x, y} - m_origin).vec());
+				//auto pt = m_scale * (m_mat * (Eigen::Vector2d(x, y) - Eigen::Vector2d(m_origin.x, m_origin.y)));
+				//auto v = (point_t{x, y} - m_origin).vec();
+				//std::println("v.x {}, v.y {}", v.x(), v.y());
+				Eigen::Vector2d pt = m_scale * (m_mat * (point_t{x, y} - m_origin).vec());
+				//std::println("x {}, y {}, pt.x {}, pt.y {}, ox {}, oy {}, X {}, Y {}", x, y, pt.x(), pt.y(), m_origin.x, m_origin.y, m_offset.x, m_offset.y);
 				return xPoint3d(pt.x() + m_offset.x, pt.y() + m_offset.y , z);
 			}
 			else if constexpr (DIM == 3) {

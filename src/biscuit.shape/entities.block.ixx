@@ -24,6 +24,8 @@
 
 export module biscuit.shape.entities.block;
 import std;
+import fmt;
+import units;
 import biscuit;
 import biscuit.shape.canvas;
 import biscuit.shape.entities.shape;

@@ -1,9 +1,10 @@
-#include <catch.hpp>
-#include <fmt/core.h>
-#include <fmt/std.h>
-#include <fmt/xchar.h>
+﻿#include <catch.hpp>
+//#include <fmt/core.h>
+//#include <fmt/std.h>
+//#include <fmt/xchar.h>
 
 import std;
+import fmt;
 import biscuit;
 
 using namespace std::literals;

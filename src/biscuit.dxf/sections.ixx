@@ -5,6 +5,8 @@
 
 export module biscuit.dxf:sections;
 import std;
+import fmt;
+import Eigen;
 import biscuit;
 import :group;
 import :stream;

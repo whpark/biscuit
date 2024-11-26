@@ -6,6 +6,7 @@
 
 export module biscuit.coord.rect;
 import std;
+import Eigen;
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.coord.concepts;

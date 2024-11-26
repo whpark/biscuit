@@ -20,6 +20,7 @@
 
 export module biscuit.win.serial_port;
 import std;
+import fmt;
 import biscuit;
 
 using namespace std::literals;

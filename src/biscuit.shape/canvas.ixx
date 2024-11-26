@@ -23,6 +23,8 @@
 
 export module biscuit.shape.canvas;
 import std;
+import fmt;
+import units;
 import biscuit;
 import biscuit.shape_basic;
 import biscuit.shape.entities.shape;

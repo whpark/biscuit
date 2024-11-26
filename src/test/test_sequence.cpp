@@ -3,6 +3,7 @@
 #include "biscuit/dependencies_fmt.h"
 
 import std;
+import fmt;
 import biscuit;
 
 static constexpr auto const ATTR = "[sequence]";

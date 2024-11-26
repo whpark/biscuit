@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -15,6 +15,7 @@ module;
 
 export module biscuit.string.defines;
 import std;
+import fmt;
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.misc;

@@ -12,6 +12,7 @@
 
 export module biscuit.qt.QRoundButton;
 import std;
+import fmt;
 import biscuit;
 import biscuit.qt.utils;
 import biscuit.qt.QColorButton;

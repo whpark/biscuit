@@ -5,6 +5,7 @@
 //#include "biscuit/dependencies_glaze.h"
 
 import std;
+import fmt;
 import biscuit;
 import biscuit.dxf;
 

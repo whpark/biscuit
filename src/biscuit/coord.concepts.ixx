@@ -1,7 +1,8 @@
-module;
+﻿module;
 
 export module biscuit.coord.concepts;
 import std;
+import Eigen;
 import biscuit.aliases;
 import biscuit.concepts;
 

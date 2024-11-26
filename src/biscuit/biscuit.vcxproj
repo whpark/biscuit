@@ -187,6 +187,11 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
     <None Include="..\..\README.md" />
     <None Include="..\..\vcpkg.json" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ThirdParties\ThirdParties.vcxproj">
+      <Project>{730a3e73-f28d-435f-adfd-def57f11f48f}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

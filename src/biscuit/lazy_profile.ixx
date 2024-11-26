@@ -19,6 +19,8 @@
 #include "biscuit/dependencies_ctre.h"
 
 export module biscuit.lazy_profile;
+import std;
+import fmt;
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.archive;

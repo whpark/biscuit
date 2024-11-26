@@ -3,17 +3,17 @@
 
 #include "biscuit/biscuit.h"
 #include "biscuit/dependencies_fmt.h"
-#include "biscuit/dependencies_eigen.h"
+//#include "biscuit/dependencies_eigen.h"
 #include "biscuit/dependencies_units.h"
 
 import std;
+import fmt;
+import Eigen;
+import units;
 import biscuit;
 
 using namespace std::literals;
 using namespace biscuit::literals;	// for intelli-sense
-//using namespace units;
-//using namespace units::angle;
-using namespace units::literals;
 
 constexpr static auto const ATTR = "[coord]";
 

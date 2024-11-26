@@ -15,6 +15,8 @@
 
 export module biscuit.coord;
 import std;
+import fmt;
+import Eigen;
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.misc;

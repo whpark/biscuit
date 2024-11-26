@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
@@ -6,6 +6,7 @@ module;
 
 export module biscuit.coord.point;
 import std;
+import Eigen;
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.coord.concepts;

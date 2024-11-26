@@ -6,6 +6,8 @@
 
 export module biscuit.dxf:entities;
 import std;
+import fmt;
+import Eigen;
 import biscuit;
 import :group;
 import :entities_subclass;

@@ -20,6 +20,7 @@
 
 export module biscuit.shape.entities.shape;
 import std;
+import fmt;
 import biscuit;
 import biscuit.shape_basic;
 

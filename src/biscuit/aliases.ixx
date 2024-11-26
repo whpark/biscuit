@@ -1,4 +1,4 @@
-module;
+﻿module;
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
@@ -6,6 +6,7 @@ module;
 
 export module biscuit.aliases;
 import std;
+import units;
 
 // export aliases;
 export namespace biscuit::inline literals { };

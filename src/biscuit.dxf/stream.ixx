@@ -4,6 +4,8 @@
 
 export module biscuit.dxf:stream;
 import std;
+import fmt;
+import Eigen;
 import biscuit;
 import :group;
 

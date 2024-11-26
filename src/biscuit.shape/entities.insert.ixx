@@ -24,6 +24,7 @@
 
 export module biscuit.shape.entities.insert;
 import std;
+import fmt;
 import biscuit;
 import biscuit.shape_basic;
 import biscuit.shape.entities.shape;

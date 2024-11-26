@@ -10,6 +10,8 @@
 module biscuit.shape.entities;
 
 import std;
+import fmt;
+import units;
 import biscuit;
 import biscuit.shape.color_table;
 import biscuit.shape_basic;
@@ -17,6 +19,7 @@ import biscuit.shape.entities;
 import biscuit.shape.canvas;
 
 using namespace std::literals;
+using namespace biscuit::literals;
 
 namespace biscuit::shape {
 

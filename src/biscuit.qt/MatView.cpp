@@ -19,6 +19,7 @@
 #include "verdigris/wobjectimpl.h"
 
 import std;
+import fmt;
 import biscuit;
 import biscuit.opencv;
 import biscuit.qt.utils;

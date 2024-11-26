@@ -4,12 +4,14 @@
 
 export module biscuit.dxf;
 export import :group;
-import :stream;
-import :sections;
-
-
+export import :stream;
+export import :sections;
 import std;
+import fmt;
+import Eigen;
 import biscuit;
+
+
 using namespace std::literals;
 using namespace biscuit::literals;
 

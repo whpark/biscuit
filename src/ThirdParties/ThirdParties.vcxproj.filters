@@ -18,9 +18,24 @@
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fmt.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ThirdParties.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Eigen.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="units.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cereal.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fmt.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

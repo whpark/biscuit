@@ -24,11 +24,16 @@
 
 export module biscuit.shape.entities.arc;
 import std;
+import fmt;
+import units;
 import biscuit;
 import biscuit.shape_basic;
 import biscuit.shape.entities.shape;
 import biscuit.shape.entities.circle;
 import biscuit.shape.canvas;
+
+using namespace std::literals;
+using namespace biscuit::literals;
 
 export namespace biscuit::shape {
 

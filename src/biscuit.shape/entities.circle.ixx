@@ -14,7 +14,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "biscuit/macro.h"
-//#include "biscuit/dependencies_fmt.h"
+#include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_eigen.h"
 #include "biscuit/dependencies_glaze.h"
 #include "biscuit/dependencies_units.h"
@@ -24,10 +24,15 @@
 
 export module biscuit.shape.entities.circle;
 import std;
+import fmt;
+import units;
 import biscuit;
 import biscuit.shape_basic;
 import biscuit.shape.entities.shape;
 import biscuit.shape.canvas;
+
+using namespace std::literals;
+using namespace biscuit::literals;
 
 export namespace biscuit::shape {
 

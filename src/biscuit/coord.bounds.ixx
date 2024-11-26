@@ -12,6 +12,7 @@
 export module biscuit.coord.bounds;
 
 import std;
+import Eigen;
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.coord.concepts;

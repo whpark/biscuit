@@ -18,6 +18,7 @@
 
 export module biscuit.stop_watch;
 import std;
+import fmt;
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.string;

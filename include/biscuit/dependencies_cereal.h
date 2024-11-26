@@ -42,5 +42,7 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/types/concepts/pair_associative_container.hpp>
 
+#include <cereal/macros.hpp>
+
 #pragma warning(pop)
 

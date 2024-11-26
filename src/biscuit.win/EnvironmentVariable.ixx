@@ -18,6 +18,7 @@
 
 export module biscuit.win.environment_variable;
 import std;
+import fmt;
 import biscuit.aliases;
 import biscuit.concepts;
 
