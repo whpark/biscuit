@@ -633,19 +633,32 @@ export namespace biscuit::coord {
 
 		//-------------------------------------------------------------------------------------------------------------------------
 		// eigen
-		BSC__NODISCARD Eigen::Vector<value_t, dim>&			vec()			requires (bPoint)				{ 
-			static_assert(sizeof(this_t) == sizeof(Eigen::Vector<value_t, dim>));
-			return *reinterpret_cast<Eigen::Vector<value_t, dim>*>(this);
+		//BSC__NODISCARD Eigen::Vector<value_t, dim>&			vec()			requires (bPoint)				{ 
+		//	static_assert(sizeof(this_t) == sizeof(Eigen::Vector<value_t, dim>));
+		//	return *reinterpret_cast<Eigen::Vector<value_t, dim>*>(this);
+		//}
+		//BSC__NODISCARD Eigen::Vector<value_t, dim> const&	vec() const		requires (bPoint)				{ return *reinterpret_cast<Eigen::Vector<value_t, dim> const *>(this); }
+		//BSC__NODISCARD Eigen::Vector<value_t, 2>&			vec2()			requires (bPoint and dim >= 2)	{ return *reinterpret_cast<Eigen::Vector<value_t, 2>*>(this); }
+		//BSC__NODISCARD Eigen::Vector<value_t, 2> const&		vec2() const	requires (bPoint and dim >= 2)	{ return *reinterpret_cast<Eigen::Vector<value_t, 2> const *>(this); }
+		//BSC__NODISCARD Eigen::Vector<value_t, 3>&			vec3()			requires (bPoint and dim >= 3)	{ return *reinterpret_cast<Eigen::Vector<value_t, 3>*>(this); }
+		//BSC__NODISCARD Eigen::Vector<value_t, 3> const&		vec3() const	requires (bPoint and dim >= 3)	{ return *reinterpret_cast<Eigen::Vector<value_t, 3> const *>(this); }
+		//BSC__NODISCARD Eigen::Vector<value_t, 4>&			vec4()			requires (bPoint and dim >= 4)	{ return *reinterpret_cast<Eigen::Vector<value_t, 4>*>(this); }
+		//BSC__NODISCARD Eigen::Vector<value_t, 4> const&		vec4() const	requires (bPoint and dim >= 4)	{ return *reinterpret_cast<Eigen::Vector<value_t, 4> const *>(this); }
+		//operator Eigen::Vector<value_t, dim>&					()			requires (bPoint)				{ return vec(); }
+		//operator Eigen::Vector<value_t, dim> const&				() const	requires (bPoint)				{ return vec(); }
+
+		BSC__NODISCARD Eigen::Vector<value_t, dim> vec() const requires (bPoint) { 
+			if constexpr (dim == 2) return Eigen::Vector<value_t, 2>(arr()[0], arr()[1]); 
+			else if constexpr (dim == 3) return Eigen::Vector<value_t, 3>(arr()[0], arr()[1], arr()[2]);
+			else if constexpr (dim == 4) return Eigen::Vector<value_t, 4>(arr()[0], arr()[1], arr()[2], arr()[3]);
+			else {
+				static_assert(false);
+			}
 		}
-		BSC__NODISCARD Eigen::Vector<value_t, dim> const&	vec() const		requires (bPoint)				{ return *reinterpret_cast<Eigen::Vector<value_t, dim> const *>(this); }
-		BSC__NODISCARD Eigen::Vector<value_t, 2>&			vec2()			requires (bPoint and dim >= 2)	{ return *reinterpret_cast<Eigen::Vector<value_t, 2>*>(this); }
-		BSC__NODISCARD Eigen::Vector<value_t, 2> const&		vec2() const	requires (bPoint and dim >= 2)	{ return *reinterpret_cast<Eigen::Vector<value_t, 2> const *>(this); }
-		BSC__NODISCARD Eigen::Vector<value_t, 3>&			vec3()			requires (bPoint and dim >= 3)	{ return *reinterpret_cast<Eigen::Vector<value_t, 3>*>(this); }
-		BSC__NODISCARD Eigen::Vector<value_t, 3> const&		vec3() const	requires (bPoint and dim >= 3)	{ return *reinterpret_cast<Eigen::Vector<value_t, 3> const *>(this); }
-		BSC__NODISCARD Eigen::Vector<value_t, 4>&			vec4()			requires (bPoint and dim >= 4)	{ return *reinterpret_cast<Eigen::Vector<value_t, 4>*>(this); }
-		BSC__NODISCARD Eigen::Vector<value_t, 4> const&		vec4() const	requires (bPoint and dim >= 4)	{ return *reinterpret_cast<Eigen::Vector<value_t, 4> const *>(this); }
-		operator Eigen::Vector<value_t, dim>&					()			requires (bPoint)				{ return vec(); }
-		operator Eigen::Vector<value_t, dim> const&				() const	requires (bPoint)				{ return vec(); }
+		BSC__NODISCARD Eigen::Vector<value_t, 2> vec2() requires (bPoint and dim >= 2) { return Eigen::Vector<value_t, 2>(arr()[0], arr()[1]); }
+		BSC__NODISCARD Eigen::Vector<value_t, 3> vec3() requires (bPoint and dim >= 3) { return Eigen::Vector<value_t, 3>(arr()[0], arr()[1], arr()[2]); }
+		BSC__NODISCARD Eigen::Vector<value_t, 4> vec4() requires (bPoint and dim >= 4) { return Eigen::Vector<value_t, 4>(arr()[0], arr()[1], arr()[2], arr()[3]); }
+		operator Eigen::Vector<value_t, dim>() const	requires (bPoint)			   { return vec(); }
 
 		//=========================================================================================================================
 

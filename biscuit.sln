@@ -24,6 +24,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "biscuit.dxf", "src\biscuit.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test.dxf", "src\test.dxf\test.dxf.vcxproj", "{02921489-D5FF-4011-A31A-66677131BCC4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test.qt", "src\test.qt\test.qt.vcxproj", "{BA4C4978-DBEE-4B6F-B1F7-2C742CA2ECA7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -66,6 +68,10 @@ Global
 		{02921489-D5FF-4011-A31A-66677131BCC4}.Debug|x64.Build.0 = Debug|x64
 		{02921489-D5FF-4011-A31A-66677131BCC4}.Release|x64.ActiveCfg = Release|x64
 		{02921489-D5FF-4011-A31A-66677131BCC4}.Release|x64.Build.0 = Release|x64
+		{BA4C4978-DBEE-4B6F-B1F7-2C742CA2ECA7}.Debug|x64.ActiveCfg = Debug|x64
+		{BA4C4978-DBEE-4B6F-B1F7-2C742CA2ECA7}.Debug|x64.Build.0 = Debug|x64
+		{BA4C4978-DBEE-4B6F-B1F7-2C742CA2ECA7}.Release|x64.ActiveCfg = Release|x64
+		{BA4C4978-DBEE-4B6F-B1F7-2C742CA2ECA7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +80,7 @@ Global
 		{BAEB51D6-595E-4B31-8132-58BE4A67718F} = {219901BC-F3EB-477D-BD7A-2AAC6BF9B65D}
 		{730A3E73-F28D-435F-ADFD-DEF57F11F48F} = {3C2340D6-6EC4-43A0-B2BE-2FF17EB38CF2}
 		{02921489-D5FF-4011-A31A-66677131BCC4} = {219901BC-F3EB-477D-BD7A-2AAC6BF9B65D}
+		{BA4C4978-DBEE-4B6F-B1F7-2C742CA2ECA7} = {219901BC-F3EB-477D-BD7A-2AAC6BF9B65D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5807FAB1-E483-4E4C-82EE-CE7C0B12AF8C}

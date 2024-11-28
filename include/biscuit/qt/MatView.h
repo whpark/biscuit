@@ -16,6 +16,7 @@
 import std;
 import biscuit;
 import biscuit.opencv;
+import Eigen;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MatViewClass; };

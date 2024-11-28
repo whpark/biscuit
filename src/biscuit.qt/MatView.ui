@@ -142,7 +142,7 @@
           <bool>false</bool>
          </property>
          <property name="buttonSymbols">
-          <enum>QAbstractSpinBox::ButtonSymbols::PlusMinus</enum>
+          <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
          </property>
          <property name="specialValueText">
           <string notr="true"/>
@@ -188,7 +188,10 @@
           </size>
          </property>
          <property name="text">
-          <string>+</string>
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset theme="QIcon::ThemeIcon::ZoomIn"/>
          </property>
         </widget>
        </item>
@@ -207,7 +210,10 @@
           </size>
          </property>
          <property name="text">
-          <string>-</string>
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset theme="QIcon::ThemeIcon::ZoomOut"/>
          </property>
         </widget>
        </item>
@@ -226,10 +232,10 @@
           </size>
          </property>
          <property name="text">
-          <string>Fit</string>
+          <string/>
          </property>
          <property name="icon">
-          <iconset theme="accessories-calculator"/>
+          <iconset theme="QIcon::ThemeIcon::ZoomFitBest"/>
          </property>
         </widget>
        </item>
@@ -248,7 +254,10 @@
           </size>
          </property>
          <property name="text">
-          <string>...</string>
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset theme="QIcon::ThemeIcon::DocumentProperties"/>
          </property>
         </widget>
        </item>
