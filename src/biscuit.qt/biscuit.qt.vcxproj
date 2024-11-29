@@ -137,6 +137,12 @@
       <FileType>Document</FileType>
     </ClCompile>
     <ClCompile Include="QColorButton.ixx" />
+    <ClCompile Include="QFileFolderBrowser.ixx">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="QGlazeModel.cpp" />
     <ClCompile Include="QPathCompleter.ixx" />
     <ClCompile Include="QRoundButton.ixx" />
@@ -162,6 +168,7 @@
     <QtUic Include="MatViewDlg.ui" />
     <QtUic Include="MatViewSettingsDlg.ui" />
     <QtUic Include="ProgressDlg.ui" />
+    <QtUic Include="QFileFolderBrowser.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

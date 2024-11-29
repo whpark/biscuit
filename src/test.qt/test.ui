@@ -26,9 +26,12 @@
     <property name="title">
      <string>Image</string>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
      <item>
-      <widget class="biscuit::qt::xMatView" name="widget" native="true"/>
+      <widget class="biscuit::qt::QFileFolderBrowser" name="browser" native="true"/>
+     </item>
+     <item>
+      <widget class="biscuit::qt::xMatView" name="view" native="true"/>
      </item>
     </layout>
    </widget>
@@ -57,6 +60,12 @@
  <customwidgets>
   <customwidget>
    <class>biscuit::qt::xMatView</class>
+   <extends>QWidget</extends>
+   <header>biscuit/qt/biscuit_widgets.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>biscuit::qt::QFileFolderBrowser</class>
    <extends>QWidget</extends>
    <header>biscuit/qt/biscuit_widgets.h</header>
    <container>1</container>

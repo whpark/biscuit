@@ -59,6 +59,9 @@
     <ClCompile Include="biscuit.qt.Widgets.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="QFileFolderBrowser.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MatBitmapArchive.ixx">
@@ -89,6 +92,9 @@
     </QtUic>
     <QtUic Include="MatViewDlg.ui">
       <Filter>MatView</Filter>
+    </QtUic>
+    <QtUic Include="QFileFolderBrowser.ui">
+      <Filter>Source Files</Filter>
     </QtUic>
   </ItemGroup>
   <ItemGroup>
