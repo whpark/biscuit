@@ -168,7 +168,6 @@
     <QtUic Include="MatViewDlg.ui" />
     <QtUic Include="MatViewSettingsDlg.ui" />
     <QtUic Include="ProgressDlg.ui" />
-    <QtUic Include="QFileFolderBrowser.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

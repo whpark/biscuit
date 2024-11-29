@@ -93,9 +93,6 @@
     <QtUic Include="MatViewDlg.ui">
       <Filter>MatView</Filter>
     </QtUic>
-    <QtUic Include="QFileFolderBrowser.ui">
-      <Filter>Source Files</Filter>
-    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\biscuit\qt\macro.h">
