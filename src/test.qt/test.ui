@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>702</width>
+    <height>551</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,16 +17,20 @@
    <widget class="QGroupBox" name="grpImage">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>10</y>
-      <width>511</width>
-      <height>341</height>
+      <x>9</x>
+      <y>9</y>
+      <width>661</width>
+      <height>331</height>
      </rect>
     </property>
     <property name="title">
-     <string>GroupBox</string>
+     <string>Image</string>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout"/>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="biscuit::qt::xMatView" name="widget" native="true"/>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -34,7 +38,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>702</width>
      <height>22</height>
     </rect>
    </property>
@@ -50,6 +54,14 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>biscuit::qt::xMatView</class>
+   <extends>QWidget</extends>
+   <header>biscuit/qt/biscuit_widgets.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="test.qrc"/>
  </resources>

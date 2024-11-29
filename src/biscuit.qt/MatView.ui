@@ -308,13 +308,6 @@
       <property name="spacing">
        <number>0</number>
       </property>
-      <item row="0" column="0">
-       <widget class="biscuit::qt::xMatViewCanvas" name="view">
-        <property name="focusPolicy">
-         <enum>Qt::FocusPolicy::StrongFocus</enum>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QScrollBar" name="sbVert">
         <property name="orientation">
@@ -334,13 +327,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>biscuit::qt::xMatViewCanvas</class>
-   <extends>QOpenGLWidget</extends>
-   <header>biscuit/qt/MatViewCanvas.h</header>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>spinZoom</tabstop>
   <tabstop>btnZoomIn</tabstop>
@@ -348,7 +334,6 @@
   <tabstop>btnZoomFit</tabstop>
   <tabstop>btnSettings</tabstop>
   <tabstop>edtInfo</tabstop>
-  <tabstop>view</tabstop>
  </tabstops>
  <resources/>
  <connections/>

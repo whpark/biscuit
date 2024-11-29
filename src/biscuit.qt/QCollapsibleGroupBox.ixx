@@ -10,7 +10,7 @@
 #include <QPropertyAnimation>
 #include <QSequentialAnimationGroup>
 
-export module biscuit.qt.QCollapsibleGroupBox;
+export module biscuit.qt.Widgets.QCollapsibleGroupBox;
 import std;
 import biscuit;
 

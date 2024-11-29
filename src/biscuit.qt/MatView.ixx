@@ -1,39 +1,227 @@
-﻿//#include "pch.h"
+﻿module;
 
 #include <GL/glew.h>
+
+#include "biscuit/dependencies_opencv.h"
+#include "biscuit/dependencies_fmt.h"
+
+#include <QOpenGLExtraFunctions>
+#include <QWidget>
+#include <QTimer>
 
 #include <QEvent>
 #include <QKeyEvent>
 #include <QScrollBar>
 #include <QMessageBox>
-#include <spdlog/stopwatch.h>
+#include <QOpenGLExtraFunctions>
+#include <QTimer>
 
-#include "biscuit/dependencies_opencv.h"
-#include "biscuit/dependencies_fmt.h"
-#include "biscuit/qt/MatView.h"
+#include "verdigris/wobjectcpp.h"
+#include "verdigris/wobjectimpl.h"
 
-//#include "MatViewSettingsDlg.h"
-#include "biscuit/qt/MatView.h"
 #include "ui_MatView.h"
 
-#include "verdigris/wobjectimpl.h"
+#include <spdlog/stopwatch.h>
+
+export module biscuit.qt.MatView;
 
 import std;
 import fmt;
+import Eigen;
 import biscuit;
 import biscuit.opencv;
 import biscuit.qt.utils;
 import biscuit.qt.ui_data_exchange;
-import biscuit.qt.MatViewSettingsDlg;
+export import :Canvas;
+export import :Option;
+export import :SettingsDlg;
 
-//import biscuit.qt.ui_data_exchange;
 
-namespace biscuit::qt {
+export namespace biscuit::qt {
+	using namespace std::literals;
+
+	class xMatView : public QWidget {
+		W_OBJECT(xMatView);
+
+	public:
+		using this_t = xMatView;
+		using base_t = QWidget;
+
+		using string_t = std::wstring;
+		using ct_t = biscuit::xCoordTrans2d;
+
+	public:
+		// ZOOM
+		//using zoom_t = mat_view::zoom_t;
+		//using zoom_in_t = mat_view::zoom_in_t;
+		//using zoom_out_t = mat_view::zoom_out_t;
+
+		using zoom_t = mat_view::eZOOM;
+		using zoom_in_t = mat_view::eZOOM_IN;
+		using zoom_out_t = mat_view::eZOOM_OUT;
+
+		using option_t = mat_view::sOption;
+
+		std::string m_strCookie;
+		std::function<bool(bool bStore, std::string_view cookie, option_t&)> m_fnSyncSetting;
+
+		struct S_SCROLL_GEOMETRY {
+			xBounds2i rectClient, rectImageScreen, rectScrollRange;
+		};
+
+	protected:
+		//// gl
+		//std::unique_ptr<wxGLContext> m_context;
+		////GLuint m_textureID{};
+
+		struct {
+			std::unique_ptr<QOpenGLExtraFunctions> gl{};
+			GLuint shaderProgram{};
+			GLuint VBO{}, VAO{};
+			QOpenGLExtraFunctions& operator () () { return *gl; }
+			QOpenGLExtraFunctions const& operator () () const { return *gl; }
+
+			void Clear() {
+				if (gl) {
+					if (auto r = std::exchange(shaderProgram, 0)) {
+						gl->glDeleteProgram(r);
+					}
+					if (auto r = std::exchange(VBO, 0)) {
+						gl->glDeleteBuffers(1, &r);
+					}
+					if (auto r = std::exchange(VAO, 0)) {
+						gl->glDeleteVertexArrays(1, &r);
+					}
+				}
+				gl.reset();
+			}
+		} m_gl;
+
+		cv::Mat m_img;	// original image
+		cv::Mat m_palette;	// palette. CV_8UC1 or CV_8UC3, 1 row 256 cols
+		mutable struct {
+			std::mutex mtx;
+			std::deque<cv::Mat> imgs;
+			std::jthread threadPyramidMaker;
+		} m_pyramid;
+		mutable struct {
+			bool bInSelectionMode{};
+			bool bRectSelected{};
+			std::optional<xPoint2i> ptAnchor;			// Anchor Point in Screen Coordinate
+			xPoint2i ptOffset0;			// offset backup
+			xPoint2d ptSel0, ptSel1;	// Selection Point in Image Coordinate
+			void Clear() {
+				bInSelectionMode = {};
+				bRectSelected = {};
+				ptAnchor.reset();
+				ptOffset0 = {};
+				ptSel0 = ptSel1 = {};
+			}
+		} m_mouse;
+		mutable struct {
+			xPoint2d pt0, pt1;
+			std::chrono::steady_clock::time_point t0, t1;
+			QTimer timer;
+			void Clear() {
+				pt0 = pt1 = {};
+				t0 = t1 = {};
+				timer.stop();
+			}
+		} m_smooth_scroll;
+
+		//xMatViewCanvas* m_view{};
+
+		option_t m_option;
+		zoom_t m_eZoom{zoom_t::fit2window};
+		ct_t m_ctScreenFromImage;
+		mutable bool m_bSkipSpinZoomEvent{};
+
+		xMatViewCanvas* m_view{};
+
+	public:
+		xMatView(QWidget* parent = nullptr);
+		~xMatView();
+
+	public:
+		cv::Mat GetImage() { return m_img; }
+		cv::Mat const& GetImage() const { return m_img; }
+		bool SetImage(cv::Mat const& img, bool bCenter = true, zoom_t eZoomMode = zoom_t::none, bool bCopy = false);
+		cv::Mat GetPalette() { return m_palette; }
+		bool SetPalette(cv::Mat const& palette, bool bUpdateView);	// palette will be copied into m_palette
+		bool SetZoomMode(zoom_t eZoomMode, bool bCenter = true);
+		std::optional<xRect2i> GetSelectionRect() const {
+			if (!m_mouse.bRectSelected)
+				return {};
+			xRect2i rect(xPoint2i(biscuit::Floor(m_mouse.ptSel0)), xPoint2i(biscuit::Floor(m_mouse.ptSel1)));
+			rect.Normalize();
+			return rect;
+		}
+		std::optional<std::pair<xPoint2d, xPoint2d>> GetSelectionPoints() const {
+			if (!m_mouse.bRectSelected)
+				return {};
+			return std::pair<xPoint2d, xPoint2d>{m_mouse.ptSel0, m_mouse.ptSel1};
+		}
+		void SetSelectionRect(xRect2i const& rect);
+		void ClearSelectionRect();
+
+		bool LoadOption() { return m_fnSyncSetting and m_fnSyncSetting(false, m_strCookie, m_option) and SetOption(m_option, false); }
+		bool SaveOption() { return m_fnSyncSetting and m_fnSyncSetting(true, m_strCookie, m_option); }
+		option_t const& GetOption() const { return m_option; }
+		bool SetOption(option_t const& option, bool bStore = true);
+
+		bool ShowToolBar(bool bShow);
+		bool IsToolBarShown() const;
+
+		//virtual void OnClose(wxCloseEvent& event) override;
+
+		// ClientRect, ImageRect, ScrollRange
+		S_SCROLL_GEOMETRY GetScrollGeometry();
+		bool UpdateCT(bool bCenter = false, zoom_t eZoom = zoom_t::none);
+		bool UpdateScrollBars();
+		bool ZoomInOut(double step, xPoint2i ptAnchor, bool bCenter);
+		bool SetZoom(double scale, xPoint2i ptAnchor, bool bCenter);
+		bool ScrollTo(xPoint2d pt, std::chrono::milliseconds tsScroll = -1ms);
+		bool Scroll(xPoint2d delta, std::chrono::milliseconds tsScroll = -1ms);
+		void PurgeScroll(bool bUpdate = true);
+		bool KeyboardNavigate(int key, bool ctrl = false, bool alt = false, bool shift = false);
+
+	protected:
+		void BuildPyramid();
+		xRect2i GetViewRect();
+		void InitializeGL(xMatViewCanvas* view);
+		void PaintGL(xMatViewCanvas* view);
+		bool PutMatAsTexture(GLuint textureID, cv::Mat const& img, int width, xBounds2i const& rect, xRect2i const& rectClient);
+
+	protected:
+		virtual void keyPressEvent(QKeyEvent *event) override;
+		void OnView_mousePressEvent(xMatViewCanvas* view, QMouseEvent *event);
+		void OnView_mouseReleaseEvent(xMatViewCanvas* view, QMouseEvent *event);
+		void OnView_mouseMoveEvent(xMatViewCanvas* view, QMouseEvent *event);
+		void OnView_wheelEvent(xMatViewCanvas* view, QWheelEvent* event);
+
+	protected:
+		// slots
+		void OnCmbZoomMode_currentIndexChanged(int index);
+		void OnSpinZoom_valueChanged(double value);
+		void OnBtnZoomIn_clicked();
+		void OnBtnZoomOut_clicked();
+		void OnBtnZoomFit_clicked();
+		void OnBtnCountColor_clicked();	// NOT Connected with button
+		void OnBtnSettings_clicked();
+		void OnSmoothScroll_timeout();
+		void OnView_resized();
+		void OnSbHorz_valueChanged(int value);
+		//void OnSbHorz_sliderMoved(int value);
+		void OnSbVert_valueChanged(int value);
+		//void OnSbVert_sliderMoved(int value);
+
+	private:
+		std::unique_ptr<Ui::MatViewClass> ui;
+	};
 
 	W_OBJECT_IMPL(xMatView);
-	W_OBJECT_IMPL(xMatViewCanvas);
 
-	static double const dZoomLevels[] = {
+	constexpr double const dZoomLevels[] = {
 		1./8192, 1./4096, 1./2048, 1./1024,
 		1./512, 1./256, 1./128, 1./64, 1./32, 1./16, 1./8, 1./4., 1./2.,
 		3./4, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10,
@@ -55,11 +243,16 @@ namespace biscuit::qt {
 	xMatView::xMatView(QWidget* parent) : QWidget(parent), ui(std::make_unique<Ui::MatViewClass>()) {
 		ui->setupUi(this);
 
+		m_view = new biscuit::qt::xMatViewCanvas(ui->frame);
+		m_view->setObjectName("view");
+		m_view->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
+		ui->gridLayout->addWidget(m_view, 0, 0, 1, 1);
+
 		ui->cmbZoomMode->setCurrentIndex(std::to_underlying(m_eZoom));
 
 		// openGL object
 		//ui->view = std::make_unique<xMatViewCanvas>(this);
-		if (auto* view = ui->view) {
+		if (auto* view = m_view) {
 			view->m_fnInitializeGL =	[this](auto* p) { this->InitializeGL(p); };
 			view->m_fnPaintGL =			[this](auto* p) { this->PaintGL(p); };
 			view->m_fnMousePress =		[this](auto* p, auto* e) { this->OnView_mousePressEvent(p, e); };
@@ -91,7 +284,7 @@ namespace biscuit::qt {
 		connect(ui->sbVert, &QScrollBar::valueChanged, this, &this_t::OnSbVert_valueChanged);
 		connect(ui->sbVert, &QScrollBar::sliderMoved, this, &this_t::OnSbVert_valueChanged);
 		connect(&m_smooth_scroll.timer, &QTimer::timeout, this, &this_t::OnSmoothScroll_timeout);
-		connect(ui->view, &QOpenGLWidget::resized, this, &this_t::OnView_resized);
+		connect(m_view, &QOpenGLWidget::resized, this, &this_t::OnView_resized);
 		//connect(ui->btnCountColor, &QPushButton::clicked, this, &this_t::OnBtnCountColor_clicked);
 	}
 
@@ -99,7 +292,7 @@ namespace biscuit::qt {
 		m_gl.Clear();
 	}
 
-	bool xMatView::SetImage(cv::Mat const& img, bool bCenter, eZOOM eZoomMode, bool bCopy) {
+	bool xMatView::SetImage(cv::Mat const& img, bool bCenter, zoom_t eZoomMode, bool bCopy) {
 		xWaitCursor wc;
 
 		// original image
@@ -123,14 +316,14 @@ namespace biscuit::qt {
 		//	return false;
 		//}
 
-		if (eZoomMode != eZOOM::none) {
+		if (eZoomMode != zoom_t::none) {
 			ui->cmbZoomMode->setCurrentIndex(std::to_underlying(eZoomMode));
 		}
 		UpdateCT(bCenter, eZoomMode);
 		UpdateScrollBars();
 
-		if (ui->view)
-			ui->view->update();
+		if (m_view)
+			m_view->update();
 		return true;
 	}
 
@@ -148,19 +341,19 @@ namespace biscuit::qt {
 			m_palette.release();
 		}
 
-		if (bUpdateView and ui->view)
-			ui->view->update();
+		if (bUpdateView and m_view)
+			m_view->update();
 
 		return bCopied;
 	}
 
-	bool xMatView::SetZoomMode(eZOOM eZoomMode, bool bCenter) {
+	bool xMatView::SetZoomMode(zoom_t eZoomMode, bool bCenter) {
 		ui->cmbZoomMode->setCurrentIndex(std::to_underlying(eZoomMode));
 		m_eZoom = eZoomMode;
 		UpdateCT(bCenter, eZoomMode);
 		UpdateScrollBars();
-		if (ui->view)
-			ui->view->update();
+		if (m_view)
+			m_view->update();
 		return true;
 	}
 
@@ -168,23 +361,23 @@ namespace biscuit::qt {
 		m_mouse.bRectSelected = true;
 		m_mouse.ptSel0 = rect.pt0();
 		m_mouse.ptSel1 = rect.pt1();
-		if (ui->view)
-			ui->view->update();
+		if (m_view)
+			m_view->update();
 	}
 	void xMatView::ClearSelectionRect() {
 		m_mouse.bRectSelected = false;
 	}
 
-	bool xMatView::SetOption(S_OPTION const& option, bool bStore) {
+	bool xMatView::SetOption(option_t const& option, bool bStore) {
 		if (&m_option != &option)
 			m_option = option;
 
 		BuildPyramid();
 
-		UpdateCT(false, eZOOM::none);
+		UpdateCT(false, zoom_t::none);
 		UpdateScrollBars();
-		if (ui->view)
-			ui->view->update();
+		if (m_view)
+			m_view->update();
 
 		if (bStore) {
 			return m_fnSyncSetting and m_fnSyncSetting(true, m_strCookie, m_option);
@@ -203,10 +396,10 @@ namespace biscuit::qt {
 	}
 
 
-	bool xMatView::UpdateCT(bool bCenter, eZOOM eZoom) {
+	bool xMatView::UpdateCT(bool bCenter, zoom_t eZoom) {
 		if (m_img.empty())
 			return false;
-		if (eZoom == eZOOM::none)
+		if (eZoom == zoom_t::none)
 			eZoom = m_eZoom;
 		ui->cmbZoomMode->setCurrentIndex(std::to_underlying(eZoom));
 
@@ -216,18 +409,17 @@ namespace biscuit::qt {
 		// scale
 		double dScale{-1.0};
 		switch (eZoom) {
-			using enum eZOOM;
-		case one2one:		dScale = 1.0; break;
-		case fit2window:	dScale = std::min((double)sizeClient.width / m_img.cols, (double)sizeClient.height / m_img.rows); break;
-		case fit2width:		dScale = (double)sizeClient.width / m_img.cols; break;
-		case fit2height:	dScale = (double)sizeClient.height / m_img.rows; break;
+		case zoom_t::one2one:		dScale = 1.0; break;
+		case zoom_t::fit2window:	dScale = std::min((double)sizeClient.width / m_img.cols, (double)sizeClient.height / m_img.rows); break;
+		case zoom_t::fit2width:		dScale = (double)sizeClient.width / m_img.cols; break;
+		case zoom_t::fit2height:	dScale = (double)sizeClient.height / m_img.rows; break;
 		//case free:			dScale = m_ctScreenFromImage.m_scale; break;
 		}
 		if (dScale > 0)
 			m_ctScreenFromImage.m_scale = dScale;
 
 		// constraints. make image put on the center of the screen
-		if ( bCenter or IsOneOf(eZoom, eZOOM::fit2window, eZOOM::fit2width, eZOOM::fit2height) ) {
+		if ( bCenter or IsOneOf(eZoom, zoom_t::fit2window, zoom_t::fit2width, zoom_t::fit2height) ) {
 			ct_t ct2 = m_ctScreenFromImage;
 			ct2.m_origin = xPoint2d(m_img.size())/2.;
 			ct2.m_offset = xBounds2d(rectClient).CenterPoint();
@@ -235,15 +427,15 @@ namespace biscuit::qt {
 			xPoint2d ptOrigin = {};
 			xPoint2i ptLT = ct2(ptOrigin);
 
-			if (bCenter or eZoom == eZOOM::fit2window) {
+			if (bCenter or eZoom == zoom_t::fit2window) {
 				m_ctScreenFromImage.m_origin = {};
 				m_ctScreenFromImage.m_offset = ptLT;
 			}
-			else if (eZoom == eZOOM::fit2width) {
+			else if (eZoom == zoom_t::fit2width) {
 				m_ctScreenFromImage.m_origin.x = 0;
 				m_ctScreenFromImage.m_offset.x = ptLT.x;
 			}
-			else if (eZoom == eZOOM::fit2height) {
+			else if (eZoom == zoom_t::fit2height) {
 				m_ctScreenFromImage.m_origin.y = 0;
 				m_ctScreenFromImage.m_offset.y = ptLT.y;
 			}
@@ -398,14 +590,14 @@ namespace biscuit::qt {
 		m_ctScreenFromImage.m_offset += ptAnchor - m_ctScreenFromImage(ptImage);
 		// Anchor point
 		auto eZoom = m_eZoom;
-		if (eZoom != eZOOM::mouse_wheel_locked)
-			eZoom = eZOOM::free;
+		if (eZoom != zoom_t::mouse_wheel_locked)
+			eZoom = zoom_t::free;
 		ui->cmbZoomMode->setCurrentIndex(std::to_underlying(eZoom));
 		//OnCmbZoomMode_currentIndexChanged(std::to_underlying(eZoom));
 		UpdateCT(bCenter);
 		UpdateScrollBars();
-		if (ui->view)
-			ui->view->update();
+		if (m_view)
+			m_view->update();
 		return true;
 	}
 
@@ -415,8 +607,8 @@ namespace biscuit::qt {
 			m_ctScreenFromImage.m_offset = pt;
 			UpdateCT(false);
 			UpdateScrollBars();
-			if (ui->view)
-				ui->view->update();
+			if (m_view)
+				m_view->update();
 		}
 		else {
 			m_smooth_scroll.pt0 = m_ctScreenFromImage.m_offset;
@@ -443,8 +635,8 @@ namespace biscuit::qt {
 		if (bUpdate) {
 			UpdateCT(false);
 			UpdateScrollBars();
-			if (ui->view)
-				ui->view->update();
+			if (m_view)
+				m_view->update();
 		}
 	}
 
@@ -581,7 +773,7 @@ namespace biscuit::qt {
 		m_pyramid.imgs.clear();
 		m_pyramid.imgs.push_front(m_img);
 		const uint minArea = 1'000 * 1'000;
-		if (m_option.bPyrImageDown and m_option.eZoomOut == eZOOM_OUT::area and ((uint64_t)m_img.cols * m_img.rows) > minArea) {
+		if (m_option.bPyrImageDown and m_option.eZoomOut == zoom_out_t::area and ((uint64_t)m_img.cols * m_img.rows) > minArea) {
 			m_pyramid.threadPyramidMaker = std::jthread([this](std::stop_token stop) {
 				cv::Mat imgPyr = m_pyramid.imgs[0];
 				while (!stop.stop_requested() and ((uint64_t)imgPyr.cols * imgPyr.rows) > minArea) {
@@ -596,9 +788,9 @@ namespace biscuit::qt {
 	}
 
 	xRect2i xMatView::GetViewRect() {
-		if (!ui->view)
+		if (!m_view)
 			return {};
-		xRect2i rect = ToCoordRect(ui->view->rect());
+		xRect2i rect = ToCoordRect(m_view->rect());
 		rect.pt() = {};
 		for (auto r = devicePixelRatio(); auto& v : rect.arr())
 			v *= r;
@@ -619,8 +811,8 @@ namespace biscuit::qt {
 			)
 		{
 			m_mouse.bRectSelected = m_mouse.bInSelectionMode = false;
-			if (ui->view)
-				ui->view->update();
+			if (m_view)
+				m_view->update();
 			event->accept();
 			return ;
 		}
@@ -647,7 +839,7 @@ namespace biscuit::qt {
 			return;
 		xPoint2i ptView = ToCoord(event->pos() * devicePixelRatio());
 		if (event->button() == Qt::MouseButton::LeftButton) {
-			if (m_option.bPanningLock and (m_eZoom == eZOOM::fit2window))
+			if (m_option.bPanningLock and (m_eZoom == zoom_t::fit2window))
 				return;
 			if (mouseGrabber())
 				return;
@@ -701,20 +893,20 @@ namespace biscuit::qt {
 		if (m_mouse.ptAnchor) {
 			if (!m_option.bPanningLock) {
 				switch (m_eZoom) {
-				case eZOOM::one2one: break;
-				case eZOOM::mouse_wheel_locked: break;
-				case eZOOM::free: break;
+				case zoom_t::one2one: break;
+				case zoom_t::mouse_wheel_locked: break;
+				case zoom_t::free: break;
 				default :
-					m_eZoom = eZOOM::free;
+					m_eZoom = zoom_t::free;
 					ui->cmbZoomMode->setCurrentIndex(std::to_underlying(m_eZoom));
 					break;
 				}
 			}
 			auto dPanningSpeed = m_mouse.bInSelectionMode ? 1.0 : m_option.dPanningSpeed;
 			auto ptOffset = (ptView - *m_mouse.ptAnchor) * dPanningSpeed;
-			if (m_eZoom == eZOOM::fit2width)
+			if (m_eZoom == zoom_t::fit2width)
 				ptOffset.x = 0;
-			if (m_eZoom == eZOOM::fit2height)
+			if (m_eZoom == zoom_t::fit2height)
 				ptOffset.y = 0;
 			m_ctScreenFromImage.m_offset = m_mouse.ptOffset0 + ptOffset;
 			UpdateCT();
@@ -792,7 +984,7 @@ namespace biscuit::qt {
 	void xMatView::OnView_wheelEvent(xMatViewCanvas* view, QWheelEvent* event) {
 		if (!view)
 			return;
-		if ((m_eZoom == eZOOM::mouse_wheel_locked) or (m_option.bZoomLock and m_eZoom != eZOOM::free)) {
+		if ((m_eZoom == zoom_t::mouse_wheel_locked) or (m_option.bZoomLock and m_eZoom != zoom_t::free)) {
 			return;
 		}
 		event->accept();
@@ -803,21 +995,20 @@ namespace biscuit::qt {
 		//static int count{};
 		//OutputDebugStringA(std::format("{} : index : {}, count {}\n", std::source_location{}.function_name(), index, count++).c_str());
 		{
-			eZOOM cur = (eZOOM)index;
-			using enum eZOOM;
-			if (m_eZoom == cur and IsOneOf(m_eZoom, fit2window, one2one, mouse_wheel_locked, free))
+			zoom_t cur = (zoom_t)index;
+			if (m_eZoom == cur and IsOneOf(m_eZoom, zoom_t::fit2window, zoom_t::one2one, zoom_t::mouse_wheel_locked, zoom_t::free))
 				return;
 			m_eZoom = cur;
 		}
 
 		//// Scroll Bar Visibility
 		//bool bHorz{true}, bVert{true};
-		//ui->view->AlwaysShowScrollbars(bHorz, bVert);
+		//m_view->AlwaysShowScrollbars(bHorz, bVert);
 
 		UpdateCT(true);
 		UpdateScrollBars();
-		if (ui->view)
-			ui->view->update();
+		if (m_view)
+			m_view->update();
 	}
 
 	void xMatView::OnSpinZoom_valueChanged(double value) {
@@ -827,7 +1018,7 @@ namespace biscuit::qt {
 		scale = std::clamp<double>(scale, dMinZoom, dMaxZoom);
 		if (m_bSkipSpinZoomEvent)
 			return;
-		if ( m_option.bZoomLock and IsNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
+		if ( m_option.bZoomLock and IsNoneOf(m_eZoom, zoom_t::free, zoom_t::mouse_wheel_locked) )
 			return;
 		if (m_ctScreenFromImage.m_scale == scale)
 			return;
@@ -840,29 +1031,29 @@ namespace biscuit::qt {
 		auto pt2 = m_ctScreenFromImage(ptImage);
 		m_ctScreenFromImage.m_offset += rect.CenterPoint() - m_ctScreenFromImage(ptImage);
 		UpdateScrollBars();
-		if (ui->view)
-			ui->view->update();
+		if (m_view)
+			m_view->update();
 	}
 
 	void xMatView::OnBtnZoomIn_clicked() {
-		//if ( m_option.bZoomLock and IsNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
+		//if ( m_option.bZoomLock and IsNoneOf(m_eZoom, zoom_t::free, zoom_t::mouse_wheel_locked) )
 		//	return;
 		ZoomInOut(100, GetViewRect().CenterPoint(), false);
 	}
 
 	void xMatView::OnBtnZoomOut_clicked() {
-		//if ( m_option.bZoomLock and IsNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
+		//if ( m_option.bZoomLock and IsNoneOf(m_eZoom, zoom_t::free, zoom_t::mouse_wheel_locked) )
 		//	return;
 		ZoomInOut(-100, GetViewRect().CenterPoint(), false);
 	}
 
 	void xMatView::OnBtnZoomFit_clicked() {
-		//if ( m_option.bZoomLock and IsNoneOf(m_eZoom, eZOOM::free, eZOOM::mouse_wheel_locked) )
+		//if ( m_option.bZoomLock and IsNoneOf(m_eZoom, zoom_t::free, zoom_t::mouse_wheel_locked) )
 		//	return;
-		UpdateCT(true, eZOOM::fit2window);
+		UpdateCT(true, zoom_t::fit2window);
 		UpdateScrollBars();
-		if (ui->view)
-			ui->view->update();
+		if (m_view)
+			m_view->update();
 	}
 
 	void xMatView::OnBtnCountColor_clicked() {
@@ -910,8 +1101,8 @@ namespace biscuit::qt {
 		}
 		UpdateCT(false);
 		UpdateScrollBars();
-		if (ui->view)
-			ui->view->update();
+		if (m_view)
+			m_view->update();
 	}
 
 	void xMatView::OnView_resized() {
@@ -928,8 +1119,8 @@ namespace biscuit::qt {
 		if (m_option.bExtendedPanning)
 			m_ctScreenFromImage.m_offset.x += rectScrollRange.Width() - std::max(0, rectImageScreen.Width() - m_option.nScrollMargin) - rectClient.Width();
 		UpdateScrollBars();
-		if (ui->view)
-			ui->view->update();
+		if (m_view)
+			m_view->update();
 	}
 	void xMatView::OnSbVert_valueChanged(int pos) {
 		auto [rectClient, rectImageScreen, rectScrollRange] = GetScrollGeometry();
@@ -940,8 +1131,8 @@ namespace biscuit::qt {
 		if (m_option.bExtendedPanning)
 			m_ctScreenFromImage.m_offset.y += rectScrollRange.Height() - std::max(0, rectImageScreen.Height() - m_option.nScrollMargin) - rectClient.Height();
 		UpdateScrollBars();
-		if (ui->view)
-			ui->view->update();
+		if (m_view)
+			m_view->update();
 	}
 
 	void xMatView::InitializeGL(xMatViewCanvas* view) {
@@ -1143,7 +1334,7 @@ R"(
 		glOrtho(0.0, sizeView.width, sizeView.height, 0.0, 0.0, 100.0);
 
 		glMatrixMode(GL_MODELVIEW);    // Set the matrix mode to object modeling
-		cv::Scalar cr = m_option.crBackground;
+		cv::Scalar cr(m_option.crBackground.b, m_option.crBackground.g, m_option.crBackground.r);
 		glClearColor(cr[0]/255.f, cr[1]/255.f, cr[2]/255.f, 1.0f);
 		glClearDepth(0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the window
@@ -1211,8 +1402,8 @@ R"(
 		int eInterpolation = cv::INTER_LINEAR;
 		try {
 			if (ct.m_scale < 1.) {
-				static std::unordered_map<eZOOM_OUT, cv::InterpolationFlags> const mapInterpolation = {
-					{eZOOM_OUT::nearest, cv::InterpolationFlags::INTER_NEAREST}, {eZOOM_OUT::area, cv::InterpolationFlags::INTER_AREA},
+				static std::unordered_map<zoom_out_t, cv::InterpolationFlags> const mapInterpolation = {
+					{zoom_out_t::nearest, cv::InterpolationFlags::INTER_NEAREST}, {zoom_out_t::area, cv::InterpolationFlags::INTER_AREA},
 				};
 				if (auto pos = mapInterpolation.find(m_option.eZoomOut); pos != mapInterpolation.end())
 					eInterpolation = pos->second;
@@ -1283,9 +1474,9 @@ R"(
 				//}
 			}
 			else if (ct.m_scale > 1.) {
-				static std::unordered_map<eZOOM_IN, cv::InterpolationFlags> const mapInterpolation = {
-					{eZOOM_IN::nearest, cv::InterpolationFlags::INTER_NEAREST}, {eZOOM_IN::linear, cv::InterpolationFlags::INTER_LINEAR},
-					{eZOOM_IN::bicubic, cv::InterpolationFlags::INTER_CUBIC}, {eZOOM_IN::lanczos4, cv::InterpolationFlags::INTER_LANCZOS4},
+				static std::unordered_map<zoom_in_t, cv::InterpolationFlags> const mapInterpolation = {
+					{zoom_in_t::nearest, cv::InterpolationFlags::INTER_NEAREST}, {zoom_in_t::linear, cv::InterpolationFlags::INTER_LINEAR},
+					{zoom_in_t::bicubic, cv::InterpolationFlags::INTER_CUBIC}, {zoom_in_t::lanczos4, cv::InterpolationFlags::INTER_LANCZOS4},
 				};
 				if (auto pos = mapInterpolation.find(m_option.eZoomIn); pos != mapInterpolation.end())
 					eInterpolation = pos->second;
@@ -1294,7 +1485,7 @@ R"(
 			else {
 				m_img(roi).copyTo(img(rcTarget));
 			}
-		} catch (std::exception& e) {
+		} catch (std::exception& ) {
 			//OutputDebugStringA(std::format("cv::{}.......\n", e.what()).c_str());
 		} catch (...) {
 			//OutputDebugStringA("cv::.......\n");

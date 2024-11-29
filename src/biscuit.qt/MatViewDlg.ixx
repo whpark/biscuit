@@ -1,20 +1,21 @@
 ﻿module;
 
 #include <QDialog>
+#include <QVBoxLayout>
 
-#include "biscuit/qt/MatView.h"
 #include "verdigris/wobjectcpp.h"
 #include "verdigris/wobjectimpl.h"
+
 #include "ui_MatViewDlg.h"
 
 export module biscuit.qt.MatViewDlg;
 
-export
-QT_BEGIN_NAMESPACE
-namespace Ui { class MatViewDlgClass; };
-QT_END_NAMESPACE
+import std;
+import biscuit;
+import biscuit.qt.MatView;
 
 export namespace biscuit::qt {
+
 	class xMatViewDlg : public QDialog {
 		W_OBJECT(xMatViewDlg)
 
@@ -44,5 +45,5 @@ export namespace biscuit::qt {
 	xMatViewDlg::~xMatViewDlg() {
 	}
 
-
 }	// namespace biscuit::qt
+

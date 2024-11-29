@@ -81,6 +81,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <BuildStlModules>true</BuildStlModules>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <DisableSpecificWarnings>5050</DisableSpecificWarnings>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -90,6 +91,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <BuildStlModules>true</BuildStlModules>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <DisableSpecificWarnings>5050</DisableSpecificWarnings>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -124,9 +126,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="biscuit.qt.ixx" />
+    <ClCompile Include="biscuit.qt.Widgets.ixx" />
     <ClCompile Include="MatBitmapArchive.ixx" />
-    <ClCompile Include="MatView.cpp" />
+    <ClCompile Include="MatView.ixx" />
+    <ClCompile Include="MatViewCanvas.ixx" />
     <ClCompile Include="MatViewDlg.ixx" />
+    <ClCompile Include="MatViewOption.ixx" />
     <ClCompile Include="ProgressDlg.ixx" />
     <ClCompile Include="QCollapsibleGroupBox.ixx">
       <FileType>Document</FileType>
@@ -137,9 +142,8 @@
     <ClCompile Include="QRoundButton.ixx" />
     <ClCompile Include="ui_data_exchange.ixx" />
     <ClCompile Include="utils.ixx" />
-    <ClInclude Include="..\..\include\biscuit\qt\MatViewCanvas.h" />
+    <ClInclude Include="..\..\include\biscuit\qt\biscuit_widgets.h" />
     <ClInclude Include="..\..\include\biscuit\qt\QGlazeModel.h" />
-    <ClInclude Include="..\..\include\biscuit\qt\MatView.h" />
     <ClCompile Include="MatViewSettingsDlg.ixx">
       <FileType>Document</FileType>
     </ClCompile>

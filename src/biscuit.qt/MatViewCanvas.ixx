@@ -1,12 +1,15 @@
-﻿#pragma once
+﻿module;
 
 #include <QOpenGLWidget>
 #include "biscuit/qt/macro.h"
 #include "verdigris/wobjectcpp.h"
+#include "verdigris/wobjectimpl.h"
 
-namespace biscuit::qt {
+export module biscuit.qt.MatView:Canvas;
 
-	class BSC__QT_CLASS xMatViewCanvas : public QOpenGLWidget {
+export namespace biscuit::qt {
+
+	class xMatViewCanvas : public QOpenGLWidget {
 		friend class xMatView;
 		W_OBJECT(xMatViewCanvas)
 
@@ -54,5 +57,7 @@ namespace biscuit::qt {
 				m_fnWheel(this, event);
 		}
 	};
+
+	W_OBJECT_IMPL(xMatViewCanvas);
 
 }	// namespace biscuit::qt

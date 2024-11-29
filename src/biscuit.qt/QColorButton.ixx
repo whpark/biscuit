@@ -7,7 +7,7 @@
 
 #include <QtWidgets/QtWidgets>
 
-export module biscuit.qt.QColorButton;
+export module biscuit.qt.Widgets.QColorButton;
 import std;
 import biscuit;
 

@@ -2,22 +2,25 @@
 
 #include <QDialog>
 #include <QColorDialog>
+
 #include "ui_MatViewSettingsDlg.h"
 
-#include "biscuit/qt/MatView.h"
 #include "verdigris/wobjectcpp.h"
 #include "verdigris/wobjectimpl.h"
 
-export module biscuit.qt.MatViewSettingsDlg;
+
+export module biscuit.qt.MatView:SettingsDlg;
 
 import std;
 import biscuit;
 import biscuit.qt.utils;
 import biscuit.qt.ui_data_exchange;
+import :Option;
 
 using namespace std::literals;
 
 export namespace biscuit::qt {
+
 
 	class xMatViewSettingsDlg : public QDialog {
 		W_OBJECT(xMatViewSettingsDlg)
@@ -26,10 +29,11 @@ export namespace biscuit::qt {
 		using this_t = xMatViewSettingsDlg;
 		using base_t = QDialog;
 
-		xMatView::S_OPTION m_option;
+		using option_t = mat_view::sOption;
+		option_t m_option;
 
 	public:
-		xMatViewSettingsDlg(xMatView::S_OPTION option, QWidget* parent = nullptr);
+		xMatViewSettingsDlg(option_t option, QWidget* parent = nullptr);
 		~xMatViewSettingsDlg() {}
 
 		bool UpdateData(bool bSaveAndValidate = true);
@@ -45,7 +49,7 @@ export namespace biscuit::qt {
 
 	W_OBJECT_IMPL(xMatViewSettingsDlg);
 
-	xMatViewSettingsDlg::xMatViewSettingsDlg(xMatView::S_OPTION option, QWidget* parent) : QDialog(parent), m_option(option) {
+	xMatViewSettingsDlg::xMatViewSettingsDlg(option_t option, QWidget* parent) : QDialog(parent), m_option(option) {
 		ui.setupUi(this);
 
 		connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &this_t::OnOK);
@@ -76,10 +80,10 @@ export namespace biscuit::qt {
 		//}
 		if (b) {
 			auto cr = QColor(ui.edtColorBackground->text());
-			m_option.crBackground = cv::Vec3b(cr.red(), cr.green(), cr.blue());
+			m_option.crBackground = color_bgra_t(cr.blue(), cr.green(), cr.red(), 0);
 		}
 		else {
-			ui.edtColorBackground->setText(QColor(m_option.crBackground[0], m_option.crBackground[1], m_option.crBackground[2]).name());
+			ui.edtColorBackground->setText(QColor(m_option.crBackground.r, m_option.crBackground.g, m_option.crBackground.b).name());
 		}
 
 		return false;
@@ -97,9 +101,9 @@ export namespace biscuit::qt {
 	void xMatViewSettingsDlg::OnBackgroundColor() {
 		QColor color = QColorDialog::getColor(QColor(ui.edtColorBackground->text()), this, tr("Select Color"));
 		if (color.isValid()) {
-			m_option.crBackground[0] = color.red();
-			m_option.crBackground[1] = color.green();
-			m_option.crBackground[2] = color.blue();
+			m_option.crBackground.r = color.red();
+			m_option.crBackground.g = color.green();
+			m_option.crBackground.b = color.blue();
 			ui.edtColorBackground->setText(color.name());
 		}
 	}

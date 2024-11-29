@@ -75,7 +75,7 @@ namespace biscuit::qt {
 			m_json.reset();
 			endResetModel();
 
-			beginInsertRows({}, 0, GetChildCount(t));
+			beginInsertRows({}, 0, (int)GetChildCount(t));
 			m_json = std::move(t);
 			BuildChildToParentMap(m_mapChildToParent, m_json);
 			endInsertRows();

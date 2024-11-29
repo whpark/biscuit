@@ -10,12 +10,12 @@
 #include <QApplication>
 #include <QtWidgets/QtWidgets>
 
-export module biscuit.qt.QRoundButton;
+export module biscuit.qt.Widgets.QRoundButton;
 import std;
 import fmt;
 import biscuit;
 import biscuit.qt.utils;
-import biscuit.qt.QColorButton;
+import biscuit.qt.Widgets.QColorButton;
 
 using namespace std::literals;
 
