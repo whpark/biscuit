@@ -143,7 +143,8 @@ export namespace biscuit::qt {
 				path = QFileDialog::getExistingDirectory(this, "Select Folder", pathCurrent);
 
 			if (!path.isEmpty()) {
-				ui.cmbPath->addItem(path);
+				if (ui.cmbPath->findText(path, Qt::MatchExactly) < 0)
+					ui.cmbPath->addItem(path);
 				ui.cmbPath->setCurrentText(path);
 
 				SigPathBrowsed(path);
