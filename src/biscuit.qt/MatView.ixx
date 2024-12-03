@@ -395,6 +395,12 @@ export namespace biscuit::qt {
 		return true;
 	}
 
+	bool xMatView::IsToolBarShown() const {
+		if (!ui->toolbar)
+			return false;
+		return ui->toolbar->isVisible();
+	}
+
 
 	bool xMatView::UpdateCT(bool bCenter, zoom_t eZoom) {
 		if (m_img.empty())
