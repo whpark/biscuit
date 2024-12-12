@@ -393,8 +393,8 @@ export namespace biscuit::qt {
 		if (m_view)
 			m_view->update();
 
-		if (bStore) {
-			return m_fnSyncSetting and m_fnSyncSetting(true, m_strCookie, m_option);
+		if (bStore && m_fnSyncSetting) {
+			return m_fnSyncSetting(true, m_strCookie, m_option);
 		}
 		return true;
 	}
