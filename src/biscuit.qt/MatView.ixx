@@ -146,6 +146,7 @@ export namespace biscuit::qt {
 		cv::Mat GetImage() { return m_img; }
 		cv::Mat const& GetImage() const { return m_img; }
 		bool SetImage(cv::Mat const& img, bool bCenter = true, zoom_t eZoomMode = zoom_t::none, bool bCopy = false);
+		void Reset();
 		cv::Mat GetPalette() { return m_palette; }
 		bool SetPalette(cv::Mat const& palette, bool bUpdateView);	// palette will be copied into m_palette
 		bool SetZoomMode(zoom_t eZoomMode, bool bCenter = true);
@@ -187,6 +188,7 @@ export namespace biscuit::qt {
 
 	protected:
 		void BuildPyramid();
+		void StopPyramidMaker();
 		xRect2i GetViewRect();
 		void InitializeGL(xMatViewCanvas* view);
 		void PaintGL(xMatViewCanvas* view);
@@ -295,6 +297,8 @@ export namespace biscuit::qt {
 	bool xMatView::SetImage(cv::Mat const& img, bool bCenter, zoom_t eZoomMode, bool bCopy) {
 		xWaitCursor wc;
 
+		StopPyramidMaker();
+
 		// original image
 		if (bCopy)
 			img.copyTo(m_img);
@@ -325,6 +329,16 @@ export namespace biscuit::qt {
 		if (m_view)
 			m_view->update();
 		return true;
+	}
+
+	void xMatView::Reset() {
+		m_mouse.Clear();
+		m_smooth_scroll.Clear();
+		m_ctScreenFromImage = {};
+		StopPyramidMaker();
+		m_img.release();
+		m_pyramid.imgs.clear();
+
 	}
 
 	bool xMatView::SetPalette(cv::Mat const& palette, bool bUpdateView) {
@@ -772,11 +786,10 @@ export namespace biscuit::qt {
 
 	void xMatView::BuildPyramid() {
 		// Build Pyramid Image for down sampling { cv::InterpolationFlags::INTER_AREA }
-		if (m_pyramid.threadPyramidMaker.joinable()) {
-			m_pyramid.threadPyramidMaker.request_stop();
-			m_pyramid.threadPyramidMaker.join();
-		}
+		StopPyramidMaker();
 		m_pyramid.imgs.clear();
+		if (m_img.empty())
+			return;
 		m_pyramid.imgs.push_front(m_img);
 		const uint minArea = 1'000 * 1'000;
 		if (m_option.bPyrImageDown and m_option.eZoomOut == zoom_out_t::area and ((uint64_t)m_img.cols * m_img.rows) > minArea) {
@@ -790,6 +803,13 @@ export namespace biscuit::qt {
 					}
 				}
 			});
+		}
+	}
+
+	void xMatView::StopPyramidMaker() {
+		if (m_pyramid.threadPyramidMaker.joinable()) {
+			m_pyramid.threadPyramidMaker.request_stop();
+			m_pyramid.threadPyramidMaker.join();
 		}
 	}
 
