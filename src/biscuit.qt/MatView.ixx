@@ -36,6 +36,9 @@ export import :Canvas;
 export import :Option;
 export import :SettingsDlg;
 
+W_REGISTER_ARGTYPE(biscuit::qt::xMatViewCanvas*);
+W_REGISTER_ARGTYPE(QMouseEvent*);
+W_REGISTER_ARGTYPE(QWheelEvent*);
 
 export namespace biscuit::qt {
 	using namespace std::literals;
@@ -104,6 +107,27 @@ export namespace biscuit::qt {
 			std::deque<cv::Mat> imgs;
 			std::jthread threadPyramidMaker;
 		} m_pyramid;
+
+		// Mouse Action
+	public:
+		enum class eMOUSE_ACTION : uint8_t { none, pan, select, };
+		enum class eWHEEL_ACTION : uint8_t { none, zoom, scroll, };
+		auto& MouseAction() { return m_mapMouseAction; };
+		auto& WheelAction() { return m_mapWheelAction; };
+	protected:
+		std::map<std::pair<Qt::MouseButton, Qt::KeyboardModifiers>, eMOUSE_ACTION> m_mapMouseAction{
+			{ {Qt::MouseButton::LeftButton, Qt::KeyboardModifier::NoModifier},		eMOUSE_ACTION::pan },
+			{ {Qt::MouseButton::LeftButton, Qt::KeyboardModifier::ControlModifier},	eMOUSE_ACTION::pan },
+			{ {Qt::MouseButton::LeftButton, Qt::KeyboardModifier::ShiftModifier},	eMOUSE_ACTION::select },
+			{ {Qt::MouseButton::RightButton, Qt::KeyboardModifier::NoModifier},		eMOUSE_ACTION::select },
+		};
+		std::map<Qt::KeyboardModifiers, eWHEEL_ACTION> m_mapWheelAction{
+			{ Qt::KeyboardModifier::NoModifier,			eWHEEL_ACTION::zoom },
+			{ Qt::KeyboardModifier::ControlModifier,	eWHEEL_ACTION::scroll },
+		};
+	public:
+		std::map<Qt::MouseButton, eMOUSE_ACTION> m_current_mouse_action;
+
 		mutable struct {
 			bool bInSelectionMode{};
 			bool bRectSelected{};
@@ -129,14 +153,12 @@ export namespace biscuit::qt {
 			}
 		} m_smooth_scroll;
 
-		//xMatViewCanvas* m_view{};
-
 		option_t m_option;
 		zoom_t m_eZoom{zoom_t::fit2window};
 		ct_t m_ctScreenFromImage;
 		mutable bool m_bSkipSpinZoomEvent{};
 
-		xMatViewCanvas* m_view{};
+		xMatViewCanvas* m_canvas{};
 
 	public:
 		xMatView(QWidget* parent = nullptr);
@@ -186,20 +208,25 @@ export namespace biscuit::qt {
 		void PurgeScroll(bool bUpdate = true);
 		bool KeyboardNavigate(int key, bool ctrl = false, bool alt = false, bool shift = false);
 
+		bool SigMousePressed(xMatViewCanvas* canvas, QMouseEvent* event) W_SIGNAL(SigMousePressed, canvas, event);
+		bool SigMouseReleased(xMatViewCanvas* canvas, QMouseEvent* event) W_SIGNAL(SigMouseReleased, canvas, event);
+		bool SigMouseMoved(xMatViewCanvas* canvas, QMouseEvent* event) W_SIGNAL(SigMouseMoved, canvas, event);
+		bool SigMouseWheelMoved(xMatViewCanvas* canvas, QWheelEvent* event) W_SIGNAL(SigMouseWheelMoved, canvas, event);
+
 	protected:
 		void BuildPyramid();
 		void StopPyramidMaker();
 		xRect2i GetViewRect();
-		void InitializeGL(xMatViewCanvas* view);
-		void PaintGL(xMatViewCanvas* view);
+		void InitializeGL(xMatViewCanvas* canvas);
+		void PaintGL(xMatViewCanvas* canvas);
 		bool PutMatAsTexture(GLuint textureID, cv::Mat const& img, int width, xBounds2i const& rect, xRect2i const& rectClient);
 
 	protected:
 		virtual void keyPressEvent(QKeyEvent *event) override;
-		void OnView_mousePressEvent(xMatViewCanvas* view, QMouseEvent *event);
-		void OnView_mouseReleaseEvent(xMatViewCanvas* view, QMouseEvent *event);
-		void OnView_mouseMoveEvent(xMatViewCanvas* view, QMouseEvent *event);
-		void OnView_wheelEvent(xMatViewCanvas* view, QWheelEvent* event);
+		void OnView_mousePressEvent(xMatViewCanvas* canvas, QMouseEvent *event);
+		void OnView_mouseReleaseEvent(xMatViewCanvas* canvas, QMouseEvent *event);
+		void OnView_mouseMoveEvent(xMatViewCanvas* canvas, QMouseEvent *event);
+		void OnView_wheelEvent(xMatViewCanvas* canvas, QWheelEvent* event);
 
 	protected:
 		// slots
@@ -245,31 +272,31 @@ export namespace biscuit::qt {
 	xMatView::xMatView(QWidget* parent) : QWidget(parent), ui(std::make_unique<Ui::MatViewClass>()) {
 		ui->setupUi(this);
 
-		m_view = new biscuit::qt::xMatViewCanvas(ui->frame);
-		m_view->setObjectName("view");
-		m_view->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
-		ui->gridLayout->addWidget(m_view, 0, 0, 1, 1);
+		m_canvas = new biscuit::qt::xMatViewCanvas(ui->frame);
+		m_canvas->setObjectName("canvas");
+		m_canvas->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
+		ui->gridLayout->addWidget(m_canvas, 0, 0, 1, 1);
 
 		ui->cmbZoomMode->setCurrentIndex(std::to_underlying(m_eZoom));
 
 		// openGL object
-		//ui->view = std::make_unique<xMatViewCanvas>(this);
-		if (auto* view = m_view) {
-			view->m_fnInitializeGL =	[this](auto* p) { this->InitializeGL(p); };
-			view->m_fnPaintGL =			[this](auto* p) { this->PaintGL(p); };
-			view->m_fnMousePress =		[this](auto* p, auto* e) { this->OnView_mousePressEvent(p, e); };
-			view->m_fnMouseRelease =	[this](auto* p, auto* e) { this->OnView_mouseReleaseEvent(p, e); };
-			view->m_fnMouseMove =		[this](auto* p, auto* e) { this->OnView_mouseMoveEvent(p, e); };
-			view->m_fnWheel =			[this](auto* p, auto* e) { this->OnView_wheelEvent(p, e); };
-			view->setMouseTracking(true);
+		//ui->canvas = std::make_unique<xMatViewCanvas>(this);
+		if (auto* canvas = m_canvas) {
+			canvas->m_fnInitializeGL	= [this](auto* p) { this->InitializeGL(p); };
+			canvas->m_fnPaintGL			= [this](auto* p) { this->PaintGL(p); };
+			canvas->m_fnMousePress		= [this](auto* p, auto* e) { this->OnView_mousePressEvent(p, e); };
+			canvas->m_fnMouseRelease	= [this](auto* p, auto* e) { this->OnView_mouseReleaseEvent(p, e); };
+			canvas->m_fnMouseMove		= [this](auto* p, auto* e) { this->OnView_mouseMoveEvent(p, e); };
+			canvas->m_fnWheel			= [this](auto* p, auto* e) { this->OnView_wheelEvent(p, e); };
+			canvas->setMouseTracking(true);
 		}
-		//ui->view->setObjectName("view");
+		//ui->canvas->setObjectName("canvas");
 		//QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 		//sizePolicy.setHorizontalStretch(0);
 		//sizePolicy.setVerticalStretch(0);
 		//sizePolicy.setHeightForWidth(false);
-		//ui->view->setSizePolicy(sizePolicy);
-		//ui->gridLayout->addWidget(ui->view.get(), 0, 0, 1, 1);
+		//ui->canvas->setSizePolicy(sizePolicy);
+		//ui->gridLayout->addWidget(ui->canvas.get(), 0, 0, 1, 1);
 
 		if (m_fnSyncSetting) {
 			m_fnSyncSetting(false, m_strCookie, m_option);
@@ -286,7 +313,7 @@ export namespace biscuit::qt {
 		connect(ui->sbVert, &QScrollBar::valueChanged, this, &this_t::OnSbVert_valueChanged);
 		connect(ui->sbVert, &QScrollBar::sliderMoved, this, &this_t::OnSbVert_valueChanged);
 		connect(&m_smooth_scroll.timer, &QTimer::timeout, this, &this_t::OnSmoothScroll_timeout);
-		connect(m_view, &QOpenGLWidget::resized, this, &this_t::OnView_resized);
+		connect(m_canvas, &QOpenGLWidget::resized, this, &this_t::OnView_resized);
 		//connect(ui->btnCountColor, &QPushButton::clicked, this, &this_t::OnBtnCountColor_clicked);
 	}
 
@@ -305,7 +332,6 @@ export namespace biscuit::qt {
 		else
 			m_img = img;
 
-		m_img = m_img;
 		BuildPyramid();
 
 		// check (opengl) texture format
@@ -326,8 +352,8 @@ export namespace biscuit::qt {
 		UpdateCT(bCenter, eZoomMode);
 		UpdateScrollBars();
 
-		if (m_view)
-			m_view->update();
+		if (m_canvas)
+			m_canvas->update();
 		return true;
 	}
 
@@ -355,8 +381,8 @@ export namespace biscuit::qt {
 			m_palette.release();
 		}
 
-		if (bUpdateView and m_view)
-			m_view->update();
+		if (bUpdateView and m_canvas)
+			m_canvas->update();
 
 		return bCopied;
 	}
@@ -366,8 +392,8 @@ export namespace biscuit::qt {
 		m_eZoom = eZoomMode;
 		UpdateCT(bCenter, eZoomMode);
 		UpdateScrollBars();
-		if (m_view)
-			m_view->update();
+		if (m_canvas)
+			m_canvas->update();
 		return true;
 	}
 
@@ -375,8 +401,8 @@ export namespace biscuit::qt {
 		m_mouse.bRectSelected = true;
 		m_mouse.ptSel0 = rect.pt0();
 		m_mouse.ptSel1 = rect.pt1();
-		if (m_view)
-			m_view->update();
+		if (m_canvas)
+			m_canvas->update();
 	}
 	void xMatView::ClearSelectionRect() {
 		m_mouse.bRectSelected = false;
@@ -390,8 +416,8 @@ export namespace biscuit::qt {
 
 		UpdateCT(false, zoom_t::none);
 		UpdateScrollBars();
-		if (m_view)
-			m_view->update();
+		if (m_canvas)
+			m_canvas->update();
 
 		if (bStore && m_fnSyncSetting) {
 			return m_fnSyncSetting(true, m_strCookie, m_option);
@@ -616,8 +642,8 @@ export namespace biscuit::qt {
 		//OnCmbZoomMode_currentIndexChanged(std::to_underlying(eZoom));
 		UpdateCT(bCenter);
 		UpdateScrollBars();
-		if (m_view)
-			m_view->update();
+		if (m_canvas)
+			m_canvas->update();
 		return true;
 	}
 
@@ -627,8 +653,8 @@ export namespace biscuit::qt {
 			m_ctScreenFromImage.m_offset = pt;
 			UpdateCT(false);
 			UpdateScrollBars();
-			if (m_view)
-				m_view->update();
+			if (m_canvas)
+				m_canvas->update();
 		}
 		else {
 			m_smooth_scroll.pt0 = m_ctScreenFromImage.m_offset;
@@ -655,8 +681,8 @@ export namespace biscuit::qt {
 		if (bUpdate) {
 			UpdateCT(false);
 			UpdateScrollBars();
-			if (m_view)
-				m_view->update();
+			if (m_canvas)
+				m_canvas->update();
 		}
 	}
 
@@ -814,9 +840,9 @@ export namespace biscuit::qt {
 	}
 
 	xRect2i xMatView::GetViewRect() {
-		if (!m_view)
+		if (!m_canvas)
 			return {};
-		xRect2i rect = ToCoordRect(m_view->rect());
+		xRect2i rect = ToCoordRect(m_canvas->rect());
 		rect.pt() = {};
 		for (auto r = devicePixelRatio(); auto& v : rect.arr())
 			v *= r;
@@ -837,8 +863,8 @@ export namespace biscuit::qt {
 			)
 		{
 			m_mouse.bRectSelected = m_mouse.bInSelectionMode = false;
-			if (m_view)
-				m_view->update();
+			if (m_canvas)
+				m_canvas->update();
 			event->accept();
 			return ;
 		}
@@ -860,60 +886,102 @@ export namespace biscuit::qt {
 		event->ignore();
 	}
 
-	void xMatView::OnView_mousePressEvent(xMatViewCanvas* view, QMouseEvent* event) {
-		if (!view)
+	void xMatView::OnView_mousePressEvent(xMatViewCanvas* canvas, QMouseEvent* event) {
+		if (!canvas)
 			return;
-		xPoint2i ptView = ToCoord(event->pos() * devicePixelRatio());
-		if (event->button() == Qt::MouseButton::LeftButton) {
-			if (m_option.bPanningLock and (m_eZoom == zoom_t::fit2window))
-				return;
-			if (mouseGrabber())
-				return;
+
+		if (emit SigMousePressed(canvas, event)) {
 			event->accept();
-			view->grabMouse();
-			m_mouse.ptAnchor = ptView;
-			m_mouse.ptOffset0 = m_ctScreenFromImage.m_offset;
+			return;
 		}
-		else if (event->button() == Qt::MouseButton::RightButton) {
-			auto ctI = m_ctScreenFromImage.GetInverse();
-			if (!ctI)
-				return;
-			if (m_mouse.bInSelectionMode) {
-				m_mouse.bInSelectionMode = false;
-				m_mouse.bRectSelected = true;
-				auto pt = (*ctI)(ptView);
-				m_mouse.ptSel1.x = std::clamp<int>(pt.x, 0, m_img.cols);
-				m_mouse.ptSel1.y = std::clamp<int>(pt.y, 0, m_img.rows);
-			} else {
+
+		auto btn = event->button();
+		auto iter = m_mapMouseAction.find({btn, event->modifiers()});
+		if (iter == m_mapMouseAction.end()) {
+			return;
+		}
+		auto action = iter->second;
+		xPoint2i ptView = ToCoord(event->pos() * devicePixelRatio());
+		switch (action) {
+		case eMOUSE_ACTION::pan:
+			{
+				if (m_option.bPanningLock and (m_eZoom == zoom_t::fit2window))
+					return;
+				if (mouseGrabber())
+					return;
+				event->accept();
+				canvas->grabMouse();
+				m_mouse.ptAnchor = ptView;
+				m_mouse.ptOffset0 = m_ctScreenFromImage.m_offset;
+				m_current_mouse_action[btn] = action;
+			}
+			break;
+		case eMOUSE_ACTION::select:
+			{
+				auto ctI = m_ctScreenFromImage.GetInverse();
+				if (!ctI)
+					return;
 				m_mouse.bRectSelected = false;
 				m_mouse.bInSelectionMode = true;
 				auto pt = (*ctI)(ptView);
 				m_mouse.ptSel0.x = std::clamp<int>(pt.x, 0, m_img.cols);
 				m_mouse.ptSel0.y = std::clamp<int>(pt.y, 0, m_img.rows);
 				m_mouse.ptSel1 = m_mouse.ptSel0;
+				m_current_mouse_action[btn] = action;
+				canvas->update();
 			}
-			view->update();
+			break;
 		}
 	}
 
-	void xMatView::OnView_mouseReleaseEvent(xMatViewCanvas* view, QMouseEvent* event) {
-		if (!view)
+	void xMatView::OnView_mouseReleaseEvent(xMatViewCanvas* canvas, QMouseEvent* event) {
+		if (!canvas)
 			return;
-		if (event->button() == Qt::MouseButton::LeftButton) {
-			if (!mouseGrabber())
-				return;
+
+		if (emit SigMouseReleased(canvas, event)) {
 			event->accept();
-			view->releaseMouse();
-			m_mouse.ptAnchor.reset();
+			return;
 		}
-		else if (event->button() == Qt::MouseButton::RightButton) {
+
+		auto btn = event->button();
+		auto action = m_current_mouse_action[btn];
+		m_current_mouse_action[btn] = eMOUSE_ACTION::none;
+		switch (action) {
+		case eMOUSE_ACTION::pan:
+			{
+				if (!mouseGrabber())
+					return;
+				event->accept();
+				canvas->releaseMouse();
+				m_mouse.ptAnchor.reset();
+			}
+			break;
+		case eMOUSE_ACTION::select:
+			if (m_mouse.bInSelectionMode) {
+				auto ctI = m_ctScreenFromImage.GetInverse();
+				if (!ctI)
+					return;
+				m_mouse.bInSelectionMode = false;
+				m_mouse.bRectSelected = true;
+				xPoint2i ptView = ToCoord(event->pos() * devicePixelRatio());
+				auto pt = (*ctI)(ptView);
+				m_mouse.ptSel1.x = std::clamp<int>(pt.x, 0, m_img.cols);
+				m_mouse.ptSel1.y = std::clamp<int>(pt.y, 0, m_img.rows);
+			}
+			break;
 		}
 	}
 
-	void xMatView::OnView_mouseMoveEvent(xMatViewCanvas* view, QMouseEvent* event) {
+	void xMatView::OnView_mouseMoveEvent(xMatViewCanvas* canvas, QMouseEvent* event) {
 		static std::locale l("en_US.UTF-8");
-		if (!view)
+		if (!canvas)
 			return;
+
+		if (emit SigMouseMoved(canvas, event)) {
+			event->accept();
+			return;
+		}
+
 		event->accept();
 		xPoint2d ptView = ToCoord(event->pos()*devicePixelRatio());
 		if (m_mouse.ptAnchor) {
@@ -937,7 +1005,7 @@ export namespace biscuit::qt {
 			m_ctScreenFromImage.m_offset = m_mouse.ptOffset0 + ptOffset;
 			UpdateCT();
 			UpdateScrollBars();
-			view->update();
+			canvas->update();
 		}
 
 		auto ctI = m_ctScreenFromImage.GetInverse();
@@ -947,7 +1015,7 @@ export namespace biscuit::qt {
 			auto pt = ctI ? (*ctI)(ptView) : ptView;
 			m_mouse.ptSel1.x = std::clamp<int>(pt.x, 0, m_img.cols);
 			m_mouse.ptSel1.y = std::clamp<int>(pt.y, 0, m_img.rows);
-			view->update();
+			canvas->update();
 		}
 
 		// status
@@ -1007,14 +1075,35 @@ export namespace biscuit::qt {
 		}
 	}
 
-	void xMatView::OnView_wheelEvent(xMatViewCanvas* view, QWheelEvent* event) {
-		if (!view)
+	void xMatView::OnView_wheelEvent(xMatViewCanvas* canvas, QWheelEvent* event) {
+		if (!canvas)
 			return;
+		auto iter = m_mapWheelAction.find(event->modifiers());
+		if (iter == m_mapWheelAction.end()) {
+			return;
+		}
+		auto action = iter->second;
+		switch (action) {
+		case eWHEEL_ACTION::zoom:
+			{
 		if ((m_eZoom == zoom_t::mouse_wheel_locked) or (m_option.bZoomLock and m_eZoom != zoom_t::free)) {
 			return;
 		}
 		event->accept();
 		ZoomInOut(event->angleDelta().y(), ToCoord(event->position()*devicePixelRatio()), false);
+			}
+			break;
+		case eWHEEL_ACTION::scroll:
+			{
+				if ((m_eZoom == zoom_t::mouse_wheel_locked) or (m_option.bPanningLock and m_eZoom != zoom_t::free)) {
+					return;
+				}
+				event->accept();
+				auto pt = xPoint2d(event->angleDelta().x(), event->angleDelta().y());
+				Scroll(pt);
+			}
+			break;
+		}
 	}
 
 	void xMatView::OnCmbZoomMode_currentIndexChanged(int index) {
@@ -1029,12 +1118,12 @@ export namespace biscuit::qt {
 
 		//// Scroll Bar Visibility
 		//bool bHorz{true}, bVert{true};
-		//m_view->AlwaysShowScrollbars(bHorz, bVert);
+		//m_canvas->AlwaysShowScrollbars(bHorz, bVert);
 
 		UpdateCT(true);
 		UpdateScrollBars();
-		if (m_view)
-			m_view->update();
+		if (m_canvas)
+			m_canvas->update();
 	}
 
 	void xMatView::OnSpinZoom_valueChanged(double value) {
@@ -1057,8 +1146,8 @@ export namespace biscuit::qt {
 		auto pt2 = m_ctScreenFromImage(ptImage);
 		m_ctScreenFromImage.m_offset += rect.CenterPoint() - m_ctScreenFromImage(ptImage);
 		UpdateScrollBars();
-		if (m_view)
-			m_view->update();
+		if (m_canvas)
+			m_canvas->update();
 	}
 
 	void xMatView::OnBtnZoomIn_clicked() {
@@ -1078,8 +1167,8 @@ export namespace biscuit::qt {
 		//	return;
 		UpdateCT(true, zoom_t::fit2window);
 		UpdateScrollBars();
-		if (m_view)
-			m_view->update();
+		if (m_canvas)
+			m_canvas->update();
 	}
 
 	void xMatView::OnBtnCountColor_clicked() {
@@ -1127,8 +1216,8 @@ export namespace biscuit::qt {
 		}
 		UpdateCT(false);
 		UpdateScrollBars();
-		if (m_view)
-			m_view->update();
+		if (m_canvas)
+			m_canvas->update();
 	}
 
 	void xMatView::OnView_resized() {
@@ -1145,8 +1234,8 @@ export namespace biscuit::qt {
 		if (m_option.bExtendedPanning)
 			m_ctScreenFromImage.m_offset.x += rectScrollRange.Width() - std::max(0, rectImageScreen.Width() - m_option.nScrollMargin) - rectClient.Width();
 		UpdateScrollBars();
-		if (m_view)
-			m_view->update();
+		if (m_canvas)
+			m_canvas->update();
 	}
 	void xMatView::OnSbVert_valueChanged(int pos) {
 		auto [rectClient, rectImageScreen, rectScrollRange] = GetScrollGeometry();
@@ -1157,11 +1246,11 @@ export namespace biscuit::qt {
 		if (m_option.bExtendedPanning)
 			m_ctScreenFromImage.m_offset.y += rectScrollRange.Height() - std::max(0, rectImageScreen.Height() - m_option.nScrollMargin) - rectClient.Height();
 		UpdateScrollBars();
-		if (m_view)
-			m_view->update();
+		if (m_canvas)
+			m_canvas->update();
 	}
 
-	void xMatView::InitializeGL(xMatViewCanvas* view) {
+	void xMatView::InitializeGL(xMatViewCanvas* canvas) {
 		GLenum err = glewInit();
 		if (err != GLEW_OK) {
 			const GLubyte* msg = glewGetErrorString(err);
@@ -1209,7 +1298,7 @@ R"(
 
 		// todo: TEMP
 		if (!m_gl.gl)
-			m_gl.gl = std::make_unique<QOpenGLExtraFunctions>(view->context());
+			m_gl.gl = std::make_unique<QOpenGLExtraFunctions>(canvas->context());
 		if (!m_gl.shaderProgram) {
 
 			m_gl().glGenVertexArrays(1, &m_gl.VAO);
@@ -1339,15 +1428,15 @@ R"(
 	}
 
 
-	void xMatView::PaintGL(xMatViewCanvas* view) {
+	void xMatView::PaintGL(xMatViewCanvas* canvas) {
 		//auto t0 = std::chrono::steady_clock::now();
 
-		if (!view)
+		if (!canvas)
 			return;
 
 		//================
 		// openGL
-		//view->makeCurrent();
+		//canvas->makeCurrent();
 
 		// Client Rect
 		xRect2i rectClient;
@@ -1365,10 +1454,10 @@ R"(
 		glClearDepth(0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the window
 
-		auto* context = view->context();
+		auto* context = canvas->context();
 		if (!context)
 			return;
-		auto* surface = view->context()->surface();
+		auto* surface = canvas->context()->surface();
 
 		xFinalAction faSwapBuffer{[&]{
 			//OutputDebugStringA("Flush\n");
@@ -1377,7 +1466,7 @@ R"(
 		}};
 
 		//event.Skip();
-		if (!view or !context)
+		if (!canvas or !context)
 			return;
 
 		//// Show zoom Scale
