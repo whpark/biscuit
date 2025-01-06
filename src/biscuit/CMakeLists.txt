@@ -1,7 +1,9 @@
-﻿cmake_minimum_required (VERSION 3.28)
+﻿cmake_minimum_required (VERSION 3.30)
 # CMakeList.txt : CMake project for biscuit, include source and define
 # project specific logic here.
 #
+
+set(VCPKG_INSTALLED_DIR ${CMAKE_SOURCE_DIR}/vcpkg_installed)
 
 project(biscuit)
 

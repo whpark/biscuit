@@ -1,3 +1,11 @@
 ﻿# Include sub-projects.
 add_subdirectory(biscuit)
-add_subdirectory(test)
+# add_subdirectory(biscuit.opencv)
+# add_subdirectory(biscuit.shape)
+# add_subdirectory(biscuit.dxf)
+# add_subdirectory(biscuit.qt)
+# add_subdirectory(biscuit.win)
+# add_subdirectory(test)
+# add_subdirectory(test.dxf)
+# add_subdirectory(test.qt)
+add_subdirectory(ThirdParties)
