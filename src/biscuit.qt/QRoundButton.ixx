@@ -2,7 +2,7 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_fmt.h"
 
 #include "verdigris/wobjectcpp.h"
 #include "verdigris/wobjectimpl.h"

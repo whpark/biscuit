@@ -13,7 +13,7 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_fmt.h"
 
 #define NOMINMAX
 #include <Windows.h>

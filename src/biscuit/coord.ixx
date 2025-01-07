@@ -10,7 +10,7 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_eigen.h"
 
 export module biscuit.coord;

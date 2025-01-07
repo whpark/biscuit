@@ -2,6 +2,9 @@
 
 #include "./config.h"
 
+#define SPDLOG_USE_STD_FORMAT
+#define SPDLOG_COMPILED_LIB
+
 #include <spdlog/spdlog.h>
 #include <spdlog/stopwatch.h>
 #include <spdlog/sinks/basic_file_sink.h>

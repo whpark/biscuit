@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 
 #include "biscuit/dependencies_opencv.h"
-#include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_fmt.h"
 
 #include <QOpenGLExtraFunctions>
 #include <QWidget>

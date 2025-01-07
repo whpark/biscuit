@@ -12,7 +12,7 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_fmt.h"
 
 #include <Windows.h>
 

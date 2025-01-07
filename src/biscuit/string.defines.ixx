@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_fmt.h"
 
 export module biscuit.string.defines;
 import std;

@@ -18,9 +18,6 @@
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="fmt.hxx">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\biscuit\dependencies_asio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -33,7 +30,7 @@
     <ClInclude Include="..\..\include\biscuit\dependencies_eigen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_fmt.h">
+    <ClInclude Include="..\..\include\biscuit\dependencies_fmt._">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\biscuit\dependencies_glaze.h">
@@ -53,6 +50,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\biscuit\dependencies_units.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt.hxx">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

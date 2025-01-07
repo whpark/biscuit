@@ -15,7 +15,7 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_ctre.h"
 
 export module biscuit.lazy_profile;
