@@ -2,6 +2,7 @@
 
 #include <version>
 #include <cstdint>
+#include <string>
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
