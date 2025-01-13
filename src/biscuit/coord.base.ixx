@@ -176,12 +176,12 @@ export namespace biscuit::coord {
 
 		// constructors
 		//TCoordBase() = default;
-		TCoordBase(value_t i0={}) requires(count() == 1) { arr()[0] = i0; }
-		TCoordBase(value_t i0={}, value_t i1={}) requires(count() == 2) { arr()[0] = i0; arr()[1] = i1; }
-		TCoordBase(value_t i0={}, value_t i1={}, value_t i2={}) requires(count() == 3) { arr()[0] = i0; arr()[1] = i1; arr()[2] = i2; }
-		TCoordBase(value_t i0={}, value_t i1={}, value_t i2={}, value_t i3={}) requires(count() == 4 && !bRect) { arr()[0] = i0; arr()[1] = i1; arr()[2] = i2; arr()[3] = i3; }
-		TCoordBase(value_t x={}, value_t y={}, value_t width={}, value_t height={}) requires(dim == 2 && bRect) { arr()[0] = x; arr()[1] = y; arr()[2] = width; arr()[3] = height; }
-		TCoordBase(value_t x={}, value_t y={}, value_t z={}, value_t width={}, value_t height={}, value_t depth=1) requires(dim == 3 and bRect) {
+		constexpr TCoordBase(value_t i0={}) requires(count() == 1) { arr()[0] = i0; }
+		constexpr TCoordBase(value_t i0={}, value_t i1={}) requires(count() == 2) { arr()[0] = i0; arr()[1] = i1; }
+		constexpr TCoordBase(value_t i0={}, value_t i1={}, value_t i2={}) requires(count() == 3) { arr()[0] = i0; arr()[1] = i1; arr()[2] = i2; }
+		constexpr TCoordBase(value_t i0={}, value_t i1={}, value_t i2={}, value_t i3={}) requires(count() == 4 && !bRect) { arr()[0] = i0; arr()[1] = i1; arr()[2] = i2; arr()[3] = i3; }
+		constexpr TCoordBase(value_t x={}, value_t y={}, value_t width={}, value_t height={}) requires(dim == 2 && bRect) { arr()[0] = x; arr()[1] = y; arr()[2] = width; arr()[3] = height; }
+		constexpr TCoordBase(value_t x={}, value_t y={}, value_t z={}, value_t width={}, value_t height={}, value_t depth=1) requires(dim == 3 and bRect) {
 			arr()[0] = x; arr()[1] = y; arr()[2] = z;
 			arr()[3] = width; arr()[4] = height; arr()[5] = depth;
 		}
