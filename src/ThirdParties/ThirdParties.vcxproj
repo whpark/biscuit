@@ -101,7 +101,7 @@
     <ClInclude Include="..\..\include\biscuit\dependencies_cereal.h" />
     <ClInclude Include="..\..\include\biscuit\dependencies_ctre.h" />
     <ClInclude Include="..\..\include\biscuit\dependencies_eigen.h" />
-    <ClInclude Include="..\..\include\biscuit\dependencies_fmt._" />
+    <ClInclude Include="..\..\include\biscuit\dependencies_fmt.h" />
     <ClInclude Include="..\..\include\biscuit\dependencies_glaze.h" />
     <ClInclude Include="..\..\include\biscuit\dependencies_iconv.h" />
     <ClInclude Include="..\..\include\biscuit\dependencies_opencv.h" />
