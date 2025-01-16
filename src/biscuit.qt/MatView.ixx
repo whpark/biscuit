@@ -218,6 +218,7 @@ export namespace biscuit::qt {
 
 		bool SigMousePressed(xMatViewCanvas* canvas, QMouseEvent* event) W_SIGNAL(SigMousePressed, canvas, event);
 		bool SigMouseReleased(xMatViewCanvas* canvas, QMouseEvent* event) W_SIGNAL(SigMouseReleased, canvas, event);
+		bool SigMouseDoubleClicked(xMatViewCanvas* canvas, QMouseEvent* event) W_SIGNAL(SigMouseDoubleClicked, canvas, event);
 		bool SigMouseMoved(xMatViewCanvas* canvas, QMouseEvent* event) W_SIGNAL(SigMouseMoved, canvas, event);
 		bool SigMouseWheelMoved(xMatViewCanvas* canvas, QWheelEvent* event) W_SIGNAL(SigMouseWheelMoved, canvas, event);
 
@@ -233,6 +234,7 @@ export namespace biscuit::qt {
 		virtual void keyPressEvent(QKeyEvent *event) override;
 		void OnView_mousePressEvent(xMatViewCanvas* canvas, QMouseEvent *event);
 		void OnView_mouseReleaseEvent(xMatViewCanvas* canvas, QMouseEvent *event);
+		void OnView_mouseDoubleClickEvent(xMatViewCanvas* canvas, QMouseEvent *event);
 		void OnView_mouseMoveEvent(xMatViewCanvas* canvas, QMouseEvent *event);
 		void OnView_wheelEvent(xMatViewCanvas* canvas, QWheelEvent* event);
 
@@ -290,12 +292,13 @@ export namespace biscuit::qt {
 		// openGL object
 		//ui->canvas = std::make_unique<xMatViewCanvas>(this);
 		if (auto* canvas = m_canvas) {
-			canvas->m_fnInitializeGL	= [this](auto* p) { this->InitializeGL(p); };
-			canvas->m_fnPaintGL			= [this](auto* p) { this->PaintGL(p); };
-			canvas->m_fnMousePress		= [this](auto* p, auto* e) { this->OnView_mousePressEvent(p, e); };
-			canvas->m_fnMouseRelease	= [this](auto* p, auto* e) { this->OnView_mouseReleaseEvent(p, e); };
-			canvas->m_fnMouseMove		= [this](auto* p, auto* e) { this->OnView_mouseMoveEvent(p, e); };
-			canvas->m_fnWheel			= [this](auto* p, auto* e) { this->OnView_wheelEvent(p, e); };
+			canvas->m_fnInitializeGL		= [this](auto* p) { this->InitializeGL(p); };
+			canvas->m_fnPaintGL				= [this](auto* p) { this->PaintGL(p); };
+			canvas->m_fnMousePress			= [this](auto* p, auto* e) { this->OnView_mousePressEvent(p, e); };
+			canvas->m_fnMouseRelease		= [this](auto* p, auto* e) { this->OnView_mouseReleaseEvent(p, e); };
+			canvas->m_fnMouseDoubleClick	= [this](auto* p, auto* e) { this->OnView_mouseDoubleClickEvent(p, e); };
+			canvas->m_fnMouseMove			= [this](auto* p, auto* e) { this->OnView_mouseMoveEvent(p, e); };
+			canvas->m_fnWheel				= [this](auto* p, auto* e) { this->OnView_wheelEvent(p, e); };
 			canvas->setMouseTracking(true);
 		}
 		//ui->canvas->setObjectName("canvas");
@@ -931,6 +934,7 @@ export namespace biscuit::qt {
 				auto ctI = m_ctScreenFromImage.GetInverse();
 				if (!ctI)
 					return;
+				event->accept();
 				m_mouse.bRectSelected = false;
 				m_mouse.bInSelectionMode = true;
 				auto pt = (*ctI)(ptView);
@@ -971,6 +975,7 @@ export namespace biscuit::qt {
 				auto ctI = m_ctScreenFromImage.GetInverse();
 				if (!ctI)
 					return;
+				event->accept();
 				m_mouse.bInSelectionMode = false;
 				m_mouse.bRectSelected = true;
 				xPoint2i ptView = ToCoord(event->pos() * devicePixelRatio());
@@ -979,6 +984,13 @@ export namespace biscuit::qt {
 				m_mouse.ptSel1.y = std::clamp<int>(pt.y, 0, m_img.rows);
 			}
 			break;
+		}
+	}
+
+	void xMatView::OnView_mouseDoubleClickEvent(xMatViewCanvas* canvas, QMouseEvent* event) {
+		if (emit SigMouseDoubleClicked(canvas, event)) {
+			event->accept();
+			return;
 		}
 	}
 
