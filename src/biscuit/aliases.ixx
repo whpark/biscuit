@@ -37,9 +37,6 @@ export namespace biscuit::inline aliases {
 	using deg_t = units::angle::degree_t;
 }
 
-// Temporary workaround for C++23's std::ssize_t
-#ifndef __cpp_size_t_suffix
-#	pragma warning(disable: 4455)
 export namespace biscuit::inline aliases {
 	using ssize_t = std::ptrdiff_t;
 
@@ -49,6 +46,8 @@ export namespace biscuit::inline aliases {
 		? BSC_SIZE_MAX >> 16	// 48-bits. still big enough for real-world use.
 		: BSC_SIZE_MAX >> 1;
 }
+#ifndef __cpp_size_t_suffix
+#	pragma warning(disable: 4455)
 export namespace biscuit::inline literals {
 	constexpr biscuit::ssize_t operator "" z ( unsigned long long n ) { return n; }
 	constexpr std::size_t operator "" uz ( unsigned long long n ) { return n; }
