@@ -37,7 +37,10 @@ export namespace biscuit::inline aliases {
 	using deg_t = units::angle::degree_t;
 }
 
+<<<<<<< HEAD
 //#pragma warning(disable: 4455)
+=======
+>>>>>>> b8549c673b9dd2f3c42f65a1909004e2f294690c
 export namespace biscuit::inline aliases {
 	using ssize_t = std::ptrdiff_t;
 
@@ -48,6 +51,10 @@ export namespace biscuit::inline aliases {
 		: BSC_SIZE_MAX >> 1;
 }
 #ifndef __cpp_size_t_suffix
+<<<<<<< HEAD
+=======
+#	pragma warning(disable: 4455)
+>>>>>>> b8549c673b9dd2f3c42f65a1909004e2f294690c
 export namespace biscuit::inline literals {
 	constexpr biscuit::ssize_t operator "" z ( unsigned long long n ) { return n; }
 	constexpr std::size_t operator "" uz ( unsigned long long n ) { return n; }
