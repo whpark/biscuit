@@ -18,7 +18,6 @@
             "features":
             [
                 "contrib",
-                "default-features",
                 "dnn",
                 "freetype",
                 "ipp",
