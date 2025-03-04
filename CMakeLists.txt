@@ -3,12 +3,15 @@
 #
 cmake_minimum_required (VERSION 3.30)
 
+project(biscuit)
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 set(CMAKE_CXX_COMPILER_IMPORT_STD ON)
 
 set(VCPKG_INSTALLED_DIR ${CMAKE_SOURCE_DIR}/vcpkg_installed)
+
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
