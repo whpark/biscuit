@@ -105,7 +105,7 @@ export namespace biscuit {
 	/// @brief adds comma into number string
 	/// @param separator 
 	template < concepts::tstring_like tstring, int interval = 3 >
-	BSC__NODISCARD constexpr std::basic_string<concepts::value_t<tstring>> AddThousandComma(tstring const& sv, concepts::value_t<tstring> separator = ',') {
+	BSC__NODISCARD std::basic_string<concepts::value_t<tstring>> AddThousandComma(tstring const& sv, concepts::value_t<tstring> separator = ',') {
 		static_assert(interval > 0);
 		using namespace std::literals;
 		using tchar = concepts::value_t<tstring>;
