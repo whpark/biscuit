@@ -698,12 +698,12 @@ export namespace biscuit {
 		return r;
 	}
 
-	template < typename T = char > requires (std::is_trivial_v<T>)
+	template < typename T = char > requires (std::is_trivially_copyable_v<T>)
 	constexpr std::optional<std::vector<T>> FileToVector(std::filesystem::path const& path) {
 		return FileToContainer<std::vector<T>>(path);
 	}
 
-	template < typename T = char > requires (std::is_trivial_v<T>)
+	template < typename T = char > requires (std::is_trivially_copyable_v<T>)
 	constexpr std::optional<std::basic_string<T>> FileToString(std::filesystem::path const& path) {
 		return FileToContainer<std::basic_string<T>>(path);
 	}
@@ -716,7 +716,7 @@ export namespace biscuit {
 	template < std::ranges::contiguous_range TContainer >
 		requires (std::is_trivially_copyable_v<std::ranges::range_value_t<std::remove_cvref_t<TContainer>>>)
 	bool ContainerToFile(TContainer const& buf, std::filesystem::path const& path) {
-		static_assert(std::is_trivial_v<typename std::decay_t<decltype(buf)>::value_type>, "TContainer::value_type must be trivial");
+		static_assert(std::is_trivially_copyable_v<typename std::decay_t<decltype(buf)>::value_type>, "TContainer::value_type must be trivial");
 		std::ofstream f(path, std::ios_base::binary);
 		f.write((char const*)buf.data(), buf.size() * sizeof(typename TContainer::value_type));
 		return (bool)f;
