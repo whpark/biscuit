@@ -33,7 +33,7 @@
     <ClCompile Include="entities_subclass.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="type_alias.ixx">
+    <ClCompile Include="group_code_type_alias.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -43,6 +43,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="group_code_alias.py" />
+    <None Include="group_code_type_alias.py" />
   </ItemGroup>
 </Project>

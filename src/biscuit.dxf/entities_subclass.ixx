@@ -9,8 +9,8 @@ import std;
 import fmt;
 import Eigen;
 import biscuit;
-import :type_alias;
 import :group;
+import :group_code_type_alias;
 
 using namespace std::literals;
 using namespace biscuit::literals;
@@ -152,7 +152,7 @@ export namespace biscuit::dxf::subclass {
 		group_code_284_t shadow_mode{};				// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
 
 		//point_t extrusion{0., 0., 1.};
-		//code_to_value_t< 39> thickness{};
+		//group_code_039_t thickness{};
 		constexpr static inline auto group_members = std::make_tuple(
 			  5, &this_t::handle,
 			330, &this_t::hOwnerBlock,

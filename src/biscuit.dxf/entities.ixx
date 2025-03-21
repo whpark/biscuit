@@ -9,8 +9,8 @@ import std;
 import fmt;
 import Eigen;
 import biscuit;
-import :type_alias;
 import :group;
+import :group_code_type_alias;
 import :entities_subclass;
 
 using namespace std::literals;

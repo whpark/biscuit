@@ -4,12 +4,16 @@ export module biscuit.dxf:group;
 import std;
 import Eigen;
 import biscuit;
-import :type_alias;
 
 using namespace std::literals;
 using namespace biscuit::literals;
 
 export namespace biscuit::dxf {
+
+	using binary_t = std::vector<std::uint8_t>;
+	using string_t = std::string;
+	using string_view_t = std::string_view;
+	using group_value_t = std::variant<bool, std::int16_t, std::int32_t, std::int64_t, double, string_t, binary_t>;
 
 	//=============================================================================================================================
 	// group
@@ -244,13 +248,12 @@ export namespace biscuit::dxf {
 		struct TGroupValueTypeByEnum {
 			using implicit_value_type =
 				std::conditional_t<e == sGroup::boolean, bool,
-				std::conditional_t<e == sGroup::i16, int16,
-				std::conditional_t<e == sGroup::i32, int32,
-				std::conditional_t<e == sGroup::i64, int64,
-				std::conditional_t<e == sGroup::dbl, double,
-				std::conditional_t<e == sGroup::str, string_t,
-				std::conditional_t<e == sGroup::hex_str, binary_t, void>
-				>>>>>>;
+					std::conditional_t<e == sGroup::i16, int16,
+						std::conditional_t<e == sGroup::i32, int32,
+							std::conditional_t<e == sGroup::i64, int64,
+								std::conditional_t<e == sGroup::dbl, double,
+									std::conditional_t<e == sGroup::str, string_t,
+										std::conditional_t<e == sGroup::hex_str, binary_t, void>>>>>>>;
 
 			using value_type = std::conditional_t<std::is_same_v<TUserDefined, void>, implicit_value_type, TUserDefined>;
 
@@ -262,7 +265,7 @@ export namespace biscuit::dxf {
 	using enum_to_value_t = typename detail::TGroupValueTypeByEnum<e, TUserDefined>::value_type;
 
 	template < group_code_t::value_t code, typename TUserDefined = void >
-	using code_to_value_t = enum_to_value_t<sGroup::GET_VALUE_TYPE_ENUM(group_code_t{code}), TUserDefined>;
+	using group_code_to_value_t = enum_to_value_t<sGroup::GET_VALUE_TYPE_ENUM(group_code_t{code}), TUserDefined>;
 
 
 	//=============================================================================================================================

@@ -106,7 +106,7 @@
     <ClCompile Include="entities.ixx" />
     <ClCompile Include="entities_subclass.ixx" />
     <ClCompile Include="group.ixx" />
-    <ClCompile Include="type_alias.ixx" />
+    <ClCompile Include="group_code_type_alias.ixx" />
     <ClCompile Include="stream.ixx" />
     <ClCompile Include="0.biscuit.dxf.ixx" />
     <ClCompile Include="sections.ixx" />
@@ -120,7 +120,7 @@
     <ClInclude Include="macro.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="group_code_alias.py" />
+    <None Include="group_code_type_alias.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

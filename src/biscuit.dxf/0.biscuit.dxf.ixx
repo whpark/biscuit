@@ -3,8 +3,8 @@
 //#include "biscuit/dependencies_fmt.h"
 
 export module biscuit.dxf;
-export import :type_alias;
 export import :group;
+export import :group_code_type_alias;
 export import :stream;
 export import :sections;
 import std;

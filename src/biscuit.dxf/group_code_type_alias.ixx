@@ -1,19 +1,15 @@
 ﻿module;
 
-export module biscuit.dxf:type_alias;
+export module biscuit.dxf:group_code_type_alias;
 import std;
 import Eigen;
 import biscuit;
+import :group;
 
 using namespace std::literals;
 using namespace biscuit::literals;
 
 export namespace biscuit::dxf {
-
-    using binary_t = std::vector<std::uint8_t>;
-    using string_t = std::string;
-    using string_view_t = std::string_view;
-    using group_value_t = std::variant<bool, std::int16_t, std::int32_t, std::int64_t, double, string_t, binary_t>;
 
 	// Auto generated file
 	// Do not modify
