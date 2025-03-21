@@ -100,6 +100,7 @@ export namespace biscuit::dxf {
 			return false;
 		}
 
+	#if 1
 		constexpr static sGroup::eVALUE_TYPE GET_VALUE_TYPE_ENUM(group_code_t code) {
 			//static_assert(std::is_constant_evaluated());
 			using enum sGroup::eVALUE_TYPE;
@@ -217,6 +218,7 @@ export namespace biscuit::dxf {
 			else if (InRange(code, 1071, 1071)) return i32;		//		  1071	| 32-bit integer value
 			else return none;
 		}
+	#endif
 		sGroup::eVALUE_TYPE GetValueTypeEnumByCode() const { return GetValueTypeEnum(eCode); }
 		static sGroup::eVALUE_TYPE GetValueTypeEnum(group_code_t eCode) {
 			constinit static auto const s_tblGroupCodeToType = [] {
@@ -241,6 +243,7 @@ export namespace biscuit::dxf {
 	using groups_t = std::vector<sGroup>;
 	using group_iter_t = groups_t::const_iterator;
 
+#if 0
 	//-----------------------------------------------------------------------------------------------------------------------------
 	namespace detail {
 
@@ -266,7 +269,7 @@ export namespace biscuit::dxf {
 
 	template < group_code_t::value_t code, typename TUserDefined = void >
 	using group_code_to_value_t = enum_to_value_t<sGroup::GET_VALUE_TYPE_ENUM(group_code_t{code}), TUserDefined>;
-
+#endif		
 
 	//=============================================================================================================================
 	template < typename TItem >

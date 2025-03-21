@@ -30,5 +30,5 @@ if __name__ == '__main__':
 				'str': 'string_t',
 				'hex_str': 'binary_t'
 			}.get(rng[1], 'unknown')
-			f.write(f'\tusing group_code_{i:03}_t = /**/ {type};\n'.encode())
+			f.write(f'\tusing group_code_{i:03}_t = /*group_code_to_value_t<{i:3}>*/ {type};\n'.encode())
 
