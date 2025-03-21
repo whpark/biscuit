@@ -7,6 +7,7 @@ import std;
 import fmt;
 import Eigen;
 import biscuit;
+import :type_alias;
 import :group;
 
 using namespace std::literals;

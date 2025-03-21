@@ -33,6 +33,9 @@
     <ClCompile Include="entities_subclass.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="type_alias.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="macro.h">

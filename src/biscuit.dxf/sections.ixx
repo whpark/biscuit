@@ -8,6 +8,7 @@ import std;
 import fmt;
 import Eigen;
 import biscuit;
+import :type_alias;
 import :group;
 import :stream;
 import :entities;

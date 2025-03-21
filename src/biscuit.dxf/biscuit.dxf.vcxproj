@@ -106,6 +106,7 @@
     <ClCompile Include="entities.ixx" />
     <ClCompile Include="entities_subclass.ixx" />
     <ClCompile Include="group.ixx" />
+    <ClCompile Include="type_alias.ixx" />
     <ClCompile Include="stream.ixx" />
     <ClCompile Include="0.biscuit.dxf.ixx" />
     <ClCompile Include="sections.ixx" />

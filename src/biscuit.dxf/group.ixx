@@ -4,6 +4,7 @@ export module biscuit.dxf:group;
 import std;
 import Eigen;
 import biscuit;
+import :type_alias;
 
 using namespace std::literals;
 using namespace biscuit::literals;
@@ -39,10 +40,6 @@ export namespace biscuit::dxf {
 	constexpr auto operator "" _g(unsigned long long v) { return eGROUP_CODE{ (int16)v }; }
 
 	using group_code_t = eGROUP_CODE;
-	using binary_t = std::vector<uint8>;
-	using string_t = std::string;
-	using string_view_t = std::string_view;
-	using group_value_t = std::variant<bool, int16, int32, int64, double, string_t, binary_t>;
 
 	struct alignas(32) sGroup : public eGROUP_CODE {	// alignas(32) - hoping for better cache performance (don't know if it works)
 	public:
