@@ -1,6 +1,6 @@
 ﻿module;
 
-#include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_eigen.h"
 
 export module biscuit.dxf:sections;

@@ -2,6 +2,8 @@
 
 #include "./config.h"
 
+static_assert(false, "DON'T INCLUDE This File");
+
 ////#include <fmt/base.h>
 ////#include <fmt/format.h>
 //#include <fmt/core.h>

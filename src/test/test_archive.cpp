@@ -1,6 +1,6 @@
 ﻿#include <catch.hpp>
 #include "biscuit/biscuit.h"
-#include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_ctre.h"
 
 import std;

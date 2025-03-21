@@ -1,7 +1,7 @@
 ﻿module;
 
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_eigen.h"
 #include "biscuit/dependencies_glaze.h"
 #include "biscuit/dependencies_units.h"

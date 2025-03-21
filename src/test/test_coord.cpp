@@ -2,7 +2,7 @@
 #include <catch.hpp>
 
 #include "biscuit/biscuit.h"
-#include "biscuit/dependencies_fmt.h"
+//#include "biscuit/dependencies_fmt.h"
 #include "biscuit/dependencies_eigen.h"
 #include "biscuit/dependencies_units.h"
 
