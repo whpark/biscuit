@@ -130,7 +130,10 @@ target_sources(biscuit PUBLIC FILE_SET biscuit_modules TYPE CXX_MODULES FILES
                 
 )
 
-target_include_directories(biscuit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(biscuit PUBLIC 
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 find_package(asio CONFIG REQUIRED)
 find_package(boost_pfr CONFIG REQUIRED)
@@ -142,33 +145,36 @@ find_package(fmt CONFIG REQUIRED)
 find_package(freeimage CONFIG REQUIRED)
 find_package(glaze CONFIG REQUIRED)
 find_package(glew CONFIG REQUIRED)
-# find_package(libiconv CONFIG REQUIRED)
+find_package(Iconv REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
-find_package(opencv CONFIG REQUIRED)
+# find_package(opencv CONFIG REQUIRED)
+# include_directories( ${OpenCV_INCLUDE_DIRS} )
 find_package(simdutf CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(tinyspline CONFIG REQUIRED)
 find_package(units CONFIG REQUIRED)
-# find_package(winreg CONFIG REQUIRED)
+# find_package(WinReg REQUIRED)
 
-target_link_libraries(biscuit PUBLIC fmt::fmt)
-target_link_libraries(biscuit PUBLIC asio::asio)
-target_link_libraries(biscuit PUBLIC boost::pfr)
-target_link_libraries(biscuit PUBLIC catch2::catch2)
-target_link_libraries(biscuit PUBLIC cereal::cereal)
-target_link_libraries(biscuit PUBLIC ctre::ctre)
-target_link_libraries(biscuit PUBLIC Eigen3::Eigen)
-target_link_libraries(biscuit PUBLIC freeimage::freeimage)
-target_link_libraries(biscuit PUBLIC glaze::glaze)
-target_link_libraries(biscuit PUBLIC GLEW::GLEW)
-# target_link_libraries(biscuit PUBLIC libiconv::libiconv)
-target_link_libraries(biscuit PUBLIC magic_enum::magic_enum)
-target_link_libraries(biscuit PUBLIC opencv::opencv)
-target_link_libraries(biscuit PUBLIC simdutf::simdutf)
-target_link_libraries(biscuit PUBLIC spdlog::spdlog)
-target_link_libraries(biscuit PUBLIC tinyspline::tinyspline)
-target_link_libraries(biscuit PUBLIC units::units)
-# target_link_libraries(biscuit PUBLIC winreg::winreg)
+target_link_libraries(ThirdParties
+	# {OpenCV_LIBS}
+	fmt::fmt
+	asio::asio
+	Catch2::Catch2
+	cereal::cereal
+	ctre::ctre
+	Eigen3::Eigen
+	FreeImage
+	glaze::glaze
+	GLEW::GLEW
+	Iconv::Iconv
+	magic_enum::magic_enum
+	simdutf::simdutf
+	spdlog::spdlog
+	tinyspline::tinyspline
+	units::units
+#	winreg::winreg
+)
+
 
 #add_custom_command(TARGET biscuit POST_BUILD
 ##    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:biscuit> "/biscuit"

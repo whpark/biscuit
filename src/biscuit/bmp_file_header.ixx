@@ -10,7 +10,7 @@ module;
 #	define ALIGNAS(x) alignas(x)
 #endif
 
-#include "biscuit/dependencies_opencv.h"
+// #include "biscuit/dependencies_opencv.h"
 
 export module biscuit.bmp_file_header;
 import std;
@@ -30,25 +30,25 @@ PUSH_ALIGN_AS(1)
 
 	struct ALIGNAS(1) sBMPFileHeader {
 		char sign[2]{ 'B', 'M' };
-		uint32_t sizeFile{};
-		uint16_t reserved1{};
-		uint16_t reserved2{};
-		uint32_t offsetData{};
+		std::uint32_t sizeFile{};
+		std::uint16_t reserved1{};
+		std::uint16_t reserved2{};
+		std::uint32_t offsetData{};
 	};
 	static_assert(sizeof(sBMPFileHeader) == 14);
 
 	struct ALIGNAS(1) sBMPInfoHeader {
-		uint32_t	size;
-		int32_t		width;
-		int32_t		height;
-		uint16_t	planes;
-		uint16_t	nBPP;
-		uint32_t	compression;
-		uint32_t	sizeImage;
-		int32_t		XPelsPerMeter;
-		int32_t		YPelsPerMeter;
-		uint32_t	nColorUsed;
-		uint32_t	nColorImportant;
+		std::uint32_t	size;
+		std::int32_t	width;
+		std::int32_t	height;
+		std::uint16_t	planes;
+		std::uint16_t	nBPP;
+		std::uint32_t	compression;
+		std::uint32_t	sizeImage;
+		std::int32_t	XPelsPerMeter;
+		std::int32_t	YPelsPerMeter;
+		std::uint32_t	nColorUsed;
+		std::uint32_t	nColorImportant;
 
 		struct ALIGNAS(1) cie_xyz_rgb {
 			struct ALIGNAS(1) cie_xyz_t {

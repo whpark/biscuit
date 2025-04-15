@@ -1,30 +1,28 @@
 ﻿cmake_minimum_required (VERSION 3.30)
-# CMakeList.txt : CMake project for ThirdParties, include source and define
+# CMakeList.txt : CMake project for biscuit, include source and define
 # project specific logic here.
 #
 
 set(VCPKG_INSTALLED_DIR ${CMAKE_SOURCE_DIR}/vcpkg_installed)
 
-project(ThirdParties)
+project(biscuit.opencv)
 
 # Add source to this project's library.
-add_library (ThirdParties STATIC
-"framework.h"
-"cereal.ixx"
-"Eigen.ixx"
-"fmt.ixx"
-"ThirdParties.ixx"
-"units.ixx"
-"fmt.hxx"
+add_library (biscuit.opencv STATIC
+"biscuit.opencv.ixx"
+"bmp_file_archive.ixx"
+"mat_gl.ixx"
+"mat_operation.ixx"
+"dllmain.cpp"
 )
 
 #Set different output names based on the build type
-set_target_properties(ThirdParties PROPERTIES
+set_target_properties(biscuit.opencv PROPERTIES
     DEBUG_POSTFIX ".D"
     #RELEASE_POSTFIX ".x64R"
 )
 
-set_property(TARGET ThirdParties PROPERTY CXX_STANDARD 23)
+set_property(TARGET biscuit.opencv PROPERTY CXX_STANDARD 23)
 
 # TODO: Add tests and install targets if needed.
 
@@ -42,15 +40,15 @@ if (MSVC)
 	target_compile_options(${PROJECT_NAME} PUBLIC "/Zc:preprocessor")
 endif()
 
-target_sources(ThirdParties PUBLIC FILE_SET thirdParties_modules TYPE CXX_MODULES FILES
-                ${CMAKE_CURRENT_SOURCE_DIR}/cereal.ixx
-                ${CMAKE_CURRENT_SOURCE_DIR}/Eigen.ixx
-                ${CMAKE_CURRENT_SOURCE_DIR}/fmt.ixx
-                ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParties.ixx
-                ${CMAKE_CURRENT_SOURCE_DIR}/units.ixx
+target_sources(biscuit.opencv PUBLIC FILE_SET biscuit_modules TYPE CXX_MODULES FILES
+                ${CMAKE_CURRENT_SOURCE_DIR}/biscuit.opencv.ixx
+                ${CMAKE_CURRENT_SOURCE_DIR}/bmp_file_archive.ixx
+                ${CMAKE_CURRENT_SOURCE_DIR}/mat_gl.ixx
+                ${CMAKE_CURRENT_SOURCE_DIR}/mat_operation.ixx
+                
 )
 
-target_include_directories(ThirdParties PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(biscuit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(asio CONFIG REQUIRED)
 find_package(boost_pfr CONFIG REQUIRED)
@@ -96,7 +94,8 @@ target_link_libraries(ThirdParties
 #	winreg::winreg
 )
 
-#add_custom_command(TARGET ThirdParties POST_BUILD
-##    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:ThirdParties> "/ThirdParties"
-#    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_SOURCE_DIR}/include/ThirdParties/"
+
+#add_custom_command(TARGET biscuit POST_BUILD
+##    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:biscuit> "/biscuit"
+#    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_SOURCE_DIR}/include/biscuit/"
 #)
