@@ -1,15 +1,13 @@
 ﻿module;
 
-//#include "biscuit/dependencies_fmt.h"
-
 export module biscuit.dxf;
 export import :group;
 export import :group_code_type_alias;
 export import :stream;
 export import :sections;
 import std;
-import fmt;
-import Eigen;
+import "biscuit/dependencies_fmt.hxx";
+import "biscuit/dependencies_eigen.hxx";
 import biscuit;
 
 

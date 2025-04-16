@@ -2,12 +2,12 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_opencv.h"
 #include "gl/glew.h"
 //#include "GL/gl.h"
 
 export module biscuit.opencv.mat_gl;
 import std;
+import "biscuit/dependencies_opencv.hxx";
 import biscuit;
 
 export namespace biscuit {

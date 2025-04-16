@@ -10,10 +10,9 @@ module;
 #	define ALIGNAS(x) alignas(x)
 #endif
 
-#include "biscuit/dependencies_opencv.h"
-
 export module biscuit.opencv.bmp_file_archive;
 import std;
+import "biscuit/dependencies_opencv.hxx";
 import biscuit;
 
 namespace concepts = biscuit::concepts;

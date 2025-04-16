@@ -2,7 +2,7 @@
 
 export module biscuit.coord.concepts;
 import std;
-import Eigen;
+import "biscuit/dependencies_eigen.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 

@@ -1,11 +1,10 @@
 ﻿module;
 
 #include "biscuit/macro.h"
-//#include "biscuit/dependencies_fmt.h"	// for ToString
 
 export module biscuit.string;
 import std;
-import fmt;
+import "biscuit/dependencies_fmt.hxx";
 
 export import biscuit.string.defines;
 export import biscuit.string.basic;

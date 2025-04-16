@@ -1,29 +1,28 @@
 ﻿module;
 
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_units.h"
 
 export module biscuit.units;
 import std;
-import units;
+import "biscuit/dependencies_units.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 
 export namespace biscuit{
 	inline namespace literals {
-		// _deg, _rad : units::literals failed to compile(link) in MSVC using module.
-		constexpr units::angle::degree_t operator "" _deg(unsigned long long n) {
-			return units::angle::degree_t((double)n);
-		}
-		constexpr units::angle::degree_t operator "" _deg(long double x) {
-			return units::angle::degree_t((double)x);
-		}
-		constexpr units::angle::radian_t operator "" _rad(unsigned long long n) {
-			return units::angle::radian_t((double)n);
-		}
-		constexpr units::angle::radian_t operator "" _rad(long double x) {
-			return units::angle::radian_t((double)x);
-		}
+		//// _deg, _rad : units::literals failed to compile(link) in MSVC using module.
+		//constexpr units::angle::degree_t operator "" _deg(unsigned long long n) {
+		//	return units::angle::degree_t((double)n);
+		//}
+		//constexpr units::angle::degree_t operator "" _deg(long double x) {
+		//	return units::angle::degree_t((double)x);
+		//}
+		//constexpr units::angle::radian_t operator "" _rad(unsigned long long n) {
+		//	return units::angle::radian_t((double)n);
+		//}
+		//constexpr units::angle::radian_t operator "" _rad(long double x) {
+		//	return units::angle::radian_t((double)x);
+		//}
 
 		constexpr units::angle::radian_t operator "" _deg_to_rad(unsigned long long n) {
 			return units::angle::radian_t{ units::angle::degree_t((double)n) };

@@ -2,11 +2,10 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_units.h"
 
 export module biscuit.aliases;
 import std;
-import units;
+import "biscuit/dependencies_units.hxx";
 
 // export aliases;
 export namespace biscuit::inline literals { };

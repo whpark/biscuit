@@ -3,11 +3,11 @@
 #include <FreeImage.h>
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_opencv.h"
-#include "biscuit/dependencies_simdutf.h"
 
 export module biscuit.opencv.mat_operation;
 import std;
+import "biscuit/dependencies_opencv.hxx";
+import "biscuit/dependencies_simdutf.hxx";
 import biscuit;
 
 namespace biscuit {

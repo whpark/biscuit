@@ -1,11 +1,8 @@
 ﻿#include <catch.hpp>
-//#include <fmt/core.h>
-//#include <fmt/std.h>
-//#include <fmt/xchar.h>
 #include <simdutf.h>
 
 import std;
-import fmt;
+import "biscuit/dependencies_fmt.hxx";
 import biscuit;
 
 using namespace std::literals;

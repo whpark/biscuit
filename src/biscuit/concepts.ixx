@@ -10,8 +10,6 @@
 
 module;
 
-//#include "biscuit/macro.h"
-
 export module biscuit.concepts;
 import std;
 import biscuit.aliases;

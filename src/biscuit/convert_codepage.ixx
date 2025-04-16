@@ -12,10 +12,10 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_simdutf.h"
 
 export module biscuit.convert_codepage;
 import std;
+import "biscuit/dependencies_simdutf.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.misc;

@@ -13,12 +13,11 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-//#include "biscuit/dependencies_fmt.h"
 #include <winreg/WinReg.hpp>
 
 export module biscuit.win.environment_variable;
 import std;
-import fmt;
+import "biscuit/dependencies_fmt.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 

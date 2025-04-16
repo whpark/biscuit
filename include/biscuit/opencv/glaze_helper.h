@@ -2,10 +2,9 @@
 //module;
 
 #include "biscuit/dependencies_glaze.h"
-#include "biscuit/dependencies_opencv.h"
 
-//export module biscuit.opencv.glaze_helper;
 import std;
+import "biscuit/dependencies_opencv.hxx";
 import biscuit;
 
 /*export */namespace biscuit {

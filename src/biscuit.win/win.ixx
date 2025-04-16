@@ -13,14 +13,13 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-//#include "biscuit/dependencies_fmt.h"
 
 #define NOMINMAX
 #include <Windows.h>
 
 export module biscuit.win.serial_port;
 import std;
-import fmt;
+import "biscuit/dependencies_fmt.hxx";
 import biscuit;
 
 using namespace std::literals;

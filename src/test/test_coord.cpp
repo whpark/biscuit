@@ -2,14 +2,11 @@
 #include <catch.hpp>
 
 #include "biscuit/biscuit.h"
-//#include "biscuit/dependencies_fmt.h"
-#include "biscuit/dependencies_eigen.h"
-#include "biscuit/dependencies_units.h"
 
 import std;
-import fmt;
-import Eigen;
-import units;
+import "biscuit/dependencies_fmt.hxx";
+import "biscuit/dependencies_eigen.hxx";
+import "biscuit/dependencies_units.hxx";
 import biscuit;
 
 using namespace std::literals;
@@ -254,7 +251,7 @@ namespace test {
 
 		biscuit::xPoint3d pt3d{ 0.0, 2.0, 3.0 };
 		auto angle = pt3d.GetAngleXY();
-		REQUIRE(angle == 90_deg);
+		REQUIRE(angle == 90.0_deg);
 	}
 
 	TEST_CASE("coord.round", ATTR) {

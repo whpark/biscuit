@@ -18,57 +18,42 @@
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_asio.h">
+    <ClInclude Include="..\..\include\biscuit\dependencies_asio.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_cereal.h">
+    <ClInclude Include="..\..\include\biscuit\dependencies_cereal.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_ctre.h">
+    <ClInclude Include="..\..\include\biscuit\dependencies_ctre.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_eigen.h">
+    <ClInclude Include="..\..\include\biscuit\dependencies_eigen.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_fmt.h">
+    <ClInclude Include="..\..\include\biscuit\dependencies_fmt.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\biscuit\dependencies_glaze.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_iconv.h">
+    <ClInclude Include="..\..\include\biscuit\dependencies_iconv.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_opencv.h">
+    <ClInclude Include="..\..\include\biscuit\dependencies_opencv.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_simdutf.h">
+    <ClInclude Include="..\..\include\biscuit\dependencies_simdutf.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_spdlog.h">
+    <ClInclude Include="..\..\include\biscuit\dependencies_spdlog.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_units.h">
+    <ClInclude Include="..\..\include\biscuit\dependencies_units.hxx">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt.hxx">
-      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ThirdParties.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Eigen.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="units.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cereal.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="fmt.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

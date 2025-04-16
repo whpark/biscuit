@@ -1,10 +1,9 @@
 ﻿#include <catch.hpp>
 #include "biscuit/biscuit.h"
-//#include "biscuit/dependencies_fmt.h"
 #include "biscuit/glaze_helper.h"
 
 import std;
-import fmt;
+import "biscuit/dependencies_fmt.hxx";
 import biscuit;
 
 using namespace std::literals;

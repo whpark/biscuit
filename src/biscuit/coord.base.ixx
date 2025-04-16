@@ -7,11 +7,10 @@
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
 #include "biscuit/dependencies_glaze.h"
-#include "biscuit/dependencies_eigen.h"
 
 export module biscuit.coord.base;
 import std;
-import Eigen;
+import "biscuit/dependencies_eigen.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.arithmetic;

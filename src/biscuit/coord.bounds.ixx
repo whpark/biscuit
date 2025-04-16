@@ -3,7 +3,6 @@
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
 #include "biscuit/dependencies_glaze.h"
-#include "biscuit/dependencies_eigen.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4201)
@@ -12,7 +11,7 @@
 export module biscuit.coord.bounds;
 
 import std;
-import Eigen;
+import "biscuit/dependencies_eigen.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.coord.concepts;

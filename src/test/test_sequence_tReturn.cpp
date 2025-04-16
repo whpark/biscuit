@@ -1,9 +1,8 @@
 ﻿#include <catch.hpp>
 #include "biscuit/biscuit.h"
-//#include "biscuit/dependencies_fmt.h"
 
 import std;
-import fmt;
+import "biscuit/dependencies_fmt.hxx";
 import biscuit;
 
 static constexpr auto const ATTR = "[sequence_tReturn]";

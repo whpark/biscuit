@@ -2,7 +2,7 @@
 
 export module biscuit.dxf:group;
 import std;
-import Eigen;
+import "biscuit/dependencies_eigen.hxx";
 import biscuit;
 
 using namespace std::literals;

@@ -2,9 +2,6 @@
 
 #include <GL/glew.h>
 
-#include "biscuit/dependencies_opencv.h"
-//#include "biscuit/dependencies_fmt.h"
-
 #include <QOpenGLExtraFunctions>
 #include <QWidget>
 #include <QTimer>
@@ -21,13 +18,13 @@
 
 #include "ui_MatView.h"
 
-#include <spdlog/stopwatch.h>
-
 export module biscuit.qt.MatView;
 
 import std;
-import fmt;
-import Eigen;
+import "biscuit/dependencies_fmt.hxx";
+import "biscuit/dependencies_eigen.hxx";
+import "biscuit/dependencies_opencv.hxx";
+import "biscuit/dependencies_spdlog.hxx";
 import biscuit;
 import biscuit.opencv;
 import biscuit.qt.utils;

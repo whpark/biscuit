@@ -12,13 +12,12 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-//#include "biscuit/dependencies_fmt.h"
 
 #include <Windows.h>
 
 export module biscuit.stop_watch;
 import std;
-import fmt;
+import "biscuit/dependencies_fmt.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.string;

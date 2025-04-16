@@ -1,10 +1,10 @@
 ﻿#include <QMessageBox>
-#include "biscuit/dependencies_opencv.h"
 
 #include "test.h"
 
 
 import std;
+import "biscuit/dependencies_opencv.hxx";
 import biscuit;
 import biscuit.opencv;
 import biscuit.qt;

@@ -15,12 +15,11 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-//#include "biscuit/dependencies_fmt.h"
-#include "biscuit/dependencies_ctre.h"
 
 export module biscuit.lazy_profile;
 import std;
-import fmt;
+import "biscuit/dependencies_fmt.hxx";
+import "biscuit/dependencies_ctre.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.archive;

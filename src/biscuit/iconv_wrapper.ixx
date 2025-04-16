@@ -15,9 +15,9 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_iconv.h"
 
 export module biscuit.iconv_wrapper;
+import "biscuit/dependencies_iconv.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.misc;

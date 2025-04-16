@@ -6,12 +6,6 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-//#include "biscuit/dependencies_eigen.h"
-//#include "biscuit/dependencies_fmt.h"
-//#include "biscuit/dependencies_glaze.h"
-//#include "biscuit/dependencies_iconv.h"
-//#include "biscuit/dependencies_simdutf.h"
-//#include "biscuit/dependencies_units.h"
 
 #if !defined(BSC__EXPORTS)
 #	pragma comment(lib, "biscuit.lib")

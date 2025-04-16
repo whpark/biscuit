@@ -14,18 +14,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "biscuit/macro.h"
-//#include "biscuit/dependencies_fmt.h"
-#include "biscuit/dependencies_eigen.h"
 #include "biscuit/dependencies_glaze.h"
-#include "biscuit/dependencies_units.h"
-#include "biscuit/dependencies_cereal.h"
 
 #include "shape_macro.h"
 
 export module biscuit.shape.entities.ellipse;
 import std;
-import fmt;
-import units;
+import "biscuit/dependencies_fmt.hxx";
+import "biscuit/dependencies_units.hxx";
+import "biscuit/dependencies_cereal.hxx";
+import "biscuit/dependencies_eigen.hxx";
 import biscuit;
 import biscuit.shape_basic;
 import biscuit.shape.entities.shape;

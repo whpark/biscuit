@@ -14,17 +14,13 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_eigen.h"
 #include "biscuit/dependencies_glaze.h"
-#include "biscuit/dependencies_units.h"
-
-#include <cereal/types/polymorphic.hpp>
-//#include <cereal/archives/binary.hpp>
 
 export module biscuit.coord.transform;
 import std;
-import Eigen;
-import units;
+import "biscuit/dependencies_cereal.hxx";
+import "biscuit/dependencies_eigen.hxx";
+import "biscuit/dependencies_units.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.memory;

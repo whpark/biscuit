@@ -10,13 +10,11 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-//#include "biscuit/dependencies_fmt.h"
-#include "biscuit/dependencies_eigen.h"
 
 export module biscuit.coord;
 import std;
-import fmt;
-import Eigen;
+import "biscuit/dependencies_fmt.hxx";
+import "biscuit/dependencies_eigen.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.misc;
