@@ -1,3 +1,4 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
@@ -9,9 +10,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{219901BC-F3EB-477D-BD7A-2AAC6BF9B65D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependencies", "dependencies", "{3C2340D6-6EC4-43A0-B2BE-2FF17EB38CF2}"
-	ProjectSection(SolutionItems) = preProject
-		src\biscuit.dxf\group_code_alias.py = src\biscuit.dxf\group_code_alias.py
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThirdParties", "src\ThirdParties\ThirdParties.vcxproj", "{730A3E73-F28D-435F-ADFD-DEF57F11F48F}"
 EndProject
