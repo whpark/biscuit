@@ -726,6 +726,15 @@ export namespace biscuit::dxf::entities {
 	};
 
 	//=============================================================================================================================
+	class xBody : public xEntity {
+	public:
+		group_code_100_t marker; // AcDbModelerGeometry
+		group_code_070_t version{1};
+		string_t proprietary_data;		// GroupCode 1, 3
+
+	};
+
+	//=============================================================================================================================
 	std::unique_ptr<xEntity> xEntity::CreateEntity(string_t const& name) {
 		if (auto iter = m_mapEntityFactory.find(name); iter != m_mapEntityFactory.end() and iter->second)
 			return iter->second();
