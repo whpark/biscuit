@@ -289,7 +289,7 @@ export namespace biscuit::seq {
 		}
 
 		// co_await
-		auto Wait(std::function<bool()> pred, clock_t::duration interval, clock_t::duration timeout = clock_t::duration::max()) {
+		inline auto Wait(std::function<bool()> pred, clock_t::duration interval, clock_t::duration timeout = clock_t::duration::max()) {
 			m_state.pred.t0 = clock_t::now();
 			m_state.pred.func = std::move(pred);
 			m_state.pred.interval = interval;
