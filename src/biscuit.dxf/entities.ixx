@@ -68,11 +68,6 @@ export namespace biscuit::dxf::entities {
 		xline,
 	};
 
-	enum class eSPACE : int16 { model, paper };
-	enum class eCOLOR : int16 { byBlock = 0, byLayer = 256, };
-
-	using point_t = Eigen::Vector3d;
-
 	template < typename TEntity, bool bSubclass = false >
 	bool ReadEntity(TEntity& entity, group_iter_t& iter, group_iter_t const& end) {
 		TContainerMap<group_code_t, int> mapGroupCodeToIndex; // for duplicated group number
@@ -121,7 +116,7 @@ export namespace biscuit::dxf::entities {
 	}
 
 	//-------------------------------------------------------------------------
-	class xEntity : public subclass::sEntity {
+	class xEntity : public sEntity {
 	public:
 		using root_t = xEntity;
 		using this_t = xEntity;
@@ -133,8 +128,6 @@ export namespace biscuit::dxf::entities {
 		binary_t hReactor;								// 102:{ACD_REACTORS 330:value 102:}
 		binary_t hOwner;								// 102:{ACAD_XDICTIONARY 330:owner_handle 102:}
 
-		//point_t extrusion{0., 0., 1.};
-		//group_code_039> thickness{};
 		constexpr static inline auto group_members = std::make_tuple(
 			0
 		);
@@ -161,14 +154,14 @@ export namespace biscuit::dxf::entities {
 
 		virtual bool Read(group_iter_t& iter, group_iter_t const& end) = 0;
 		virtual bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) {
-			return ReadEntity<subclass::sEntity, true>(*this, iter, end);
+			return ReadEntity<sEntity, true>(*this, iter, end);
 		}
 
 		virtual bool ReadControlData(group_iter_t& iter, group_iter_t const& end) {
 			if (iter->eCode != group_code_t::control)
 				return false;
-			static sGroup const groupEnd{ 102, "}"s };
-			string_t str = iter->GetValue<string_t>().value_or(""s);
+			static sGroup const groupEnd{ 102, std::string("}") };
+			string_t str = iter->GetValue<string_t>().value_or(std::string());
 			string_view_t sv(str);
 			sv = TrimView(sv);
 			if (sv.starts_with("{")) {
@@ -296,10 +289,10 @@ export namespace biscuit::dxf::entities {
 		fHIDDEN flags{};	// 70:
 
 		constexpr static inline auto group_members = std::make_tuple(
-			10, BSC__LAMBDA_MEMBER_VALUE(pt1.x()), 20, BSC__LAMBDA_MEMBER_VALUE(pt1.y()), 30, BSC__LAMBDA_MEMBER_VALUE(pt1.z()),
-			11, BSC__LAMBDA_MEMBER_VALUE(pt2.x()), 21, BSC__LAMBDA_MEMBER_VALUE(pt2.y()), 31, BSC__LAMBDA_MEMBER_VALUE(pt2.z()),
-			12, BSC__LAMBDA_MEMBER_VALUE(pt3.x()), 22, BSC__LAMBDA_MEMBER_VALUE(pt3.y()), 32, BSC__LAMBDA_MEMBER_VALUE(pt3.z()),
-			13, BSC__LAMBDA_MEMBER_VALUE(pt4.x()), 23, BSC__LAMBDA_MEMBER_VALUE(pt4.y()), 33, BSC__LAMBDA_MEMBER_VALUE(pt4.z()),
+			10, BSC__LAMBDA_MEMBER_VALUE(pt1.x), 20, BSC__LAMBDA_MEMBER_VALUE(pt1.y), 30, BSC__LAMBDA_MEMBER_VALUE(pt1.z),
+			11, BSC__LAMBDA_MEMBER_VALUE(pt2.x), 21, BSC__LAMBDA_MEMBER_VALUE(pt2.y), 31, BSC__LAMBDA_MEMBER_VALUE(pt2.z),
+			12, BSC__LAMBDA_MEMBER_VALUE(pt3.x), 22, BSC__LAMBDA_MEMBER_VALUE(pt3.y), 32, BSC__LAMBDA_MEMBER_VALUE(pt3.z),
+			13, BSC__LAMBDA_MEMBER_VALUE(pt4.x), 23, BSC__LAMBDA_MEMBER_VALUE(pt4.y), 33, BSC__LAMBDA_MEMBER_VALUE(pt4.z),
 			70, &x3DFace::flags,
 			0
 		);
@@ -390,16 +383,16 @@ export namespace biscuit::dxf::entities {
 		constexpr static inline auto const group_members = std::make_tuple(
 			100, &T::markerCircle,
 			 39, &T::thickness,
-			 10, BSC__LAMBDA_MEMBER_VALUE(pt.x()),
-			 20, BSC__LAMBDA_MEMBER_VALUE(pt.y()),
-			 30, BSC__LAMBDA_MEMBER_VALUE(pt.z()),
+			 10, BSC__LAMBDA_MEMBER_VALUE(pt.x),
+			 20, BSC__LAMBDA_MEMBER_VALUE(pt.y),
+			 30, BSC__LAMBDA_MEMBER_VALUE(pt.z),
 			 40, &T::radius,
 			100, &T::marker,
 			 50, &T::start_angle,
 			 51, &T::end_angle,
-			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x()),
-			220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y()),
-			230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z())
+			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x),
+			220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y),
+			230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)
 		);
 	};
 
@@ -415,9 +408,9 @@ export namespace biscuit::dxf::entities {
 
 		constexpr static inline auto group_members = std::make_tuple(
 			100, &xPoint::marker,
-			10, BSC__LAMBDA_MEMBER_VALUE(pt.x()), 20, BSC__LAMBDA_MEMBER_VALUE(pt.y()), 30, BSC__LAMBDA_MEMBER_VALUE(pt.z()),
+			10, BSC__LAMBDA_MEMBER_VALUE(pt.x), 20, BSC__LAMBDA_MEMBER_VALUE(pt.y), 30, BSC__LAMBDA_MEMBER_VALUE(pt.z),
 			39, &xPoint::thickness,
-			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x()), 220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y()), 230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z()),
+			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x), 220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y), 230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z),
 			50, &xPoint::angle
 		);
 
@@ -436,15 +429,15 @@ export namespace biscuit::dxf::entities {
 		constexpr static inline auto group_members = std::make_tuple(
 			100, &T::marker,
 			39, &T::thickness,
-			10, BSC__LAMBDA_MEMBER_VALUE(pt0.x()),
-			20, BSC__LAMBDA_MEMBER_VALUE(pt0.y()),
-			30, BSC__LAMBDA_MEMBER_VALUE(pt0.z()),
-			11, BSC__LAMBDA_MEMBER_VALUE(pt1.x()),
-			21, BSC__LAMBDA_MEMBER_VALUE(pt1.y()),
-			31, BSC__LAMBDA_MEMBER_VALUE(pt1.z()),
-			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x()),
-			220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y()),
-			230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z())
+			10, BSC__LAMBDA_MEMBER_VALUE(pt0.x),
+			20, BSC__LAMBDA_MEMBER_VALUE(pt0.y),
+			30, BSC__LAMBDA_MEMBER_VALUE(pt0.z),
+			11, BSC__LAMBDA_MEMBER_VALUE(pt1.x),
+			21, BSC__LAMBDA_MEMBER_VALUE(pt1.y),
+			31, BSC__LAMBDA_MEMBER_VALUE(pt1.z),
+			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x),
+			220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y),
+			230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)
 		);
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::line, "LINE", xLine, xEntity)
@@ -492,7 +485,7 @@ export namespace biscuit::dxf::entities {
 		constexpr static inline auto const group_members = std::make_tuple(
 			100, &T::marker,
 			 39, &T::thickness,
-			 10, BSC__LAMBDA_MEMBER_VALUE(pt_align0.x()), 20, BSC__LAMBDA_MEMBER_VALUE(pt_align0.y()), 30, BSC__LAMBDA_MEMBER_VALUE(pt_align0.z()),
+			 10, BSC__LAMBDA_MEMBER_VALUE(pt_align0.x), 20, BSC__LAMBDA_MEMBER_VALUE(pt_align0.y), 30, BSC__LAMBDA_MEMBER_VALUE(pt_align0.z),
 			 40, &T::text_height,
 			  1, &T::text,
 			 50, &T::rotation,
@@ -501,8 +494,8 @@ export namespace biscuit::dxf::entities {
 			  7, &T::text_style_name,
 			 71, &T::text_generation_flags,
 			 72, &T::horizontal_justification,
-			 11, BSC__LAMBDA_MEMBER_VALUE(pt_align1.x()), 21, BSC__LAMBDA_MEMBER_VALUE(pt_align1.y()), 31, BSC__LAMBDA_MEMBER_VALUE(pt_align1.z()),
-			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x()), 220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y()), 230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z()),
+			 11, BSC__LAMBDA_MEMBER_VALUE(pt_align1.x),  21, BSC__LAMBDA_MEMBER_VALUE(pt_align1.y),  31, BSC__LAMBDA_MEMBER_VALUE(pt_align1.z),
+			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x), 220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y), 230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z),
 			100, &T::marker,
 			 73, &T::vertical_alignment
 		);
@@ -561,15 +554,15 @@ export namespace biscuit::dxf::entities {
 		using T = xMText;
 		constexpr static inline auto const group_members = std::make_tuple(
 			100, &T::marker,
-			 10, BSC__LAMBDA_MEMBER_VALUE(pt.x()), 20, BSC__LAMBDA_MEMBER_VALUE(pt.y()), 30, BSC__LAMBDA_MEMBER_VALUE(pt.z()),
+			 10, BSC__LAMBDA_MEMBER_VALUE(pt.x), 20, BSC__LAMBDA_MEMBER_VALUE(pt.y), 30, BSC__LAMBDA_MEMBER_VALUE(pt.z),
 			 40, &T::nominal_text_height,
 			 41, &T::reference_rectangle_width,
 			 46, &T::defined_annotation_height,
 			 71, &T::attachment_point,
 			 72, &T::drawing_direction,
 			  7, &T::text_style_name,
-			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x()), 220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y()), 230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z()),
-			 11, BSC__LAMBDA_MEMBER_VALUE(direction.x()), 21, BSC__LAMBDA_MEMBER_VALUE(direction.y()), 31, BSC__LAMBDA_MEMBER_VALUE(direction.z()),
+			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x), 220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y), 230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z),
+			 11, BSC__LAMBDA_MEMBER_VALUE(direction.x), 21, BSC__LAMBDA_MEMBER_VALUE(direction.y), 31, BSC__LAMBDA_MEMBER_VALUE(direction.z),
 			 42, &T::character_width,
 			 43, &T::character_height,
 			 50, &T::rotation,
@@ -627,6 +620,10 @@ export namespace biscuit::dxf::entities {
 		point_t pt_alignment_attribute{};	// alignment point for attribute
 		group_code_040_t current_annotation_scale{ 1. };	//// no default value speicified
 		group_code_002_t attribute;
+		group_code_000_t entity_type_mtext;
+		group_code_100_t AcDbEntity;
+		group_code_067_t space{};	// 0 : model space, 1 : paper space
+		group_code_008_t layer_name{};
 		xMText mtext;
 
 		using T = xAttributeDefinition;
@@ -645,7 +642,7 @@ export namespace biscuit::dxf::entities {
 			 70, &T::is_really_locked,
 			 70, &T::number_of_secondary_attributes,
 			340, &T::hard_pointer_id_of_secondary_attributes,
-			 10, BSC__LAMBDA_MEMBER_VALUE(pt_alignment_attribute.x()), 20, BSC__LAMBDA_MEMBER_VALUE(pt_alignment_attribute.y()), 30, BSC__LAMBDA_MEMBER_VALUE(pt_alignment_attribute.z()),
+			 10, BSC__LAMBDA_MEMBER_VALUE(pt_alignment_attribute.x), 20, BSC__LAMBDA_MEMBER_VALUE(pt_alignment_attribute.y), 30, BSC__LAMBDA_MEMBER_VALUE(pt_alignment_attribute.z),
 			 40, &T::current_annotation_scale,
 			  2, &T::attribute
 		);
@@ -656,7 +653,7 @@ export namespace biscuit::dxf::entities {
 			if (*iter == sGroup(100, "AcDbText")) {
 				return text.Read(iter, end);
 			}
-			if (*iter == sGroup(0, "MTEXT")) {
+			if (*iter == sGroup(100, "AcDbMText")) {
 				return mtext.Read(iter, end);
 			}
 			return false;
@@ -666,9 +663,8 @@ export namespace biscuit::dxf::entities {
 	//=============================================================================================================================
 	class xAttribute : public xEntity {
 	public:
-		group_code_100_t markerText{};	// Subclass marker (AcDbText)
 		xText text;
-		group_code_100_t marker;	// Subclass marker (AcDbAttribute Definition)
+		group_code_100_t markerAttribute;	// Subclass marker (AcDbAttribute Definition)
 		group_code_280_t version_number;	// 0 = 2010
 		group_code_002_t tag{};
 		enum fFLAG : group_code_070_t { fHIDDEN = 0x01, fCONSTANT = 0x02, fVERIFICATION_REQUIRED = 0x04, fPRESET = 0x08 };
@@ -685,21 +681,21 @@ export namespace biscuit::dxf::entities {
 		point_t extrusion{ 0., 0., 1. };	// 210, 220, 230,
 		group_code_280_t lock_position{};	// 280, 0 : unlocked, 1 : locked
 
-		//group_code_100> markerXrecord{};	// Subclass marker (AcDbXrecord)
-		//group_code_280> duplicate_record_cloning_flag{};	// 1 : keep existing
-		//enum fMTEXT_FLAG : group_code_070> { fMTEXT_MULTILINE = 0x02, fMTEXT_CONSTANT_MULTILINE = 0x04 };
-		//group_code_070, fMTEXT_FLAG> fMText{};
-		//group_code_070> is_really_locked{};	// 0 : unlocked, 1 : locked
-		//group_code_070> number_of_secondary_attributes{};
-		//group_code_340> hard_pointer_id_of_secondary_attributes{};
-		//point_t pt_alignment_attribute{};	// alignment point for attribute
-		//group_code_040> current_annotation_scale{ 1. };	//// no default value speicified
-		//group_code_002> attribute;
+		group_code_100_t markerXrecord{};	// Subclass marker (AcDbXrecord)
+		group_code_280_t duplicate_record_cloning_flag{};	// 1 : keep existing
+		enum fMTEXT_FLAG : group_code_070_t { fMTEXT_MULTILINE = 0x02, fMTEXT_CONSTANT_MULTILINE = 0x04 };
+		fMTEXT_FLAG fMText{};
+		group_code_070_t is_really_locked{};	// 0 : unlocked, 1 : locked
+		group_code_070_t number_of_secondary_attributes{};
+		group_code_340_t hard_pointer_id_of_secondary_attributes{};
+		point_t pt_alignment_attribute{};	// alignment point for attribute
+		group_code_040_t current_annotation_scale{ 1. };	//// no default value specified
+		group_code_002_t attribute;
 		xMText mtext;
 
 		using T = xAttribute;
 		constexpr static inline auto const group_members = std::make_tuple(
-			100, &T::marker,
+			100, &T::markerAttribute,
 			280, &T::version_number,
 			  2, &T::tag,
 			 70, &T::flags,
@@ -711,8 +707,8 @@ export namespace biscuit::dxf::entities {
 			 71, &T::text_generation_flags,
 			 72, &T::horizontal_justification,
 			 74, &T::vertical_text_justification,
-			 11, BSC__LAMBDA_MEMBER_VALUE(pt_alignment.x()), 21, BSC__LAMBDA_MEMBER_VALUE(pt_alignment.y()), 31, BSC__LAMBDA_MEMBER_VALUE(pt_alignment.z()),
-			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x()), 220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y()), 230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z()),
+			 11, BSC__LAMBDA_MEMBER_VALUE(pt_alignment.x), 21, BSC__LAMBDA_MEMBER_VALUE(pt_alignment.y), 31, BSC__LAMBDA_MEMBER_VALUE(pt_alignment.z),
+			210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x), 220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y), 230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z),
 			  0
 		);
 

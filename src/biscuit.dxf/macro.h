@@ -30,5 +30,5 @@
 	public:\
 		bool Read(group_iter_t& iter, group_iter_t const& end) override { return ReadEntity<this_t>(*this, iter, end); }\
 
-#define BSC__LAMBDA_MEMBER_VALUE(member)  [](auto& self) -> decltype(auto) { return self.member; }
+#define BSC__LAMBDA_MEMBER_VALUE(member) [](auto& self) -> auto& { return self.member; } 
 

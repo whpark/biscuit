@@ -558,7 +558,8 @@ export namespace biscuit {
 				auto cr = (avg > 128) ? cv::Scalar{0, 0, 0, 255} : cv::Scalar{255, 255, 255, 255};
 				for (int ch{}; ch < nChannel; ch++) {
 					auto str = std::format("{:3}", v[ch]);
-					cv::putText(canvas, str, cv::Point(pt.x, pt.y+(ch+1)*heightFont*40), cv::FONT_HERSHEY_DUPLEX, heightFont, cr, 1, 8, false);
+					cv::putText(canvas, str, cv::Point(static_cast<int>(pt.x), static_cast<int>(pt.y+(ch+1)*heightFont*40)),
+						cv::FONT_HERSHEY_DUPLEX, heightFont, cr, 1, 8, false);
 				}
 			}
 		}

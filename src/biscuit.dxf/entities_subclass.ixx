@@ -13,7 +13,7 @@ import :group_code_type_alias;
 using namespace std::literals;
 using namespace biscuit::literals;
 
-export namespace biscuit::dxf::subclass {
+export namespace biscuit::dxf::entities {
 
 	//=============================================================================================================================
 
@@ -93,7 +93,7 @@ export namespace biscuit::dxf::subclass {
 	enum class eSPACE : int16 { model, paper };
 	enum class eCOLOR : int16 { byBlock = 0, byLayer = 256, };
 
-	using point_t = Eigen::Vector3d;
+	using point_t = xPoint3d;
 
 	//template < typename TSubclass >
 	//bool ReadEntitySubclass(TSubclass& subclass, group_iter_t& iter, group_iter_t const& end) {
@@ -173,9 +173,9 @@ export namespace biscuit::dxf::subclass {
 			284, &this_t::shadow_mode,
 
 			//39, &this_t::thickness,
-			//210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x()),
-			//220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y()),
-			//230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z())
+			//210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x),
+			//220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y),
+			//230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)
 			  0
 		);
 
