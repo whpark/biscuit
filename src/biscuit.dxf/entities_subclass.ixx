@@ -8,7 +8,7 @@ import "biscuit/dependencies_fmt.hxx";
 import "biscuit/dependencies_eigen.hxx";
 import biscuit;
 import :group;
-import :group_code_type_alias;
+//import :group_code_type_alias;
 
 using namespace std::literals;
 using namespace biscuit::literals;
@@ -97,9 +97,9 @@ export namespace biscuit::dxf::entities {
 
 	//template < typename TSubclass >
 	//bool ReadEntitySubclass(TSubclass& subclass, group_iter_t& iter, group_iter_t const& end) {
-	//	TContainerMap<group_code_t, int> mapGroupCodeToIndex; // for duplicated group number
+	//	TContainerMap<group_code_value_t, int> mapGroupCodeToIndex; // for duplicated group number
 	//	for (iter++; iter != end; iter++) {
-	//		if (iter->eCode == group_code_t::subclass or iter->eCode == group_code_t::entity) {
+	//		if (iter->eCode == group_code_value_t::subclass or iter->eCode == group_code_value_t::entity) {
 	//			iter--;
 	//			return true;
 	//		}
@@ -115,7 +115,7 @@ export namespace biscuit::dxf::entities {
 	//				continue;
 	//		}
 
-	//		if (iter->eCode == group_code_t::entity) {
+	//		if (iter->eCode == group_code_value_t::entity) {
 	//			iter--;	// current item is for next sequence.
 	//			return true;
 	//		}
@@ -129,48 +129,48 @@ export namespace biscuit::dxf::entities {
 	public:
 		using this_t = sEntity;
 	public:
-		group_code_005_t handle{};
-		group_code_330_t hOwnerBlock;
-		group_code_100_t marker;					// 100:AcDbEntity (SubclassMarker)
-		eSPACE space{};								// 67:space, 0 for model, 1 for paper
-		group_code_410_t layout_tab_name;
-		group_code_008_t layer;
-		group_code_006_t line_type_name;
-		group_code_347_t ptrMaterial;
-		eCOLOR color{ 256 };						// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
-		group_code_370_t line_weight{};				// 370: Stored and moved around as a 16-bit integer (?)
-		group_code_048_t line_type_scale{ 1.0 };	// 48: optional
-		group_code_060_t hidden{ 0 };				// 60: 0: visible, 1: invisible
-		group_code_092_t size_graphics_data{};
-		group_code_310_t graphics_data{};
-		color_bgra_t color24{};						// 420: 24-bit color value - lowest 8 bits are blue, next 8 are green, highest 8 are red
-		group_code_430_t color_name;
-		group_code_440_t transparency{};
-		group_code_390_t ptr_plot_style_object{};
-		group_code_284_t shadow_mode{};				// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
+		group_code_value_t<  5> handle{};
+		group_code_value_t<330> hOwnerBlock;
+		group_code_value_t<100> marker;						// 100:AcDbEntity (SubclassMarker)
+		group_code_value_t< 67, eSPACE> space{};			// 67:space, 0 for model, 1 for paper
+		group_code_value_t<410> layout_tab_name;
+		group_code_value_t<  8> layer;
+		group_code_value_t<  6> line_type_name;
+		group_code_value_t<347> ptrMaterial;
+		group_code_value_t< 62, eCOLOR> color{ eCOLOR::byLayer };		// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
+		group_code_value_t<370> line_weight{};				// 370: Stored and moved around as a 16-bit integer (?)
+		group_code_value_t< 48> line_type_scale{ 1.0 };		// 48: optional
+		group_code_value_t< 60> hidden{ 0 };				// 60: 0: visible, 1: invisible
+		group_code_value_t< 92> size_graphics_data{};
+		group_code_value_t<310> graphics_data{};
+		group_code_value_t<420, color_bgra_t> color24{};	// 420: 24-bit color value - lowest 8 bits are blue, next 8 are green, highest 8 are red
+		group_code_value_t<430> color_name;
+		group_code_value_t<440> transparency{};
+		group_code_value_t<390> ptr_plot_style_object{};
+		group_code_value_t<284> shadow_mode{};				// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
 
 		//point_t extrusion{0., 0., 1.};
-		//group_code_039_t thickness{};
+		//group_code_value_t<039> thickness{};
 		constexpr static inline auto group_members = std::make_tuple(
-			  5, &this_t::handle,
-			330, &this_t::hOwnerBlock,
-			100, &this_t::marker,
-			 67, &this_t::space,
-			410, &this_t::layout_tab_name,
-			  8, &this_t::layer,
-			  6, &this_t::line_type_name,
-			347, &this_t::ptrMaterial,
-			 62, &this_t::color,
-			370, &this_t::line_weight,
-			 48, &this_t::line_type_scale,
-			 60, &this_t::hidden,
-			 92, &this_t::size_graphics_data,
-			310, &this_t::graphics_data,
-			420, BSC__LAMBDA_MEMBER_VALUE(color24.Value()),
-			430, &this_t::color_name,
-			440, &this_t::transparency,
-			390, &this_t::ptr_plot_style_object,
-			284, &this_t::shadow_mode,
+			&this_t::handle,
+			&this_t::hOwnerBlock,
+			&this_t::marker,
+			&this_t::space,
+			&this_t::layout_tab_name,
+			&this_t::layer,
+			&this_t::line_type_name,
+			&this_t::ptrMaterial,
+			&this_t::color,
+			&this_t::line_weight,
+			&this_t::line_type_scale,
+			&this_t::hidden,
+			&this_t::size_graphics_data,
+			&this_t::graphics_data,
+			std::pair{420, [](auto& self) -> auto& { return self.color24.Value(); }},
+			&this_t::color_name,
+			&this_t::transparency,
+			&this_t::ptr_plot_style_object,
+			&this_t::shadow_mode,
 
 			//39, &this_t::thickness,
 			//210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x),

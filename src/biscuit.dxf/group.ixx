@@ -34,12 +34,12 @@ export namespace biscuit::dxf {
 		constexpr eGROUP_CODE(eGROUP_CODE&&) = default;
 		constexpr eGROUP_CODE& operator = (eGROUP_CODE const&) = default;
 		constexpr eGROUP_CODE& operator = (eGROUP_CODE&&) = default;
-		constexpr eGROUP_CODE(value_t e) : eCode(e) {}
+		constexpr eGROUP_CODE(value_t eValueType) : eCode(eValueType) {}
 
 		//constexpr operator value_t() const { return value; }
-		eGROUP_CODE& operator = (value_t e) { eCode = e; return *this; }
+		eGROUP_CODE& operator = (value_t eValueType) { eCode = eValueType; return *this; }
 		constexpr auto operator <=> (eGROUP_CODE const&) const = default;
-		constexpr auto operator <=> (value_t const& e) const { return eCode <=> e; }
+		constexpr auto operator <=> (value_t const& eValueType) const { return eCode <=> eValueType; }
 	};
 	constexpr auto operator "" _g(unsigned long long v) { return eGROUP_CODE{ (int16)v }; }
 
@@ -235,7 +235,7 @@ export namespace biscuit::dxf {
 		}
 	};
 
-	auto format_as(group_code_t e) { return e.eCode; }
+	auto format_as(group_code_t eValueType) { return eValueType.eCode; }
 	auto format_as(sGroup const& group) {
 		return std::pair{ group.eCode, group.value };
 	}
@@ -243,82 +243,97 @@ export namespace biscuit::dxf {
 	using groups_t = std::vector<sGroup>;
 	using group_iter_t = groups_t::const_iterator;
 
-#if 0
+#if 1
 	//-----------------------------------------------------------------------------------------------------------------------------
 	namespace detail {
 
-		template < sGroup::eVALUE_TYPE e, typename TUserDefined = void >
-		struct TGroupValueTypeByEnum {
+		template < sGroup::eGROUP_CODE eGroupCode_, typename TUserDefined = void >
+		struct TGroupValue {
+			constexpr inline static sGroup::eGROUP_CODE const eGroupCode{eGroupCode_};
+			constexpr inline static sGroup::eVALUE_TYPE const eValueType = sGroup::GET_VALUE_TYPE_ENUM(eGroupCode);
+
 			using implicit_value_type =
-				std::conditional_t<e == sGroup::boolean, bool,
-					std::conditional_t<e == sGroup::i16, int16,
-						std::conditional_t<e == sGroup::i32, int32,
-							std::conditional_t<e == sGroup::i64, int64,
-								std::conditional_t<e == sGroup::dbl, double,
-									std::conditional_t<e == sGroup::str, string_t,
-										std::conditional_t<e == sGroup::hex_str, binary_t, void>>>>>>>;
+				std::conditional_t<eValueType == sGroup::boolean, bool,
+					std::conditional_t<eValueType == sGroup::i16, int16,
+						std::conditional_t<eValueType == sGroup::i32, int32,
+							std::conditional_t<eValueType == sGroup::i64, int64,
+								std::conditional_t<eValueType == sGroup::dbl, double,
+									std::conditional_t<eValueType == sGroup::str, string_t,
+										std::conditional_t<eValueType == sGroup::hex_str, binary_t, void>>>>>>>;
 
-			using value_type = std::conditional_t<std::is_same_v<TUserDefined, void>, implicit_value_type, TUserDefined>;
+			using value_t = std::conditional_t<std::is_same_v<TUserDefined, void>, implicit_value_type, TUserDefined>;
 
-			static_assert(sizeof(value_type) == sizeof(implicit_value_type));
+			static_assert(sizeof(value_t) == sizeof(implicit_value_type));
+
+			value_t value{};
+
+			auto operator <=> (TGroupValue const&) const = default;
+
+			value_t& operator() () { return value; }
+			value_t const& operator() () const { return value; }
 		};
+
 	}
 
-	template < sGroup::eVALUE_TYPE e, typename TUserDefined = void >
-	using enum_to_value_t = typename detail::TGroupValueTypeByEnum<e, TUserDefined>::value_type;
+	//template < sGroup::eVALUE_TYPE eValueType, typename TUserDefined = void >
+	//using enum_to_value_t = typename detail::TGroupValueTypeByEnum<eValueType, TUserDefined>::value_t;
 
 	template < group_code_t::value_t code, typename TUserDefined = void >
-	using group_code_to_value_t = enum_to_value_t<sGroup::GET_VALUE_TYPE_ENUM(group_code_t{code}), TUserDefined>;
+	using group_code_value_t = detail::TGroupValue<(group_code_t{code}), TUserDefined>;
+
 #endif		
 
 	//=============================================================================================================================
-	template < typename TItem >
-	bool ReadItemSingleMember(TItem& item, sGroup const& group, size_t& index) {
-		if constexpr (requires (TItem v) { v.base(); }) {
-			if (ReadItemSingleMember<TItem::base_t>(item.base(), group, index))
+	template < typename TEntity >
+	bool ReadItemSingleMember(TEntity& item, sGroup const& group, size_t& index) {
+		if constexpr (requires (TEntity v) { v.base(); }) {
+			if (ReadItemSingleMember<TEntity::base_t>(item.base(), group, index))
 				return true;
 		}
-		constexpr static size_t nTupleSize = std::tuple_size_v<decltype(TItem::group_members)>/2;
+		constexpr static size_t nTupleSize = std::tuple_size_v<decltype(TEntity::group_members)>;
 		return ForEachIntSeq<nTupleSize>([&]<int I>{
-			constexpr int code = std::get<I*2>(TItem::group_members);
-			constexpr auto const offset_ptr = std::get<I*2+1>(TItem::group_members);
-			if (group.eCode != code)
-				return false;
+			constexpr auto const member = std::get<I>(TEntity::group_members);
 
-			if (index > 0) {
-				index--;
-				return false;
-			}
+			if constexpr (std::is_member_object_pointer_v<decltype(member)>) {
+				if ((item.*member).eGroupCode != group.eCode)
+					return false;
+				if (index > 0) {
+					index--;
+					return false;
+				}
 
-			if constexpr (std::is_member_object_pointer_v<decltype(offset_ptr)>) {
-				if constexpr (std::is_enum_v<std::remove_cvref_t<decltype(item.*offset_ptr)>>) {
-					using underlying_t = std::underlying_type_t<std::remove_cvref_t<decltype(item.*offset_ptr)>>;
-					group.GetValue((underlying_t&)(item.*offset_ptr));
+				using member_t = std::remove_cvref_t<decltype(item.*member)>;
+				if constexpr (std::is_enum_v<std::remove_cvref_t<typename member_t::value_t>>) {
+					using underlying_t = std::underlying_type_t<typename member_t::value_t>;
+					return group.GetValue((underlying_t&)(item.*member).value);
 				}
 				else {
-					group.GetValue(item.*offset_ptr);
+					return group.GetValue((item.*member).value);
 				}
-				return true;
 			}
-			else if constexpr (std::invocable<decltype(offset_ptr), TItem&, sGroup const&>) {
-				return offset_ptr(item, group);
+			else {
+				// todo:
+				//constexpr int const code = member.first;
+				//return group.GetValue(member.second(item));
+				return false;
 			}
-			else if constexpr (std::invocable<decltype(offset_ptr), TItem&>) {
-				using value_t = std::invoke_result_t<decltype(offset_ptr), TItem&>;
-				if constexpr (std::is_enum_v<value_t>) {
-					using underlying_t = std::underlying_type_t<value_t>;
-					group.GetValue((underlying_t&)offset_ptr(item));
-				}
-				else {
-					group.GetValue(offset_ptr(item));
-				}
-				return true;
-			}
+
+			//else if constexpr (std::invocable<decltype(offset_ptr), TEntity&>) {
+			//	using value_t = std::invoke_result_t<decltype(offset_ptr), TEntity&>;
+			//	if constexpr (std::is_enum_v<value_t>) {
+			//		using underlying_t = std::underlying_type_t<value_t>;
+			//		group.GetValue((underlying_t&)offset_ptr(item));
+			//	}
+			//	else {
+			//		group.GetValue(offset_ptr(item));
+			//	}
+			//	return true;
+			//}
 		});
 	}
 	//-----------------------------------------------------------------------------------------------------------------------------
-	template < typename TItem >
-	bool ReadItemSingleMember(TItem& item, sGroup const& group) {
+	template < typename TEntity >
+	bool ReadItemSingleMember(TEntity& item, sGroup const& group) {
 		size_t index{};
 		return ReadItemSingleMember(item, group, index);
 	}

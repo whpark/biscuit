@@ -9,6 +9,7 @@ import :group;
 import :group_code_type_alias;
 import :stream;
 import :entities;
+import :entities_subclass;
 
 using namespace std::literals;
 using namespace biscuit::literals;
@@ -75,24 +76,22 @@ export namespace biscuit::dxf {
 	//=============================================================================================================================
 	// Classes Section
 	struct sClass {
-		string_t name;
-		string_t cpp_class_name;
-		string_t app_name;
-		int32 flags{};
-		int32 count{};
-		int16 proxy{};
-		int16 entity{};
+		group_code_value_t<  1> name;
+		group_code_value_t<  2> cpp_class_name;
+		group_code_value_t<  3> app_name;
+		group_code_value_t< 90> flags{};
+		group_code_value_t< 91> count{};
+		group_code_value_t<280> proxy{};
+		group_code_value_t<281> entity{};
 
 		constexpr static inline auto const group_members = std::make_tuple(
-			//1, [](sClass& self) -> auto& { return self.name; },
-			//1, [](sClass& self, sGroup const& g)->bool{ return g.GetValue(self.name); },
-			1, &sClass::name,
-			2, &sClass::cpp_class_name,
-			3, &sClass::app_name,
-			90, &sClass::flags,
-			91, &sClass::count,
-			280, &sClass::proxy,
-			281, &sClass::entity
+			&sClass::name,
+			&sClass::cpp_class_name,
+			&sClass::app_name,
+			&sClass::flags,
+			&sClass::count,
+			&sClass::proxy,
+			&sClass::entity
 		);
 	};
 	using classes_t = std::vector<sClass>;
@@ -131,17 +130,19 @@ export namespace biscuit::dxf {
 	//=============================================================================================================================
 	class xTable {
 	public:
-		string_t table_type;
-		int32 handle{};
-		string_t class_name;
-		int16 max_entries{};
+		using this_t = xTable;
+	public:
+		group_code_value_t<  2> table_type;
+		group_code_value_t<  5> handle{};
+		group_code_value_t<100> class_name;
+		group_code_value_t< 70> max_entries{};
 		int16 flags{};
 
 		constexpr static inline auto const group_members = std::make_tuple(
-			2, &xTable::table_type,
-			5, &xTable::handle,
-			100, &xTable::class_name,
-			70, &xTable::max_entries
+			&this_t::table_type,
+			&this_t::handle,
+			&this_t::class_name,
+			&this_t::max_entries
 		);
 	};
 
@@ -186,28 +187,30 @@ export namespace biscuit::dxf {
 	//=============================================================================================================================
 	class xBlock {
 	public:
-		int32 handle{};
+		using this_t = xBlock;
+	public:
+		group_code_value_t<  5> handle{};
 		//string_t entity;	// fixed value : AcDbEntity
-		string_t layer;
+		group_code_value_t<  8> layer;
 		//string_t sign;		// fixed value : AcDbBlockBegin
-		string_t name;
-		int16 flags{};
-		Eigen::Vector3d ptBase;
-		string_t name2;
-		string_t xref_path;
+		group_code_value_t<  2> name;
+		group_code_value_t< 70> flags{};
+		entities::point_t ptBase;
+		group_code_value_t<  3> name2;
+		group_code_value_t<  1> xref_path;
 
 		constexpr static inline auto const group_members = std::make_tuple(
-			5, &xBlock::handle,
-			//100, &xBlock::entity,
-			8, &xBlock::layer,
-			//100, &xBlock::sign,
-			2, &xBlock::name,
-			70, &xBlock::flags,
-			10, [](auto& self) -> decltype(auto) { return self.ptBase.x(); },
-			20, [](auto& self) -> decltype(auto) { return self.ptBase.y(); },
-			30, [](auto& self) -> decltype(auto) { return self.ptBase.z(); },
-			3, & xBlock::name2,
-			1, & xBlock::xref_path
+			&this_t::handle,
+			//100, &this_t::entity,
+			&this_t::layer,
+			//100, &this_t::sign,
+			&this_t::name,
+			&this_t::flags,
+			std::pair{10, [](auto& self) -> auto& { return self.ptBase.x; }},
+			std::pair{20, [](auto& self) -> auto& { return self.ptBase.y; }},
+			std::pair{30, [](auto& self) -> auto& { return self.ptBase.z; }},
+			&this_t::name2,
+			&this_t::xref_path
 		);
 	};
 	class xSectionBlocks {

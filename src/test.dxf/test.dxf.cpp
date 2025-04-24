@@ -69,17 +69,17 @@ TEST_CASE("Test biscuit.dxf") {
 
 		// classes
 		for (auto const& c : dxf.m_classes) {
-			fmt::println(out, "class:{}", c.name);
-			fmt::println(out, "\tcpp_class_name:{}", c.cpp_class_name);
-			fmt::println(out, "\tapp_name:{}", c.app_name);
+			fmt::println(out, "class:{}", c.name());
+			fmt::println(out, "\tcpp_class_name:{}", c.cpp_class_name());
+			fmt::println(out, "\tapp_name:{}", c.app_name());
 		}
 
 		// tables
 		for (auto const& t : dxf.m_tables) {
-			fmt::println(out, "table:{}", t.table_type);
-			fmt::println(out, "\thandle:{}", t.handle);
-			fmt::println(out, "\tclass:{}", t.class_name);
-			fmt::println(out, "\tmax_entries:{}", t.max_entries);
+			fmt::println(out, "table:{}", t.table_type());
+			fmt::println(out, "\thandle:{}", t.handle());
+			fmt::println(out, "\tclass:{}", t.class_name());
+			fmt::println(out, "\tmax_entries:{}", t.max_entries());
 		}
 
 		// entities
@@ -89,7 +89,7 @@ TEST_CASE("Test biscuit.dxf") {
 				if (auto* entity = dynamic_cast<biscuit::dxf::entities::xUnknown*>(e.get()))
 					fmt::println(out, "\tname:{}", entity->m_name);
 			}
-			fmt::println(out, "\tlayer:{}", e->layer);
+			fmt::println(out, "\tlayer:{}", e->layer());
 		}
 
 	}
