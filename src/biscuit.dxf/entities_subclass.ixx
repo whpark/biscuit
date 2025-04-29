@@ -8,7 +8,7 @@ import "biscuit/dependencies_fmt.hxx";
 import "biscuit/dependencies_eigen.hxx";
 import biscuit;
 import :group;
-//import :group_code_type_alias;
+import :group_code_type_alias;
 
 using namespace std::literals;
 using namespace biscuit::literals;
@@ -129,25 +129,25 @@ export namespace biscuit::dxf::entities {
 	public:
 		using this_t = sEntity;
 	public:
-		group_code_value_t<  5> handle{};
-		group_code_value_t<330> hOwnerBlock;
-		group_code_value_t<100> marker;						// 100:AcDbEntity (SubclassMarker)
-		group_code_value_t< 67, eSPACE> space{};			// 67:space, 0 for model, 1 for paper
-		group_code_value_t<410> layout_tab_name;
-		group_code_value_t<  8> layer;
-		group_code_value_t<  6> line_type_name;
-		group_code_value_t<347> ptrMaterial;
-		group_code_value_t< 62, eCOLOR> color{ eCOLOR::byLayer };		// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
-		group_code_value_t<370> line_weight{};				// 370: Stored and moved around as a 16-bit integer (?)
-		group_code_value_t< 48> line_type_scale{ 1.0 };		// 48: optional
-		group_code_value_t< 60> hidden{ 0 };				// 60: 0: visible, 1: invisible
-		group_code_value_t< 92> size_graphics_data{};
-		group_code_value_t<310> graphics_data{};
-		group_code_value_t<420, color_bgra_t> color24{};	// 420: 24-bit color value - lowest 8 bits are blue, next 8 are green, highest 8 are red
-		group_code_value_t<430> color_name;
-		group_code_value_t<440> transparency{};
-		group_code_value_t<390> ptr_plot_style_object{};
-		group_code_value_t<284> shadow_mode{};				// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
+		gcv<  5> handle{};
+		gcv<330> hOwnerBlock;
+		gcv<100> marker;						// 100:AcDbEntity (SubclassMarker)
+		gcv< 67, eSPACE> space{};			// 67:space, 0 for model, 1 for paper
+		gcv<410> layout_tab_name;
+		gcv<  8> layer;
+		gcv<  6> line_type_name;
+		gcv<347> ptrMaterial;
+		gcv< 62, eCOLOR> color{ eCOLOR::byLayer };		// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
+		gcv<370> line_weight{};				// 370: Stored and moved around as a 16-bit integer (?)
+		gcv< 48> line_type_scale{ 1.0 };		// 48: optional
+		gcv< 60> hidden{ 0 };				// 60: 0: visible, 1: invisible
+		gcv< 92> size_graphics_data{};
+		gcv<310> graphics_data{};
+		gcv<420, color_bgra_t> color24{};	// 420: 24-bit color value - lowest 8 bits are blue, next 8 are green, highest 8 are red
+		gcv<430> color_name;
+		gcv<440> transparency{};
+		gcv<390> ptr_plot_style_object{};
+		gcv<284> shadow_mode{};				// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
 
 		//point_t extrusion{0., 0., 1.};
 		//group_code_value_t<039> thickness{};

@@ -269,8 +269,15 @@ export namespace biscuit::dxf {
 
 			auto operator <=> (TGroupValue const&) const = default;
 
-			value_t& operator() () { return value; }
+			TGroupValue& operator = (TGroupValue const&) = default;
+			TGroupValue& operator = (value_t const& v) { value = v; return *this; }
+			TGroupValue& operator = (value_t&& v) { value = std::move(v); return *this; }
+
+			//value_t& operator() () { return value; }
 			value_t const& operator() () const { return value; }
+			operator value_t& () { return value; }
+			operator value_t const& () const { return value; }
+
 		};
 
 	}

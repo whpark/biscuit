@@ -2,7 +2,7 @@
 
 export module biscuit.dxf;
 export import :group;
-export import :group_code_type_alias;
+import :group_code_type_alias;
 export import :stream;
 export import :sections;
 import std;

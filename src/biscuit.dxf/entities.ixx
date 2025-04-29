@@ -257,6 +257,13 @@ export namespace biscuit::dxf::entities {
 				//xEntity::RegisterEntity(name, std::move(fnCreate));
 			}
 		};
+
+		static bool ReadStringTo(group_iter_t& iter, group_iter_t const& end, string_t& text)  {
+			if (iter == end) return false;
+			if (iter->eCode == 1) { text = iter->GetValue<string_t>().value_or(""s); return true; }
+			if (iter->eCode == 3) { text += iter->GetValue<string_t>().value_or(""s); return true; }
+			return false;
+		}
 	};
 
 
@@ -287,8 +294,8 @@ export namespace biscuit::dxf::entities {
 	class x3DFace : public xEntity {
 	public:
 		point_t pt1, pt2, pt3, pt4;
-		enum fHIDDEN : group_code_value_t< 70>::value_t { fHIDDEN_FIRST = 1, fHIDDEN_SECOND = 2, fHIDDEN_THIRD = 4, fHIDDEN_FOURTH = 8 };
-		group_code_value_t< 70, fHIDDEN> flags{};	// 70:
+		enum fHIDDEN : gcv_t< 70> { fHIDDEN_FIRST = 1, fHIDDEN_SECOND = 2, fHIDDEN_THIRD = 4, fHIDDEN_FOURTH = 8 };
+		gcv< 70, fHIDDEN> flags{};	// 70:
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::_3dface, "3DFACE", x3DFace, xEntity);
 
@@ -316,11 +323,11 @@ export namespace biscuit::dxf::entities {
 	//============================================================================================================================
 	class x3DSolid : public xEntity {
 	public:
-		group_code_value_t<100> marker;	// Subclass marker (AcDbModelerGeometry)
-		group_code_value_t< 70> version{ 1 };
-		group_code_value_t<  1> proprietary_data;		// GroupCode 1, 3
-		group_code_value_t<100> marker2;	// Subclass marker (AcDb3dSolid)
-		group_code_value_t<350> owner_id_handle_to_history_object{};
+		gcv<100> marker;	// Subclass marker (AcDbModelerGeometry)
+		gcv< 70> version{ 1 };
+		gcv<  1> proprietary_data;		// GroupCode 1, 3
+		gcv<100> marker2;	// Subclass marker (AcDb3dSolid)
+		gcv<350> owner_id_handle_to_history_object{};
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::_3dsolid, "3DSOLID", x3DSolid, xEntity);
 
@@ -332,15 +339,9 @@ export namespace biscuit::dxf::entities {
 		);
 
 		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) override {
-			if (iter->eCode == 1) {
-				proprietary_data() = iter->GetValue<string_t>().value_or(""s);
-				iter++;
-			}
-			if (iter->eCode == 3) {
-				proprietary_data() += iter->GetValue<string_t>().value_or(""s);
-				iter++;
-			}
-			return true;
+			if (ReadStringTo(iter, end, proprietary_data))
+				return true;
+			return false;
 		}
 	};
 
@@ -348,20 +349,20 @@ export namespace biscuit::dxf::entities {
 	//=============================================================================================================================
 	class xACADProxyEntity : public xEntity {
 	public:
-		group_code_value_t<100> marker{};	// Subclass marker (AcDbProxyEntity)
-		group_code_value_t< 90> proxy_entity_class_id{ 498 };
-		group_code_value_t< 91> application_entity_class_id{ 500 };
-		group_code_value_t< 92> size_graphics_data_in_bytes{};
-		group_code_value_t<310> graphics_data{};
-		group_code_value_t< 93> size_entity_data_in_bits{};
-		group_code_value_t<310> entity_data{};
-		group_code_value_t<330> object_id0{};
-		group_code_value_t<340> object_id1{};
-		group_code_value_t<350> object_id2{};
-		group_code_value_t<360> object_id3{};
-		group_code_value_t< 94> end_of_object_id_section{};
-		group_code_value_t< 95> size_proxy_data_in_bytes{};
-		group_code_value_t< 70> dwg_or_dxf{};	// Original custom object data format (0 = DWG, 1 = DXF)
+		gcv<100> marker{};	// Subclass marker (AcDbProxyEntity)
+		gcv< 90> proxy_entity_class_id{ 498 };
+		gcv< 91> application_entity_class_id{ 500 };
+		gcv< 92> size_graphics_data_in_bytes{};
+		gcv<310> graphics_data{};
+		gcv< 93> size_entity_data_in_bits{};
+		gcv<310> entity_data{};
+		gcv<330> object_id0{};
+		gcv<340> object_id1{};
+		gcv<350> object_id2{};
+		gcv<360> object_id3{};
+		gcv< 94> end_of_object_id_section{};
+		gcv< 95> size_proxy_data_in_bytes{};
+		gcv< 70> dwg_or_dxf{};	// Original custom object data format (0 = DWG, 1 = DXF)
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::acad_proxy_entity, "ACAD_PROXY_ENTITY", xACADProxyEntity, xEntity)
 
@@ -386,13 +387,13 @@ export namespace biscuit::dxf::entities {
 	//=============================================================================================================================
 	class xArc : public xEntity {
 	public:
-		group_code_value_t<100> markerCircle{};	// Subclass marker (AcDbCircle)
-		group_code_value_t< 39> thickness{};
+		gcv<100> markerCircle{};	// Subclass marker (AcDbCircle)
+		gcv< 39> thickness{};
 		point_t pt{};	// center
-		group_code_value_t< 40> radius{};
-		group_code_value_t<100> marker{};	// Subclass marker (AcDbArc)
-		group_code_value_t< 50> start_angle{};
-		group_code_value_t< 51> end_angle{};
+		gcv< 40> radius{};
+		gcv<100> marker{};	// Subclass marker (AcDbArc)
+		gcv< 50> start_angle{};
+		gcv< 51> end_angle{};
 		point_t extrusion{ 0., 0., 1. };
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::arc, "ARC", xArc, xEntity);
@@ -416,11 +417,11 @@ export namespace biscuit::dxf::entities {
 	//=============================================================================================================================
 	class xPoint : public xEntity {
 	public:
-		group_code_value_t<100> marker{};	// Subclass marker (AcDbPoint)
+		gcv<100> marker{};	// Subclass marker (AcDbPoint)
 		point_t pt{};
-		group_code_value_t< 39> thickness{};
+		gcv< 39> thickness{};
 		point_t extrusion{ 0., 0., 1. };
-		group_code_value_t< 50> angle{};	// angle of x axis for UCS inf effect when the point was drawn (optional, default = 0); used when PDMODE is nonzero
+		gcv< 50> angle{};	// angle of x axis for UCS inf effect when the point was drawn (optional, default = 0); used when PDMODE is nonzero
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::point, "POINT", xPoint, xEntity)
 
@@ -442,10 +443,10 @@ export namespace biscuit::dxf::entities {
 	public:
 		using this_t = xLine;
 	public:
-		group_code_value_t<100> marker;
+		gcv<100> marker;
 		point_t pt0{};
 		point_t pt1{};
-		group_code_value_t< 39> thickness{};
+		gcv< 39> thickness{};
 		point_t extrusion{ 0., 0., 1. };
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::line, "LINE", xLine, xEntity)
@@ -485,24 +486,24 @@ export namespace biscuit::dxf::entities {
 	//=============================================================================================================================
 	class xText : public xEntity {
 	public:
-		group_code_value_t<100> marker{};	// Subclass marker (AcDbText)
-		group_code_value_t< 39> thickness{};
+		gcv<100> marker{};	// Subclass marker (AcDbText)
+		gcv< 39> thickness{};
 		point_t pt_align0{};	// alignment point
-		group_code_value_t< 40> text_height{};
-		group_code_value_t<  1> text{};
-		group_code_value_t< 50> rotation{};
-		group_code_value_t< 41> relative_x_scale_factor{1.};
-		group_code_value_t< 51> oblique_angle{};
-		group_code_value_t<  7> text_style_name{"STANDARD"s};
-		enum fTEXT_GENERATION_FLAGS : group_code_value_t< 71>::value_t { fTEXT_GENERATION_FLAGS__BACKWARD = 2, fTEXT_GENERATION_FLAGS__UPSIDE_DOWN = 4 };
-		group_code_value_t< 71, fTEXT_GENERATION_FLAGS> text_generation_flags{};	// 71:
-		enum class eHORIZONTAL_TEXT_JUSTIFICATION : group_code_value_t< 72>::value_t { left, center, right, aligned, middle, fit };
-		group_code_value_t< 72, eHORIZONTAL_TEXT_JUSTIFICATION> horizontal_justification{};	// 72:
+		gcv< 40> text_height{};
+		gcv<  1> text{};
+		gcv< 50> rotation{};
+		gcv< 41> relative_x_scale_factor{1.};
+		gcv< 51> oblique_angle{};
+		gcv<  7> text_style_name{"STANDARD"s};
+		enum fTEXT_GENERATION_FLAGS : gcv_t< 71> { fTEXT_GENERATION_FLAGS__BACKWARD = 2, fTEXT_GENERATION_FLAGS__UPSIDE_DOWN = 4 };
+		gcv< 71, fTEXT_GENERATION_FLAGS> text_generation_flags{};	// 71:
+		enum class eHORIZONTAL_TEXT_JUSTIFICATION : gcv_t< 72> { left, center, right, aligned, middle, fit };
+		gcv< 72, eHORIZONTAL_TEXT_JUSTIFICATION> horizontal_justification{};	// 72:
 		point_t pt_align1{};	// second alignment point
 		point_t extrusion{ 0., 0., 1. };
-		group_code_value_t<100> marker2;	// Subclass marker (AcDbText)
-		enum class eVERTICAL_ALIGNMENT : group_code_value_t< 73>::value_t { baseline, bottom, middle, top};
-		group_code_value_t< 73, eVERTICAL_ALIGNMENT> vertical_alignment{};	// 73:
+		gcv<100> marker2;	// Subclass marker (AcDbText)
+		enum class eVERTICAL_ALIGNMENT : gcv_t< 73> { baseline, bottom, middle, top};
+		gcv< 73, eVERTICAL_ALIGNMENT> vertical_alignment{};	// 73:
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::text, "TEXT", xText, xEntity)
 
@@ -535,48 +536,48 @@ export namespace biscuit::dxf::entities {
 	//=============================================================================================================================
 	class xMText : public xEntity {
 	public:
-		group_code_value_t<100> marker{};	// Subclass marker (AcDbMText)
+		gcv<100> marker{};	// Subclass marker (AcDbMText)
 		point_t pt;	// insertion point
-		group_code_value_t< 40> nominal_text_height{};
-		group_code_value_t< 41> reference_rectangle_width{};
+		gcv< 40> nominal_text_height{};
+		gcv< 41> reference_rectangle_width{};
 
-		enum class eTEXT_ATTACHMENT_POINT : group_code_value_t< 71>::value_t {
+		enum class eTEXT_ATTACHMENT_POINT : gcv_t< 71> {
 			top_left = 1, top_center, top_right,
 			middle_left, middle_center, middle_right,
 			bottom_left, bottom_center, bottom_right
 		};
-		group_code_value_t< 71, eTEXT_ATTACHMENT_POINT> attachment_point{eTEXT_ATTACHMENT_POINT::top_left};	// 71
+		gcv< 71, eTEXT_ATTACHMENT_POINT> attachment_point{eTEXT_ATTACHMENT_POINT::top_left};	// 71
 
-		enum class eDRAWING_DIRECTION : group_code_value_t< 72>::value_t {
+		enum class eDRAWING_DIRECTION : gcv_t< 72> {
 			left_to_right = 1, top_to_bottom = 3, by_style = 5
 		};
-		group_code_value_t< 72, eDRAWING_DIRECTION> drawing_direction{eDRAWING_DIRECTION::left_to_right};	// 72
+		gcv< 72, eDRAWING_DIRECTION> drawing_direction{eDRAWING_DIRECTION::left_to_right};	// 72
 
 		string_t text;	// group code 1, 3
 
-		group_code_value_t< 7> text_style_name{"STANDARD"s};
+		gcv< 7> text_style_name{"STANDARD"s};
 		point_t extrusion{ 0., 0., 1. };
 		point_t direction{};	// 11, 21, 31
-		group_code_value_t< 42> character_width{};
-		group_code_value_t< 43> character_height{};
-		group_code_value_t< 50> rotation{};	// in radian.
-		enum class eLINE_SPACING_STYLE : group_code_value_t< 73>::value_t { at_least = 1, exact = 2 };
-		group_code_value_t< 73, eLINE_SPACING_STYLE> line_spacing_style{eLINE_SPACING_STYLE::exact};	// 73:
-		group_code_value_t< 44> line_spacing_factor{ 1. };	// 0.25 ~ 4.0
-		enum class eBACKGROUND_FILL : group_code_value_t< 90>::value_t { off = 0, color = 1, window = 2 };
-		group_code_value_t< 90, eBACKGROUND_FILL> background_fill_color{eBACKGROUND_FILL::off};	// 90:
+		gcv< 42> character_width{};
+		gcv< 43> character_height{};
+		gcv< 50> rotation{};	// in radian.
+		enum class eLINE_SPACING_STYLE : gcv_t< 73> { at_least = 1, exact = 2 };
+		gcv< 73, eLINE_SPACING_STYLE> line_spacing_style{eLINE_SPACING_STYLE::exact};	// 73:
+		gcv< 44> line_spacing_factor{ 1. };	// 0.25 ~ 4.0
+		enum class eBACKGROUND_FILL : gcv_t< 90> { off = 0, color = 1, window = 2 };
+		gcv< 90, eBACKGROUND_FILL> background_fill_color{eBACKGROUND_FILL::off};	// 90:
 		color_bgra_t background_fill_color_value{};	// 420:
-		group_code_value_t<430> background_fill_color_name{};
-		group_code_value_t< 45> fill_box_scale{1.};
-		group_code_value_t< 63> background_fill_color_index{};	// valid when groupcode 90 is 1
-		group_code_value_t<441> transparency_na{};	// not implemented
-		group_code_value_t< 75> column_type{};	// 0 : no columns, 1 : one column, 2 : continuous columns
-		group_code_value_t< 76> column_count{};
-		group_code_value_t< 78> column_flow_reversed{};
-		group_code_value_t< 79> column_auto_height{};
-		group_code_value_t< 48> column_width{};
-		group_code_value_t< 49> column_gutter{};
-		group_code_value_t< 50> column_heights{};	// this code is followed by column count (int16), and then the number of column heights
+		gcv<430> background_fill_color_name{};
+		gcv< 45> fill_box_scale{1.};
+		gcv< 63> background_fill_color_index{};	// valid when groupcode 90 is 1
+		gcv<441> transparency_na{};	// not implemented
+		gcv< 75> column_type{};	// 0 : no columns, 1 : one column, 2 : continuous columns
+		gcv< 76> column_count{};
+		gcv< 78> column_flow_reversed{};
+		gcv< 79> column_auto_height{};
+		gcv< 48> column_width{};
+		gcv< 49> column_gutter{};
+		gcv< 50> column_heights{};	// this code is followed by column count (int16), and then the number of column heights
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::mtext, "MTEXT", xMText, xEntity);
 
@@ -617,16 +618,8 @@ export namespace biscuit::dxf::entities {
 		);
 
 		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) {
-			if (iter->eCode == 1) {
-				text = iter->GetValue<string_t>().value_or(""s);
-				//iter++;
+			if (ReadStringTo(iter, end, text))
 				return true;
-			}
-			if (iter->eCode == 3) {
-				text += iter->GetValue<string_t>().value_or(""s);
-				//iter++;
-				return true;
-			}
 			return false;
 		}
 	};
@@ -634,8 +627,8 @@ export namespace biscuit::dxf::entities {
 	//=============================================================================================================================
 	class xMText_AttDef : public xMText {
 	public:
-		group_code_value_t< 46> defined_annotation_height{};	// valid before 2012
-		group_code_value_t< 63> background_fill_color_index{};	// valid when groupcode 90 is 1
+		gcv< 46> defined_annotation_height{};	// valid before 2012
+		gcv< 63> background_fill_color_index{};	// valid when groupcode 90 is 1
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::mtext_attdef, "MTEXT_ATTDEF", xMText_AttDef, xMText);
 
@@ -685,29 +678,29 @@ export namespace biscuit::dxf::entities {
 		using this_t = xAttributeDefinition;
 	public:
 		xText text;
-		group_code_value_t<100> marker;	// Subclass marker (AcDbAttribute Definition)
-		group_code_value_t<280> version_number;	// 0 = 2010
-		group_code_value_t<  3> prompt{};
-		group_code_value_t<  2> tag{};
-		enum fFLAG : group_code_value_t< 70>::value_t { fHIDDEN = 0x01, fCONSTANT = 0x02, fVERIFICATION_REQUIRED = 0x04, fPRESET = 0x08 };
-		group_code_value_t< 70, fFLAG> flags{};	// 70:
-		group_code_value_t< 73> field_length{};
-		group_code_value_t< 74> vertical_text_justification{};
-		group_code_value_t<280> lock_position{};
-		group_code_value_t<100> markerRecord{};	// Subclass marker (AcDbXrecord)
-		group_code_value_t<280> duplicate_record_cloning_flag{};	// 1 : keep existing
-		enum fMTEXT_FLAG : group_code_value_t< 70>::value_t { fMTEXT_MULTILINE = 0x02, fMTEXT_CONSTANT_MULTILINE = 0x04 };
-		group_code_value_t< 70, fMTEXT_FLAG> fMText{};	// 70:
-		group_code_value_t< 70> is_really_locked{};	// 0 : unlocked, 1 : locked
-		group_code_value_t< 70> number_of_secondary_attributes{};
-		group_code_value_t<340> hard_pointer_id_of_secondary_attributes{};
+		gcv<100> marker;	// Subclass marker (AcDbAttribute Definition)
+		gcv<280> version_number;	// 0 = 2010
+		gcv<  3> prompt{};
+		gcv<  2> tag{};
+		enum fFLAG : gcv_t< 70> { fHIDDEN = 0x01, fCONSTANT = 0x02, fVERIFICATION_REQUIRED = 0x04, fPRESET = 0x08 };
+		gcv< 70, fFLAG> flags{};	// 70:
+		gcv< 73> field_length{};
+		gcv< 74> vertical_text_justification{};
+		gcv<280> lock_position{};
+		gcv<100> markerRecord{};	// Subclass marker (AcDbXrecord)
+		gcv<280> duplicate_record_cloning_flag{};	// 1 : keep existing
+		enum fMTEXT_FLAG : gcv_t< 70> { fMTEXT_MULTILINE = 0x02, fMTEXT_CONSTANT_MULTILINE = 0x04 };
+		gcv< 70, fMTEXT_FLAG> fMText{};	// 70:
+		gcv< 70> is_really_locked{};	// 0 : unlocked, 1 : locked
+		gcv< 70> number_of_secondary_attributes{};
+		gcv<340> hard_pointer_id_of_secondary_attributes{};
 		point_t pt_alignment_attribute{};	// alignment point for attribute
-		group_code_value_t< 40> current_annotation_scale{ 1. };	//// no default value speicified
-		group_code_value_t<  2> attribute;
-		group_code_value_t<  0> entity_type_mtext;
-		group_code_value_t<100> AcDbEntity;
-		group_code_value_t< 67> space{};	// 0 : model space, 1 : paper space
-		group_code_value_t<  8> layer_name{};
+		gcv< 40> current_annotation_scale{ 1. };	//// no default value speicified
+		gcv<  2> attribute;
+		gcv<  0> entity_type_mtext;
+		gcv<100> AcDbEntity;
+		gcv< 67> space{};	// 0 : model space, 1 : paper space
+		gcv<  8> layer_name{};
 		xMText_AttDef mtext;
 
 		constexpr static inline auto const group_members = std::make_tuple(
@@ -752,33 +745,33 @@ export namespace biscuit::dxf::entities {
 		using this_t = xAttribute;
 	public:
 		xText text;
-		group_code_value_t<100> markerAttribute;	// Subclass marker (AcDbAttribute Definition)
-		group_code_value_t<280> version_number;	// 0 = 2010
-		group_code_value_t<  2> tag{};
-		enum fFLAG : group_code_value_t< 70>::value_t { fHIDDEN = 0x01, fCONSTANT = 0x02, fVERIFICATION_REQUIRED = 0x04, fPRESET = 0x08 };
-		group_code_value_t< 70, fFLAG> flags{};	// 70:
-		group_code_value_t< 73> field_length{};
-		group_code_value_t< 50> rotation_angle{};
-		group_code_value_t< 41> relative_x_scale_factor{ 1. };
-		group_code_value_t< 51> oblique_angle{};
-		group_code_value_t<  7> text_style_name{ "STANDARD"s };
-		group_code_value_t< 71> text_generation_flags{};
-		group_code_value_t< 72> horizontal_justification{};
-		group_code_value_t< 74> vertical_text_justification{};	// see groupcode 73 in TEXT
+		gcv<100> markerAttribute;	// Subclass marker (AcDbAttribute Definition)
+		gcv<280> version_number;	// 0 = 2010
+		gcv<  2> tag{};
+		enum fFLAG : gcv_t< 70> { fHIDDEN = 0x01, fCONSTANT = 0x02, fVERIFICATION_REQUIRED = 0x04, fPRESET = 0x08 };
+		gcv< 70, fFLAG> flags{};	// 70:
+		gcv< 73> field_length{};
+		gcv< 50> rotation_angle{};
+		gcv< 41> relative_x_scale_factor{ 1. };
+		gcv< 51> oblique_angle{};
+		gcv<  7> text_style_name{ "STANDARD"s };
+		gcv< 71> text_generation_flags{};
+		gcv< 72> horizontal_justification{};
+		gcv< 74> vertical_text_justification{};	// see groupcode 73 in TEXT
 		point_t pt_alignment{};	// 11, 21, 31, alignment point for attribute
 		point_t extrusion{ 0., 0., 1. };	// 210, 220, 230,
-		group_code_value_t<280> lock_position{};	// 280, 0 : unlocked, 1 : locked
+		gcv<280> lock_position{};	// 280, 0 : unlocked, 1 : locked
 
-		group_code_value_t<100> markerXrecord{};	// Subclass marker (AcDbXrecord)
-		group_code_value_t<280> duplicate_record_cloning_flag{};	// 1 : keep existing
-		enum fMTEXT_FLAG : group_code_value_t< 70>::value_t { fMTEXT_MULTILINE = 0x02, fMTEXT_CONSTANT_MULTILINE = 0x04 };
-		group_code_value_t< 70, fMTEXT_FLAG> fMText{};
-		group_code_value_t< 70> is_really_locked{};	// 0 : unlocked, 1 : locked
-		group_code_value_t< 70> number_of_secondary_attributes{};
-		group_code_value_t<340> hard_pointer_id_of_secondary_attributes{};
+		gcv<100> markerXrecord{};	// Subclass marker (AcDbXrecord)
+		gcv<280> duplicate_record_cloning_flag{};	// 1 : keep existing
+		enum fMTEXT_FLAG : gcv_t< 70> { fMTEXT_MULTILINE = 0x02, fMTEXT_CONSTANT_MULTILINE = 0x04 };
+		gcv< 70, fMTEXT_FLAG> fMText{};
+		gcv< 70> is_really_locked{};	// 0 : unlocked, 1 : locked
+		gcv< 70> number_of_secondary_attributes{};
+		gcv<340> hard_pointer_id_of_secondary_attributes{};
 		point_t pt_alignment_attribute{};	// alignment point for attribute
-		group_code_value_t< 40> current_annotation_scale{ 1. };	//// no default value specified
-		group_code_value_t<  2> attribute;
+		gcv< 40> current_annotation_scale{ 1. };	//// no default value specified
+		gcv<  2> attribute;
 		xMText mtext;
 
 		constexpr static inline auto const group_members = std::make_tuple(
@@ -818,11 +811,92 @@ export namespace biscuit::dxf::entities {
 	//=============================================================================================================================
 	class xBody : public xEntity {
 	public:
-		group_code_value_t<100> marker; // AcDbModelerGeometry
-		group_code_value_t< 70> version{1};
+		gcv<100> marker; // AcDbModelerGeometry
+		gcv< 70> version{1};
 		string_t proprietary_data;		// GroupCode 1, 3
 
+		BSC__DXF_ENTITY_DEFINITION(eENTITY::body, "BODY", xBody, xEntity);
+
+		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) {
+			if (ReadStringTo(iter, end, proprietary_data))
+				return true;
+			return false;
+		}
+
+		constexpr static inline auto group_members = std::make_tuple(
+			&this_t::marker,
+			&this_t::version
+		);
 	};
+
+
+	//=============================================================================================================================
+	class xCircle : public xEntity {
+	public:
+		gcv<100> markerCircle{};	// Subclass marker (AcDbCircle)
+		gcv< 39> thickness{};
+		point_t pt;
+		gcv< 40> radius;
+		point_t extrusion;
+
+		BSC__DXF_ENTITY_DEFINITION(eENTITY::circle, "CIRCLE", xCircle, xEntity);
+
+		constexpr static inline auto group_members = std::make_tuple(
+			&this_t::markerCircle,
+			&this_t::thickness,
+			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt.x)},
+			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(pt.y)},
+			std::pair{30, BSC__LAMBDA_MEMBER_VALUE(pt.z)},
+			&this_t::radius,
+			std::pair{210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x)},
+			std::pair{220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y)},
+			std::pair{230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)}
+		);
+	};
+
+	//============================================================================================================================
+	class xEllipse : public xEntity {
+	public:
+		gcv<100> markerEllipse; // Subclass marker (AcDbEllipse)
+		gcv< 40> major_radius;
+		gcv< 40> minor_radius;
+		point_t extrusion;
+
+		BSC__DXF_ENTITY_DEFINITION(eENTITY::ellipse, "ELLIPSE", xEllipse, xEntity);
+
+		constexpr static inline auto group_members = std::make_tuple(
+			&this_t::markerEllipse,
+			&this_t::major_radius,
+			&this_t::minor_radius,
+			std::pair{210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x)},
+			std::pair{220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y)},
+			std::pair{230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)}
+		);
+	};
+
+	//============================================================================================================================
+	class xHatch : public xEntity {
+	public:
+		gcv<100> marker;
+		point_t ptElevation;	// in OCS, x = y = 0, z : elevation
+		point_t extrusion{0., 0., 1.};
+		gcv<  2> pattern_name;
+		gcv< 70> is_pattern_solid{};		// 0:pattern fill; 1=solid fill; for MPolygon, the version of MPolygon
+		gcv< 63> pattern_fill_color_aci;	// for MPolygon
+		gcv< 71> is_associative;			// boolean
+		gcv< 91> number_boundary_path;
+		std::vector<sGroup> boundary_path;
+		enum class eHATCH_STYLE : gcv_t< 75> { odd_parity, outermost_area_only, through_entire_area };
+		gcv< 75> hatch_style;
+		enum class eHATCH_PATTERN_TYPE : gcv_t< 76> { user_defined = 0, predefined, custom };
+		gcv< 76> pattern_type;
+		gcv< 52> pattern_angle;
+		gcv< 41> pattern_scale_or_spacing;	// pattern fill only
+		gcv< 73> is_boundary_annotation;	// boolean
+		gcv< 77> is_double_pattern;			// boolean
+
+	};
+
 
 	//=============================================================================================================================
 	std::unique_ptr<xEntity> xEntity::CreateEntity(string_t const& name) {
