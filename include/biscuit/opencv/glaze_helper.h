@@ -58,14 +58,14 @@ import biscuit;
 }	// namespace biscuit;
 
 
-namespace glz::detail {
+namespace glz {
 	// cv::Mat
 	template <>
 	struct from<JSON, cv::Mat> {
 		template <auto Opts>
 		static void op(cv::Mat& mat, auto&&... args) {
 			biscuit::detail::cvMat cvmat;
-			read<JSON>::op<Opts>(cvmat, args...);
+			parser<JSON>::op<Opts>(cvmat, args...);
 			mat = cvmat;
 		}
 	};
@@ -74,7 +74,7 @@ namespace glz::detail {
 		template <auto Opts>
 		static void op(cv::Mat const& mat, auto&&... args) noexcept {
 			biscuit::detail::cvMat cvmat(mat);
-			write<JSON>::op<Opts>(cvmat, args...);
+			serializer<JSON>::op<Opts>(cvmat, args...);
 		}
 	};
 
@@ -83,14 +83,14 @@ namespace glz::detail {
 	struct from<JSON, cv::Matx<_Tp, m, n>> {
 		template <auto Opts>
 		static void op(cv::Matx<_Tp, m, n>& mat, auto&&... args) {
-			read<JSON>::op<Opts>(static_cast(std::array<_Tp, m*n>&)mat.val, args...);
+			parser<JSON>::op<Opts>(static_cast(std::array<_Tp, m*n>&)mat.val, args...);
 		}
 	};
 	template <typename _Tp, int m, int n>
 	struct to<JSON, cv::Matx<_Tp, m, n>> {
 		template <auto Opts>
 		static void op(cv::Matx<_Tp, m, n> const& mat, auto&&... args) noexcept {
-			write<JSON>::op<Opts>(static_cast(std::array<_Tp, m*n> const&)mat.val, args...);
+			serializer<JSON>::op<Opts>(static_cast(std::array<_Tp, m*n> const&)mat.val, args...);
 		}
 	};
 
@@ -99,14 +99,14 @@ namespace glz::detail {
 	struct from<JSON, cv::Vec<_Tp, cn>> {
 		template <auto Opts>
 		static void op(cv::Vec<_Tp, cn>& vec, auto&&... args) {
-			read<JSON>::op<Opts>(static_cast(std::array<_Tp, cn>&)vec.val, args...);
+			parser<JSON>::op<Opts>(static_cast(std::array<_Tp, cn>&)vec.val, args...);
 		}
 	};
 	template <typename _Tp, int cn>
 	struct to<JSON, cv::Vec<_Tp, cn>> {
 		template <auto Opts>
 		static void op(cv::Vec<_Tp, cn> const& vec, auto&&... args) noexcept {
-			write<JSON>::op<Opts>(static_cast(std::array<_Tp, cn> const&)vec.val, args...);
+			serializer<JSON>::op<Opts>(static_cast(std::array<_Tp, cn> const&)vec.val, args...);
 		}
 	};
 
@@ -115,14 +115,14 @@ namespace glz::detail {
 	struct from<JSON, cv::Scalar_<_Tp>> {
 		template <auto Opts>
 		static void op(cv::Scalar_<_Tp>& scalar, auto&&... args) {
-			read<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(scalar.val) / sizeof(_Tp)>&)scalar.val, args...);
+			parser<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(scalar.val) / sizeof(_Tp)>&)scalar.val, args...);
 		}
 	};
 	template <typename _Tp>
 	struct to<JSON, cv::Scalar_<_Tp>> {
 		template <auto Opts>
 		static void op(cv::Scalar_<_Tp> const& scalar, auto&&... args) noexcept {
-			write<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(scalar.val) / sizeof(_Tp)>&)scalar.val, args...);
+			serializer<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(scalar.val) / sizeof(_Tp)>&)scalar.val, args...);
 		}
 	};
 
@@ -131,14 +131,14 @@ namespace glz::detail {
 	struct from<JSON, cv::Point_<_Tp>> {
 		template <auto Opts>
 		static void op(cv::Point_<_Tp>& point, auto&&... args) {
-			read<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(point.val) / sizeof(_Tp)>&)point.val, args...);
+			parser<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(point.val) / sizeof(_Tp)>&)point.val, args...);
 		}
 	};
 	template <typename _Tp>
 	struct to<JSON, cv::Point_<_Tp>) {
 		template <auto Opts>
 		static void op(cv::Point_<_Tp> const& point, auto&&... args) noexcept {
-			write<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(point.val) / sizeof(_Tp)>&)point.val, args...);
+			serializer<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(point.val) / sizeof(_Tp)>&)point.val, args...);
 		}
 	};
 
@@ -147,14 +147,14 @@ namespace glz::detail {
 	struct from<JSON, cv::Point3_<_Tp>> {
 		template <auto Opts>
 		static void op(cv::Point3_<_Tp>& point, auto&&... args) {
-			read<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(point.val) / sizeof(_Tp)>&)point.val, args...);
+			parser<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(point.val) / sizeof(_Tp)>&)point.val, args...);
 		}
 	};
 	template <typename _Tp>
 	struct to<JSON, cv::Point3_<_Tp>) {
 		template <auto Opts>
 		static void op(cv::Point3_<_Tp> const& point, auto&&... args) noexcept {
-			write<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(point.val) / sizeof(_Tp)>&)point.val, args...);
+			serializer<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(point.val) / sizeof(_Tp)>&)point.val, args...);
 		}
 	};
 
@@ -163,14 +163,14 @@ namespace glz::detail {
 	struct from<JSON, cv::Size_<_Tp>> {
 		template <auto Opts>
 		static void op(cv::Size_<_Tp>& size, auto&&... args) {
-			read<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(size.val) / sizeof(_Tp)>&)size.val, args...);
+			parser<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(size.val) / sizeof(_Tp)>&)size.val, args...);
 		}
 	};
 	template <typename _Tp>
 	struct to<JSON, cv::Size_<_Tp>) {
 		template <auto Opts>
 		static void op(cv::Size_<_Tp> const& size, auto&&... args) noexcept {
-			write<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(size.val) / sizeof(_Tp)>&)size.val, args...);
+			serializer<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(size.val) / sizeof(_Tp)>&)size.val, args...);
 		}
 	};
 
@@ -179,14 +179,14 @@ namespace glz::detail {
 	struct from<JSON, cv::Rect_<_Tp>> {
 		template <auto Opts>
 		static void op(cv::Rect_<_Tp>& rect, auto&&... args) {
-			read<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(rect.val) / sizeof(_Tp)>&)rect.val, args...);
+			parser<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(rect.val) / sizeof(_Tp)>&)rect.val, args...);
 		}
 	};
 	template <typename _Tp>
 	struct to<JSON, cv::Rect_<_Tp>) {
 		template <auto Opts>
 		static void op(cv::Rect_<_Tp> const& rect, auto&&... args) noexcept {
-			write<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(rect.val) / sizeof(_Tp)>&)rect.val, args...);
+			serializer<JSON>::op<Opts>(static_cast(std::array<_Tp, sizeof(rect.val) / sizeof(_Tp)>&)rect.val, args...);
 		}
 	};
 

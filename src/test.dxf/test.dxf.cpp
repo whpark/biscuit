@@ -17,8 +17,8 @@ TEST_CASE("Test biscuit.dxf") {
 
 	std::vector<std::filesystem::path> paths = {
 		L"/DXF/sample_ascii.dxf"s,
-		//L"/DXF/sample_bin_r12.dxf"s,
-		//L"/DXF/sample_bin_2010.dxf"s,
+		L"/DXF/sample_bin_r12.dxf"s,
+		L"/DXF/sample_bin_2010.dxf"s,
 	};
 
 	//biscuit::dxf::sClass s;
@@ -80,6 +80,12 @@ TEST_CASE("Test biscuit.dxf") {
 			fmt::println(out, "\thandle:{}", t.handle());
 			fmt::println(out, "\tclass:{}", t.class_name());
 			fmt::println(out, "\tmax_entries:{}", t.max_entries());
+		}
+
+		// blocks
+		for (auto const& b : dxf.m_blocks) {
+			fmt::println(out, "block:{}", b.name());
+			fmt::println(out, "\tlayer:{}", b.layer());
 		}
 
 		// entities

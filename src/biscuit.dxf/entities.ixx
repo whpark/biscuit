@@ -884,8 +884,10 @@ export namespace biscuit::dxf::entities {
 		gcv< 70> is_pattern_solid{};		// 0:pattern fill; 1=solid fill; for MPolygon, the version of MPolygon
 		gcv< 63> pattern_fill_color_aci;	// for MPolygon
 		gcv< 71> is_associative;			// boolean
+		//== boundary path
 		gcv< 91> number_boundary_path;
 		std::vector<sGroup> boundary_path;
+
 		enum class eHATCH_STYLE : gcv_t< 75> { odd_parity, outermost_area_only, through_entire_area };
 		gcv< 75> hatch_style;
 		enum class eHATCH_PATTERN_TYPE : gcv_t< 76> { user_defined = 0, predefined, custom };
@@ -894,6 +896,69 @@ export namespace biscuit::dxf::entities {
 		gcv< 41> pattern_scale_or_spacing;	// pattern fill only
 		gcv< 73> is_boundary_annotation;	// boolean
 		gcv< 77> is_double_pattern;			// boolean
+		//== pattern definition lines
+		gcv< 78> number_pattern_definition_lines;
+		std::vector<sGroup> pattern_definition_lines;
+		gcv< 47> pixel_size;
+		gcv< 98> number_of_seed_points;
+		gcv< 11> offset_vector;				// for MPolygon
+		gcv< 99> number_of_degenerate_boundary_paths;
+		point_t ptSeed; // x, y
+		gcv<450> solid_hatch_or_gradient;
+		gcv<451> reserved;
+		gcv<452> is_single_color_gradient;	// 0:two-color gradient, 1:single-color gradient;
+		gcv<453> number_of_colors;			// 0:Solid hatch, 2:gradient
+		gcv<460> angle;						// in radians
+		gcv<461> gradient_definition;		// 0.0:non shifted, 1.0:shifted
+		gcv<462> color_tint;
+		gcv<463> reserved2;
+		gcv<470> String;					// default : "LINEAR"
+
+		BSC__DXF_ENTITY_DEFINITION(eENTITY::hatch, "HATCH", xHatch, xEntity);
+
+		constexpr static inline auto group_members = std::make_tuple(
+			&this_t::marker,
+			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(ptElevation.x)},
+			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(ptElevation.y)},
+			std::pair{30, BSC__LAMBDA_MEMBER_VALUE(ptElevation.z)},
+			std::pair{210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x)},
+			std::pair{220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y)},
+			std::pair{230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)},
+			&this_t::pattern_name,
+			&this_t::is_pattern_solid,
+			&this_t::pattern_fill_color_aci,
+			&this_t::is_associative,
+			&this_t::number_boundary_path,
+			&this_t::hatch_style,
+			& this_t::pattern_type,
+			& this_t::pattern_angle,
+			& this_t::pattern_scale_or_spacing,
+			& this_t::is_boundary_annotation,
+			& this_t::is_double_pattern,
+			& this_t::number_pattern_definition_lines,
+			& this_t::pixel_size,
+			& this_t::number_of_seed_points,
+			& this_t::offset_vector,
+			& this_t::number_of_degenerate_boundary_paths,
+			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(ptSeed.x)},
+			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(ptSeed.y)}
+			//std::pair{30, BSC__LAMBDA_MEMBER_VALUE(ptSeed.z)},
+
+		);
+
+		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) override {
+			if (iter == end)
+				return false;
+			if (number_boundary_path.value > 0) {
+				number_boundary_path.value--;
+				boundary_path.push_back(*iter);
+			}
+			if (number_pattern_definition_lines.value > 0) {
+				number_pattern_definition_lines.value--;
+				pattern_definition_lines.push_back(*iter);
+			}
+			return false;
+		}
 
 	};
 
