@@ -1205,7 +1205,7 @@ export namespace biscuit::qt {
 			if (matHist.at<float>(i, 0) > 0) {
 				// add locale en_US.utf8
 				str += fmt::format(L"Value {} : ", i);
-				str += fmt::format(std::locale("en_US.UTF-8"), L"{:L}", (int)matHist.at<float>(i, 0));
+				str += fmt::format(std::locale(".UTF-8"), L"{:L}", (int)matHist.at<float>(i, 0));
 				str += L"\n";
 			}
 		}

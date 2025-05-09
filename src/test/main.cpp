@@ -4,6 +4,8 @@ import std;
 import biscuit;
 
 int main(int , char* []) {
+	std::locale::global(std::locale(".UTF-8"));
+
 	biscuit::SetCurrentPath_ProjectFolder();
 	auto path = std::filesystem::current_path();
 	std::print("Current path: {}\n", path.string());
