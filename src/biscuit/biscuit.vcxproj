@@ -71,6 +71,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BuildStlModules>true</BuildStlModules>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -98,6 +99,8 @@ rem xcopy /dy "$(IntDir)\*.ifc" "$(SolutionDir)ifc\$(Configuration)\"</Command>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BuildStlModules>true</BuildStlModules>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
+      <UseDynamicDebugging>true</UseDynamicDebugging>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

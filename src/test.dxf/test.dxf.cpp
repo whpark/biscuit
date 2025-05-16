@@ -1,9 +1,11 @@
 ﻿#include <catch.hpp>
 
-#include <magic_enum/magic_enum.hpp>
+#include "biscuit/dependencies_glaze.h"
 
 import std;
 import "biscuit/dependencies_fmt.hxx";
+import "biscuit/dependencies_ctre.hxx";
+import "biscuit/dependencies_magic_enum.hxx";
 import biscuit;
 import biscuit.dxf;
 
@@ -95,7 +97,7 @@ TEST_CASE("Test biscuit.dxf") {
 				if (auto* entity = dynamic_cast<biscuit::dxf::entities::xUnknown*>(e.get()))
 					fmt::println(out, "\tname:{}", entity->m_name);
 			}
-			fmt::println(out, "\tlayer:{}", e->layer());
+			fmt::println(out, "\tlayer:{}", e->entity.layer());
 		}
 
 	}
@@ -128,3 +130,33 @@ TEST_CASE("benchmark") {
 
 }
 
+namespace biscuit::dxf {
+
+	//=============================================================================================================================
+	template < typename TEntity >
+	bool ReadItemEntityMember(TEntity& item, sGroup const& group, size_t& index) {
+		constexpr static size_t nTupleSize = glz::reflect<TEntity>::size;
+		return ForEachIntSeq<nTupleSize>([&]<int I>{
+			auto& v = glz::reflect<TEntity>::elem<I>(item);
+			if (v.eGroupCode == group.eCode) {
+				group.GetValue(v.value);
+				return true;
+			}
+			return false;
+		});
+	}
+
+}
+
+TEST_CASE("glaze.dxf") {
+	using T = biscuit::dxf::entities::sACADProxyEntity;
+	static_assert(glz::reflect<T>::size == 14);
+
+	size_t index{};
+	biscuit::dxf::sGroup group{100, "AcDbProxyEntity"s};
+	T entity;
+	ReadItemEntityMember(entity, group, index);
+
+	REQUIRE(entity.marker.value == "AcDbProxyEntity"s);
+
+}

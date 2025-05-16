@@ -82,6 +82,7 @@
       <BuildStlModules>true</BuildStlModules>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>5050</DisableSpecificWarnings>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -92,6 +93,8 @@
       <BuildStlModules>true</BuildStlModules>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>5050</DisableSpecificWarnings>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
+      <UseDynamicDebugging>true</UseDynamicDebugging>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">

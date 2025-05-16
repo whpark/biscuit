@@ -92,6 +92,7 @@
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <UseDynamicDebugging>true</UseDynamicDebugging>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

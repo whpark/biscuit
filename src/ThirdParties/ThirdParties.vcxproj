@@ -68,6 +68,9 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <BuildStlModules>true</BuildStlModules>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -87,6 +90,10 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <BuildStlModules>true</BuildStlModules>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
+      <UseDynamicDebugging>true</UseDynamicDebugging>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -104,6 +111,7 @@
     <ClInclude Include="..\..\include\biscuit\dependencies_fmt.hxx" />
     <ClInclude Include="..\..\include\biscuit\dependencies_glaze.h" />
     <ClInclude Include="..\..\include\biscuit\dependencies_iconv.hxx" />
+    <ClInclude Include="..\..\include\biscuit\dependencies_magic_enum.hxx" />
     <ClInclude Include="..\..\include\biscuit\dependencies_opencv.hxx" />
     <ClInclude Include="..\..\include\biscuit\dependencies_simdutf.hxx" />
     <ClInclude Include="..\..\include\biscuit\dependencies_spdlog.hxx" />

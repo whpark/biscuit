@@ -9,6 +9,7 @@ import std;
 import "biscuit/dependencies_fmt.hxx";
 import "biscuit/dependencies_eigen.hxx";
 import biscuit;
+import biscuit.shape;
 
 
 using namespace std::literals;

@@ -70,6 +70,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <BuildStlModules>true</BuildStlModules>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -91,6 +92,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <BuildStlModules>true</BuildStlModules>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
+      <UseDynamicDebugging>true</UseDynamicDebugging>
     </ClCompile>
     <Link>
       <SubSystem>

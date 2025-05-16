@@ -7,6 +7,7 @@ import std;
 import "biscuit/dependencies_fmt.hxx";
 import "biscuit/dependencies_eigen.hxx";
 import biscuit;
+import biscuit.shape;
 import :group;
 import :group_code_type_alias;
 import :entities_subclass;
@@ -117,12 +118,13 @@ export namespace biscuit::dxf::entities {
 	}
 
 	//-------------------------------------------------------------------------
-	class xEntity : public sEntity {
+	class xEntity {
 	public:
 		using root_t = xEntity;
 		using this_t = xEntity;
 		using string_t = std::string;
 	public:
+		sEntity entity;
 		groups_t extended_data;
 		string_t app_name;								// 102:{application_name ... 102:}
 		std::vector<sGroup> app_data;
@@ -154,7 +156,7 @@ export namespace biscuit::dxf::entities {
 
 		virtual bool Read(group_iter_t& iter, group_iter_t const& end) = 0;
 		virtual bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) {
-			return ReadEntity<sEntity, true>(*this, iter, end);
+			return ReadEntity<sEntity, true>(entity, iter, end);
 		}
 
 		virtual bool ReadControlData(group_iter_t& iter, group_iter_t const& end) {
@@ -347,8 +349,7 @@ export namespace biscuit::dxf::entities {
 
 
 	//=============================================================================================================================
-	class xACADProxyEntity : public xEntity {
-	public:
+	struct sACADProxyEntity {
 		gcv<100> marker{};	// Subclass marker (AcDbProxyEntity)
 		gcv< 90> proxy_entity_class_id{ 498 };
 		gcv< 91> application_entity_class_id{ 500 };
@@ -363,6 +364,11 @@ export namespace biscuit::dxf::entities {
 		gcv< 94> end_of_object_id_section{};
 		gcv< 95> size_proxy_data_in_bytes{};
 		gcv< 70> dwg_or_dxf{};	// Original custom object data format (0 = DWG, 1 = DXF)
+
+		auto operator <=> (sACADProxyEntity const&) const = default;
+	};
+	class xACADProxyEntity : public xEntity, public sACADProxyEntity {
+	public:
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::acad_proxy_entity, "ACAD_PROXY_ENTITY", xACADProxyEntity, xEntity)
 
@@ -527,7 +533,7 @@ export namespace biscuit::dxf::entities {
 			std::pair{210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x)},
 			std::pair{220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y)},
 			std::pair{230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)},
-			&this_t::marker,
+			&this_t::marker2,
 			&this_t::vertical_alignment
 		);
 
@@ -745,7 +751,7 @@ export namespace biscuit::dxf::entities {
 		using this_t = xAttribute;
 	public:
 		xText text;
-		gcv<100> markerAttribute;	// Subclass marker (AcDbAttribute Definition)
+		gcv<100> marker;			// Subclass marker (AcDbAttribute Definition)
 		gcv<280> version_number;	// 0 = 2010
 		gcv<  2> tag{};
 		enum fFLAG : gcv_t< 70> { fHIDDEN = 0x01, fCONSTANT = 0x02, fVERIFICATION_REQUIRED = 0x04, fPRESET = 0x08 };
@@ -775,7 +781,7 @@ export namespace biscuit::dxf::entities {
 		xMText mtext;
 
 		constexpr static inline auto const group_members = std::make_tuple(
-			&this_t::markerAttribute,
+			&this_t::marker,
 			&this_t::version_number,
 			&this_t::tag,
 			&this_t::flags,
@@ -930,16 +936,16 @@ export namespace biscuit::dxf::entities {
 			&this_t::is_associative,
 			&this_t::number_boundary_path,
 			&this_t::hatch_style,
-			& this_t::pattern_type,
-			& this_t::pattern_angle,
-			& this_t::pattern_scale_or_spacing,
-			& this_t::is_boundary_annotation,
-			& this_t::is_double_pattern,
-			& this_t::number_pattern_definition_lines,
-			& this_t::pixel_size,
-			& this_t::number_of_seed_points,
-			& this_t::offset_vector,
-			& this_t::number_of_degenerate_boundary_paths,
+			&this_t::pattern_type,
+			&this_t::pattern_angle,
+			&this_t::pattern_scale_or_spacing,
+			&this_t::is_boundary_annotation,
+			&this_t::is_double_pattern,
+			&this_t::number_pattern_definition_lines,
+			&this_t::pixel_size,
+			&this_t::number_of_seed_points,
+			&this_t::offset_vector,
+			&this_t::number_of_degenerate_boundary_paths,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(ptSeed.x)},
 			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(ptSeed.y)}
 			//std::pair{30, BSC__LAMBDA_MEMBER_VALUE(ptSeed.z)},
@@ -961,6 +967,99 @@ export namespace biscuit::dxf::entities {
 		}
 
 	};
+
+
+	//=============================================================================================================================
+	class xHelix : public xEntity {
+	public:
+		gcv<100> marker;	// Subclass marker (AcDbCircle)
+		gcv< 90> release_major;
+		gcv< 91> release_maintenance;
+		point_t ptAxisBase, ptStart, vAxis;
+		gcv< 40> radius;
+		gcv< 41> number_turns;
+		gcv<290> handedness;	// 0: right handed, 1: left handed
+		enum class eCONSTRAIN : gcv_t<280> { turn_height, turns, height };
+		gcv<280, eCONSTRAIN> constrain_type;
+
+		BSC__DXF_ENTITY_DEFINITION(eENTITY::helix, "HELIX", xHelix, xEntity);
+
+		constexpr static inline auto group_members = std::make_tuple(
+			&this_t::marker,
+			&this_t::release_major,
+			&this_t::release_maintenance,
+			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(ptAxisBase.x)},
+			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(ptAxisBase.y)},
+			std::pair{30, BSC__LAMBDA_MEMBER_VALUE(ptAxisBase.z)},
+			std::pair{11, BSC__LAMBDA_MEMBER_VALUE(ptStart.x)},
+			std::pair{21, BSC__LAMBDA_MEMBER_VALUE(ptStart.y)},
+			std::pair{31, BSC__LAMBDA_MEMBER_VALUE(ptStart.z)},
+			std::pair{12, BSC__LAMBDA_MEMBER_VALUE(ptAxis.x)},
+			std::pair{22, BSC__LAMBDA_MEMBER_VALUE(ptAxis.y)},
+			std::pair{32, BSC__LAMBDA_MEMBER_VALUE(ptAxis.z)},
+			&this_t::radius,
+			&this_t::number_turns,
+			&this_t::handedness
+		);
+	};
+
+
+	//=============================================================================================================================
+	class xImage : public xEntity {
+	public:
+		gcv<100> marker;
+		gcv< 90> class_version;
+		point_t ptInsert;
+		point_t vcU;
+		point_t vcV;
+		gcv< 13> image_width;						// vcU
+		gcv< 23> image_height;						// vcV
+		gcv<340> hImage;							// hard reference to image data
+		enum class fIMAGE_DISPLAY : gcv_t< 70> { show_image = 1, show_image_when_not_aligned_with_screen = 2, use_clipping_boundary = 4, transparent = 8 };
+		gcv< 70, fIMAGE_DISPLAY> fProperty{};		// 70:
+		gcv<280> bClipping;							// 0 : off, 1 : on
+		gcv<281> brightness{50};					// 0-100, Default:50
+		gcv<282> contrast{50};						// 0-100, Default:50
+		gcv<283> fade{0};							// 0-100, Default:0
+		gcv<360> hReactor;							// hard reference to image reactor
+		enum class eCLIPPING_BOUNDARY : gcv_t< 71> { rectangular = 1, polygonal = 2 };
+		gcv< 71, eCLIPPING_BOUNDARY> eClippingBoundary{};
+		gcv< 91> number_of_clipping_boundary_vertices{};
+		gcv< 14> image_width_clipping_boundary;		// vcU
+		gcv< 24> image_height_clipping_boundary;	// vcV
+		gcv<290> bClipInside;						// 0: clip outside, 1: clip inside
+
+		BSC__DXF_ENTITY_DEFINITION(eENTITY::image, "IMAGE", xImage, xEntity);
+
+		constexpr static inline auto group_members = std::make_tuple(
+			&this_t::marker,
+			&this_t::class_version,
+			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(ptInsert.x)},
+			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(ptInsert.y)},
+			std::pair{30, BSC__LAMBDA_MEMBER_VALUE(ptInsert.z)},
+			std::pair{11, BSC__LAMBDA_MEMBER_VALUE(vcU.x)},
+			std::pair{21, BSC__LAMBDA_MEMBER_VALUE(vcU.y)},
+			std::pair{31, BSC__LAMBDA_MEMBER_VALUE(vcU.z)},
+			std::pair{12, BSC__LAMBDA_MEMBER_VALUE(vcV.x)},
+			std::pair{22, BSC__LAMBDA_MEMBER_VALUE(vcV.y)},
+			std::pair{32, BSC__LAMBDA_MEMBER_VALUE(vcV.z)},
+			&this_t::image_width,
+			&this_t::image_height,
+			&this_t::hImage,
+			&this_t::fProperty,
+			&this_t::bClipping,
+			&this_t::brightness,
+			&this_t::contrast,
+			&this_t::fade,
+			&this_t::hReactor,
+			&this_t::eClippingBoundary,
+			&this_t::number_of_clipping_boundary_vertices,
+			&this_t::image_width_clipping_boundary,
+			&this_t::image_height_clipping_boundary,
+			&this_t::bClipInside
+		);
+	};
+
 
 
 	//=============================================================================================================================

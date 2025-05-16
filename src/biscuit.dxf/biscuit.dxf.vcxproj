@@ -71,6 +71,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <BuildStlModules>true</BuildStlModules>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -93,6 +94,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <BuildStlModules>true</BuildStlModules>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
+      <UseDynamicDebugging>true</UseDynamicDebugging>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -112,6 +115,9 @@
     <ClCompile Include="sections.ixx" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\biscuit.shape\biscuit.shape.vcxproj">
+      <Project>{188263c3-c6bb-4461-a3d9-1426f9d154eb}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\biscuit\biscuit.vcxproj">
       <Project>{4fc2059e-06a9-4b82-861d-ed3cb583303f}</Project>
     </ProjectReference>
