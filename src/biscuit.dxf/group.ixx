@@ -1,8 +1,9 @@
 ﻿module;
 
+#include "biscuit/dependencies_glaze.h"
+
 export module biscuit.dxf:group;
 import std;
-import "biscuit/dependencies_eigen.hxx";
 import biscuit;
 
 using namespace std::literals;
@@ -291,56 +292,65 @@ export namespace biscuit::dxf {
 #endif		
 
 	//=============================================================================================================================
-	template < typename TEntity >
-	bool ReadItemSingleMember(TEntity& item, sGroup const& group, size_t& index) {
-		if constexpr (requires (TEntity v) { v.base(); }) {
-			if (ReadItemSingleMember<TEntity::base_t>(item.base(), group, index))
-				return true;
-		}
-		constexpr static size_t nTupleSize = std::tuple_size_v<decltype(TEntity::group_members)>;
-		return ForEachIntSeq<nTupleSize>([&]<int I>{
-			constexpr auto const member = std::get<I>(TEntity::group_members);
+	template < typename TField >
+	bool ReadItemSingleMember(TField& item, sGroup const& group, size_t& index) {
+		bool bFound{};
 
-			if constexpr (std::is_member_object_pointer_v<decltype(member)>) {
-				if ((item.*member).eGroupCode != group.eCode)
-					return false;
-				if (index > 0) {
-					index--;
-					return false;
+		// direct access to entity members as is using glz::reflect
+		constexpr static size_t nMemberSize = glz::reflect<TField>::size;
+		bFound = ForEachIntSeq<nMemberSize>(
+			[&]<int I>{
+			auto& v = glz::reflect<TField>::elem<I>(item);
+			using member_t = std::remove_cvref_t<decltype(v)>;
+			if constexpr (requires (member_t m) { m.eGroupCode; }) {
+				if (v.eGroupCode == group.eCode) {
+					if (index > 0) {
+						index--;
+						return false;
+					}
+					if constexpr (requires (member_t m) { m.value; }) {
+						group.GetValue(v.value);
+					}
+					else if constexpr (requires (member_t m) { m.Value(item); }) {
+						group.GetValue(v.Value(item));
+					}
+					return true;
 				}
+			}
+			return false;
+		});
+		if (bFound) return true;
 
-				using member_t = std::remove_cvref_t<decltype(item.*member)>;
-				if constexpr (std::is_enum_v<std::remove_cvref_t<typename member_t::value_t>>) {
-					using underlying_t = std::underlying_type_t<typename member_t::value_t>;
-					return group.GetValue((underlying_t&)(item.*member).value);
+		// indirect access via group_members
+		if constexpr (requires (TField ) { TField::custom_field; }) {
+			constexpr static size_t nTupleSize = std::tuple_size_v<decltype(TField::custom_field)>;
+			bFound = ForEachIntSeq<nTupleSize>([&]<int I>{
+				auto const& pair = std::get<I>(TField::custom_field);
+				if constexpr (std::is_integral_v<std::remove_cvref_t<decltype(pair)>>) {
+					// end marker. do nothing.
 				}
 				else {
-					return group.GetValue((item.*member).value);
+					if (pair.first == group.eCode) {
+						if (index > 0) {
+							index--;
+							return false;
+						}
+						group.GetValue(pair.second(item));
+						return true;
+					}
 				}
-			}
-			else {
-				// todo:
-				//constexpr int const code = member.first;
-				//return group.GetValue(member.second(item));
 				return false;
-			}
+			});
 
-			//else if constexpr (std::invocable<decltype(offset_ptr), TEntity&>) {
-			//	using value_t = std::invoke_result_t<decltype(offset_ptr), TEntity&>;
-			//	if constexpr (std::is_enum_v<value_t>) {
-			//		using underlying_t = std::underlying_type_t<value_t>;
-			//		group.GetValue((underlying_t&)offset_ptr(item));
-			//	}
-			//	else {
-			//		group.GetValue(offset_ptr(item));
-			//	}
-			//	return true;
-			//}
-		});
+			if (bFound)
+				return true;
+		}
+
+		return false;
 	}
 	//-----------------------------------------------------------------------------------------------------------------------------
-	template < typename TEntity >
-	bool ReadItemSingleMember(TEntity& item, sGroup const& group) {
+	template < typename TField >
+	bool ReadItemSingleMember(TField& item, sGroup const& group) {
 		size_t index{};
 		return ReadItemSingleMember(item, group, index);
 	}

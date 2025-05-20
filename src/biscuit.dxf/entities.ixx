@@ -87,8 +87,14 @@ export namespace biscuit::dxf::entities {
 			}
 
 			size_t index = mapGroupCodeToIndex[iter->eCode]++;
-			if (/*iter != end and*/ ReadItemSingleMember<TEntity>(entity, *iter, index))
-				continue;
+			if constexpr (requires (TEntity v) { v.m_fieldCommon; }) {
+				if (/*iter != end and*/ ReadItemSingleMember(entity.m_fieldCommon, *iter, index))
+					continue;
+			}
+			if constexpr (requires (TEntity v) { v.m_field; }) {
+				if (/*iter != end and*/ ReadItemSingleMember(entity.m_field, *iter, index))
+					continue;
+			}
 
 			if constexpr (requires(TEntity v) { v.ReadPrivate(iter, end); }) {
 				if (iter != end and entity.ReadPrivate(iter, end))
@@ -124,15 +130,12 @@ export namespace biscuit::dxf::entities {
 		using this_t = xEntity;
 		using string_t = std::string;
 	public:
-		sEntity entity;
-		groups_t extended_data;
-		string_t app_name;								// 102:{application_name ... 102:}
-		std::vector<sGroup> app_data;
-		binary_t hReactor;								// 102:{ACD_REACTORS 330:value 102:}
-		binary_t hOwner;								// 102:{ACAD_XDICTIONARY 330:owner_handle 102:}
-
-		constexpr static inline auto group_members = std::make_tuple(
-		);
+		sField m_fieldCommon;
+		groups_t m_extended_data;
+		string_t m_app_name;								// 102:{application_name ... 102:}
+		std::vector<sGroup> m_app_data;
+		binary_t m_hReactor;								// 102:{ACD_REACTORS 330:value 102:}
+		binary_t m_hOwner;									// 102:{ACAD_XDICTIONARY 330:owner_handle 102:}
 
 	public:
 		xEntity() = default;
@@ -156,13 +159,12 @@ export namespace biscuit::dxf::entities {
 
 		virtual bool Read(group_iter_t& iter, group_iter_t const& end) = 0;
 		virtual bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) {
-			return ReadEntity<sEntity, true>(entity, iter, end);
+			return ReadEntity<this_t, true>(*this, iter, end);
 		}
-
 		virtual bool ReadControlData(group_iter_t& iter, group_iter_t const& end) {
 			if (iter->eCode != group_code_t::control)
 				return false;
-			static sGroup const groupEnd{ 102, std::string("}") };
+			static sGroup const groupEnd{ group_code_t::control, std::string("}") };
 			string_t str = iter->GetValue<string_t>().value_or(std::string());
 			string_view_t sv(str);
 			sv = TrimView(sv);
@@ -173,21 +175,21 @@ export namespace biscuit::dxf::entities {
 			else
 				return false;
 			if (sv.starts_with("ACAD_REACTORS")) {
-				if (++iter == end or (iter->eCode != 330) or !iter->GetValue(hReactor))
+				if (++iter == end or (iter->eCode != 330) or !iter->GetValue(m_hReactor))
 					return false;
 				if (*++iter != groupEnd)
 					return false;
 			}
 			else if (sv.starts_with("ACAD_XDICTIONARY")) {
-				if (++iter == end or (iter->eCode != 360) or !iter->GetValue(hOwner))
+				if (++iter == end or (iter->eCode != 360) or !iter->GetValue(m_hOwner))
 					return false;
 				if (*++iter != groupEnd)
 					return false;
 			}
 			else {
-				app_name = sv;
+				m_app_name = sv;
 				for (iter++; iter != end and *iter != groupEnd; iter++) {
-					app_data.push_back(*iter);
+					m_app_data.push_back(*iter);
 				}
 				if (iter == end)
 					return false;
@@ -200,16 +202,16 @@ export namespace biscuit::dxf::entities {
 			if (iter->eCode < sGroup::extended)
 				return false;
 
-			auto iExtendedData = extended_data.size();
+			auto iExtendedData = m_extended_data.size();
 			for (; iter != end; iter++) {
 				if (iter->eCode < sGroup::extended) {
 					iter--;
 					break;
 				}
-				extended_data.push_back(*iter);
+				m_extended_data.push_back(*iter);
 			}
-			auto iter2 = extended_data.cbegin() + iExtendedData;
-			ProcessExtendedData(iter2, extended_data.cend());
+			auto iter2 = m_extended_data.cbegin() + iExtendedData;
+			ProcessExtendedData(iter2, m_extended_data.cend());
 			return true;
 		}
 		bool ProcessExtendedData(group_iter_t& iter, group_iter_t const& end) {
@@ -273,6 +275,49 @@ export namespace biscuit::dxf::entities {
 	using entities_t = std::deque<entity_ptr_t>;
 
 	//============================================================================================================================
+	template < typename This, typename TField, eENTITY eEntity, xStringLiteral NAME >
+	struct TEntityDerived : public xEntity {
+	public:
+		using field_t = TField;
+		using base_t = xEntity;
+		using this_t = TEntityDerived;
+
+	public:
+		constexpr static inline eENTITY m_entity = eEntity;
+		field_t m_field;
+
+		TEntityDerived() = default;
+		TEntityDerived(TEntityDerived const&) = default;
+		TEntityDerived(TEntityDerived&&) = default;
+		TEntityDerived& operator=(TEntityDerived const&) = default;
+		TEntityDerived& operator=(TEntityDerived&&) = default;
+		virtual ~TEntityDerived() = default;
+		bool operator == (this_t const&) const = default;
+		bool operator != (this_t const&) const = default;
+		auto operator <=> (this_t const&) const = default;
+		base_t& base() { return static_cast<base_t&>(*this); }
+		base_t const& base() const { return static_cast<base_t const&>(*this); }
+		eENTITY GetEntityType() const override { return m_entity; }
+		std::unique_ptr<this_t::root_t> clone() const override { return std::make_unique<this_t>(*this); }
+		static std::unique_ptr<this_t::root_t> create() { return std::make_unique<this_t>(); }
+		bool Compare(xEntity const& other) const override {
+			if (!base_t::Compare(other))
+				return false;
+			if (auto const* p = dynamic_cast<this_t const*>(&other))
+				return *this == *p;
+			return false;
+		}
+	private:
+		static inline xRegisterEntity s_registerEntity{NAME.str, &this_t::create};
+	public:
+		bool Read(group_iter_t& iter, group_iter_t const& end) override {
+			return ReadEntity(*this, &this_t::m_field, iter, end);
+		}
+
+	};
+
+
+	//============================================================================================================================
 	class xUnknown : public xEntity {
 	public:
 
@@ -292,14 +337,13 @@ export namespace biscuit::dxf::entities {
 		}
 	};
 
+#if 0
+
 	//============================================================================================================================
-	class x3DFace : public xEntity {
-	public:
+	struct s3DFace {
 		point_t pt1, pt2, pt3, pt4;
 		enum fHIDDEN : gcv_t< 70> { fHIDDEN_FIRST = 1, fHIDDEN_SECOND = 2, fHIDDEN_THIRD = 4, fHIDDEN_FOURTH = 8 };
 		gcv< 70, fHIDDEN> flags{};	// 70:
-
-		BSC__DXF_ENTITY_DEFINITION(eENTITY::_3dface, "3DFACE", x3DFace, xEntity);
 
 		constexpr static inline auto group_members = std::make_tuple(
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt1.x)},
@@ -317,9 +361,14 @@ export namespace biscuit::dxf::entities {
 			std::pair{13, BSC__LAMBDA_MEMBER_VALUE(pt4.x)},
 			std::pair{23, BSC__LAMBDA_MEMBER_VALUE(pt4.y)},
 			std::pair{33, BSC__LAMBDA_MEMBER_VALUE(pt4.z)},
-			&this_t::flags
+			0
 		);
 
+	};
+
+	class x3DFace : public xEntity, public s3DFace {
+	public:
+		BSC__DXF_ENTITY_DEFINITION(eENTITY::_3dface, "3DFACE", x3DFace, xEntity);
 	};
 
 	//============================================================================================================================
@@ -332,13 +381,6 @@ export namespace biscuit::dxf::entities {
 		gcv<350> owner_id_handle_to_history_object{};
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::_3dsolid, "3DSOLID", x3DSolid, xEntity);
-
-		constexpr static inline auto group_members = std::make_tuple(
-			&this_t::marker,
-			&this_t::version,
-			&this_t::marker2,
-			&this_t::owner_id_handle_to_history_object
-		);
 
 		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) override {
 			if (ReadStringTo(iter, end, proprietary_data))
@@ -372,22 +414,6 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::acad_proxy_entity, "ACAD_PROXY_ENTITY", xACADProxyEntity, xEntity)
 
-		constexpr static inline auto group_members = std::make_tuple(
-			&this_t::marker,
-			&this_t::proxy_entity_class_id,
-			&this_t::application_entity_class_id,
-			&this_t::size_graphics_data_in_bytes,
-			&this_t::graphics_data,
-			&this_t::size_entity_data_in_bits,
-			&this_t::entity_data,
-			&this_t::object_id0,
-			&this_t::object_id1,
-			&this_t::object_id2,
-			&this_t::object_id3,
-			&this_t::end_of_object_id_section,
-			&this_t::size_proxy_data_in_bytes,
-			&this_t::dwg_or_dxf
-		);
 	};
 
 	//=============================================================================================================================
@@ -1060,7 +1086,7 @@ export namespace biscuit::dxf::entities {
 		);
 	};
 
-
+#endif
 
 	//=============================================================================================================================
 	std::unique_ptr<xEntity> xEntity::CreateEntity(string_t const& name) {
