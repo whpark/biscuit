@@ -70,6 +70,72 @@ export namespace biscuit::dxf::entities {
 		xline,
 	};
 
+	//=============================================================================================================================
+	template < typename TField, typename sGroup >
+	bool ReadFieldSingleMember(TField& item, sGroup const& group, size_t& index) {
+		bool bFound{};
+
+		// direct access to entity members
+		////constexpr static size_t nMemberSize = boost::pfr::tuple_size_v<TField>;
+		constexpr static size_t nMemberSize = biscuit::CountStructMember<TField>();
+		bFound = ForEachIntSeq<nMemberSize>(
+			[&]<int I>{
+			auto& v = biscuit::GetStructMember<I>(item);
+			using member_t = std::remove_cvref_t<decltype(v)>;
+			if constexpr (requires (member_t m) { m.eGroupCode; }) {
+				if (v.eGroupCode == group.eCode) {
+					if (index > 0) {
+						index--;
+						return false;
+					}
+					if constexpr (requires (member_t m) { m.value; }) {
+						group.GetValue(v.value);
+					}
+					else if constexpr (requires (member_t m) { m.Value(item); }) {
+						group.GetValue(v.Value(item));
+					}
+					return true;
+				}
+			}
+			return false;
+		});
+		if (bFound) return true;
+
+		// indirect access via custom_field
+		if constexpr (requires (TField ) { TField::custom_field; }) {
+			constexpr static size_t nTupleSize = std::tuple_size_v<decltype(TField::custom_field)>;
+			bFound = ForEachIntSeq<nTupleSize>([&]<int I>{
+				auto const& pair = std::get<I>(TField::custom_field);
+				if constexpr (std::is_integral_v<std::remove_cvref_t<decltype(pair)>>) {
+					// end marker. do nothing.
+				}
+				else {
+					if (pair.first == group.eCode) {
+						if (index > 0) {
+							index--;
+							return false;
+						}
+						group.GetValue(pair.second(item));
+						return true;
+					}
+				}
+				return false;
+			});
+
+			if (bFound)
+				return true;
+		}
+
+		return false;
+	}
+	//-----------------------------------------------------------------------------------------------------------------------------
+	template < typename TField, typename sGroup >
+	bool ReadFieldSingleMember(TField& item, sGroup const& group) {
+		size_t index{};
+		return ReadFieldSingleMember(item, group, index);
+	}
+
+
 	template < typename TEntity, bool bSubclass = false >
 	bool ReadEntity(TEntity& entity, group_iter_t& iter, group_iter_t const& end) {
 		TContainerMap<group_code_t, int> mapGroupCodeToIndex; // for duplicated group number
@@ -88,11 +154,11 @@ export namespace biscuit::dxf::entities {
 
 			size_t index = mapGroupCodeToIndex[iter->eCode]++;
 			if constexpr (requires (TEntity v) { v.m_fieldCommon; }) {
-				if (/*iter != end and*/ ReadItemSingleMember(entity.m_fieldCommon, *iter, index))
+				if (/*iter != end and*/ ReadFieldSingleMember(entity.m_fieldCommon, *iter, index))
 					continue;
 			}
 			if constexpr (requires (TEntity v) { v.m_field; }) {
-				if (/*iter != end and*/ ReadItemSingleMember(entity.m_field, *iter, index))
+				if (/*iter != end and*/ ReadFieldSingleMember(entity.m_field, *iter, index))
 					continue;
 			}
 
@@ -124,11 +190,54 @@ export namespace biscuit::dxf::entities {
 	}
 
 	//-------------------------------------------------------------------------
+
+	enum class eSPACE : gcv_t< 67> { model, paper };
+	enum class eCOLOR : gcv_t< 62> { byBlock = 0, byLayer = 256, };
+
+	using point_t = xPoint3d;
+
+	struct sField {
+	public:
+		using this_t = sField;
+	public:
+		gcv<  5> handle{};
+		gcv<330> hOwnerBlock;
+		gcv<100> marker;							// 100:AcDbEntity (SubclassMarker)
+		gcv< 67, eSPACE> space{};					// 67:space, 0 for model, 1 for paper
+		gcv<410> layout_tab_name;
+		gcv<  8> layer;
+		gcv<  6> line_type_name;
+		gcv<347> ptrMaterial;
+		gcv< 62, eCOLOR> color{ eCOLOR::byLayer };	// 62:color, 0 for ByBlock, 256 for ByLayer, negative value indicates layer is off.
+		gcv<370> line_weight{};						// 370: Stored and moved around as a 16-bit integer (?)
+		gcv< 48> line_type_scale{ 1.0 };			// 48: optional
+		gcv< 60> hidden{ 0 };						// 60: 0: visible, 1: invisible
+		gcv< 92> size_graphics_data{};
+		gcv<310> graphics_data{};
+		gcv<420, color_bgra_t> color24{};			// 420: 24-bit color value - lowest 8 bits are blue, next 8 are green, highest 8 are red
+		gcv<430> color_name;
+		gcv<440> transparency{};
+		gcv<390> ptr_plot_style_object{};
+		gcv<284> shadow_mode{};						// 0 : Casts and received shadows, 1 : Casts shadows, 2 : Receives shadows, 3 : Ignores shadows
+
+		//point_t extrusion{0., 0., 1.};
+		//group_code_value_t<039> thickness{};
+		constinit static inline auto const custom_field = std::make_tuple(
+			std::pair{420, [](auto& self) -> auto& { color_bgra_t& cr = self.color24; return cr.Value(); } },
+			0
+		);
+
+		bool operator == (this_t const&) const = default;
+		bool operator != (this_t const&) const = default;
+		auto operator <=> (this_t const&) const = default;
+
+	};
+
+	//-------------------------------------------------------------------------
 	class xEntity {
 	public:
 		using root_t = xEntity;
 		using this_t = xEntity;
-		using string_t = std::string;
 	public:
 		sField m_fieldCommon;
 		groups_t m_extended_data;
@@ -251,9 +360,6 @@ export namespace biscuit::dxf::entities {
 	protected:
 		// map of entity factory
 		static inline std::map<string_t, std::function<std::unique_ptr<xEntity>()>> m_mapEntityFactory;
-		//static void RegisterEntity(string_t const& name, std::function<std::unique_ptr<xEntity>()> fnCreate) {
-		//	m_mapEntityFactory[name] = std::move(fnCreate);
-		//}
 		class xRegisterEntity {
 		public:
 			xRegisterEntity(std::string const& name, std::function<std::unique_ptr<xEntity>()> fnCreate) {
@@ -270,12 +376,11 @@ export namespace biscuit::dxf::entities {
 		}
 	};
 
-
 	using entity_ptr_t = TCloneablePtr<xEntity>;
 	using entities_t = std::deque<entity_ptr_t>;
 
 	//============================================================================================================================
-	template < typename This, typename TField, eENTITY eEntity, xStringLiteral NAME >
+	template < typename TField, eENTITY eEntity, xStringLiteral NAME >
 	struct TEntityDerived : public xEntity {
 	public:
 		using field_t = TField;
@@ -311,25 +416,44 @@ export namespace biscuit::dxf::entities {
 		static inline xRegisterEntity s_registerEntity{NAME.str, &this_t::create};
 	public:
 		bool Read(group_iter_t& iter, group_iter_t const& end) override {
-			return ReadEntity(*this, &this_t::m_field, iter, end);
+			return ReadEntity(*this, iter, end);
 		}
 
 	};
 
 
 	//============================================================================================================================
-	class xUnknown : public xEntity {
+	struct sUnknown {
+		auto operator <=> (sUnknown const&) const = default;
+	};
+	class xUnknown : public TEntityDerived<sUnknown, eENTITY::unknown, "UNKNOWN"> {
 	public:
+		using this_t = xUnknown;
 
 		string_t m_name;
 		std::vector<sGroup> groups;
 
-		BSC__DXF_ENTITY_DEFINITION(eENTITY::unknown, "UNKNOWN", xUnknown, xEntity);
+		xUnknown() = default;
+		xUnknown(xUnknown const&) = default;
+		xUnknown(xUnknown&&) = default;
+		xUnknown& operator=(xUnknown const&) = default;
+		xUnknown& operator=(xUnknown&&) = default;
+		virtual ~xUnknown() = default;
+		bool operator == (xUnknown const&) const = default;
+		bool operator != (xUnknown const&) const = default;
+		auto operator <=> (xUnknown const&) const = default;
 
 		xUnknown(string_t name) : m_name(std::move(name)) {}
 
-		constexpr static inline auto group_members = std::make_tuple(
-		);
+		std::unique_ptr<this_t::root_t> clone() const override { return std::make_unique<this_t>(*this); }
+		static std::unique_ptr<this_t::root_t> create() { return std::make_unique<this_t>(); }
+		bool Compare(xEntity const& other) const override {
+			if (!base_t::Compare(other))
+				return false;
+			if (auto const* p = dynamic_cast<this_t const*>(&other))
+				return *this == *p;
+			return false;
+		}
 
 		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) override {
 			groups.push_back(*iter);
@@ -337,15 +461,13 @@ export namespace biscuit::dxf::entities {
 		}
 	};
 
-#if 0
-
 	//============================================================================================================================
 	struct s3DFace {
 		point_t pt1, pt2, pt3, pt4;
 		enum fHIDDEN : gcv_t< 70> { fHIDDEN_FIRST = 1, fHIDDEN_SECOND = 2, fHIDDEN_THIRD = 4, fHIDDEN_FOURTH = 8 };
 		gcv< 70, fHIDDEN> flags{};	// 70:
 
-		constexpr static inline auto group_members = std::make_tuple(
+		constexpr static inline auto const custom_field = std::make_tuple(
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt1.x)},
 			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(pt1.y)},
 			std::pair{30, BSC__LAMBDA_MEMBER_VALUE(pt1.z)},
@@ -364,12 +486,11 @@ export namespace biscuit::dxf::entities {
 			0
 		);
 
+		auto operator <=> (s3DFace const&) const = default;
+
 	};
 
-	class x3DFace : public xEntity, public s3DFace {
-	public:
-		BSC__DXF_ENTITY_DEFINITION(eENTITY::_3dface, "3DFACE", x3DFace, xEntity);
-	};
+	using x3DFace = TEntityDerived<s3DFace, eENTITY::_3dface, "3DFACE">;
 
 	//============================================================================================================================
 	class x3DSolid : public xEntity {
@@ -416,6 +537,7 @@ export namespace biscuit::dxf::entities {
 
 	};
 
+#if 0
 	//=============================================================================================================================
 	class xArc : public xEntity {
 	public:
@@ -430,7 +552,7 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::arc, "ARC", xArc, xEntity);
 
-		constexpr static inline auto const group_members = std::make_tuple(
+		constexpr static inline auto const custom_field = std::make_tuple(
 			&this_t::markerCircle,
 			&this_t::thickness,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt.x)},
@@ -457,7 +579,7 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::point, "POINT", xPoint, xEntity)
 
-		constexpr static inline auto group_members = std::make_tuple(
+		constexpr static inline auto custom_field = std::make_tuple(
 			&this_t::marker,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt.x)},
 			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(pt.y)},
@@ -483,7 +605,7 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::line, "LINE", xLine, xEntity)
 
-		constexpr static inline auto group_members = std::make_tuple(
+		constexpr static inline auto custom_field = std::make_tuple(
 			&this_t::marker,
 			&this_t::thickness,
 			std::pair{ 10, BSC__LAMBDA_MEMBER_VALUE(pt0.x)},
@@ -502,7 +624,7 @@ export namespace biscuit::dxf::entities {
 	//=============================================================================================================================
 	class xRay : public xLine {
 	public:
-		constexpr static inline auto group_members = std::make_tuple(
+		constexpr static inline auto custom_field = std::make_tuple(
 		);
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::ray, "XRAY", xRay, xLine)
 	};
@@ -510,7 +632,7 @@ export namespace biscuit::dxf::entities {
 	//=============================================================================================================================
 	class xXLine : public xLine {
 	public:
-		constexpr static inline auto group_members = std::make_tuple(
+		constexpr static inline auto custom_field = std::make_tuple(
 		);
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::xline, "XLINE", xXLine, xLine)
 	};
@@ -539,7 +661,7 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::text, "TEXT", xText, xEntity)
 
-		constexpr static inline auto const group_members = std::make_tuple(
+		constexpr static inline auto const custom_field = std::make_tuple(
 			&this_t::marker,
 			&this_t::thickness,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt_align0.x)},
@@ -613,7 +735,7 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::mtext, "MTEXT", xMText, xEntity);
 
-		constexpr static inline auto const group_members = std::make_tuple(
+		constexpr static inline auto const custom_field = std::make_tuple(
 			&this_t::marker,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt.x)},
 			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(pt.y)},
@@ -664,7 +786,7 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::mtext_attdef, "MTEXT_ATTDEF", xMText_AttDef, xMText);
 
-		constexpr static inline auto const group_members = std::make_tuple(
+		constexpr static inline auto const custom_field = std::make_tuple(
 			&this_t::marker,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt.x)},
 			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(pt.y)},
@@ -735,7 +857,7 @@ export namespace biscuit::dxf::entities {
 		gcv<  8> layer_name{};
 		xMText_AttDef mtext;
 
-		constexpr static inline auto const group_members = std::make_tuple(
+		constexpr static inline auto const custom_field = std::make_tuple(
 			&this_t::marker,
 			&this_t::version_number,
 			&this_t::prompt,
@@ -806,7 +928,7 @@ export namespace biscuit::dxf::entities {
 		gcv<  2> attribute;
 		xMText mtext;
 
-		constexpr static inline auto const group_members = std::make_tuple(
+		constexpr static inline auto const custom_field = std::make_tuple(
 			&this_t::marker,
 			&this_t::version_number,
 			&this_t::tag,
@@ -855,7 +977,7 @@ export namespace biscuit::dxf::entities {
 			return false;
 		}
 
-		constexpr static inline auto group_members = std::make_tuple(
+		constexpr static inline auto custom_field = std::make_tuple(
 			&this_t::marker,
 			&this_t::version
 		);
@@ -873,7 +995,7 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::circle, "CIRCLE", xCircle, xEntity);
 
-		constexpr static inline auto group_members = std::make_tuple(
+		constexpr static inline auto custom_field = std::make_tuple(
 			&this_t::markerCircle,
 			&this_t::thickness,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt.x)},
@@ -896,7 +1018,7 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::ellipse, "ELLIPSE", xEllipse, xEntity);
 
-		constexpr static inline auto group_members = std::make_tuple(
+		constexpr static inline auto custom_field = std::make_tuple(
 			&this_t::markerEllipse,
 			&this_t::major_radius,
 			&this_t::minor_radius,
@@ -948,7 +1070,7 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::hatch, "HATCH", xHatch, xEntity);
 
-		constexpr static inline auto group_members = std::make_tuple(
+		constexpr static inline auto custom_field = std::make_tuple(
 			&this_t::marker,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(ptElevation.x)},
 			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(ptElevation.y)},
@@ -1010,7 +1132,7 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::helix, "HELIX", xHelix, xEntity);
 
-		constexpr static inline auto group_members = std::make_tuple(
+		constexpr static inline auto custom_field = std::make_tuple(
 			&this_t::marker,
 			&this_t::release_major,
 			&this_t::release_maintenance,
@@ -1057,7 +1179,7 @@ export namespace biscuit::dxf::entities {
 
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::image, "IMAGE", xImage, xEntity);
 
-		constexpr static inline auto group_members = std::make_tuple(
+		constexpr static inline auto custom_field = std::make_tuple(
 			&this_t::marker,
 			&this_t::class_version,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(ptInsert.x)},

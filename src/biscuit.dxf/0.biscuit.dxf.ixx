@@ -2,9 +2,10 @@
 
 export module biscuit.dxf;
 export import :group;
-import :group_code_type_alias;
+export import :group_code_type_alias;
 export import :stream;
 export import :sections;
+export import :entities;
 import std;
 import "biscuit/dependencies/fmt.hxx";
 import "biscuit/dependencies/eigen.hxx";

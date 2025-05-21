@@ -1,7 +1,5 @@
 ﻿module;
 
-#include "biscuit/dependencies/glaze.h"
-
 export module biscuit.dxf:group;
 import std;
 import biscuit;
@@ -15,11 +13,21 @@ export namespace biscuit::dxf {
 	using string_t = std::string;
 	using string_view_t = std::string_view;
 	using group_value_t = std::variant<bool, std::int16_t, std::int32_t, std::int64_t, double, string_t, binary_t>;
+	template < typename T >
+	consteval size_t GetGroupValueIndex() {
+		if constexpr (std::is_constructible_v<group_value_t, T>) {
+			return group_value_t{T{}}.index();
+		} else if constexpr (std::is_enum_v<T>) {
+			return GetGroupValueIndex<std::underlying_type_t<T>>();
+		} else if constexpr (std::is_same_v<T, biscuit::color_bgra_t>) {
+			return GetGroupValueIndex<int32_t>();
+		}
+	}
 
 	//=============================================================================================================================
 	// group
 	struct eGROUP_CODE {
-		using value_t = int16;
+		using value_t = std::int16_t;
 		enum : value_t {
 			entity = 0,
 			subclass = 100,
@@ -42,13 +50,13 @@ export namespace biscuit::dxf {
 		constexpr auto operator <=> (eGROUP_CODE const&) const = default;
 		constexpr auto operator <=> (value_t const& eValueType) const { return eCode <=> eValueType; }
 	};
-	constexpr auto operator "" _g(unsigned long long v) { return eGROUP_CODE{ (int16)v }; }
+	constexpr auto operator "" _g(unsigned long long v) { return eGROUP_CODE{ (std::int16_t)v }; }
 
 	using group_code_t = eGROUP_CODE;
 
 	struct alignas(32) sGroup : public eGROUP_CODE {	// alignas(32) - hoping for better cache performance (don't know if it works)
 	public:
-		enum eVALUE_TYPE : int8 { none = -1, boolean = 0, i16, i32, i64, dbl, str, hex_str };
+		enum eVALUE_TYPE : std::int8_t { none = -1, boolean = 0, i16, i32, i64, dbl, str, hex_str };
 
 		//group_code_t eCode{};
 		group_value_t value;
@@ -64,17 +72,18 @@ export namespace biscuit::dxf {
 		constexpr bool operator == (sGroup const&) const = default;
 		constexpr bool operator != (sGroup const&) const = default;
 
-		template < std::convertible_to<group_value_t> T >
+		//template < std::convertible_to<group_value_t> T >
+		template < typename T >
 		std::optional<T> GetValue() const {
-			constexpr static auto index = group_value_t{T{}}.index();
+			constexpr static size_t index = GetGroupValueIndex<T>();
 			if (value.index() != index)
 				return std::nullopt;
-			return std::get<T>(value);
+			return (T&)(std::get<index>(value));
 		}
 		std::optional<int> GetInt() const {
 			std::optional<int> result;
 			std::visit([&result]<typename T>(T const& v) {
-				if constexpr (std::is_same_v<T, int64>) {
+				if constexpr (std::is_same_v<T, std::int64_t>) {
 					//static_assert(false);
 					if (v >= std::numeric_limits<int>::min() and v <= std::numeric_limits<int>::max()) {
 						result = (int)v;
@@ -88,9 +97,9 @@ export namespace biscuit::dxf {
 
 		template < typename T >
 		bool GetValue(T& value) const {
-			if constexpr ( std::is_integral_v<T> and sizeof(T) > sizeof(bool) and sizeof(T) < sizeof(int64) ) {
+			if constexpr ((std::is_enum_v<T> or std::is_integral_v<T>) and sizeof(T) > sizeof(bool) and sizeof(T) < sizeof(int64)) {
 				if (auto v = GetInt()) {
-					value = *v;
+					value = (T)*v;
 					return true;
 				}
 			}
@@ -106,7 +115,7 @@ export namespace biscuit::dxf {
 			//static_assert(std::is_constant_evaluated());
 			using enum sGroup::eVALUE_TYPE;
 
-			auto InRange = [](auto&& code, int16 min, int16 max) {
+			auto InRange = [](auto&& code, std::int16_t min, std::int16_t max) {
 				return code >= min and code <= max;
 			};
 
@@ -291,69 +300,6 @@ export namespace biscuit::dxf {
 
 #endif		
 
-	//=============================================================================================================================
-	template < typename TField >
-	bool ReadItemSingleMember(TField& item, sGroup const& group, size_t& index) {
-		bool bFound{};
-
-		// direct access to entity members as is using glz::reflect
-		constexpr static size_t nMemberSize = glz::reflect<TField>::size;
-		bFound = ForEachIntSeq<nMemberSize>(
-			[&]<int I>{
-			auto& v = glz::reflect<TField>::elem<I>(item);
-			using member_t = std::remove_cvref_t<decltype(v)>;
-			if constexpr (requires (member_t m) { m.eGroupCode; }) {
-				if (v.eGroupCode == group.eCode) {
-					if (index > 0) {
-						index--;
-						return false;
-					}
-					if constexpr (requires (member_t m) { m.value; }) {
-						group.GetValue(v.value);
-					}
-					else if constexpr (requires (member_t m) { m.Value(item); }) {
-						group.GetValue(v.Value(item));
-					}
-					return true;
-				}
-			}
-			return false;
-		});
-		if (bFound) return true;
-
-		// indirect access via group_members
-		if constexpr (requires (TField ) { TField::custom_field; }) {
-			constexpr static size_t nTupleSize = std::tuple_size_v<decltype(TField::custom_field)>;
-			bFound = ForEachIntSeq<nTupleSize>([&]<int I>{
-				auto const& pair = std::get<I>(TField::custom_field);
-				if constexpr (std::is_integral_v<std::remove_cvref_t<decltype(pair)>>) {
-					// end marker. do nothing.
-				}
-				else {
-					if (pair.first == group.eCode) {
-						if (index > 0) {
-							index--;
-							return false;
-						}
-						group.GetValue(pair.second(item));
-						return true;
-					}
-				}
-				return false;
-			});
-
-			if (bFound)
-				return true;
-		}
-
-		return false;
-	}
-	//-----------------------------------------------------------------------------------------------------------------------------
-	template < typename TField >
-	bool ReadItemSingleMember(TField& item, sGroup const& group) {
-		size_t index{};
-		return ReadItemSingleMember(item, group, index);
-	}
 
 }	// namespace biscuit::dxf
 

@@ -83,16 +83,6 @@ export namespace biscuit::dxf {
 		group_code_value_t< 91> count{};
 		group_code_value_t<280> proxy{};
 		group_code_value_t<281> entity{};
-
-		constexpr static inline auto const group_members = std::make_tuple(
-			&sClass::name,
-			&sClass::cpp_class_name,
-			&sClass::app_name,
-			&sClass::flags,
-			&sClass::count,
-			&sClass::proxy,
-			&sClass::entity
-		);
 	};
 	using classes_t = std::vector<sClass>;
 
@@ -120,7 +110,7 @@ export namespace biscuit::dxf {
 					iter--;	// current item is NOT an EndCondition.
 					return true;
 				}
-				if (!ReadItemSingleMember(aClass, *iter))
+				if (!entities::ReadFieldSingleMember(aClass, *iter))
 					return false;
 			}
 			return true;
@@ -138,11 +128,7 @@ export namespace biscuit::dxf {
 		group_code_value_t< 70> max_entries{};
 		int16 flags{};
 
-		constexpr static inline auto const group_members = std::make_tuple(
-			&this_t::table_type,
-			&this_t::handle,
-			&this_t::class_name,
-			&this_t::max_entries
+		constexpr static inline auto const custom_field = std::make_tuple(
 		);
 	};
 
@@ -173,7 +159,7 @@ export namespace biscuit::dxf {
 				if (*iter == groupTableEnd) {
 					return true;
 				}
-				if (ReadItemSingleMember(m_tables.back(), *iter)) {
+				if (entities::ReadFieldSingleMember(m_tables.back(), *iter)) {
 				}
 				else {
 					// todo:
@@ -199,18 +185,11 @@ export namespace biscuit::dxf {
 		group_code_value_t<  3> name2;
 		group_code_value_t<  1> xref_path;
 
-		constexpr static inline auto const group_members = std::make_tuple(
-			&this_t::handle,
-			//100, &this_t::entity,
-			&this_t::layer,
-			//100, &this_t::sign,
-			&this_t::name,
-			&this_t::flags,
+		constexpr static inline auto const custom_field = std::make_tuple(
 			std::pair{10, [](auto& self) -> auto& { return self.ptBase.x; }},
 			std::pair{20, [](auto& self) -> auto& { return self.ptBase.y; }},
 			std::pair{30, [](auto& self) -> auto& { return self.ptBase.z; }},
-			&this_t::name2,
-			&this_t::xref_path
+			0
 		);
 	};
 	class xSectionBlocks {
@@ -240,7 +219,7 @@ export namespace biscuit::dxf {
 				if (*iter == groupBlockEnd) {
 					return true;
 				}
-				if (ReadItemSingleMember(m_blocks.back(), *iter)) {
+				if (entities::ReadFieldSingleMember(m_blocks.back(), *iter)) {
 				}
 				else {
 					// todo:
