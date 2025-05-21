@@ -18,8 +18,8 @@
 
 export module biscuit.lazy_profile;
 import std;
-import "biscuit/dependencies_fmt.hxx";
-import "biscuit/dependencies_ctre.hxx";
+import "biscuit/dependencies/fmt.hxx";
+import "biscuit/dependencies/ctre.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.archive;

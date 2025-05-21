@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "./config.h"
+#include "biscuit/config.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4819)	// codepage

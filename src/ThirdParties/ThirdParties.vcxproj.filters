@@ -13,46 +13,49 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\dependencies">
+      <UniqueIdentifier>{b39c35c0-142c-490a-977b-07f1d88759f7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_asio.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\asio.hxx">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_cereal.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\cereal.hxx">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_ctre.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\ctre.hxx">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_eigen.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\eigen.hxx">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_fmt.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\fmt.hxx">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_glaze.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\iconv.hxx">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_iconv.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\magic_enum.hxx">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_opencv.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\opencv.hxx">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_simdutf.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\simdutf.hxx">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_spdlog.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\spdlog.hxx">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_units.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\units.hxx">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\biscuit\dependencies_magic_enum.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\include\biscuit\dependencies\glaze.h">
+      <Filter>Header Files\dependencies</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

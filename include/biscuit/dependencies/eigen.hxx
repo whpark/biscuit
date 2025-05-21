@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "./config.h"
+#include "biscuit/config.h"
 
 #ifdef _MSC_VER
 #	pragma warning(push)

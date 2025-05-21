@@ -12,17 +12,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies/glaze.h"
 
 #include "tinysplinecxx.h"
 
 export module biscuit.shape.canvas;
 import std;
-import "biscuit/dependencies_fmt.hxx";
-import "biscuit/dependencies_units.hxx";
-import "biscuit/dependencies_cereal.hxx";
-import "biscuit/dependencies_opencv.hxx";
-import "biscuit/dependencies_eigen.hxx";
+import "biscuit/dependencies/fmt.hxx";
+import "biscuit/dependencies/units.hxx";
+import "biscuit/dependencies/cereal.hxx";
+import "biscuit/dependencies/opencv.hxx";
+import "biscuit/dependencies/eigen.hxx";
 import biscuit;
 import biscuit.shape_basic;
 import biscuit.shape.entities.shape;

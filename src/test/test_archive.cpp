@@ -2,8 +2,8 @@
 #include "biscuit/biscuit.h"
 
 import std;
-import "biscuit/dependencies_fmt.hxx";
-import "biscuit/dependencies_ctre.hxx";
+import "biscuit/dependencies/fmt.hxx";
+import "biscuit/dependencies/ctre.hxx";
 import biscuit;
 
 using namespace std::literals;

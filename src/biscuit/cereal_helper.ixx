@@ -3,7 +3,7 @@ module;
 export module biscuit.cereal_helper;
 
 import std;
-import "biscuit/dependencies_cereal.hxx";
+import "biscuit/dependencies/cereal.hxx";
 import biscuit.aliases;
 import biscuit.convert_codepage;
 

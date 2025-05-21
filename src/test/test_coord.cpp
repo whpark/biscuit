@@ -4,9 +4,9 @@
 #include "biscuit/biscuit.h"
 
 import std;
-import "biscuit/dependencies_fmt.hxx";
-import "biscuit/dependencies_eigen.hxx";
-import "biscuit/dependencies_units.hxx";
+import "biscuit/dependencies/fmt.hxx";
+import "biscuit/dependencies/eigen.hxx";
+import "biscuit/dependencies/units.hxx";
 import biscuit;
 
 using namespace std::literals;

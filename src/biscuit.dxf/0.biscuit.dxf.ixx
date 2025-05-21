@@ -6,8 +6,8 @@ import :group_code_type_alias;
 export import :stream;
 export import :sections;
 import std;
-import "biscuit/dependencies_fmt.hxx";
-import "biscuit/dependencies_eigen.hxx";
+import "biscuit/dependencies/fmt.hxx";
+import "biscuit/dependencies/eigen.hxx";
 import biscuit;
 import biscuit.shape;
 

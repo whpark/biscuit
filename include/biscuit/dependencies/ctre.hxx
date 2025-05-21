@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "./config.h"
+#include "biscuit/config.h"
 
 #include <ctre.hpp>
 #pragma warning(suppress: 4458)

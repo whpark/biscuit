@@ -13,7 +13,7 @@
 
 export module biscuit.qt.MatBitmapArchive;
 import std;
-import "biscuit/dependencies_opencv.hxx";
+import "biscuit/dependencies/opencv.hxx";
 import biscuit;
 import biscuit.opencv;
 import biscuit.qt.utils;

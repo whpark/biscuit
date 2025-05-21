@@ -7,7 +7,7 @@
 
 export module biscuit.opencv.mat_gl;
 import std;
-import "biscuit/dependencies_opencv.hxx";
+import "biscuit/dependencies/opencv.hxx";
 import biscuit;
 
 export namespace biscuit {

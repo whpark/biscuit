@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "./config.h"
+#include "biscuit/config.h"
 
 #define SPDLOG_USE_STD_FORMAT
 #define SPDLOG_COMPILED_LIB

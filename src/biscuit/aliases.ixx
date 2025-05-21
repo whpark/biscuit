@@ -5,7 +5,7 @@
 
 export module biscuit.aliases;
 import std;
-import "biscuit/dependencies_units.hxx";
+import "biscuit/dependencies/units.hxx";
 
 // export aliases;
 export namespace biscuit::inline literals { };

@@ -4,7 +4,7 @@
 
 #include "biscuit/config.h"
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies/glaze.h"
 #include "biscuit/qt/macro.h"
 #include "verdigris/wobjectcpp.h"
 #include "verdigris/wobjectimpl.h"

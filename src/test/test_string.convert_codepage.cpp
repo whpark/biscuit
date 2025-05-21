@@ -2,7 +2,7 @@
 #include <simdutf.h>
 
 import std;
-import "biscuit/dependencies_fmt.hxx";
+import "biscuit/dependencies/fmt.hxx";
 import biscuit;
 
 using namespace std::literals;

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "./config.h"
+#include "biscuit/config.h"
 
 #include <fmt/base.h>
 #include <fmt/format.h>

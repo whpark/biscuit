@@ -2,7 +2,7 @@
 #include "biscuit/biscuit.h"
 
 import std;
-import "biscuit/dependencies_fmt.hxx";
+import "biscuit/dependencies/fmt.hxx";
 import biscuit;
 
 static constexpr auto const ATTR = "[sequence_map]";

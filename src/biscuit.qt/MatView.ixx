@@ -21,10 +21,10 @@
 export module biscuit.qt.MatView;
 
 import std;
-import "biscuit/dependencies_fmt.hxx";
-import "biscuit/dependencies_eigen.hxx";
-import "biscuit/dependencies_opencv.hxx";
-import "biscuit/dependencies_spdlog.hxx";
+import "biscuit/dependencies/fmt.hxx";
+import "biscuit/dependencies/eigen.hxx";
+import "biscuit/dependencies/opencv.hxx";
+import "biscuit/dependencies/spdlog.hxx";
 import biscuit;
 import biscuit.opencv;
 import biscuit.qt.utils;

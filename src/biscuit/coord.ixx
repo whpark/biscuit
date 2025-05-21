@@ -13,8 +13,8 @@
 
 export module biscuit.coord;
 import std;
-import "biscuit/dependencies_fmt.hxx";
-import "biscuit/dependencies_eigen.hxx";
+import "biscuit/dependencies/fmt.hxx";
+import "biscuit/dependencies/eigen.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.misc;

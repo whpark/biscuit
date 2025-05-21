@@ -17,7 +17,7 @@
 
 export module biscuit.win.environment_variable;
 import std;
-import "biscuit/dependencies_fmt.hxx";
+import "biscuit/dependencies/fmt.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 

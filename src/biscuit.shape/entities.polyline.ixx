@@ -14,15 +14,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies/glaze.h"
 
 #include "shape_macro.h"
 
 export module biscuit.shape.entities.polyline;
 import std;
-import "biscuit/dependencies_fmt.hxx";
-import "biscuit/dependencies_cereal.hxx";
-import "biscuit/dependencies_eigen.hxx";
+import "biscuit/dependencies/fmt.hxx";
+import "biscuit/dependencies/cereal.hxx";
+import "biscuit/dependencies/eigen.hxx";
 import biscuit;
 import biscuit.shape_basic;
 import biscuit.shape.entities.shape;

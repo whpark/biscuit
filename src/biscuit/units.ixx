@@ -4,7 +4,7 @@
 
 export module biscuit.units;
 import std;
-import "biscuit/dependencies_units.hxx";
+import "biscuit/dependencies/units.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 

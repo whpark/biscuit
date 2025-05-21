@@ -1,10 +1,10 @@
 ﻿#pragma once
 //module;
 
-#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies/glaze.h"
 
 import std;
-import "biscuit/dependencies_opencv.hxx";
+import "biscuit/dependencies/opencv.hxx";
 import biscuit;
 
 /*export */namespace biscuit {

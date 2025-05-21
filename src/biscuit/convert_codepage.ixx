@@ -15,7 +15,7 @@
 
 export module biscuit.convert_codepage;
 import std;
-import "biscuit/dependencies_simdutf.hxx";
+import "biscuit/dependencies/simdutf.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.misc;

@@ -5,11 +5,11 @@
 #include <QApplication>
 #include <QtWidgets/QtWidgets>
 
-#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies/glaze.h"
 
 export module biscuit.qt.utils;
 import std;
-import "biscuit/dependencies_opencv.hxx";
+import "biscuit/dependencies/opencv.hxx";
 import biscuit;
 
 using namespace std::literals;

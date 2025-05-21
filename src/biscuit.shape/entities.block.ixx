@@ -14,16 +14,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies/glaze.h"
 
 #include "shape_macro.h"
 
 export module biscuit.shape.entities.block;
 import std;
-import "biscuit/dependencies_fmt.hxx";
-import "biscuit/dependencies_units.hxx";
-import "biscuit/dependencies_cereal.hxx";
-import "biscuit/dependencies_eigen.hxx";
+import "biscuit/dependencies/fmt.hxx";
+import "biscuit/dependencies/units.hxx";
+import "biscuit/dependencies/cereal.hxx";
+import "biscuit/dependencies/eigen.hxx";
 import biscuit;
 import biscuit.shape.canvas;
 import biscuit.shape.entities.shape;

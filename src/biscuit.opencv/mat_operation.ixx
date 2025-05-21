@@ -6,8 +6,8 @@
 
 export module biscuit.opencv.mat_operation;
 import std;
-import "biscuit/dependencies_opencv.hxx";
-import "biscuit/dependencies_simdutf.hxx";
+import "biscuit/dependencies/opencv.hxx";
+import "biscuit/dependencies/simdutf.hxx";
 import biscuit;
 
 namespace biscuit {

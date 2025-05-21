@@ -5,7 +5,7 @@
 
 export module biscuit.coord.size;
 import std;
-import "biscuit/dependencies_eigen.hxx";
+import "biscuit/dependencies/eigen.hxx";
 import biscuit.aliases;
 import biscuit.concepts;
 import biscuit.coord.concepts;

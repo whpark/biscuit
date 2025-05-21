@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "./config.h"
+#include "biscuit/config.h"
 
 import std;
 #define MAGIC_ENUM_USE_STD_MODULE

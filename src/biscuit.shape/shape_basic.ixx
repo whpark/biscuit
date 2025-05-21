@@ -12,13 +12,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "biscuit/macro.h"
-#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies/glaze.h"
 
 export module biscuit.shape_basic;
 import std;
-import "biscuit/dependencies_fmt.hxx";
-import "biscuit/dependencies_cereal.hxx";
-import "biscuit/dependencies_eigen.hxx";
+import "biscuit/dependencies/fmt.hxx";
+import "biscuit/dependencies/cereal.hxx";
+import "biscuit/dependencies/eigen.hxx";
 import biscuit;
 
 export namespace biscuit::shape {

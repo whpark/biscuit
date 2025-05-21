@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "./config.h"
+#include "biscuit/config.h"
 
 #include <glaze/glaze.hpp>
 //import <glaze/glaze.hpp>;

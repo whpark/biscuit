@@ -1,6 +1,6 @@
 ﻿module;
 
-#include "biscuit/dependencies_glaze.h"
+#include "biscuit/dependencies/glaze.h"
 
 export module biscuit.dxf:group;
 import std;
