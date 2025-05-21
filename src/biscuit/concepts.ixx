@@ -27,7 +27,12 @@ export namespace biscuit::concepts {
 	template < typename T >
 	concept trivially_copyable = std::is_trivially_copyable_v<T>;
 
-	
+
+	/// @brief MSVC's std::is_constructible_v ... is weird.
+	template < typename T, typename ... TArgs >
+	concept constructible = requires(T _) { T{TArgs{}...}; };
+
+
 	template < typename T >
 	concept cloneable = requires (T t) {
 		{ t.clone() } -> std::convertible_to<std::unique_ptr<T>>;

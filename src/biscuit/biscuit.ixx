@@ -34,7 +34,7 @@ export import biscuit.cereal_helper;
 export import biscuit.bmp_file_header;
 export import biscuit.axis;
 export import biscuit.utils;
-
+export import biscuit.reflection;
 //export import :coord;
 
 export namespace biscuit {
