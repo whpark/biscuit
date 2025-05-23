@@ -19,7 +19,7 @@ TEST_CASE("Test biscuit.dxf") {
 	}
 
 	std::vector<std::filesystem::path> paths = {
-		//L"/DXF/sample_ascii.dxf"s,
+		L"/DXF/sample_ascii.dxf"s,
 		////L"/DXF/sample_bin_r12.dxf"s,
 		//L"/DXF/sample_bin_2010.dxf"s,
 	};
@@ -91,7 +91,6 @@ TEST_CASE("Test biscuit.dxf") {
 			fmt::println(out, "\tlayer:{}", b.layer());
 		}
 
-		// todo:temp
 		// entities
 		for (auto const& e : dxf.m_entities) {
 			fmt::println(out, "entity:{}", magic_enum::enum_name(e->GetEntityType()));

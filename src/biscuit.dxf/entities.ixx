@@ -76,7 +76,8 @@ export namespace biscuit::dxf::entities {
 		bool bFound{};
 
 		// direct access to entity members
-		////constexpr static size_t nMemberSize = boost::pfr::tuple_size_v<TField>;
+		//constexpr static size_t nMemberSize = boost::pfr::tuple_size_v<TField>;
+		//constexpr static size_t nMemberSize = glz::reflect<TField>::size;
 		constexpr static size_t nMemberSize = biscuit::CountStructMember<TField>();
 		bFound = ForEachIntSeq<nMemberSize>(
 			[&]<int I>{
@@ -357,17 +358,19 @@ export namespace biscuit::dxf::entities {
 
 	public:
 		static std::unique_ptr<xEntity> CreateEntity(string_t const& name);
+	private:
+		// map of entity factory. don't make static inline variable. (static variable initializing order is NOT stable)
+		//inline static std::map<string_t, std::function<std::unique_ptr<xEntity>()>> m_mapEntityFactory;
+		static auto& GetEntityFactory() { static std::map<string_t, std::function<std::unique_ptr<xEntity>()>> mapEntityFactory; return mapEntityFactory; }
 	protected:
-		// map of entity factory
-		static inline std::map<string_t, std::function<std::unique_ptr<xEntity>()>> m_mapEntityFactory;
 		class xRegisterEntity {
 		public:
 			xRegisterEntity(std::string const& name, std::function<std::unique_ptr<xEntity>()> fnCreate) {
-				m_mapEntityFactory[name] = std::move(fnCreate);
-				//xEntity::RegisterEntity(name, std::move(fnCreate));
+				GetEntityFactory()[name] = std::move(fnCreate);
 			}
 		};
 
+	protected:
 		static bool ReadStringTo(group_iter_t& iter, group_iter_t const& end, string_t& text)  {
 			if (iter == end) return false;
 			if (iter->eCode == 1) { text = iter->GetValue<string_t>().value_or(""s); return true; }
@@ -380,12 +383,13 @@ export namespace biscuit::dxf::entities {
 	using entities_t = std::deque<entity_ptr_t>;
 
 	//============================================================================================================================
-	template < typename TField, eENTITY eEntity, xStringLiteral NAME >
-	struct TEntityDerived : public xEntity {
+	template < /*typename TSelf, */typename TField, eENTITY eEntity, xStringLiteral NAME >
+	class TEntityDerived : public xEntity {
 	public:
 		using field_t = TField;
 		using base_t = xEntity;
 		using this_t = TEntityDerived;
+		//using self_t = TSelf;
 
 	public:
 		constexpr static inline eENTITY m_entity = eEntity;
@@ -404,6 +408,7 @@ export namespace biscuit::dxf::entities {
 		base_t const& base() const { return static_cast<base_t const&>(*this); }
 		eENTITY GetEntityType() const override { return m_entity; }
 		std::unique_ptr<this_t::root_t> clone() const override { return std::make_unique<this_t>(*this); }
+		//static std::unique_ptr<this_t::root_t> create() { return std::make_unique<TSelf>(); }
 		static std::unique_ptr<this_t::root_t> create() { return std::make_unique<this_t>(); }
 		bool Compare(xEntity const& other) const override {
 			if (!base_t::Compare(other))
@@ -423,28 +428,31 @@ export namespace biscuit::dxf::entities {
 
 
 	//============================================================================================================================
-	struct sUnknown {
-		auto operator <=> (sUnknown const&) const = default;
-	};
-	class xUnknown : public TEntityDerived<sUnknown, eENTITY::unknown, "UNKNOWN"> {
+	class xUnknown : public xEntity {
 	public:
 		using this_t = xUnknown;
+		using base_t = xEntity;
 
+	public:
 		string_t m_name;
 		std::vector<sGroup> groups;
+
+	public:
+		constexpr static inline eENTITY m_entity = eENTITY::unknown;
 
 		xUnknown() = default;
 		xUnknown(xUnknown const&) = default;
 		xUnknown(xUnknown&&) = default;
 		xUnknown& operator=(xUnknown const&) = default;
 		xUnknown& operator=(xUnknown&&) = default;
+		xUnknown(std::string_view name) : m_name{name} {}
 		virtual ~xUnknown() = default;
-		bool operator == (xUnknown const&) const = default;
-		bool operator != (xUnknown const&) const = default;
-		auto operator <=> (xUnknown const&) const = default;
-
-		xUnknown(string_t name) : m_name(std::move(name)) {}
-
+		bool operator == (this_t const&) const = default;
+		bool operator != (this_t const&) const = default;
+		auto operator <=> (this_t const&) const = default;
+		base_t& base() { return static_cast<base_t&>(*this); }
+		base_t const& base() const { return static_cast<base_t const&>(*this); }
+		eENTITY GetEntityType() const override { return m_entity; }
 		std::unique_ptr<this_t::root_t> clone() const override { return std::make_unique<this_t>(*this); }
 		static std::unique_ptr<this_t::root_t> create() { return std::make_unique<this_t>(); }
 		bool Compare(xEntity const& other) const override {
@@ -453,6 +461,12 @@ export namespace biscuit::dxf::entities {
 			if (auto const* p = dynamic_cast<this_t const*>(&other))
 				return *this == *p;
 			return false;
+		}
+	private:
+		static inline xRegisterEntity s_registerEntity{"UNKOWN", &this_t::create};
+	public:
+		bool Read(group_iter_t& iter, group_iter_t const& end) override {
+			return ReadEntity(*this, iter, end);
 		}
 
 		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) override {
@@ -1212,7 +1226,8 @@ export namespace biscuit::dxf::entities {
 
 	//=============================================================================================================================
 	std::unique_ptr<xEntity> xEntity::CreateEntity(string_t const& name) {
-		if (auto iter = m_mapEntityFactory.find(name); iter != m_mapEntityFactory.end() and iter->second)
+		auto& map = GetEntityFactory();
+		if (auto iter = map.find(name); iter != map.end() and iter->second)
 			return iter->second();
 		return std::make_unique<biscuit::dxf::entities::xUnknown>(name);
 	}
