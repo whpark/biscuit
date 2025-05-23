@@ -155,12 +155,28 @@ export namespace biscuit::dxf::entities {
 
 			size_t index = mapGroupCodeToIndex[iter->eCode]++;
 			if constexpr (requires (TEntity v) { v.m_fieldCommon; }) {
-				if (/*iter != end and*/ ReadFieldSingleMember(entity.m_fieldCommon, *iter, index))
+				if (ReadFieldSingleMember(entity.m_fieldCommon, *iter, index)) {
+					for (++iter; iter != end; ++iter) {
+						if (ReadFieldSingleMember(entity.m_fieldCommon, *iter, index))
+							continue;
+						iter--;
+						break;
+					}
+
 					continue;
+				}
 			}
 			if constexpr (requires (TEntity v) { v.m_field; }) {
-				if (/*iter != end and*/ ReadFieldSingleMember(entity.m_field, *iter, index))
+				if (ReadFieldSingleMember(entity.m_field, *iter, index)) {
+					for (++iter; iter != end; ++iter) {
+						if (ReadFieldSingleMember(entity.m_field, *iter, index))
+							continue;
+						iter--;
+						break;
+					}
+
 					continue;
+				}
 			}
 
 			if constexpr (requires(TEntity v) { v.ReadPrivate(iter, end); }) {
@@ -371,10 +387,16 @@ export namespace biscuit::dxf::entities {
 		};
 
 	protected:
-		static bool ReadStringTo(group_iter_t& iter, group_iter_t const& end, string_t& text)  {
+		//static bool ReadStringTo(group_iter_t& iter, group_iter_t const& end, string_t& text)  {
+		//	if (iter == end) return false;
+		//	if (iter->eCode == 1) { text = iter->GetValue<string_t>().value_or(""s); return true; }
+		//	if (iter->eCode == 3) { text += iter->GetValue<string_t>().value_or(""s); return true; }
+		//	return false;
+		//}
+		template < group_code_t::value_t eSTRING = 3 >
+		bool AddStringTo(group_iter_t& iter, group_iter_t const& end, string_t& text)  {
 			if (iter == end) return false;
-			if (iter->eCode == 1) { text = iter->GetValue<string_t>().value_or(""s); return true; }
-			if (iter->eCode == 3) { text += iter->GetValue<string_t>().value_or(""s); return true; }
+			if (iter->eCode == eSTRING) { text += iter->GetValue<string_t>().value_or(""s); return true; }
 			return false;
 		}
 	};
@@ -523,7 +545,7 @@ export namespace biscuit::dxf::entities {
 	class x3DSolid : public TEntityDerived<x3DSolid, s3DSolid, eENTITY::_3dsolid, "3DSOLID"> {
 	public:
 		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) override {
-			if (ReadStringTo(iter, end, m_field.proprietary_data))
+			if (AddStringTo(iter, end, m_field.proprietary_data))
 				return true;
 			return false;
 		}
@@ -551,9 +573,11 @@ export namespace biscuit::dxf::entities {
 	};
 	class xACADProxyEntity : public TEntityDerived<xACADProxyEntity, sACADProxyEntity, eENTITY::acad_proxy_entity, "ACAD_PROXY_ENTITY"> { };
 
-#if 0
+
 	//=============================================================================================================================
-	class xArc : public xEntity {
+	struct sArc {
+	public:
+		using this_t = sArc;
 	public:
 		gcv<100> markerCircle{};	// Subclass marker (AcDbCircle)
 		gcv< 39> thickness{};
@@ -564,26 +588,24 @@ export namespace biscuit::dxf::entities {
 		gcv< 51> end_angle{};
 		point_t extrusion{ 0., 0., 1. };
 
-		BSC__DXF_ENTITY_DEFINITION(eENTITY::arc, "ARC", xArc, xEntity);
-
 		constinit static inline auto const custom_field = std::make_tuple(
-			&this_t::markerCircle,
-			&this_t::thickness,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt.x)},
 			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(pt.y)},
 			std::pair{30, BSC__LAMBDA_MEMBER_VALUE(pt.z)},
-			&this_t::radius,
-			&this_t::marker,
-			&this_t::start_angle,
-			&this_t::end_angle,
 			std::pair{210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x)},
 			std::pair{220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y)},
 			std::pair{230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)}
 		);
+
+		auto operator <=> (this_t const&) const = default;
 	};
+	class xArc : public TEntityDerived<xArc, sArc, eENTITY::arc, "ARC"> { };
+
 
 	//=============================================================================================================================
-	class xPoint : public xEntity {
+	struct sPoint {
+	public:
+		using this_t = sPoint;
 	public:
 		gcv<100> marker{};	// Subclass marker (AcDbPoint)
 		point_t pt{};
@@ -591,25 +613,25 @@ export namespace biscuit::dxf::entities {
 		point_t extrusion{ 0., 0., 1. };
 		gcv< 50> angle{};	// angle of x axis for UCS inf effect when the point was drawn (optional, default = 0); used when PDMODE is nonzero
 
-		BSC__DXF_ENTITY_DEFINITION(eENTITY::point, "POINT", xPoint, xEntity)
-
 		constinit static inline auto custom_field = std::make_tuple(
-			&this_t::marker,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt.x)},
 			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(pt.y)},
 			std::pair{30, BSC__LAMBDA_MEMBER_VALUE(pt.z)},
-			&this_t::thickness,
 			std::pair{210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x)},
 			std::pair{220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y)},
 			std::pair{230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)},
-			&this_t::angle
+			0
 		);
+
+		auto operator <=> (this_t const&) const = default;
 	};
+	class xPoint : public TEntityDerived<xPoint, sPoint, eENTITY::point, "POINT"> { };
+
 
 	//=============================================================================================================================
-	class xLine : public xEntity {
+	struct sLine {
 	public:
-		using this_t = xLine;
+		using this_t = sLine;
 	public:
 		gcv<100> marker;
 		point_t pt0{};
@@ -617,11 +639,7 @@ export namespace biscuit::dxf::entities {
 		gcv< 39> thickness{};
 		point_t extrusion{ 0., 0., 1. };
 
-		BSC__DXF_ENTITY_DEFINITION(eENTITY::line, "LINE", xLine, xEntity)
-
 		constinit static inline auto custom_field = std::make_tuple(
-			&this_t::marker,
-			&this_t::thickness,
 			std::pair{ 10, BSC__LAMBDA_MEMBER_VALUE(pt0.x)},
 			std::pair{ 20, BSC__LAMBDA_MEMBER_VALUE(pt0.y)},
 			std::pair{ 30, BSC__LAMBDA_MEMBER_VALUE(pt0.z)},
@@ -633,26 +651,23 @@ export namespace biscuit::dxf::entities {
 			std::pair{230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)}
 		);
 
+		auto operator <=> (this_t const&) const = default;
 	};
+	class xLine : public TEntityDerived<xLine, sLine, eENTITY::line, "LINE"> {};
+
 
 	//=============================================================================================================================
-	class xRay : public xLine {
+	class xRay : public TEntityDerived<xRay, sLine, eENTITY::ray, "XRAY"> {};
+
+
+	//=============================================================================================================================
+	class xXLine : public TEntityDerived<xXLine, sLine, eENTITY::xline, "XLINE"> {};
+
+
+	//=============================================================================================================================
+	struct sText {
 	public:
-		constinit static inline auto custom_field = std::make_tuple(
-		);
-		BSC__DXF_ENTITY_DEFINITION(eENTITY::ray, "XRAY", xRay, xLine)
-	};
-
-	//=============================================================================================================================
-	class xXLine : public xLine {
-	public:
-		constexpr static inline auto custom_field = std::make_tuple(
-		);
-		BSC__DXF_ENTITY_DEFINITION(eENTITY::xline, "XLINE", xXLine, xLine)
-	};
-
-	//=============================================================================================================================
-	class xText : public xEntity {
+		using this_t = sText;
 	public:
 		gcv<100> marker{};	// Subclass marker (AcDbText)
 		gcv< 39> thickness{};
@@ -673,36 +688,28 @@ export namespace biscuit::dxf::entities {
 		enum class eVERTICAL_ALIGNMENT : gcv_t< 73> { baseline, bottom, middle, top};
 		gcv< 73, eVERTICAL_ALIGNMENT> vertical_alignment{};	// 73:
 
-		BSC__DXF_ENTITY_DEFINITION(eENTITY::text, "TEXT", xText, xEntity)
-
 		constinit static inline auto const custom_field = std::make_tuple(
-			&this_t::marker,
-			&this_t::thickness,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt_align0.x)},
 			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(pt_align0.y)}, 
 			std::pair{30, BSC__LAMBDA_MEMBER_VALUE(pt_align0.z)},
-			&this_t::text_height,
-			&this_t::text,
-			&this_t::rotation,
-			&this_t::relative_x_scale_factor,
-			&this_t::oblique_angle,
-			&this_t::text_style_name,
-			&this_t::text_generation_flags,
-			&this_t::horizontal_justification,
 			std::pair{11, BSC__LAMBDA_MEMBER_VALUE(pt_align1.x)},
 			std::pair{21, BSC__LAMBDA_MEMBER_VALUE(pt_align1.y)},
 			std::pair{31, BSC__LAMBDA_MEMBER_VALUE(pt_align1.z)},
 			std::pair{210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x)},
 			std::pair{220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y)},
 			std::pair{230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)},
-			&this_t::marker2,
-			&this_t::vertical_alignment
+			0
 		);
 
+		auto operator <=> (this_t const&) const = default;
 	};
+	class xText : public TEntityDerived<xText, sText, eENTITY::text, "TEXT"> { };
+
 
 	//=============================================================================================================================
-	class xMText : public xEntity {
+	struct sMText {
+	public:
+		using this_t = sMText;
 	public:
 		gcv<100> marker{};	// Subclass marker (AcDbMText)
 		point_t pt;	// insertion point
@@ -721,7 +728,7 @@ export namespace biscuit::dxf::entities {
 		};
 		gcv< 72, eDRAWING_DIRECTION> drawing_direction{eDRAWING_DIRECTION::left_to_right};	// 72
 
-		string_t text;	// group code 1, 3
+		gcv<  1> text;	// group code 1, 3
 
 		gcv< 7> text_style_name{"STANDARD"s};
 		point_t extrusion{ 0., 0., 1. };
@@ -747,53 +754,37 @@ export namespace biscuit::dxf::entities {
 		gcv< 49> column_gutter{};
 		gcv< 50> column_heights{};	// this code is followed by column count (int16), and then the number of column heights
 
-		BSC__DXF_ENTITY_DEFINITION(eENTITY::mtext, "MTEXT", xMText, xEntity);
-
 		constinit static inline auto const custom_field = std::make_tuple(
-			&this_t::marker,
 			std::pair{10, BSC__LAMBDA_MEMBER_VALUE(pt.x)},
 			std::pair{20, BSC__LAMBDA_MEMBER_VALUE(pt.y)},
 			std::pair{30, BSC__LAMBDA_MEMBER_VALUE(pt.z)},
-			&this_t::nominal_text_height,
-			&this_t::reference_rectangle_width,
-			&this_t::attachment_point,
-			&this_t::drawing_direction,
-			&this_t::text_style_name,
 			std::pair{210, BSC__LAMBDA_MEMBER_VALUE(extrusion.x)},
 			std::pair{220, BSC__LAMBDA_MEMBER_VALUE(extrusion.y)},
 			std::pair{230, BSC__LAMBDA_MEMBER_VALUE(extrusion.z)},
 			std::pair{ 11, BSC__LAMBDA_MEMBER_VALUE(direction.x)},
 			std::pair{ 21, BSC__LAMBDA_MEMBER_VALUE(direction.y)},
 			std::pair{ 31, BSC__LAMBDA_MEMBER_VALUE(direction.z)},
-			&this_t::character_width,
-			&this_t::character_height,
-			&this_t::rotation,
-			&this_t::line_spacing_style,
-			&this_t::line_spacing_factor,
-			&this_t::background_fill_color,
 			std::pair{420, BSC__LAMBDA_MEMBER_VALUE(background_fill_color_value.Value())},
-			&this_t::background_fill_color_name,
-			&this_t::fill_box_scale,
-			&this_t::background_fill_color_index,
-			&this_t::transparency_na,
-			&this_t::column_type,
-			&this_t::column_count,
-			&this_t::column_flow_reversed,
-			&this_t::column_auto_height,
-			&this_t::column_width,
-			&this_t::column_gutter,
-			&this_t::column_heights
+			0
 		);
 
+		auto operator <=> (this_t const&) const = default;
+	};
+	class xMText : public TEntityDerived<xMText, sMText, eENTITY::mtext, "MTEXT"> {
+	public:
 		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) {
-			if (ReadStringTo(iter, end, text))
+			if (AddStringTo(iter, end, m_field.text))
 				return true;
 			return false;
 		}
 	};
 
+
+#if 0
 	//=============================================================================================================================
-	class xMText_AttDef : public xMText {
+	struct sMText_AttDef {
+	public:
+		using this_t = xMText_AttDef;
 	public:
 		gcv< 46> defined_annotation_height{};	// valid before 2012
 		gcv< 63> background_fill_color_index{};	// valid when groupcode 90 is 1
@@ -837,8 +828,9 @@ export namespace biscuit::dxf::entities {
 			&this_t::column_heights
 		);
 
-	};
+		auto operator <=> (this_t const&) const = default;
 
+	};
 
 	//=============================================================================================================================
 	class xAttributeDefinition : public xEntity {
@@ -898,7 +890,7 @@ export namespace biscuit::dxf::entities {
 
 		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) override {
 			if (*iter == sGroup(100, "AcDbText")) {
-				return text.Read(iter, end);
+				return ReadEntity(iter, end);
 			}
 			if (*iter == sGroup(100, "AcDbMText")) {
 				return mtext.Read(iter, end);
@@ -986,7 +978,7 @@ export namespace biscuit::dxf::entities {
 		BSC__DXF_ENTITY_DEFINITION(eENTITY::body, "BODY", xBody, xEntity);
 
 		bool ReadPrivate(group_iter_t& iter, group_iter_t const& end) {
-			if (ReadStringTo(iter, end, proprietary_data))
+			if (AddStringTo(iter, end, m_field.proprietary_data))
 				return true;
 			return false;
 		}
